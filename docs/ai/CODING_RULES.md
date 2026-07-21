@@ -1,69 +1,69 @@
-# CODING_RULES.md — กฎการเขียนโค้ดและการดูแลไฟล์
+# CODING_RULES.md — Coding and File Maintenance Rules
 
-เอกสารนี้คือรายละเอียดเต็มของกฎการเขียนโค้ด อ้างอิงจาก [`AGENTS.md`](../../AGENTS.md) (ที่มีแค่สรุปย่อ)
+This document is the full detail behind [`AGENTS.md`](../../AGENTS.md) (which only has a short summary).
 
 ## A. No Hardcoding
 
-ห้าม hardcode:
+Never hardcode:
 
-- secret, API key, password, database credential
-- URL เฉพาะ environment
-- backend port ที่ซ้ำอยู่หลายจุดใน source code
-- frontend API origin ที่ซ้ำอยู่หลายจุดใน source code
-- absolute path เฉพาะเครื่องใน application code
-- ค่าเฉพาะ deployment
-- ค่าคงที่ทางการเงินที่ซ้ำกัน (duplicated financial constants)
-- threshold ของ simulation ที่ไม่มีคำอธิบาย
-- ค่า UI ที่ซ้ำและควรอยู่ใน shared configuration
+- secrets, API keys, passwords, database credentials;
+- environment-specific URLs;
+- backend ports repeated across multiple places in the source code;
+- frontend API origins repeated across multiple places in the source code;
+- machine-specific absolute paths in application code;
+- deployment-specific values;
+- duplicated financial constants;
+- unexplained simulation thresholds;
+- repeated UI values that belong in shared configuration.
 
-ให้ใช้แทน (ตามความเหมาะสม):
+Use instead, as appropriate:
 
-- environment variables
-- validated configuration
-- constants / enums
-- typed configuration object
-- ข้อมูลใน database ที่ Admin จัดการได้
-- simulation definition module
-- shared design token
+- environment variables;
+- validated configuration;
+- constants / enums;
+- typed configuration objects;
+- database content managed by an Admin;
+- simulation definition modules;
+- shared design tokens.
 
-**ข้อยกเว้นที่ไม่ต้องตีความเกินจำเป็น** — ค่าต่อไปนี้ยังคง hardcode ได้เมื่อเป็นกฎ domain ที่เสถียร:
+**Do not over-interpret this rule** — the following may remain explicit in code when they are stable domain rules:
 
-- enum member
-- HTTP status code
-- ชื่อ route
-- ชื่อ role ที่ fix ตายตัว (`USER`, `ADMIN`, `SUPER_ADMIN`)
-- UI label แบบ one-off
-- สูตรคณิตศาสตร์ที่นิยามตายตัว
-- ค่า test fixture
-- ค่า default ที่ปลอดภัย มีเอกสารกำกับ และไม่ผูกกับ environment
+- enum members;
+- HTTP status codes;
+- route names;
+- fixed role names (`USER`, `ADMIN`, `SUPER_ADMIN`);
+- one-off UI labels;
+- mathematically defined, fixed formulas;
+- test fixture values;
+- safe defaults that are documented and not environment-specific.
 
-ห้ามสร้างชั้น configuration เพิ่มเพียงเพื่อหลีกเลี่ยง literal value ทุกตัว
+Do not create a configuration layer purely to avoid every literal value.
 
 ## B. File Size Limit
 
-ไฟล์ source code ที่คนดูแลเอง (manually maintained) ต้องมีความยาว **ไม่เกิน 500 บรรทัดจริง (physical lines)**
+Manually maintained source files must remain at or below **500 physical lines**.
 
-ครอบคลุม: `.ts`, `.tsx`, `.js`, `.jsx`, ไฟล์ Prisma schema ที่ดูแลเอง
+This includes: `.ts`, `.tsx`, `.js`, `.jsx`, and manually maintained Prisma schema files.
 
-เมื่อไฟล์ยาวประมาณ 400 บรรทัด:
+At approximately 400 lines:
 
-- ตรวจสอบว่าความรับผิดชอบในไฟล์เริ่มปนกันหรือไม่
-- เสนอแยกไฟล์เล็กๆ ก่อนที่จะถึง 500 บรรทัด
-- คง behavior เดิมไว้ขณะแยกไฟล์
+- inspect whether responsibilities in the file are starting to mix;
+- propose a small extraction before the file exceeds 500 lines;
+- preserve behavior while splitting.
 
-ข้อยกเว้น (ไม่ต้องนับ/ไม่ต้องแก้เพื่อลดบรรทัด):
+Exceptions (do not count toward the limit, and do not edit purely to shorten):
 
-- Prisma client ที่ generate อัตโนมัติ
-- lockfile
-- ไฟล์ framework ที่ generate อัตโนมัติ
-- migration SQL ที่ generate อัตโนมัติ
-- ไฟล์จาก third-party/vendor
+- generated Prisma clients;
+- lockfiles;
+- generated framework files;
+- generated migration SQL;
+- third-party or vendor files.
 
-Test ควรอยู่ต่ำกว่า 500 บรรทัดเช่นกันเมื่อทำได้ และควรแยกตามพฤติกรรม (behavior) เมื่อเริ่มอ่านยาก
+Tests should also stay below 500 lines where practical, and should be split by behavior when they become hard to read.
 
 ## C. Teacher-Style Backend
 
-โครงสร้างแบบแบ่งตาม Feature:
+Feature-based organization:
 
 ```text
 src/<feature>/
@@ -74,37 +74,37 @@ src/<feature>/
 └── types/
 ```
 
-กฎ:
+Rules:
 
-- Controller รับ HTTP input แล้วเรียก Service เท่านั้น
-- Controller ต้องบาง (thin)
-- Business logic อยู่ใน Service
-- Prisma query อยู่ใน Service
-- ใช้ NestJS dependency injection โดยตรง
-- ใช้ DTO ร่วมกับ `class-validator` สำหรับ request body
-- ใช้ NestJS Pipe สำหรับ path parameter
-- ใช้ built-in NestJS exception
-- ใช้ camelCase ใน Prisma code, ใช้ `@map`/`@@map` แปลงเป็น snake_case ใน database
-- ใช้ UUID เป็น primary key ของ FinCraft ทุกตาราง
-- ใช้ `Date` ภายในระบบ และใช้ ISO string ข้าม JSON response
-- **ห้ามสร้าง Repository layer**
-- ห้ามเพิ่ม CQRS, event bus, microservice หรือ generic domain framework โดยไม่มี requirement รับรอง
+- Controller receives HTTP input and calls the Service only.
+- Controller stays thin.
+- Business logic lives in the Service.
+- Prisma queries live in the Service.
+- Use NestJS dependency injection directly.
+- Use DTOs with `class-validator` for request bodies.
+- Use NestJS Pipes for path parameters.
+- Use built-in NestJS exceptions.
+- Use camelCase in Prisma code, and `@map`/`@@map` to translate to snake_case in the database.
+- Use UUID as the primary key for every FinCraft table.
+- Use `Date` internally, and ISO strings across the JSON response boundary.
+- **Do not create a Repository layer.**
+- Do not add CQRS, event buses, microservices, or generic domain frameworks without an approved requirement.
 
-FinCraft-specific extension ที่อนุญาต (เพราะเป็น requirement ตรงของโปรดักต์):
+FinCraft-specific extensions that are allowed (because they are direct product requirements):
 
-- `USER` / `ADMIN` / `SUPER_ADMIN`
-- Role Guard แบบ minimal
-- Craft transaction
-- duplicate recipe protection
-- rediscovery handling
-- simulation calculation service
-- direct test สำหรับ behavior สำคัญ
+- `USER` / `ADMIN` / `SUPER_ADMIN`;
+- minimal Role Guard;
+- Craft transaction;
+- duplicate recipe protection;
+- rediscovery handling;
+- simulation calculation service;
+- direct tests for critical behavior.
 
 ## D. Teacher-Style Frontend
 
-ใช้ Next.js App Router
+Use the Next.js App Router.
 
-โครงสร้างที่แนะนำ:
+Preferred structure:
 
 ```text
 src/
@@ -121,31 +121,31 @@ src/
     └── types/
 ```
 
-กฎ:
+Rules:
 
-- Server Component เป็นค่าเริ่มต้น
-- Client Component เฉพาะส่วนที่ต้อง interactive
-- Canvas อนุญาตให้เป็น Client Component
-- ไฟล์ page เน้น routing และ composition เท่านั้น
-- ใช้ Server Action สำหรับ mutation เมื่อเหมาะสม
-- ใช้ Zod + React Hook Form สำหรับฟอร์ม
-- API call อยู่ใน API layer (`lib/api`) เท่านั้น
-- ห้ามใส่ business logic ใน page component
-- ห้าม client-side fetch โดยไม่มีเหตุผล interactive ที่ชัดเจน
+- Server Components by default.
+- Client Components only for interactive UI.
+- Canvas is allowed to be a Client Component.
+- Page files focus on routing and composition only.
+- Use Server Actions for mutations when appropriate.
+- Use Zod + React Hook Form for forms.
+- API calls stay in the API layer (`lib/api`) only.
+- Never put business logic in page components.
+- Never do client-side fetching without a clear interactive reason.
 
 ## E. Scope and Learning Rules
 
-- ทำทีละ bounded step
-- เน้นหนึ่ง function หรือหนึ่ง endpoint ต่อ step
-- อธิบายก่อนเขียนโค้ดเสมอ
-- ระบุไฟล์ที่จะอ่าน/แก้ไขทุกครั้ง
-- ห้าม scaffold ฟีเจอร์ในอนาคตล่วงหน้า
-- ห้ามแก้ไขโค้ดที่ไม่เกี่ยวข้อง
-- ห้าม refactor วงกว้างระหว่างที่ทำฟีเจอร์
-- หยุดหลังจบ function ปัจจุบัน
-- รอ owner review ก่อนไปขั้นถัดไป
+- One bounded step at a time.
+- One function or endpoint per step.
+- Always explain before writing code.
+- Always name the files that will be read or changed.
+- Never scaffold future features in advance.
+- Never modify unrelated code.
+- Never perform broad refactors while implementing a feature.
+- Stop after the current function.
+- Wait for owner review before moving to the next step.
 
-## เกี่ยวข้องกับเอกสารอื่น
+## Related documents
 
-- ขั้นตอนการทำงานแบบ stepwise → [`STEPWISE_WORKFLOW.md`](STEPWISE_WORKFLOW.md)
-- Skill ที่ใช้ปฏิบัติจริง → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
+- Stepwise workflow → [`STEPWISE_WORKFLOW.md`](STEPWISE_WORKFLOW.md)
+- The skill used to execute this in practice → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`

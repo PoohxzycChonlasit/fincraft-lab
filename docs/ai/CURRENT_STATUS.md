@@ -1,8 +1,8 @@
-# CURRENT_STATUS.md — สถานะที่ verify แล้วล่าสุด
+# CURRENT_STATUS.md — Latest Verified Status
 
-เอกสารนี้บันทึกเฉพาะสิ่งที่ตรวจสอบได้จริง (evidence-based) ห้ามอ่านแล้วเชื่อทันทีในงานถัดไป — ให้ตรวจซ้ำด้วยคำสั่งด้านล่างก่อนเริ่มงานเสมอ
+This document records only what has been directly verified (evidence-based). Do not trust it blindly in a later task — re-verify with the commands below before starting any work.
 
-## วิธีตรวจสอบซ้ำ
+## How to re-verify
 
 ```powershell
 git rev-parse --show-toplevel
@@ -11,46 +11,47 @@ git log -1 --oneline
 git status --short
 ```
 
-## สถานะที่ verify แล้ว (ตรวจในงาน P0.5 — TASK_ID: P0_5_SHARED_AI_AGENT_FOUNDATION_001)
+## Verified status (checked during P0.5 — TASK_ID: P0_5_SHARED_AI_AGENT_FOUNDATION_001, updated during P0_5_ENGLISH_AGENT_DOCUMENTATION_CORRECTION_001)
 
-- **Git root**: `C:/devnest 101/single-project/fincraft-lab` (ไม่มี git ซ้อนใน `fincraft-lab-api` หรือ `fincraft-lab-web`)
-- **Starting commit (P0.5)**: `34117a182845bc8b56b211bc5e793526343bb897`
-- **Commit message**: `P0: scaffold NestJS backend foundation in fincraft-lab-api`
-- **Worktree ก่อนเริ่ม P0.5**: มีเฉพาะ `?? .agents/` (owner-provided draft ของ SKILL.md ที่ยังไม่ commit)
+- **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
+- **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
+- **Shared agent documentation checkpoint**: `8b2bb9a` — "docs(ai): add shared agent workflow and coding rules"
+- **Worktree before this English-correction task**: clean
 
 ### Backend (`fincraft-lab-api`)
 
-- ตรวจ `package.json` โดยตรง: `"packageManager": "pnpm@11.15.1"` ยืนยันแล้ว
-- `dependencies`: มีเฉพาะ `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, `reflect-metadata`, `rxjs`
-- **ไม่มี Prisma** ใน dependencies (ยืนยันจากการอ่านไฟล์ตรง)
-- `src/` มีไฟล์ generated พื้นฐาน 5 ไฟล์เท่านั้น: `main.ts`, `app.module.ts`, `app.controller.ts`, `app.service.ts`, `app.controller.spec.ts`
-- **ไม่มี `GET /health`** (ยืนยันจากการอ่าน `src/` โดยตรง — ไม่มี module หรือ route อื่นนอกจาก root `AppController`)
-- **ไม่มี feature folder ใดๆ** ยัง
+- `package.json` verified directly: `"packageManager": "pnpm@11.15.1"`
+- `dependencies`: only `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, `reflect-metadata`, `rxjs`
+- **Prisma is not installed** (confirmed by reading the file directly)
+- `src/` contains only the 5 generated baseline files: `main.ts`, `app.module.ts`, `app.controller.ts`, `app.service.ts`, `app.controller.spec.ts`
+- **`GET /health` does not exist** (confirmed by reading `src/` directly — no module or route beyond the root `AppController`)
+- **No feature folders exist yet**
+- **PostgreSQL is not configured**
 
 ### Frontend (`fincraft-lab-web`)
 
-- ตรวจ `ls` โดยตรง: **ว่างเปล่า** ยังไม่ initialize
+- Verified directly with `ls`: **empty**, not yet initialized
 
-### เอกสาร AI (ก่อนงาน P0.5)
+### AI documentation
 
-- ก่อนงานนี้: ไม่มี `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `docs/ai/*`
-- มีเฉพาะ `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md` (owner-provided draft ที่ยังไม่ commit)
+- `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `docs/ai/*`, and `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md` exist and are committed at `8b2bb9a`.
+- All AI documentation is standardized in English as of this task.
 
-## Build/Lint/Test — สถานะการรัน
+## Build/Lint/Test — run status
 
-ผลการรัน `pnpm build`, `pnpm lint`, `pnpm test`, และการ boot แอปจริง (`GET /` → `200 Hello World!`) **รายงานไว้ในงาน P0** (ผ่านทั้งหมด, lint มี 1 warning เดิมจาก template ที่ generate มา ไม่ใช่ error)
+Results for `pnpm build`, `pnpm lint`, `pnpm test`, and a real app boot (`GET /` → `200 Hello World!`) were **reported during the P0 task** (all passed; lint had 1 pre-existing warning from the generated template, not an error).
 
-**งาน P0.5 นี้เป็น docs-only — ไม่ได้ rerun คำสั่งเหล่านี้ซ้ำ** ผลที่บันทึกไว้ข้างต้นถือเป็น "reported, not rerun in this docs-only task" ต้อง rerun เพื่อยืนยันใหม่ก่อนใช้เป็นหลักฐานใน step ถัดไปที่แตะ backend จริง
+**The P0.5 documentation tasks are docs-only — these commands were not rerun.** The results above are "reported, not rerun" and must be re-verified before being used as evidence in a step that touches the backend directly.
 
 ## Next Bounded Step
 
 ```text
-P1 — Implement GET /health เป็น teacher-style backend function เดียว แบบ bounded step
+P1 — Implement GET /health as one bounded teacher-style backend function.
 ```
 
-ห้ามข้าม step นี้ไปทำ Prisma, authentication, หรือ feature folder อื่นก่อน
+Do not skip this step to work on Prisma, authentication, or any other feature folder first.
 
-## เกี่ยวข้องกับเอกสารอื่น
+## Related documents
 
-- แผนที่ไฟล์ทั้งหมด → [`FILE_MAP.md`](FILE_MAP.md)
-- ลำดับ step เต็มของโปรเจกต์ → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md` (หัวข้อ Initial Project Sequence)
+- Full file map → [`FILE_MAP.md`](FILE_MAP.md)
+- Full project step sequence → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md` (Initial Project Sequence section)

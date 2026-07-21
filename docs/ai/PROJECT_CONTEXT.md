@@ -1,6 +1,6 @@
-# PROJECT_CONTEXT.md — บริบทโปรดักต์และสถาปัตยกรรมของ FinCraft Lab
+# PROJECT_CONTEXT.md — Product and Architecture Context for FinCraft Lab
 
-เอกสารนี้อธิบาย "โปรเจกต์นี้คืออะไร" อย่างเสถียร (ไม่เปลี่ยนบ่อย) — ต่างจาก [`CURRENT_STATUS.md`](CURRENT_STATUS.md) ที่บอกสถานะปัจจุบัน ณ ขณะนี้
+This document describes "what this project is" in a stable way (it does not change often) — unlike [`CURRENT_STATUS.md`](CURRENT_STATUS.md), which describes the state right now.
 
 ## Product
 
@@ -8,37 +8,37 @@
 
 ## Purpose
 
-ผู้ใช้เรียนรู้เรื่องการเงินผ่านการ:
+Users learn finance by:
 
-- ผสม (Craft) Element เข้าด้วยกัน
-- ค้นพบ (Discover) Concept ใหม่
-- อ่านบทเรียนที่อ้างอิงโลกจริง (real-world grounded lessons)
-- เชื่อมโยงความคิดบน Canvas
-- ทดสอบผลลัพธ์ที่วัดได้ผ่าน Simulation
+- combining (Crafting) Elements together;
+- discovering new Concepts;
+- reading lessons grounded in the real world;
+- connecting ideas on a Canvas;
+- testing measurable outcomes through Simulations.
 
-## Safety — ข้อจำกัดสำคัญที่ต้องยึดถือเสมอ
+## Safety — critical constraints that always apply
 
 - **Education Only**
 - **Simulation Only**
 - **Not Financial Advice**
-- ห้ามเชื่อมต่อการซื้อขายจริง (no real trading)
-- ห้ามเชื่อมต่อตลาดจริง (no real market connection)
-- ไม่มี payment gateway ใน MVP ที่นำเสนอ
-- ห้ามการันตีผลกำไร (no guaranteed profit)
-- ห้ามทำนายราคา (no price prediction)
+- No real trading connections.
+- No real market connections.
+- No payment gateway in the presented MVP.
+- No guaranteed profit.
+- No price prediction.
 
 ## Technology Stack
 
 - Next.js (Frontend, App Router)
 - NestJS (Backend)
 - PostgreSQL
-- Prisma (ยังไม่ติดตั้ง — ดู [`CURRENT_STATUS.md`](CURRENT_STATUS.md))
-- pnpm (package manager เดียวที่อนุญาต)
-- บทบาทผู้ใช้: `USER` / `ADMIN` / `SUPER_ADMIN`
+- Prisma (not installed yet — see [`CURRENT_STATUS.md`](CURRENT_STATUS.md))
+- pnpm (the only allowed package manager)
+- User roles: `USER` / `ADMIN` / `SUPER_ADMIN`
 
 ## Main Data Domains
 
-โมเดลข้อมูลหลักที่วางแผนไว้ (ยังไม่ได้สร้างทั้งหมด — ดูสถานะจริงที่ `CURRENT_STATUS.md` และ `FILE_MAP.md`):
+Planned core data model (not all created yet — see the actual state in `CURRENT_STATUS.md` and `FILE_MAP.md`):
 
 1. `users`
 2. `pets`
@@ -58,29 +58,29 @@
 
 ## Core Behavior Rules
 
-- `Element` คือ shared master data (ใช้ร่วมกันทุกผู้ใช้)
-- การ Rediscovery (ผสมของที่มีอยู่แล้วในระบบ) จะคืนค่า Element เดิม ไม่สร้างซ้ำ
-- `user_elements` บันทึกการ unlock ครั้งแรกของแต่ละผู้ใช้เท่านั้น
-- `discovery_events` บันทึกทุกครั้งที่มีการ Craft (ไม่ว่าจะสำเร็จซ้ำหรือใหม่)
-- `input_hash` ใช้ป้องกัน Recipe ซ้ำ (duplicate protection)
-- **Knowledge Relationship** และ **Craft Recipe** เป็นแนวคิดคนละอย่างกัน — ห้ามใช้ปนกัน
-- สูตรคำนวณของ Simulation ทั้งหมดอยู่ใน NestJS (ฝั่ง backend)
-- `simulation_runs` เก็บ input/output ย้อนหลังเป็นประวัติ (historical record) ห้ามแก้ไขภายหลัง
-- ข้อมูลอ้างอิงทางการเงิน (financial claims) ต้องมีแหล่งอ้างอิงหรือระบุ assumption ให้ชัดเจน
+- `Element` is shared master data (shared across all users).
+- Rediscovery (crafting something that already exists) returns the existing Element; it never creates a duplicate.
+- `user_elements` records only the first unlock per user.
+- `discovery_events` records every Craft attempt, whether new or repeated.
+- `input_hash` prevents duplicate Recipes.
+- **Knowledge Relationship** and **Craft Recipe** are different concepts — never conflate them.
+- All Simulation formulas live in NestJS (backend).
+- `simulation_runs` stores historical inputs and outputs and must never be edited afterward.
+- Financial claims must have a source or a clearly documented assumption.
 
-## Deferred Modules (ยังไม่ทำในเฟสนี้)
+## Deferred Modules (not built in this phase)
 
 - Community
-- ระบบ subscription/payment จริง
-- Google Login แบบเต็มรูปแบบ
+- Real subscription/payment
+- Full Google Login
 - Notifications
 - Advanced Futures simulation
-- AI image generation แบบ runtime
+- Runtime AI image generation
 - Full production operations
 
-## เกี่ยวข้องกับเอกสารอื่น
+## Related documents
 
-- กฎการเขียนโค้ดแบบละเอียด → [`CODING_RULES.md`](CODING_RULES.md)
-- ขั้นตอนการทำงานแบบ stepwise → [`STEPWISE_WORKFLOW.md`](STEPWISE_WORKFLOW.md)
-- สถานะที่ verify แล้วล่าสุด → [`CURRENT_STATUS.md`](CURRENT_STATUS.md)
-- ไฟล์ที่มีอยู่จริงตอนนี้ → [`FILE_MAP.md`](FILE_MAP.md)
+- Detailed coding rules → [`CODING_RULES.md`](CODING_RULES.md)
+- Stepwise workflow → [`STEPWISE_WORKFLOW.md`](STEPWISE_WORKFLOW.md)
+- Latest verified status → [`CURRENT_STATUS.md`](CURRENT_STATUS.md)
+- Files that currently exist → [`FILE_MAP.md`](FILE_MAP.md)

@@ -1,81 +1,85 @@
-# AGENTS.md — กฎกลางสำหรับ AI ทุกตัวในโปรเจกต์ FinCraft Lab
+# AGENTS.md — Canonical Rules for All AI Agents in FinCraft Lab
 
-## ไฟล์นี้คืออะไร
+## What this file is
 
-`AGENTS.md` คือ **แหล่งกฎกลาง (canonical source of truth)** เพียงแหล่งเดียวสำหรับ AI agent ทุกตัวที่เข้ามาช่วยพัฒนา FinCraft Lab ไม่ว่าจะเป็น Claude Code, Gemini, ChatGPT, Codex หรือเครื่องมืออื่นในอนาคต
+`AGENTS.md` is the **single canonical source of truth** for every AI agent working on FinCraft Lab — Claude Code, Gemini, ChatGPT, Codex, or any future tool.
 
-ไฟล์อื่น เช่น `CLAUDE.md`, `GEMINI.md` เป็นเพียง **thin adapter** ที่ชี้กลับมาที่ไฟล์นี้ ไม่มีสิทธิ์เขียนกฎซ้ำหรือขัดแย้งกับไฟล์นี้
+Other files such as `CLAUDE.md` and `GEMINI.md` are **thin adapters** that point back to this file. They must not duplicate or contradict the rules defined here.
 
-ถ้ากฎในไฟล์อื่นขัดแย้งกับ `AGENTS.md` ให้ถือว่า `AGENTS.md` ถูกต้องกว่าเสมอ
+If any other file conflicts with `AGENTS.md`, `AGENTS.md` always takes precedence.
 
-## เริ่มงานอย่างไร (สำหรับ AI ทุกตัว)
+## How to start a task (for every AI tool)
 
-ก่อนเริ่มงานใดๆ ใน repository นี้ ให้ทำตามลำดับนี้เสมอ:
+Before starting any work in this repository, follow this order every time:
 
-1. อ่านไฟล์นี้ (`AGENTS.md`) ทั้งหมด
-2. อ่าน [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) เพื่อดูสถานะล่าสุดที่ยืนยันแล้ว
-3. อ่าน [`docs/ai/PROJECT_CONTEXT.md`](docs/ai/PROJECT_CONTEXT.md) เพื่อเข้าใจภาพรวมโปรดักต์
-4. ทำตาม Stepwise Loop ที่อธิบายไว้ใน `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
-5. อย่าเชื่อสถานะเก่าโดยไม่ตรวจสอบ — ให้ verify ด้วย git และไฟล์จริงเสมอ ก่อนอ้างอิงสถานะ
+1. Read this file (`AGENTS.md`) in full.
+2. Read [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) for the latest verified state.
+3. Read [`docs/ai/PROJECT_CONTEXT.md`](docs/ai/PROJECT_CONTEXT.md) to understand the product.
+4. Follow the Stepwise Loop described in `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`.
+5. Never trust a remembered status — verify with git and the actual files before relying on any prior state.
 
-## โปรเจกต์นี้คืออะไร
+## What this project is
 
-สรุปสั้น — รายละเอียดเต็มอยู่ที่ [`docs/ai/PROJECT_CONTEXT.md`](docs/ai/PROJECT_CONTEXT.md)
+Short summary — full detail in [`docs/ai/PROJECT_CONTEXT.md`](docs/ai/PROJECT_CONTEXT.md).
 
-- **FinCraft Lab** คือ Financial Literacy Discovery Lab ใช้เรียนรู้เรื่องการเงินผ่านการผสม Element ค้นพบ Concept และทดลอง Simulation
-- เป็นโปรเจกต์เพื่อการเรียนรู้ (school personal project) — **Education Only, Simulation Only, Not Financial Advice**
-- Backend: NestJS + PostgreSQL + Prisma (ยังไม่ติดตั้ง Prisma ณ ตอนนี้)
-- Frontend: Next.js App Router
-- Package manager: **pnpm เท่านั้น**
+- **FinCraft Lab** is a Financial Literacy Discovery Lab for learning finance by combining Elements, discovering Concepts, and running Simulations.
+- This is a learning project (school personal project) — **Education Only, Simulation Only, Not Financial Advice**.
+- Backend: NestJS + PostgreSQL + Prisma (Prisma is not installed yet).
+- Frontend: Next.js App Router.
+- Package manager: **pnpm only**.
 
-## Coding Rules (สรุป — รายละเอียดเต็มที่ docs/ai/CODING_RULES.md)
+## Coding Rules (summary — full detail in docs/ai/CODING_RULES.md)
 
-รายละเอียดทั้งหมดอยู่ที่ [`docs/ai/CODING_RULES.md`](docs/ai/CODING_RULES.md) ที่นี่สรุปเฉพาะกฎที่สำคัญที่สุด:
+Full detail lives in [`docs/ai/CODING_RULES.md`](docs/ai/CODING_RULES.md). This section only summarizes the most important rules:
 
-1. **ห้าม Hardcode** ค่า secret, URL, port, credential หรือค่าที่ควรเป็น config — ข้อยกเว้นที่อนุญาตดูใน CODING_RULES.md
-2. **ไฟล์ที่คนดูแลเอง (manually maintained) ต้องไม่เกิน 500 บรรทัด** เริ่มพิจารณาแยกไฟล์ตั้งแต่ประมาณ 400 บรรทัด
-3. **Backend แบ่งตาม Feature** — Controller บาง, Business Logic และ Prisma query อยู่ใน Service เท่านั้น, ห้ามสร้าง Repository layer
-4. **Frontend ใช้ Next.js App Router** — Server Component เป็นค่าเริ่มต้น, Client Component เฉพาะส่วนที่ต้อง interactive
-5. **ทำทีละ Function หรือ Endpoint** — ห้าม scaffold ฟีเจอร์ทั้งโมดูลในขั้นตอนเดียว เว้นแต่เจ้าของโปรเจกต์ร้องขอชัดเจน
-6. **ทุกขั้นต้องอธิบายก่อนเขียนโค้ด และต้อง verify ด้วยหลักฐานจริงก่อนถือว่าสำเร็จ**
+1. **No hardcoding** of secrets, URLs, ports, credentials, or values that belong in configuration — see CODING_RULES.md for the allowed exceptions.
+2. **Manually maintained files must not exceed 500 physical lines.** Start considering a split once a file reaches roughly 400 lines.
+3. **Backend is organized by feature** — controllers stay thin, business logic and Prisma queries live in services, no repository layer.
+4. **Frontend uses the Next.js App Router** — Server Components by default, Client Components only where interactivity is required.
+5. **Work one function or endpoint at a time** — do not scaffold an entire module in a single step unless the owner explicitly requests it.
+6. **Every step must be explained before implementation, and verified with real evidence before it is considered done.**
 
-## Stepwise Workflow (สรุป — รายละเอียดเต็มที่ docs/ai/STEPWISE_WORKFLOW.md และ SKILL.md)
+## Stepwise Workflow (summary — full detail in docs/ai/STEPWISE_WORKFLOW.md and SKILL.md)
 
-ทุกขั้นตอนการพัฒนาต้องผ่าน loop นี้:
+Every development step must follow this loop:
 
 ```text
 Observe → Explain → Implement → Verify → Teach Back → Checkpoint → Stop
 ```
 
-- **Observe** — ตรวจ repository และ git state ก่อนเริ่ม
-- **Explain** — อธิบาย objective, scope, out-of-scope, ไฟล์ที่จะแตะ, ความเสี่ยง ก่อนเขียนโค้ด
-- **Implement** — ทำเฉพาะขั้นตอนที่ผูกไว้ (bounded step) เดียว ห้าม refactor หรือ scaffold สิ่งที่ไม่เกี่ยวข้อง
-- **Verify** — ต้องมีหลักฐานจริง (build, test, curl, diff) ห้ามอ้างว่าสำเร็จโดยไม่มีหลักฐาน
-- **Teach Back** — อธิบายไฟล์ที่เปลี่ยนและวิธีที่ไฟล์เชื่อมกัน เพื่อการเรียนรู้ของเจ้าของโปรเจกต์
-- **Checkpoint** — สร้าง local commit เดียวเมื่อได้รับอนุญาตและ verify ผ่านแล้วเท่านั้น ห้าม push โดยไม่ได้รับคำสั่ง
-- **Stop** — แนะนำ "ขั้นตอนถัดไปที่ผูกไว้" เพียงหนึ่งขั้น แล้วหยุดรอการอนุมัติ ห้ามทำงานต่อเองอัตโนมัติ
+- **Observe** — inspect the repository and git state before starting.
+- **Explain** — describe the objective, scope, out-of-scope, files to touch, and risks before writing code.
+- **Implement** — do only the one bounded step; no unrelated refactors or future scaffolding.
+- **Verify** — require real evidence (build, test, curl, diff); never claim success without it.
+- **Teach Back** — explain the changed files and how they connect, for the owner's learning.
+- **Checkpoint** — create a single local commit only once authorized and verified; never push without an explicit instruction.
+- **Stop** — recommend exactly one next bounded step, then stop and wait for approval. Never continue automatically.
 
-รายละเอียดการปฏิบัติงานแบบละเอียดในการทำทีละ Function อยู่ที่:
+The detailed operational method for working one function at a time lives in:
 `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
 
-## Hard Safety Rules (ต้องยึดถือเสมอ ไม่ว่างานจะเป็นอะไร)
+## Hard Safety Rules (always apply, regardless of the task)
 
-- ห้ามแก้ไข `C:\devnest 101\workshop-01\fakebook` หรือ teacher repository ใดๆ
-- ห้ามสร้าง Git repository ซ้อนใน `fincraft-lab-api` หรือ `fincraft-lab-web` — Git มีได้ที่ root เดียวคือ `fincraft-lab/.git`
-- ห้าม push ไป remote โดยไม่ได้รับคำสั่งชัดเจนจากเจ้าของ
-- ห้ามลบไฟล์ของเจ้าของโดยไม่ได้รับอนุญาต
-- ห้ามรัน destructive command (เช่น database reset, force push, hard delete master data) โดยไม่ได้รับอนุญาตชัดเจน
-- ห้าม commit secret หรือ credential ใดๆ
-- ห้ามสร้างระบบ AI Governance ขนาดใหญ่ (ไม่มี Manifest system, Receipt system, State Machine หลายชั้น, Autonomous multi-hour loop, Agent hierarchy)
+- Never modify `C:\devnest 101\workshop-01\fakebook` or any teacher repository.
+- Never create a nested Git repository inside `fincraft-lab-api` or `fincraft-lab-web` — Git exists only at the single root `fincraft-lab/.git`.
+- Never push to a remote without an explicit instruction from the owner.
+- Never delete owner files without authorization.
+- Never run destructive commands (e.g. database reset, force push, hard-deleting master data) without explicit authorization.
+- Never commit secrets or credentials.
+- Never build a large AI governance system (no manifest system, no receipt system, no multi-layer state machine, no autonomous multi-hour loop, no agent hierarchy).
 
-## สถานะปัจจุบัน
+## Talking to the owner
 
-สถานะที่ verify แล้วล่าสุดอยู่ที่ [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) — **ห้ามเชื่อสถานะจากความจำเก่า ให้ตรวจสอบไฟล์นี้หรือ git จริงก่อนเริ่มงานเสมอ**
+This file, its adapters, and `docs/ai/*` must be written in English. The owner may communicate in Thai. Respond in Thai when teaching or explaining directly to the owner, unless the current task explicitly requests English.
 
-## แผนที่ไฟล์
+## Current status
 
-โครงสร้างไฟล์ปัจจุบันทั้งหมดอยู่ที่ [`docs/ai/FILE_MAP.md`](docs/ai/FILE_MAP.md)
+The latest verified status lives in [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) — **never trust a remembered status; check this file or the actual git state before starting any task.**
 
-## ทำไมต้องใช้โครงสร้างนี้
+## File map
 
-โปรเจกต์นี้จะถูกพัฒนาโดย AI หลายตัว (Claude, Gemini, ChatGPT, Codex) หากไม่มีแหล่งกฎกลางเดียว แต่ละ AI อาจตีความไม่ตรงกัน สร้างไฟล์ใหญ่เกินไป ใช้ pattern ไม่ตรงกับที่เจ้าของโปรเจกต์เรียนรู้มา หรือทำงานเกินขอบเขตที่ขอ โครงสร้างนี้จึงถูกออกแบบให้ **บางที่สุดเท่าที่จำเป็น** สำหรับโปรเจกต์เรียนรู้ส่วนตัว ไม่ใช่ AI OS ขนาดใหญ่ที่มี Manifest, Receipt และ State Machine หลายชั้น
+The current file structure is listed in [`docs/ai/FILE_MAP.md`](docs/ai/FILE_MAP.md).
+
+## Why this structure exists
+
+This project will be developed by multiple AI tools (Claude, Gemini, ChatGPT, Codex). Without one canonical source of rules, each tool could interpret instructions differently, create oversized files, use patterns the owner has not learned, or work beyond the requested scope. This structure is deliberately **as thin as necessary** for a personal learning project — not a large AI operating system with manifests, receipts, and multi-layer state machines.

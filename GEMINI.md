@@ -1,20 +1,20 @@
-# GEMINI.md — Gemini Adapter สำหรับ FinCraft Lab
+# GEMINI.md — Gemini Adapter for FinCraft Lab
 
-ไฟล์นี้เป็น **thin adapter** สำหรับ Gemini เท่านั้น ไม่ใช่แหล่งกฎ
+This file is a **thin adapter** for Gemini only. It is not a source of rules.
 
-## ก่อนเริ่มงานใดๆ
+## Before starting any task
 
-1. อ่าน [`AGENTS.md`](AGENTS.md) ทั้งหมดก่อนเสมอ — เป็นแหล่งกฎกลางที่แท้จริง
-2. อ่าน [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) เพื่อดูสถานะล่าสุด
-3. ทำตาม Skill: `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
-   (ใช้เป็นแนวทางปฏิบัติแบบ stepwise loop แม้ Gemini จะไม่มีกลไก Skill tool แบบ Claude Code)
+1. Read [`AGENTS.md`](AGENTS.md) in full first — it is the true canonical rule file.
+2. Read [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) for the latest status.
+3. Follow the skill: `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
+   (use it as the operational guide for the stepwise loop, even though Gemini does not have a Skill-tool mechanism like Claude Code).
 
-## กฎเฉพาะของ Gemini
+## Gemini-specific rules
 
-- อ่านเฉพาะไฟล์ที่จำเป็นต่อขั้นตอนปัจจุบัน อย่า scan repository ทั้งหมดโดยไม่มีเหตุผล
-- ห้ามรันคำสั่งที่ทำลายข้อมูลหรือ push โดยไม่ได้รับคำสั่งชัดเจนจากเจ้าของ
-- หากเครื่องมือหรือ permission model ของ Gemini แตกต่างจาก Claude Code ให้ยึดพฤติกรรมความปลอดภัยตาม Hard Safety Rules ใน `AGENTS.md` เป็นหลัก
+- Read only the files needed for the current step; do not scan the whole repository without a concrete reason.
+- Never run destructive commands or push without an explicit instruction from the owner.
+- If Gemini's tools or permission model differ from Claude Code's, defer to the Hard Safety Rules in `AGENTS.md` as the authority.
 
-## ห้ามทำในไฟล์นี้
+## Do not do this in this file
 
-ห้ามคัดลอกกฎจาก `AGENTS.md` หรือ `docs/ai/*` มาซ้ำในไฟล์นี้ หากต้องการเพิ่มกฎ ให้แก้ที่ `AGENTS.md` หรือ `docs/ai/CODING_RULES.md` แทน
+Do not copy rules from `AGENTS.md` or `docs/ai/*` into this file. To add a rule, edit `AGENTS.md` or `docs/ai/CODING_RULES.md` instead.

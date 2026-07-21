@@ -1,8 +1,8 @@
-# STEPWISE_WORKFLOW.md — วงจรของแต่ละ Bounded Step
+# STEPWISE_WORKFLOW.md — Lifecycle of Each Bounded Step
 
-เอกสารนี้อธิบาย lifecycle ของหนึ่งขั้นตอนการพัฒนา (bounded step) แบบละเอียด วิธีปฏิบัติจริงเมื่อทำงานอยู่ในโหมด skill ดูที่ `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
+This document describes the lifecycle of one development step (a bounded step) in detail. For the practical, skill-mode execution guide, see `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`.
 
-## Loop ทั้งหมด
+## The full loop
 
 ```text
 Observe → Explain → Implement → Verify → Teach Back → Checkpoint → Stop
@@ -10,59 +10,59 @@ Observe → Explain → Implement → Verify → Teach Back → Checkpoint → S
 
 ### 1. Observe
 
-- ยืนยัน repository path และ Git state
-- อ่านเฉพาะไฟล์ที่เกี่ยวข้องกับ step ปัจจุบัน
-- ระบุ pattern เดิมที่ function ใหม่ต้องทำตาม
-- ถ้าเจอ uncommitted change ที่ไม่คาดคิด → หยุดและรายงาน ห้าม overwrite
+- Confirm the repository path and Git state.
+- Read only the files relevant to the current step.
+- Identify the existing patterns the new function must follow.
+- If unexpected uncommitted changes exist, stop and report them — never overwrite.
 
 ### 2. Explain
 
-ก่อนเขียนโค้ด ต้องอธิบาย:
+Before writing code, explain:
 
-- objective
-- เหตุผลที่ step นี้สำคัญ
-- scope / out-of-scope
-- ไฟล์ที่จะอ่าน / จะสร้างหรือแก้ไข
-- request flow
-- risk
-- แผนการ verify
+- objective;
+- why this step matters;
+- scope / out-of-scope;
+- files to be read / created / modified;
+- request flow;
+- risks;
+- verification plan.
 
-เจ้าของโปรเจกต์ต้องเข้าใจ function นี้ทำงานอย่างไรก่อนเริ่ม implement
+The owner must understand how this function works before implementation begins.
 
 ### 3. Implement
 
-- ทำเฉพาะ step ที่ผูกไว้ (bounded)
-- สร้างเฉพาะไฟล์ที่ step นี้ต้องการ
-- ห้ามสร้าง feature folder ล่วงหน้า
-- ห้ามติดตั้ง package ที่ไม่เกี่ยวข้อง
-- ห้าม refactor หรือ rename ไฟล์ที่ไม่เกี่ยวข้อง
-- คงโครงสร้างแบบ teacher-style เดิมไว้
-- เลือก implementation ที่ง่ายที่สุดที่ตอบโจทย์ปัจจุบัน
+- Do only the current bounded step.
+- Create only the files this step requires.
+- Never create feature folders in advance.
+- Never install unrelated packages.
+- Never refactor or rename unrelated files.
+- Preserve the existing teacher-style structure.
+- Choose the simplest implementation that satisfies the current requirement.
 
 ### 4. Verify
 
-รันเฉพาะการตรวจสอบที่จำเป็นที่สุด:
+Run only the smallest useful checks:
 
-- compile / type-check ส่วนที่แตะ
-- รัน direct test ของ behavior ปัจจุบัน
-- เรียก endpoint จริงเมื่อเกี่ยวข้อง
-- ตรวจทั้ง success case และ error case
-- ตรวจ diff
-- ยืนยันว่าไม่มีไฟล์อื่นที่ไม่เกี่ยวข้องถูกแก้
+- compile / type-check the touched area;
+- run the direct test for the current behavior;
+- call the endpoint directly when relevant;
+- verify both the success case and the error case;
+- inspect the diff;
+- confirm no unrelated files changed.
 
-ห้ามอ้างว่าสำเร็จโดยไม่มีหลักฐาน
+Never claim success without evidence.
 
 ### 5. Teach Back
 
-อธิบายหลัง verify ผ่านแล้ว:
+After verification passes, explain:
 
-- แต่ละไฟล์ที่เปลี่ยนทำหน้าที่อะไร
-- ไฟล์เรียกกันอย่างไร
-- request flow แบบเต็ม
-- ข้อมูลอะไรเข้า, เก็บที่ไหน, response อะไรออก, error อะไรเกิดได้
-- สิ่งที่เจ้าของโปรเจกต์ควรจำ
+- what each changed file does;
+- how the files call one another;
+- the full request flow;
+- what data enters, where it is stored, what response leaves, and what errors can occur;
+- what the owner should remember.
 
-รูปแบบ flow มาตรฐานเมื่อเกี่ยวข้องกับ backend:
+Standard flow diagram when relevant to backend work:
 
 ```text
 Request
@@ -76,30 +76,30 @@ Request
 
 ### 6. Checkpoint
 
-- สร้าง local commit เดียวเมื่อได้รับอนุญาตและ verify ผ่านแล้วเท่านั้น
-- ห้าม push โดยไม่ได้รับคำสั่งจากเจ้าของ
+- Create a single local commit only once authorized and verified.
+- Never push without an explicit instruction from the owner.
 
 ### 7. Stop
 
-- แนะนำ "ขั้นตอนถัดไปที่ผูกไว้" เพียงหนึ่งขั้น
-- ห้ามทำงานต่อเองอัตโนมัติ
-- รอการอนุมัติจากเจ้าของก่อนไปขั้นถัดไปเสมอ
+- Recommend exactly one next bounded step.
+- Never continue automatically.
+- Always wait for owner approval before moving to the next step.
 
 ## Evidence Standard
 
-ขั้นตอนหนึ่งจะถือว่า "เสร็จ" ก็ต่อเมื่อมีหลักฐานตรง เช่น:
+A step is only "done" when there is direct evidence, such as:
 
-- output ของคำสั่ง
-- direct test ที่ผ่าน
-- HTTP response จริง
-- ผล query ของ Prisma
-- ผล type-check
-- สรุป diff
+- command output;
+- a passing direct test;
+- an actual HTTP response;
+- a Prisma query result;
+- a type-check result;
+- a diff summary.
 
-ต้องแยกให้ชัดว่าอะไรคือ observed fact, inference, recommendation หรือ unresolved question
+Always distinguish between: observed fact, inference, recommendation, and unresolved question.
 
-## เกี่ยวข้องกับเอกสารอื่น
+## Related documents
 
-- กฎการเขียนโค้ดแบบละเอียด → [`CODING_RULES.md`](CODING_RULES.md)
-- สถานะปัจจุบัน → [`CURRENT_STATUS.md`](CURRENT_STATUS.md)
-- วิธีปฏิบัติจริงในรูปแบบ skill (พร้อม protocol template) → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
+- Detailed coding rules → [`CODING_RULES.md`](CODING_RULES.md)
+- Current status → [`CURRENT_STATUS.md`](CURRENT_STATUS.md)
+- The practical skill version, including protocol templates → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`

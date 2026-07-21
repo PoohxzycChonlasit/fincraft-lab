@@ -1,21 +1,21 @@
-# CLAUDE.md — Claude Code Adapter สำหรับ FinCraft Lab
+# CLAUDE.md — Claude Code Adapter for FinCraft Lab
 
-ไฟล์นี้เป็น **thin adapter** สำหรับ Claude Code เท่านั้น ไม่ใช่แหล่งกฎ
+This file is a **thin adapter** for Claude Code only. It is not a source of rules.
 
-## ก่อนเริ่มงานใดๆ
+## Before starting any task
 
-1. อ่าน [`AGENTS.md`](AGENTS.md) ทั้งหมดก่อนเสมอ — เป็นแหล่งกฎกลางที่แท้จริง
-2. อ่าน [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) เพื่อดูสถานะล่าสุด
-3. ทำตาม Skill: `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
-   (เรียกผ่าน Skill tool ของ Claude Code เมื่อทำงานแบบ stepwise loop)
+1. Read [`AGENTS.md`](AGENTS.md) in full first — it is the true canonical rule file.
+2. Read [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) for the latest status.
+3. Follow the skill: `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
+   (invoke it via Claude Code's Skill tool when working in a stepwise loop).
 
-## กฎเฉพาะของ Claude Code
+## Claude Code-specific rules
 
-- ใช้ permission mode ตามที่เจ้าของโปรเจกต์กำหนดในเซสชันนั้น อย่าเปลี่ยน permission mode เอง
-- ห้ามใช้ `--dangerously-skip-permissions` เว้นแต่เจ้าของสั่งชัดเจนในเซสชันนั้น
-- Model/Effort ให้ใช้ตามที่เจ้าของกำหนดในแต่ละ prompt (เช่น `sonnet` เป็นค่าเริ่มต้น, `opus` เป็น fallback)
-- อ่านเฉพาะไฟล์ที่จำเป็นต่อขั้นตอนปัจจุบัน อย่า scan repository ทั้งหมดโดยไม่มีเหตุผล
+- Use the permission mode set by the owner for that session; do not change it yourself.
+- Never use `--dangerously-skip-permissions` unless the owner explicitly instructs it in that session.
+- Use the model/effort the owner specifies per prompt (e.g. `sonnet` as default, `opus` as fallback).
+- Read only the files needed for the current step; do not scan the whole repository without a concrete reason.
 
-## ห้ามทำในไฟล์นี้
+## Do not do this in this file
 
-ห้ามคัดลอกกฎจาก `AGENTS.md` หรือ `docs/ai/*` มาซ้ำในไฟล์นี้ หากต้องการเพิ่มกฎ ให้แก้ที่ `AGENTS.md` หรือ `docs/ai/CODING_RULES.md` แทน
+Do not copy rules from `AGENTS.md` or `docs/ai/*` into this file. To add a rule, edit `AGENTS.md` or `docs/ai/CODING_RULES.md` instead.
