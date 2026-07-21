@@ -1,9 +1,414 @@
 generator client {
   provider     = "prisma-client"
-  output       = "../src/generated/prisma"
+  output       = "../src/database/generated/prisma"
   moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// ==========================================
+// MVP ENUMS (12 ENUMS)
+// ==========================================
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+
+  @@map("user_role")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+
+  @@map("user_status")
+}
+
+enum PetSpecies {
+  CAT
+  DOG
+  RABBIT
+  TURTLE
+  BIRD
+
+  @@map("pet_species")
+}
+
+enum ActiveStatus {
+  ACTIVE
+  INACTIVE
+
+  @@map("active_status")
+}
+
+enum ElementType {
+  BASE
+  CONCEPT
+  BEHAVIOR
+  RISK
+  SCENARIO
+  TOOL
+  DISCOVERY
+
+  @@map("element_type")
+}
+
+enum ContentStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  REJECTED
+
+  @@map("content_status")
+}
+
+enum RealityLevel {
+  GROUNDED
+  SIMPLIFIED_MODEL
+  SCENARIO
+  HYPOTHESIS
+
+  @@map("reality_level")
+}
+
+enum SafetyLabel {
+  EDUCATION_ONLY
+  SIMULATION_ONLY
+  NOT_FINANCIAL_ADVICE
+  HIGH_RISK_TOPIC
+  NEEDS_REVIEW
+
+  @@map("safety_label")
+}
+
+enum RelationshipStrength {
+  WEAK
+  MODERATE
+  STRONG
+
+  @@map("relationship_strength")
+}
+
+enum CraftRuleType {
+  COMMUTATIVE
+  ORDERED
+  SELF_COMBINE
+  BLOCKED
+
+  @@map("craft_rule_type")
+}
+
+enum DiscoveryResultStatus {
+  SUCCESS
+  NO_RECIPE
+  BLOCKED
+  ERROR
+
+  @@map("discovery_result_status")
+}
+
+enum WorkspaceStatus {
+  ACTIVE
+  ARCHIVED
+
+  @@map("workspace_status")
+}
+
+// ==========================================
+// MVP MODELS (15 MODELS)
+// ==========================================
+
+// 1. USER
+model User {
+  id           String     @id @default(uuid()) @db.Uuid
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  displayName  String     @map("display_name")
+  avatarUrl    String?    @map("avatar_url")
+  role         UserRole   @default(USER)
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  pet             Pet?
+  userElements    UserElement[]
+  discoveryEvents DiscoveryEvent[]
+  workspaces      Workspace[]
+  simulationRuns  SimulationRun[]
+
+  @@map("users")
+}
+
+// 2. PET
+model Pet {
+  id           String     @id @default(uuid()) @db.Uuid
+  userId       String     @unique @map("user_id") @db.Uuid
+  name         String
+  species      PetSpecies
+  avatarUrl    String?    @map("avatar_url")
+  personality  String?
+  learningGoal String?    @map("learning_goal")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("pets")
+}
+
+// 3. ELEMENT CATEGORY
+model ElementCategory {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String       @unique
+  description String?
+  sortOrder   Int          @default(0) @map("sort_order")
+  status      ActiveStatus @default(ACTIVE)
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  elements Element[]
+
+  @@map("element_categories")
+}
+
+// 4. ELEMENT
+model Element {
+  id          String        @id @default(uuid()) @db.Uuid
+  categoryId  String        @map("category_id") @db.Uuid
+  name        String
+  slug        String        @unique
+  iconUrl     String?       @map("icon_url")
+  emoji       String
+  elementType ElementType   @map("element_type")
+  isStarter   Boolean       @default(false) @map("is_starter")
+  status      ContentStatus @default(PENDING)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  category            ElementCategory       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  discoveryDetail     DiscoveryDetail?
+  sourceRelationships ElementRelationship[] @relation("SourceElementRelationships")
+  targetRelationships ElementRelationship[] @relation("TargetElementRelationships")
+  craftRecipeInputs   CraftRecipeInput[]
+  producedRecipes     CraftRecipe[]         @relation("ProducedRecipes")
+  userElements        UserElement[]
+  discoveryEvents     DiscoveryEvent[]
+  workspaceNodes      WorkspaceNode[]
+  simulations         Simulation[]
+
+  @@map("elements")
+}
+
+// 5. DISCOVERY DETAIL
+model DiscoveryDetail {
+  id                   String       @id @default(uuid()) @db.Uuid
+  elementId            String       @unique @map("element_id") @db.Uuid
+  shortDescription     String       @map("short_description")
+  realLesson           String       @map("real_lesson")
+  example              String?
+  possibleBenefit      String?      @map("possible_benefit")
+  possibleTradeoff     String?      @map("possible_tradeoff")
+  hiddenRisk           String?      @map("hidden_risk")
+  worksWhen            String?      @map("works_when")
+  becomesDifficultWhen String?      @map("becomes_difficult_when")
+  whatChangesOutcome   String?      @map("what_changes_outcome")
+  realityLevel         RealityLevel @map("reality_level")
+  safetyLabel          SafetyLabel  @map("safety_label")
+  sources              Json
+  createdAt            DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  element Element @relation(fields: [elementId], references: [id], onDelete: Cascade)
+
+  @@map("discovery_details")
+}
+
+// 6. ELEMENT RELATIONSHIP
+model ElementRelationship {
+  id               String               @id @default(uuid()) @db.Uuid
+  sourceElementId  String               @map("source_element_id") @db.Uuid
+  targetElementId  String               @map("target_element_id") @db.Uuid
+  relationshipType String               @map("relationship_type")
+  label            String
+  description      String?
+  strength         RelationshipStrength
+  sources          Json
+  status           ActiveStatus         @default(ACTIVE)
+  createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  sourceElement Element @relation("SourceElementRelationships", fields: [sourceElementId], references: [id], onDelete: Restrict)
+  targetElement Element @relation("TargetElementRelationships", fields: [targetElementId], references: [id], onDelete: Restrict)
+
+  @@index([sourceElementId])
+  @@index([targetElementId])
+  @@map("element_relationships")
+}
+
+// 7. CRAFT RECIPE
+/// NestJS creates a canonical input hash.
+/// COMMUTATIVE recipes sort input IDs before hashing.
+model CraftRecipe {
+  id              String        @id @default(uuid()) @db.Uuid
+  outputElementId String        @map("output_element_id") @db.Uuid
+  inputHash       String        @unique @map("input_hash")
+  ruleType        CraftRuleType @map("rule_type")
+  status          ContentStatus @default(PENDING)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  outputElement   Element            @relation("ProducedRecipes", fields: [outputElementId], references: [id], onDelete: Restrict)
+  inputs          CraftRecipeInput[]
+  discoveryEvents DiscoveryEvent[]
+
+  @@map("craft_recipes")
+}
+
+// 8. CRAFT RECIPE INPUT
+model CraftRecipeInput {
+  id         String   @id @default(uuid()) @db.Uuid
+  recipeId   String   @map("recipe_id") @db.Uuid
+  elementId  String   @map("element_id") @db.Uuid
+  inputOrder Int      @map("input_order")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  recipe  CraftRecipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  element Element     @relation(fields: [elementId], references: [id], onDelete: Restrict)
+
+  @@unique([recipeId, inputOrder])
+  @@index([elementId])
+  @@map("craft_recipe_inputs")
+}
+
+// 9. USER ELEMENT
+model UserElement {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  elementId    String    @map("element_id") @db.Uuid
+  isFavorite   Boolean   @default(false) @map("is_favorite")
+  unlockedAt   DateTime  @default(now()) @map("unlocked_at") @db.Timestamptz(6)
+  lastViewedAt DateTime? @map("last_viewed_at") @db.Timestamptz(6)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  element Element @relation(fields: [elementId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, elementId])
+  @@index([elementId])
+  @@map("user_elements")
+}
+
+// 10. DISCOVERY EVENT
+model DiscoveryEvent {
+  id              String                @id @default(uuid()) @db.Uuid
+  userId          String                @map("user_id") @db.Uuid
+  recipeId        String?               @map("recipe_id") @db.Uuid
+  resultElementId String?               @map("result_element_id") @db.Uuid
+  inputElementIds Json                  @map("input_element_ids")
+  resultStatus    DiscoveryResultStatus @map("result_status")
+  discoveredAt    DateTime              @default(now()) @map("discovered_at") @db.Timestamptz(6)
+
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe        CraftRecipe? @relation(fields: [recipeId], references: [id], onDelete: SetNull)
+  resultElement Element?     @relation(fields: [resultElementId], references: [id], onDelete: SetNull)
+
+  @@index([userId, discoveredAt])
+  @@index([recipeId])
+  @@index([resultElementId])
+  @@map("discovery_events")
+}
+
+// 11. WORKSPACE
+model Workspace {
+  id        String          @id @default(uuid()) @db.Uuid
+  userId    String          @map("user_id") @db.Uuid
+  name      String
+  status    WorkspaceStatus @default(ACTIVE)
+  createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nodes WorkspaceNode[]
+  edges WorkspaceEdge[]
+
+  @@index([userId, status])
+  @@map("workspaces")
+}
+
+// 12. WORKSPACE NODE
+model WorkspaceNode {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  elementId   String   @map("element_id") @db.Uuid
+  positionX   Float    @map("position_x")
+  positionY   Float    @map("position_y")
+  valueData   Json     @map("value_data")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  element     Element         @relation(fields: [elementId], references: [id], onDelete: Restrict)
+  sourceEdges WorkspaceEdge[] @relation("SourceWorkspaceNode")
+  targetEdges WorkspaceEdge[] @relation("TargetWorkspaceNode")
+
+  @@index([workspaceId])
+  @@index([elementId])
+  @@map("workspace_nodes")
+}
+
+// 13. WORKSPACE EDGE
+model WorkspaceEdge {
+  id           String   @id @default(uuid()) @db.Uuid
+  workspaceId  String   @map("workspace_id") @db.Uuid
+  sourceNodeId String   @map("source_node_id") @db.Uuid
+  targetNodeId String   @map("target_node_id") @db.Uuid
+  label        String
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  workspace  Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  sourceNode WorkspaceNode @relation("SourceWorkspaceNode", fields: [sourceNodeId], references: [id], onDelete: Cascade)
+  targetNode WorkspaceNode @relation("TargetWorkspaceNode", fields: [targetNodeId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([sourceNodeId])
+  @@index([targetNodeId])
+  @@map("workspace_edges")
+}
+
+// 14. SIMULATION
+model Simulation {
+  id              String       @id @default(uuid()) @db.Uuid
+  linkedElementId String?      @map("linked_element_id") @db.Uuid
+  name            String
+  description     String
+  simulationType  String       @unique @map("simulation_type")
+  status          ActiveStatus @default(ACTIVE)
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  linkedElement  Element?        @relation(fields: [linkedElementId], references: [id], onDelete: SetNull)
+  simulationRuns SimulationRun[]
+
+  @@index([linkedElementId])
+  @@map("simulations")
+}
+
+// 15. SIMULATION RUN
+model SimulationRun {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  simulationId String   @map("simulation_id") @db.Uuid
+  inputs       Json
+  outputs      Json
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  simulation Simulation @relation(fields: [simulationId], references: [id], onDelete: Restrict)
+
+  @@index([userId, createdAt])
+  @@index([simulationId])
+  @@map("simulation_runs")
 }

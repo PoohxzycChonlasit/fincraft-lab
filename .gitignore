@@ -41,7 +41,7 @@ Thumbs.db
 .env.production.local
 
 # generated Prisma Client
-fincraft-lab-api/src/generated/prisma/
+fincraft-lab-api/src/database/generated/prisma
 
 # temp
 .temp/

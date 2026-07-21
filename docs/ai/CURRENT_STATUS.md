@@ -11,77 +11,49 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (checked during P0.5, updated during P1 and P2A/P2B.1)
+## Verified status (updated during P3A)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
 - **Shared agent documentation checkpoint**: `8b2bb9a` / `4b403b1` — AI documentation added and standardized to English
 - **P1 checkpoint**: `a17d7f4` — "feat: add backend health endpoint"
 - **P2A checkpoint**: `22483f9` — "chore: add Prisma PostgreSQL dependencies"
-- **P2B.1 checkpoint**: "chore: initialize Prisma project structure" (see git log for the exact SHA)
-- **Worktree before the P2B.1 task**: an unrelated, unexpected uncommitted change to `fincraft-lab-api/tsconfig.json` was found and restored to HEAD under explicit owner authorization before P2A began; clean at the start of every task since
+- **P3A checkpoint**: "feat: add FinCraft MVP Prisma foundation" (see git log)
 
 ### Backend (`fincraft-lab-api`)
 
-- `package.json` verified directly: `"packageManager": "pnpm@11.15.1"` (unchanged since P0)
-- **Prisma is installed** (P2A): `@nestjs/config@4.0.4`, `@prisma/client@7.8.0`, `@prisma/adapter-pg@7.8.0`, `pg@8.22.0`, `dotenv@17.4.2` as production dependencies; `prisma@7.8.0`, `@types/pg` as dev dependencies. Existing NestJS package versions were not changed.
-- **Prisma project structure is initialized** (P2B.1): `prisma/schema.prisma` (generator + datasource only, no models), `prisma.config.ts` (loads `DATABASE_URL` via `env()` from `prisma/config`, `dotenv/config`), `.env.example` (placeholder only)
-- **`prisma format`, `prisma validate`, `prisma generate` all pass.** The generated client exists locally at `fincraft-lab-api/src/generated/prisma/` and is git-ignored (added to the root `.gitignore`, scoped to that exact path only).
-- **No database connection has been attempted.** `.env` (git-ignored, local only) holds a placeholder `postgresql://USERNAME:PASSWORD@localhost:5432/fincraft_lab?schema=public` — syntactically valid so Prisma's config/format/validate/generate commands can run, not a real credential.
-- **No Prisma model, enum, or migration exists yet.**
-- The NestJS application remains CommonJS — `moduleFormat = "cjs"` was used in the Prisma generator block specifically so no ESM conversion, import rewrite, or Jest config change was needed.
-- `src/` now contains: `main.ts`, `app.module.ts`, and the `health/` feature folder (`health.module.ts`, `health.controller.ts`, `health.service.ts`, `health.controller.spec.ts`)
-- The generated Hello World files (`app.controller.ts`, `app.controller.spec.ts`, `app.service.ts`) were removed after the Health feature's tests passed
-- **`GET /health` exists and is verified working** — see below
-- **`GET /` now returns 404** (the generated root route was removed along with `AppController`)
-- **No other feature folders exist yet**
-- **PostgreSQL is not configured**
-
-### GET /health — verified behavior (P1)
-
-- Request flow: `HTTP Request → main.ts → AppModule → HealthModule → HealthController → HealthService → JSON Response`
-- Verified directly with a real server boot (tracked PID, not a broad process, per process-safety rules) and `Invoke-WebRequest`:
-  - `GET /health` → `200` with body `{"status":"ok","service":"fincraft-lab-api","timestamp":"<ISO-8601>"}`
-  - `GET /` → `404`
-- Does not access a database (confirmed by reading `health.service.ts` directly — it only builds an object from `new Date().toISOString()`)
+- **Prisma canonical schema**: `prisma/schema.prisma` contains exactly the approved **15 MVP models** (User, Pet, ElementCategory, Element, DiscoveryDetail, ElementRelationship, CraftRecipe, CraftRecipeInput, UserElement, DiscoveryEvent, Workspace, WorkspaceNode, WorkspaceEdge, Simulation, SimulationRun) and **12 enums** (UserRole, UserStatus, PetSpecies, ActiveStatus, ElementType, ContentStatus, RealityLevel, SafetyLabel, RelationshipStrength, CraftRuleType, DiscoveryResultStatus, WorkspaceStatus).
+- **Prisma Client canonical path**: Generated at `fincraft-lab-api/src/database/generated/prisma` and git-ignored (`.gitignore` line 44). `PrismaService` imports from `./generated/prisma/client`.
+- **PostgreSQL Database created**: The local development database `fincraft_lab` exists on PostgreSQL.
+- **Database authentication & SELECT 1 verified**: `PrismaService` extends `PrismaClient` with `@prisma/adapter-pg`, connects to `fincraft_lab`, and executes `SELECT 1` during module initialization (`OnModuleInit`).
+- **No database table or migration exists yet**: `fincraft_lab` database has zero public tables (`TABLE_COUNT: 0`). No migration files exist.
+- **`DatabaseModule` integrated**: Exported `PrismaService` and imported globally by `AppModule`.
+- **E2E Test VM-modules fix**: `test/jest-e2e.json` maps relative `.js` imports (`moduleNameMapper`), and `package.json` configures `"test:e2e": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json"`.
+- **`GET /health` verified**: Returns `200 OK` with JSON payload `{ status: "ok", service: "fincraft-lab-api", timestamp }`.
 
 ### Frontend (`fincraft-lab-web`)
 
-- Verified directly with `ls`: **empty**, not yet initialized
-
-### AI documentation
-
-- `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `docs/ai/*`, and `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md` exist and are committed at `8b2bb9a`.
-- All AI documentation is standardized in English as of this task.
+- Empty, not yet initialized (out of scope).
 
 ## Build/Lint/Test — run status
 
-Rerun directly during P2B.1, after Prisma initialization (schema, config, `.env.example`, generated client):
-
 - `pnpm build` — passed
-- `pnpm lint` — 0 errors, 1 pre-existing warning in `main.ts` (`@typescript-eslint/no-floating-promises`, unchanged since P0)
-- `pnpm test` — 3/3 unit tests passed
-- `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` → 200; `GET /` → 404)
-- Health endpoint code was not touched during P2A or P2B.1
+- `pnpm lint` — 0 errors, 1 pre-existing warning in `main.ts` (`@typescript-eslint/no-floating-promises`)
+- `pnpm test` — 3/3 unit tests passed (HealthController status, service name, ISO timestamp)
+- `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` -> 200, `GET /` -> 404) via Node VM modules
+- Live runtime NestJS boot — passed (`GET /health` -> 200)
 
 ## Active Project Rule: No Automatic Unit Spec Generation
 
-As of P2B.1.1, the owner has decided that unit spec files are no longer generated automatically:
-
-- Every NestJS generator that can create a test file must be run with `--no-spec`.
-- No `*.controller.spec.ts` / `*.service.spec.ts` / `*.provider.spec.ts` / `*.resolver.spec.ts` should be hand-created unless the owner explicitly requests a unit test for that bounded step.
-- Existing tests (`fincraft-lab-api/src/health/health.controller.spec.ts`, `fincraft-lab-api/test/app.e2e-spec.ts`) were not deleted and remain in place.
-- This does not reduce verification — see [`CODING_RULES.md`](CODING_RULES.md) section F for the full policy and the evidence to use instead (build, lint, Prisma commands, runtime checks, existing E2E tests, diff inspection).
+Unit spec files are not generated automatically (`--no-spec` for Nest CLI generators, no hand-created unit specs without explicit instruction).
 
 ## Next Bounded Step
 
 ```text
-P2B.2 — Configure a real PostgreSQL development connection and create the bounded PrismaService/DatabaseModule integration, without adding all FinCraft models and without generating any unit spec file.
+P3B — Create the first Prisma migration for the approved 15-model MVP schema, without implementing CRUD yet.
 ```
-
-Do not skip this step to work on authentication or any FinCraft feature folder first.
 
 ## Related documents
 
 - Full file map → [`FILE_MAP.md`](FILE_MAP.md)
-- Full project step sequence → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md` (Initial Project Sequence section)
+- Stepwise loop method → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
