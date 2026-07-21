@@ -11,19 +11,25 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (checked during P0.5, updated during P1 — TASK_ID: P1_BACKEND_HEALTH_ENDPOINT_001)
+## Verified status (checked during P0.5, updated during P1 and P2A/P2B.1)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
 - **Shared agent documentation checkpoint**: `8b2bb9a` / `4b403b1` — AI documentation added and standardized to English
-- **P1 checkpoint**: `feat: add backend health endpoint` (see git log for the exact SHA)
-- **Worktree before the P1 task**: clean
+- **P1 checkpoint**: `a17d7f4` — "feat: add backend health endpoint"
+- **P2A checkpoint**: `22483f9` — "chore: add Prisma PostgreSQL dependencies"
+- **P2B.1 checkpoint**: "chore: initialize Prisma project structure" (see git log for the exact SHA)
+- **Worktree before the P2B.1 task**: an unrelated, unexpected uncommitted change to `fincraft-lab-api/tsconfig.json` was found and restored to HEAD under explicit owner authorization before P2A began; clean at the start of every task since
 
 ### Backend (`fincraft-lab-api`)
 
-- `package.json` verified directly: `"packageManager": "pnpm@11.15.1"`
-- `dependencies`: only `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, `reflect-metadata`, `rxjs` (unchanged — no package installed in P1)
-- **Prisma is not installed** (confirmed by reading the file directly)
+- `package.json` verified directly: `"packageManager": "pnpm@11.15.1"` (unchanged since P0)
+- **Prisma is installed** (P2A): `@nestjs/config@4.0.4`, `@prisma/client@7.8.0`, `@prisma/adapter-pg@7.8.0`, `pg@8.22.0`, `dotenv@17.4.2` as production dependencies; `prisma@7.8.0`, `@types/pg` as dev dependencies. Existing NestJS package versions were not changed.
+- **Prisma project structure is initialized** (P2B.1): `prisma/schema.prisma` (generator + datasource only, no models), `prisma.config.ts` (loads `DATABASE_URL` via `env()` from `prisma/config`, `dotenv/config`), `.env.example` (placeholder only)
+- **`prisma format`, `prisma validate`, `prisma generate` all pass.** The generated client exists locally at `fincraft-lab-api/src/generated/prisma/` and is git-ignored (added to the root `.gitignore`, scoped to that exact path only).
+- **No database connection has been attempted.** `.env` (git-ignored, local only) holds a placeholder `postgresql://USERNAME:PASSWORD@localhost:5432/fincraft_lab?schema=public` — syntactically valid so Prisma's config/format/validate/generate commands can run, not a real credential.
+- **No Prisma model, enum, or migration exists yet.**
+- The NestJS application remains CommonJS — `moduleFormat = "cjs"` was used in the Prisma generator block specifically so no ESM conversion, import rewrite, or Jest config change was needed.
 - `src/` now contains: `main.ts`, `app.module.ts`, and the `health/` feature folder (`health.module.ts`, `health.controller.ts`, `health.service.ts`, `health.controller.spec.ts`)
 - The generated Hello World files (`app.controller.ts`, `app.controller.spec.ts`, `app.service.ts`) were removed after the Health feature's tests passed
 - **`GET /health` exists and is verified working** — see below
@@ -50,18 +56,18 @@ git status --short
 
 ## Build/Lint/Test — run status
 
-Rerun directly during the P1 task, after the Health feature was implemented and the generated Hello World files were removed:
+Rerun directly during P2B.1, after Prisma initialization (schema, config, `.env.example`, generated client):
 
 - `pnpm build` — passed
-- `pnpm lint` — 0 errors, 1 pre-existing warning in `main.ts` (`@typescript-eslint/no-floating-promises`, unchanged from the P0 baseline, not introduced by P1)
-- `pnpm test` — 3/3 unit tests passed (`HealthController`: status, service name, valid ISO-8601 timestamp)
-- `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` → 200 with the full expected shape; `GET /` → 404)
-- Live server boot (tracked PID) — `GET /health` returned 200 with the exact expected JSON; `GET /` returned 404; process cleanup confirmed (port 3000 freed, PID stopped)
+- `pnpm lint` — 0 errors, 1 pre-existing warning in `main.ts` (`@typescript-eslint/no-floating-promises`, unchanged since P0)
+- `pnpm test` — 3/3 unit tests passed
+- `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` → 200; `GET /` → 404)
+- Health endpoint code was not touched during P2A or P2B.1
 
 ## Next Bounded Step
 
 ```text
-P2 — Configure Prisma and PostgreSQL connection without creating all FinCraft models.
+P2B.2 — Configure a real PostgreSQL development connection and create the bounded PrismaService/DatabaseModule integration, without adding all FinCraft models.
 ```
 
 Do not skip this step to work on authentication or any FinCraft feature folder first.
