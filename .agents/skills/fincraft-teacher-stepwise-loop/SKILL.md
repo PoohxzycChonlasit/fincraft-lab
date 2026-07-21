@@ -87,6 +87,17 @@ Do not introduce generic RBAC tables, CQRS, event buses, microservices, or repos
 
 ---
 
+## NestJS Generator Policy — No Automatic Unit Specs
+
+Full policy lives in `docs/ai/CODING_RULES.md` (section F) — this is the operational reminder for use during a loop:
+
+- Run every `nest g ...` generator that can create a test file with `--no-spec`.
+- Do not hand-create a `*.spec.ts` file unless the owner explicitly asks for a unit test in the current bounded step.
+- Never delete an existing spec or the E2E test file for this reason alone.
+- This does not reduce verification — see "4. Verify" below for what evidence to use instead.
+
+---
+
 ## Stepwise Learning Loop
 
 Every implementation step must follow this exact loop. Full description of each stage lives in `docs/ai/STEPWISE_WORKFLOW.md` — this section keeps the actionable checklist.
@@ -131,16 +142,19 @@ Rules:
 - do not refactor unrelated code;
 - do not rename unrelated files;
 - preserve the existing teacher-style structure;
-- prefer the simplest implementation that satisfies the current requirement.
+- prefer the simplest implementation that satisfies the current requirement;
+- use `--no-spec` on any Nest CLI generator run; do not hand-create a unit spec unless the owner explicitly requested one for this step.
 
 ### 4. Verify
 
-Run only the smallest useful verification:
+Run only the smallest useful verification. A step with no new unit spec is not unverified — use whichever of these actually applies:
 
 - compile or type-check the touched area;
-- run the direct test for the current behavior;
+- build and lint;
+- Prisma format/validate/generate, when relevant;
 - call the endpoint manually when relevant;
 - verify both success and error behavior;
+- run the existing E2E test when it covers the change;
 - inspect the diff;
 - confirm no unrelated files changed.
 

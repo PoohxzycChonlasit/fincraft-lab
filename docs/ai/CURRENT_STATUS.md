@@ -64,10 +64,19 @@ Rerun directly during P2B.1, after Prisma initialization (schema, config, `.env.
 - `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` → 200; `GET /` → 404)
 - Health endpoint code was not touched during P2A or P2B.1
 
+## Active Project Rule: No Automatic Unit Spec Generation
+
+As of P2B.1.1, the owner has decided that unit spec files are no longer generated automatically:
+
+- Every NestJS generator that can create a test file must be run with `--no-spec`.
+- No `*.controller.spec.ts` / `*.service.spec.ts` / `*.provider.spec.ts` / `*.resolver.spec.ts` should be hand-created unless the owner explicitly requests a unit test for that bounded step.
+- Existing tests (`fincraft-lab-api/src/health/health.controller.spec.ts`, `fincraft-lab-api/test/app.e2e-spec.ts`) were not deleted and remain in place.
+- This does not reduce verification — see [`CODING_RULES.md`](CODING_RULES.md) section F for the full policy and the evidence to use instead (build, lint, Prisma commands, runtime checks, existing E2E tests, diff inspection).
+
 ## Next Bounded Step
 
 ```text
-P2B.2 — Configure a real PostgreSQL development connection and create the bounded PrismaService/DatabaseModule integration, without adding all FinCraft models.
+P2B.2 — Configure a real PostgreSQL development connection and create the bounded PrismaService/DatabaseModule integration, without adding all FinCraft models and without generating any unit spec file.
 ```
 
 Do not skip this step to work on authentication or any FinCraft feature folder first.

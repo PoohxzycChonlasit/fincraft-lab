@@ -145,6 +145,33 @@ Rules:
 - Stop after the current function.
 - Wait for owner review before moving to the next step.
 
+## F. NestJS No-Spec Policy
+
+The owner has decided that unit spec files are no longer generated automatically. This is a scope decision, not a reduction in verification.
+
+1. **Do not automatically generate unit spec files.**
+2. Every NestJS generator that can create a test file must be run with `--no-spec`:
+
+   ```text
+   nest g controller element-category --no-spec
+   nest g service element-category --no-spec
+   nest g resource element-category --no-spec
+   ```
+
+3. A module generator normally does not create a spec file already — do not add an artificial one.
+4. Do not manually create `*.controller.spec.ts`, `*.service.spec.ts`, `*.provider.spec.ts`, or `*.resolver.spec.ts` unless the owner explicitly requests a unit test for that bounded task.
+5. Never delete an existing test merely because automatic spec generation is now disabled.
+6. Existing E2E verification (e.g. `test/app.e2e-spec.ts`) may remain, and may be updated when a feature directly requires it.
+7. When a step produces no new unit spec, verify with the smallest relevant evidence instead:
+   - build;
+   - lint;
+   - Prisma format/validate/generate (when relevant);
+   - runtime HTTP verification;
+   - database connection verification (when relevant);
+   - existing E2E tests;
+   - diff inspection.
+8. **This rule disables automatic unit-spec generation only — it never means "no verification is needed."** Never claim a step is done without real evidence.
+
 ## Related documents
 
 - Stepwise workflow → [`STEPWISE_WORKFLOW.md`](STEPWISE_WORKFLOW.md)

@@ -38,6 +38,7 @@ Full detail lives in [`docs/ai/CODING_RULES.md`](docs/ai/CODING_RULES.md). This 
 4. **Frontend uses the Next.js App Router** — Server Components by default, Client Components only where interactivity is required.
 5. **Work one function or endpoint at a time** — do not scaffold an entire module in a single step unless the owner explicitly requests it.
 6. **Every step must be explained before implementation, and verified with real evidence before it is considered done.**
+7. **No automatic unit spec generation.** Every NestJS generator that can create a `*.spec.ts` file must be run with `--no-spec`, and no `*.spec.ts` file should be hand-created unless the owner explicitly asks for a unit test in that step. This does not reduce verification — see [`docs/ai/CODING_RULES.md`](docs/ai/CODING_RULES.md) for the full policy and required evidence instead.
 
 ## Stepwise Workflow (summary — full detail in docs/ai/STEPWISE_WORKFLOW.md and SKILL.md)
 
