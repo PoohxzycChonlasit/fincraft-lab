@@ -11,22 +11,33 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (checked during P0.5 — TASK_ID: P0_5_SHARED_AI_AGENT_FOUNDATION_001, updated during P0_5_ENGLISH_AGENT_DOCUMENTATION_CORRECTION_001)
+## Verified status (checked during P0.5, updated during P1 — TASK_ID: P1_BACKEND_HEALTH_ENDPOINT_001)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
-- **Shared agent documentation checkpoint**: `8b2bb9a` — "docs(ai): add shared agent workflow and coding rules"
-- **Worktree before this English-correction task**: clean
+- **Shared agent documentation checkpoint**: `8b2bb9a` / `4b403b1` — AI documentation added and standardized to English
+- **P1 checkpoint**: `feat: add backend health endpoint` (see git log for the exact SHA)
+- **Worktree before the P1 task**: clean
 
 ### Backend (`fincraft-lab-api`)
 
 - `package.json` verified directly: `"packageManager": "pnpm@11.15.1"`
-- `dependencies`: only `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, `reflect-metadata`, `rxjs`
+- `dependencies`: only `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, `reflect-metadata`, `rxjs` (unchanged — no package installed in P1)
 - **Prisma is not installed** (confirmed by reading the file directly)
-- `src/` contains only the 5 generated baseline files: `main.ts`, `app.module.ts`, `app.controller.ts`, `app.service.ts`, `app.controller.spec.ts`
-- **`GET /health` does not exist** (confirmed by reading `src/` directly — no module or route beyond the root `AppController`)
-- **No feature folders exist yet**
+- `src/` now contains: `main.ts`, `app.module.ts`, and the `health/` feature folder (`health.module.ts`, `health.controller.ts`, `health.service.ts`, `health.controller.spec.ts`)
+- The generated Hello World files (`app.controller.ts`, `app.controller.spec.ts`, `app.service.ts`) were removed after the Health feature's tests passed
+- **`GET /health` exists and is verified working** — see below
+- **`GET /` now returns 404** (the generated root route was removed along with `AppController`)
+- **No other feature folders exist yet**
 - **PostgreSQL is not configured**
+
+### GET /health — verified behavior (P1)
+
+- Request flow: `HTTP Request → main.ts → AppModule → HealthModule → HealthController → HealthService → JSON Response`
+- Verified directly with a real server boot (tracked PID, not a broad process, per process-safety rules) and `Invoke-WebRequest`:
+  - `GET /health` → `200` with body `{"status":"ok","service":"fincraft-lab-api","timestamp":"<ISO-8601>"}`
+  - `GET /` → `404`
+- Does not access a database (confirmed by reading `health.service.ts` directly — it only builds an object from `new Date().toISOString()`)
 
 ### Frontend (`fincraft-lab-web`)
 
@@ -39,17 +50,21 @@ git status --short
 
 ## Build/Lint/Test — run status
 
-Results for `pnpm build`, `pnpm lint`, `pnpm test`, and a real app boot (`GET /` → `200 Hello World!`) were **reported during the P0 task** (all passed; lint had 1 pre-existing warning from the generated template, not an error).
+Rerun directly during the P1 task, after the Health feature was implemented and the generated Hello World files were removed:
 
-**The P0.5 documentation tasks are docs-only — these commands were not rerun.** The results above are "reported, not rerun" and must be re-verified before being used as evidence in a step that touches the backend directly.
+- `pnpm build` — passed
+- `pnpm lint` — 0 errors, 1 pre-existing warning in `main.ts` (`@typescript-eslint/no-floating-promises`, unchanged from the P0 baseline, not introduced by P1)
+- `pnpm test` — 3/3 unit tests passed (`HealthController`: status, service name, valid ISO-8601 timestamp)
+- `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` → 200 with the full expected shape; `GET /` → 404)
+- Live server boot (tracked PID) — `GET /health` returned 200 with the exact expected JSON; `GET /` returned 404; process cleanup confirmed (port 3000 freed, PID stopped)
 
 ## Next Bounded Step
 
 ```text
-P1 — Implement GET /health as one bounded teacher-style backend function.
+P2 — Configure Prisma and PostgreSQL connection without creating all FinCraft models.
 ```
 
-Do not skip this step to work on Prisma, authentication, or any other feature folder first.
+Do not skip this step to work on authentication or any FinCraft feature folder first.
 
 ## Related documents
 
