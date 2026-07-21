@@ -26,6 +26,7 @@ This document lists only files and folders that **actually exist** right now. Fu
 | `STEPWISE_WORKFLOW.md` | Lifecycle of each bounded step | created in P0.5 | Update when the workflow changes |
 | `CURRENT_STATUS.md` | Latest verified status | created in P0.5 | **Update at the end of every completed step** (evidence-based) |
 | `FILE_MAP.md` | This file | created in P0.5 | Update when a new file actually exists |
+| `plans/ELEMENT_CATEGORY_CRUD_PLAN.md` | Teacher-style design & bounded implementation plan for ElementCategory CRUD | created in P4A | Update if design decisions change |
 
 ## `fincraft-lab-api/` (Backend — created in P0)
 
