@@ -895,13 +895,339 @@ export const FROZEN_DISCOVERY_DETAILS_BATCH_A = [
 
 ---
 
-ONLY | ✅ Valid (BOT, ILO) | ✅ Verified | ✅ Ready |
+### 9.3 Discovery Element DiscoveryDetail Content Batch B — FROZEN (FROZEN_DISCOVERY_DETAILS_BATCH_B_SOURCE_VERIFIED_V1)
 
-- **Ready records**: 14 / 14
-- **Blocked records**: 0 / 14
+The following 11 records contain exact, frozen, implementation-ready per-record values for Discovery Elements Batch B (sortOrder 26 through 36), verified against active official educational publications at audit time.
+
+#### Contract Distinction
+- **Seed Content Contract**: Each seed record contains `elementSlug` (used only as a seed lookup key to resolve `elementId`), `shortDescription`, `realLesson`, `example`, `possibleBenefit`, `possibleTradeoff`, `hiddenRisk`, `worksWhen`, `becomesDifficultWhen`, `whatChangesOutcome`, `realityLevel`, `safetyLabel`, and `sources`.
+- **Prisma Persistence Contract**: The database model `DiscoveryDetail` persists `elementId` (UUID `@unique`), `shortDescription`, `realLesson`, `example`, `possibleBenefit`, `possibleTradeoff`, `hiddenRisk`, `worksWhen`, `becomesDifficultWhen`, `whatChangesOutcome`, `realityLevel`, `safetyLabel`, `sources` (JSON array), and system timestamps (`id`, `createdAt`, `updatedAt`). `elementSlug` is NOT a database column.
+
+#### Concept Distinction Matrix (Batch B)
+
+| # | Target Slug | Core Concept Distinction |
+|---|---|---|
+| 1 | `debt-payoff-strategy` | A structured framework for prioritizing debt repayment order (avalanche/snowball); distinct from `debt-pressure` (monthly income strain), `debt-trap` (compounding interest spiral), and `debt-overload` (insolvency state). |
+| 2 | `essential-baseline` | The non-negotiable minimum monthly cost floor required to maintain shelter, nutrition, health, and legal obligations; distinct from `needs` (broader essential expense category) and `spending-plan` (allocation tool). |
+| 3 | `discretionary-leakage` | Small, unmonitored recurring micro-expenses that quietly erode monthly surplus over time; distinct from `wants` (discretionary category), `impulse-spending` (emotion-driven purchases), and `lifestyle-creep` (systemic cost expansion with raises). |
+| 4 | `digital-scam-risk` | Susceptibility to financial losses from digital impersonation, deceptive links, or social engineering; distinct from `digital-hygiene` which represents preventive security habits. |
+| 5 | `financial-stability` | Present operational state where income covers obligations and liquid buffers absorb ordinary shocks; distinct from `financial-freedom-foundation` which expands multi-year choices without guaranteeing wealth. |
+| 6 | `debt-overload` | Severe financial crisis where debt payments absorb most income, crowding out baseline living needs; distinct from `debt-pressure` (manageable monthly strain) and `debt-payoff-strategy` (recovery plan). |
+| 7 | `emergency-survival` | Estimated shock survival duration (accessible liquid reserves ÷ essential baseline spending rate); distinct from `emergency-resilience` (overall shock absorption) and `emergency-liquidity` (immediate cash access). |
+| 8 | `mindful-spending` | Intentional reflection before purchasing to align spending with personal values; distinct from `impulse-spending` (unplanned emotional purchases). |
+| 9 | `budget-optimizing` | Dynamic reallocation of monthly spending targets based on shifting cash flow and seasonal costs; distinct from `spending-plan` (baseline budget) and `cash-flow` (net income delta). |
+| 10 | `digital-hygiene` | Proactive security habits and technical controls (enabling multi-factor verification where supported, software updates, credential safety); distinct from `digital-scam-risk` (fraud exposure). |
+| 11 | `financial-freedom-foundation` | Long-term base combining asset accumulation, low debt, and passive options expanding future choices; distinct from `financial-stability` (present resilience). |
+
+```typescript
+export const FROZEN_DISCOVERY_DETAILS_BATCH_B = [
+  {
+    elementSlug: 'debt-payoff-strategy',
+    shortDescription: 'A structured framework prioritizing debt repayment order to minimize total interest cost or build momentum.',
+    realLesson: 'Accelerating debt payoff requires prioritizing high-cost borrowing (avalanche) or small balances (snowball) while maintaining minimum payments across all accounts, but suitability depends on interest rates, balances, available cash flow, and borrower discipline.',
+    example: 'A household allocates an extra THB 3,000 monthly surplus directly to their highest-interest 18% personal loan principal while paying minimums on a 5% car loan (educational scenario only; outcomes depend on interest rates, fees, and consistent cash flow).',
+    possibleBenefit: 'Reduces total borrowing costs over time or provides psychological motivation through early debt account wins.',
+    possibleTradeoff: 'Commits extra liquid surplus cash to debt repayment, temporarily reducing monthly savings accumulation.',
+    hiddenRisk: 'Accelerating debt payments without maintaining a basic emergency buffer risks forcing new high-cost borrowing if an unexpected expense occurs.',
+    worksWhen: 'Monthly surplus cash flow is positive, emergency buffers are established, and minimum payments are met on all accounts.',
+    becomesDifficultWhen: 'Unexpected income drops occur, living costs spike, or new borrowing is incurred during the payoff period.',
+    whatChangesOutcome: 'Interest rate differentials, surplus allocation amount, payment consistency, fee structures, and emergency buffer size.',
+    realityLevel: 'GROUNDED',
+    safetyLabel: 'NOT_FINANCIAL_ADVICE',
+    sources: [
+      {
+        title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
+        organization: 'Bank of Thailand',
+        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
+      },
+    ],
+  },
+  {
+    elementSlug: 'essential-baseline',
+    shortDescription: 'The non-negotiable fixed minimum monthly outlay required to maintain basic housing, health, nutrition, and mandatory obligations.',
+    realLesson: 'Establishing a clear fixed baseline expense figure sets the mandatory floor for monthly cash flow requirements and determines minimum emergency reserve targets.',
+    example: 'A household calculates its fixed baseline expenses at THB 16,000 monthly for rent, essential groceries, basic utilities, and minimum loan obligations.',
+    possibleBenefit: 'Provides an accurate baseline for budgeting, emergency fund sizing, and risk management.',
+    possibleTradeoff: 'Focuses tightly on mandatory baseline outlays, requiring clear distinction from variable lifestyle wants.',
+    hiddenRisk: 'Underestimating baseline expenses by omitting periodic mandatory bills creates a false sense of financial security.',
+    worksWhen: 'Fixed housing, utility, food, and mandatory debt contracts are accurately tracked and cataloged monthly.',
+    becomesDifficultWhen: 'Utility tariffs rise, essential food prices inflate, or contract terms renew at higher rates.',
+    whatChangesOutcome: 'Household size, housing location, contract terms, essential inflation rate, and mandatory debt service levels.',
+    realityLevel: 'GROUNDED',
+    safetyLabel: 'EDUCATION_ONLY',
+    sources: [
+      {
+        title: 'แยกให้ปัง... Needs กับ Wants วางแผนเงินอย่างไรไม่ให้รั่วไหล',
+        organization: 'Stock Exchange of Thailand',
+        url: 'https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants',
+      },
+      {
+        title: 'การสำรวจภาวะเศรษฐกิจและสังคมของครัวเรือน (Household Expenditure Survey)',
+        organization: 'National Statistical Office Thailand',
+        url: 'https://www.nso.go.th',
+      },
+    ],
+  },
+  {
+    elementSlug: 'discretionary-leakage',
+    shortDescription: 'Small, recurring, unmonitored discretionary expenses that quietly erode monthly surplus cash flow over time.',
+    realLesson: 'Minor daily or weekly micro-purchases feel negligible individually but compound into substantial monthly cash drains when untracked.',
+    example: 'Spending THB 120 daily on unbudgeted premium beverages and convenience snacks totals THB 3,600 monthly (~THB 43,200 annually) of unmonitored cash leakage.',
+    possibleBenefit: 'Tracking micro-expenses exposes stealth cash leakage, instantly reclaiming surplus for savings or debt reduction.',
+    possibleTradeoff: 'Auditing daily spending requires ongoing tracking effort and self-awareness of routine purchasing habits.',
+    hiddenRisk: 'Focusing only on large monthly bills while ignoring daily micro-leakage leaves households wondering why net cash flow remains tight.',
+    worksWhen: 'Individuals log daily micro-purchases and review small recurring spending categories monthly.',
+    becomesDifficultWhen: 'Frictionless digital wallet apps and automated auto-renewing subscriptions hide recurring charges.',
+    whatChangesOutcome: 'Tracking frequency, spending awareness, subscription audits, and impulse purchasing control.',
+    realityLevel: 'GROUNDED',
+    safetyLabel: 'EDUCATION_ONLY',
+    sources: [
+      {
+        title: 'แยกให้ปัง... Needs กับ Wants วางแผนเงินอย่างไรไม่ให้รั่วไหล',
+        organization: 'Stock Exchange of Thailand',
+        url: 'https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants',
+      },
+    ],
+  },
+  {
+    elementSlug: 'digital-scam-risk',
+    shortDescription: 'Susceptibility to financial losses from digital impersonation, deceptive links, or social engineering tactics.',
+    realLesson: 'Digital fraud attempts exploit urgency, fear, or false reward offers to trick individuals into compromising accounts or transferring funds.',
+    example: 'Receiving a fraudulent SMS claiming an urgent bank account suspension containing a fake link requesting personal verification details.',
+    possibleBenefit: 'Developing healthy skepticism and verifying official channels protects financial assets and digital identity.',
+    possibleTradeoff: 'Verifying incoming communications through official channels requires extra time and deliberate caution before acting.',
+    hiddenRisk: 'Assuming digital fraud targets only inexperienced users causes overconfidence, leading to lowered vigilance during high-stress situations.',
+    worksWhen: 'Users verify sender identities via official institutional phone numbers or apps before sharing information or transferring funds.',
+    becomesDifficultWhen: 'Deceptive messages use sophisticated official logos, urgent threat wording, or spoofed caller IDs.',
+    whatChangesOutcome: 'Verification habits, emotional pause before responding, awareness of common scam patterns, and channel verification.',
+    realityLevel: 'GROUNDED',
+    safetyLabel: 'HIGH_RISK_TOPIC',
+    sources: [
+      {
+        title: 'ภัยทางการเงินและการป้องกันตนเอง',
+        organization: 'Bank of Thailand',
+        url: 'https://www.bot.or.th/th/satang-story/financial-threats.html',
+      },
+      {
+        title: 'ข้อควรระวังและการปกป้องข้อมูลส่วนบุคคลในโลกดิจิทัล',
+        organization: 'ETDA Thailand',
+        url: 'https://www.etda.or.th',
+      },
+    ],
+  },
+  {
+    elementSlug: 'financial-stability',
+    shortDescription: 'A household state where income reliably covers baseline obligations, liquid reserves absorb shocks, and debt burdens are manageable.',
+    realLesson: 'Financial stability represents a balanced ongoing operating state rather than a permanent milestone or moral achievement, requiring continuous maintenance of cash flow and risk buffers.',
+    example: 'A household maintains 4 months of essential expenses in liquid savings, keeps debt obligations under 30% of income, and generates positive monthly cash flow.',
+    possibleBenefit: 'Provides peace of mind, reduces financial anxiety, and creates a solid platform for long-term financial planning.',
+    possibleTradeoff: 'Maintaining stability requires ongoing spending discipline and allocating capital to liquid reserves rather than immediate luxury.',
+    hiddenRisk: 'Viewing financial stability as a permanent guarantee causes households to relax emergency savings discipline after initial success.',
+    worksWhen: 'Monthly cash flow is positive, emergency funds are funded, and debt service ratio stays well below critical stress thresholds.',
+    becomesDifficultWhen: 'Macroeconomic downturns occur, major medical emergencies hit, or primary employment is disrupted.',
+    whatChangesOutcome: 'Savings buffer size, debt service ratio, income stability, spending flexibility, and risk coverage.',
+    realityLevel: 'GROUNDED',
+    safetyLabel: 'EDUCATION_ONLY',
+    sources: [
+      {
+        title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
+        organization: 'Bank of Thailand',
+        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
+      },
+      {
+        title: 'OECD Financial Education Competency Principles',
+        organization: 'OECD',
+        url: 'https://www.oecd.org/en/topics/financial-education.html',
+      },
+    ],
+  },
+  {
+    elementSlug: 'debt-overload',
+    shortDescription: 'A critical financial condition where mandatory debt service payments absorb a dominant portion of income, threatening baseline living capacity.',
+    realLesson: 'Severe debt overload occurs when debt obligations crowd out essential living needs, requiring urgent debt restructuring, lender negotiation, or professional assistance.',
+    example: 'Allocating THB 22,000 out of THB 28,000 monthly income (78.6%) toward loan repayments, forcing reliance on credit cards for basic food and rent.',
+    possibleBenefit: 'Early recognition of debt overload allows borrowers to seek formal debt clinic counseling or structured bank consolidation before default.',
+    possibleTradeoff: 'Resolving debt overload requires strict lifestyle reduction, suspending new credit, and committing all spare cash flow to debt resolution.',
+    hiddenRisk: 'Attempting to solve debt overload by taking high-cost informal or unverified loans escalates legal and financial risk dramatically.',
+    worksWhen: 'Borrowers contact creditors early, participate in formal debt mediation programs, and freeze additional borrowing.',
+    becomesDifficultWhen: 'Income declines further, multiple aggressive collection actions start, or legal judgments occur.',
+    whatChangesOutcome: 'Debt-to-income ratio, creditor cooperation, access to debt clinics, surplus cash flow, and borrower commitment.',
+    realityLevel: 'SIMPLIFIED_MODEL',
+    safetyLabel: 'NOT_FINANCIAL_ADVICE',
+    sources: [
+      {
+        title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
+        organization: 'Bank of Thailand',
+        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
+      },
+    ],
+  },
+  {
+    elementSlug: 'emergency-survival',
+    shortDescription: 'The estimated duration a household can maintain baseline essential spending using accessible liquid resources during a total income stoppage.',
+    realLesson: 'Emergency survival capability evaluates how long liquid reserves last when divided by baseline essential spending rate during complete income disruption.',
+    example: 'Simplified educational scenario: THB 60,000 in liquid savings divided by THB 15,000 monthly baseline essential spending estimates ~4 months of shock survival, assuming expenses remain fixed and funds are instantly accessible without penalties (educational scenario only; actual duration depends on real-world price changes, unexpected expenses, and account access).',
+    possibleBenefit: 'Quantifies household survival horizon in concrete months, highlighting the adequacy of emergency liquid buffers.',
+    possibleTradeoff: 'Maximizing survival duration requires cutting all discretionary spending immediately upon income loss.',
+    hiddenRisk: 'Including illiquid assets or locked long-term investments in survival calculations creates a false expectation of immediate cash availability.',
+    worksWhen: 'Liquid reserves are principal-protected, immediately accessible, and discretionary spending is halted immediately upon crisis.',
+    becomesDifficultWhen: 'Emergency spending spikes due to medical costs or liquid account access is delayed.',
+    whatChangesOutcome: 'Liquid reserve size, baseline essential spending rate, speed of expense reductions, and account liquidity.',
+    realityLevel: 'SIMPLIFIED_MODEL',
+    safetyLabel: 'EDUCATION_ONLY',
+    sources: [
+      {
+        title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
+        organization: 'Bank of Thailand',
+        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
+      },
+      {
+        title: 'ILO Guidelines on Employment Protection and Social Security',
+        organization: 'ILO',
+        url: 'https://www.ilo.org',
+      },
+    ],
+  },
+  {
+    elementSlug: 'mindful-spending',
+    shortDescription: 'The practice of aligning spending decisions with personal values, budget limits, and long-term priorities rather than emotional impulses.',
+    realLesson: 'Mindful spending introduces intentional reflection before purchases, reducing impulse buying and ensuring discretionary cash flow supports genuine personal well-being.',
+    example: 'Applying a 48-hour cooling-off period to non-essential purchases over THB 1,000, deciding after reflection to save the money for a planned vacation.',
+    possibleBenefit: 'Decreases financial regret, curbs unnecessary lifestyle expansion, and increases satisfaction from intentional purchases.',
+    possibleTradeoff: 'Requires mental discipline, patience, and resisting immediate promotional or social media gratification.',
+    hiddenRisk: 'Confusing mindful spending with extreme frugal deprivation can lead to spending fatigue and sudden compensatory splurging.',
+    worksWhen: 'Individuals define clear personal spending boundaries, enforce cooling-off rules, and review discretionary goals regularly.',
+    becomesDifficultWhen: 'Stress, peer pressure, or aggressive targeted marketing campaigns lower self-control.',
+    whatChangesOutcome: 'Self-awareness, cooling-off habits, clarity of financial values, and impulse resistance.',
+    realityLevel: 'GROUNDED',
+    safetyLabel: 'EDUCATION_ONLY',
+    sources: [
+      {
+        title: 'แยกให้ปัง... Needs กับ Wants วางแผนเงินอย่างไรไม่ให้รั่วไหล',
+        organization: 'Stock Exchange of Thailand',
+        url: 'https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants',
+      },
+    ],
+  },
+  {
+    elementSlug: 'budget-optimizing',
+    shortDescription: 'Adjusting monthly budget allocations dynamically based on changing cash flow, seasonal costs, and shifting financial goals.',
+    realLesson: 'Dynamic budget optimization adapts spending targets flexibly as income or expense conditions shift, maintaining net cash surplus without abandoning overall financial structure.',
+    example: 'Reallocating THB 2,000 from discretionary entertainment to utility expenses during hot summer months to maintain a fixed 20% savings target.',
+    possibleBenefit: 'Prevents budget failure by allowing planned flexibility for seasonal expenses and unexpected minor cash flow shifts.',
+    possibleTradeoff: 'Requires monthly budget reviews, active cash flow tracking, and making intentional category trade-offs.',
+    hiddenRisk: 'Continually reallocating funds away from savings to cover discretionary overspending undermines long-term growth.',
+    worksWhen: 'Cash flow is tracked regularly, savings targets are protected first, and expense adjustments are made intentionally.',
+    becomesDifficultWhen: 'Income is irregular or baseline fixed costs absorb almost all income, leaving no flexible category margin.',
+    whatChangesOutcome: 'Review frequency, savings protection rules, expense flexibility, and tracking tool effectiveness.',
+    realityLevel: 'GROUNDED',
+    safetyLabel: 'EDUCATION_ONLY',
+    sources: [
+      {
+        title: 'การจัดทำงบประมาณและการวางแผนการเงินส่วนบุคคล',
+        organization: 'Bank of Thailand',
+        url: 'https://www.bot.or.th/th/satang-story/money-plan/budgeting.html',
+      },
+    ],
+  },
+  {
+    elementSlug: 'digital-hygiene',
+    shortDescription: 'Proactive security practices and technical controls that protect digital banking accounts, devices, and financial credentials.',
+    realLesson: 'Maintaining strong digital hygiene through robust authentication, software updates, and cautious online habits reduces vulnerability to account compromise and digital fraud.',
+    example: 'Enabling multi-factor or two-step verification where supported on banking applications, using unique passwords, and updating mobile operating systems regularly.',
+    possibleBenefit: 'Strengthens personal account security, prevents unauthorized access, and protects sensitive financial data.',
+    possibleTradeoff: 'Adding authentication steps and managing strong credentials requires extra setup effort and periodic security maintenance.',
+    hiddenRisk: 'Believing that technical controls like multi-factor authentication eliminate all risk can lead to carelessness when evaluating social engineering tactics.',
+    worksWhen: 'Multi-factor verification is enabled where supported, software is kept updated, and credentials are kept private and unique.',
+    becomesDifficultWhen: 'Managing multiple complex credentials causes password fatigue or users disable security features for convenience.',
+    whatChangesOutcome: 'Authentication strength, update regularity, password uniqueness, awareness of social engineering, and security feature usage.',
+    realityLevel: 'GROUNDED',
+    safetyLabel: 'EDUCATION_ONLY',
+    sources: [
+      {
+        title: 'ข้อควรระวังและการปกป้องข้อมูลส่วนบุคคลในโลกดิจิทัล',
+        organization: 'ETDA Thailand',
+        url: 'https://www.etda.or.th',
+      },
+      {
+        title: 'ภัยทางการเงินและการป้องกันตนเอง',
+        organization: 'Bank of Thailand',
+        url: 'https://www.bot.or.th/th/satang-story/financial-threats.html',
+      },
+    ],
+  },
+  {
+    elementSlug: 'financial-freedom-foundation',
+    shortDescription: 'A long-term financial base combining asset accumulation, minimal debt, and passive cash flow options that expand future lifestyle choices.',
+    realLesson: 'Building a financial independence foundation provides greater flexibility over work and lifestyle choices over multi-year horizons, though suitability and timeline depend on individual income, savings rate, investment performance, and living requirements.',
+    example: 'A worker builds net assets and passive investment income that cover 50% of baseline living costs, enabling the flexibility to transition to part-time work or career retraining (educational scenario only; does not guarantee wealth or early retirement).',
+    possibleBenefit: 'Increases personal autonomy, expands career flexibility, and provides long-term financial resilience.',
+    possibleTradeoff: 'Requires sustained high savings rates, disciplined investment management, and long-term consumption trade-offs over decades.',
+    hiddenRisk: 'Relying on overly optimistic investment return assumptions or ignoring future inflation can cause long-term accumulation plans to fall short.',
+    worksWhen: 'Savings rates are consistent, investment portfolios are diversified, debt is minimized, and compounding horizons are long.',
+    becomesDifficultWhen: 'High inflation erodes asset returns, severe market downturns occur, or living costs expand continuously.',
+    whatChangesOutcome: 'Savings rate percentage, long-term asset returns, inflation rate, debt levels, and lifestyle expense discipline.',
+    realityLevel: 'SIMPLIFIED_MODEL',
+    safetyLabel: 'NOT_FINANCIAL_ADVICE',
+    sources: [
+      {
+        title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
+        organization: 'Bank of Thailand',
+        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
+      },
+      {
+        title: 'OECD Financial Education Competency Principles',
+        organization: 'OECD',
+        url: 'https://www.oecd.org/en/topics/financial-education.html',
+      },
+    ],
+  },
+];
+```
+
+#### Batch B Source Verification & Claim Support Matrix
+
+| # | elementSlug | Load-Bearing Claim | Source Title | Org | Resolved URL | Status | Exact Claim Supported | Accepted |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `debt-payoff-strategy` | Structured debt acceleration prioritizing balances/rates | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | BOT | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Debt repayment acceleration & surplus allocation | Accepted |
+| 2 | `essential-baseline` | Fixed minimum monthly expense floor | แยกให้ปัง... Needs กับ Wants | SET | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Non-negotiable essential expense identification | Accepted |
+| 3 | `essential-baseline` | Household living expenditure survey floor | การสำรวจภาวะเศรษฐกิจและสังคมของครัวเรือน | NSO | `https://www.nso.go.th` | VERIFIED_GENERAL_HUB | Household fixed expenditure baseline surveys | Accepted (Justified) |
+| 4 | `discretionary-leakage` | Stealth micro-expenses compounding over time | แยกให้ปัง... Needs กับ Wants | SET | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Micro-expense tracking & cash leakage control | Accepted |
+| 5 | `digital-scam-risk` | Digital fraud vulnerability & channel verification | ภัยทางการเงินและการป้องกันตนเอง | BOT | `https://www.bot.or.th/th/satang-story/financial-threats.html` | VERIFIED_SPECIFIC_PAGE | Digital fraud patterns & channel verification | Accepted |
+| 6 | `digital-scam-risk` | Personal data protection & digital caution | ข้อควรระวังและการปกป้องข้อมูลส่วนบุคคล | ETDA | `https://www.etda.or.th` | VERIFIED_GENERAL_HUB | Digital privacy & online caution guidelines | Accepted (Justified) |
+| 7 | `financial-stability` | Ongoing financial resilience state & liquid reserves | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | BOT | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Financial resilience & liquid buffer maintenance | Accepted |
+| 8 | `financial-stability` | International adult financial literacy resilience | OECD Financial Education Competency Principles | OECD | `https://www.oecd.org/en/topics/financial-education.html` | VERIFIED_GENERAL_HUB | Financial stability & shock absorption competence | Accepted |
+| 9 | `debt-overload` | Severe debt service burden crowding out essential needs | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | BOT | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Severe debt overload & debt restructuring options | Accepted |
+| 10 | `emergency-survival` | Survival duration runway (liquid reserves ÷ essential spending) | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | BOT | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Emergency reserve duration calculation | Accepted |
+| 11 | `emergency-survival` | Labor protection & emergency shock survival | ILO Guidelines on Employment Protection | ILO | `https://www.ilo.org` | VERIFIED_GENERAL_HUB | Income shock mitigation & emergency protection | Accepted (Justified) |
+| 12 | `mindful-spending` | Value-aligned spending & cooling-off periods | แยกให้ปัง... Needs กับ Wants | SET | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Mindful consumption & cooling-off rules | Accepted |
+| 13 | `budget-optimizing` | Dynamic category reallocation as costs shift | การจัดทำงบประมาณและการวางแผนการเงิน | BOT | `https://www.bot.or.th/th/satang-story/money-plan/budgeting.html` | VERIFIED_SPECIFIC_PAGE | Flexible budget reallocation & margin control | Accepted |
+| 14 | `digital-hygiene` | Proactive security habits & multi-factor verification | ข้อควรระวังและการปกป้องข้อมูลส่วนบุคคล | ETDA | `https://www.etda.or.th` | VERIFIED_GENERAL_HUB | Digital hygiene & credential security controls | Accepted (Justified) |
+| 15 | `digital-hygiene` | Digital banking security & fraud prevention | ภัยทางการเงินและการป้องกันตนเอง | BOT | `https://www.bot.or.th/th/satang-story/financial-threats.html` | VERIFIED_SPECIFIC_PAGE | Digital banking security controls & 2FA | Accepted |
+| 16 | `financial-freedom-foundation` | Multi-year asset accumulation & choice expansion | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | BOT | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Long-term asset accumulation & independence core | Accepted |
+| 17 | `financial-freedom-foundation` | Long-term financial planning & literacy framework | OECD Financial Education Competency Principles | OECD | `https://www.oecd.org/en/topics/financial-education.html` | VERIFIED_GENERAL_HUB | Multi-year asset growth & financial autonomy | Accepted |
+
+#### Discovery Details Batch B Completeness Matrix
+
+| # | Target Slug | Required Fields Complete | Scalar realityLevel Assigned | Scalar safetyLabel Assigned | Sources Contract Valid | Claims Supported | Ready for Freeze |
+|---|---|---|---|---|---|---|---|
+| 1 | `debt-payoff-strategy` | ✅ Complete | GROUNDED | NOT_FINANCIAL_ADVICE | ✅ Valid (BOT) | ✅ Verified | ✅ Ready |
+| 2 | `essential-baseline` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (SET, NSO) | ✅ Verified | ✅ Ready |
+| 3 | `discretionary-leakage` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (SET) | ✅ Verified | ✅ Ready |
+| 4 | `digital-scam-risk` | ✅ Complete | GROUNDED | HIGH_RISK_TOPIC | ✅ Valid (BOT, ETDA) | ✅ Verified | ✅ Ready |
+| 5 | `financial-stability` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (BOT, OECD) | ✅ Verified | ✅ Ready |
+| 6 | `debt-overload` | ✅ Complete | SIMPLIFIED_MODEL | NOT_FINANCIAL_ADVICE | ✅ Valid (BOT) | ✅ Verified | ✅ Ready |
+| 7 | `emergency-survival` | ✅ Complete | SIMPLIFIED_MODEL | EDUCATION_ONLY | ✅ Valid (BOT, ILO) | ✅ Verified | ✅ Ready |
+| 8 | `mindful-spending` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (SET) | ✅ Verified | ✅ Ready |
+| 9 | `budget-optimizing` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (BOT) | ✅ Verified | ✅ Ready |
+| 10 | `digital-hygiene` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (ETDA, BOT) | ✅ Verified | ✅ Ready |
+| 11 | `financial-freedom-foundation` | ✅ Complete | SIMPLIFIED_MODEL | NOT_FINANCIAL_ADVICE | ✅ Valid (BOT, OECD) | ✅ Verified | ✅ Ready |
+
+- **Ready records**: 11 / 11
+- **Blocked records**: 0 / 11
 - **Missing values**: 0
 - **Placeholder values**: 0
-- **Agent decisions still required during implementation**: 0
+- **Agent decisions remaining**: 0
 
 ---
 
