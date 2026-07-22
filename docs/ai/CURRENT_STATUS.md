@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P5_SEED_2_IMPLEMENT_INFRASTRUCTURE_AND_CATEGORIES)
+## Verified status (updated during P4_AUTH_6_ALIGN_SKILL_AND_PLAN_FAKEBUCK_REFACTOR)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -29,18 +29,15 @@ git status --short
 - **P4_AUTH_5 checkpoint**: `cd910c6` — "feat: add role-based authorization guard"
 - **P5_PREP checkpoint**: `8451344` — "docs: align AI agents with teacher coding style"
 - **P5_SEED_1 checkpoint**: `66851c0` — "docs: plan core content seed"
-- **P5_SEED_2 checkpoint**: "feat: add core seed infrastructure and categories" (see git log)
+- **P5_SEED_2 checkpoint**: `d807255` — "feat: add core seed infrastructure and categories"
+- **P4_AUTH_6 checkpoint**: "docs: plan Fakebuck-aligned auth refactor" (see git log)
 
-### Backend (`fincraft-lab-api`) — Seed Infrastructure & Category Slice Complete
+### Backend (`fincraft-lab-api`) — Skill v3 & Fakebuck Refactor Planned
 
-- **Seed Infrastructure Implemented**: Small runner `prisma/seed.ts`, standalone Prisma Client `prisma/seed/seed-client.ts` using `@prisma/adapter-pg`, manifest `seed-manifest.ts`, pre-write validator `validate-seed.ts`, post-seed verifier `verify-seed.ts`. Seed command configured in `prisma.config.ts` (`migrations.seed = "tsx prisma/seed.ts"`).
-- **Eight Planned Categories Seeded**: 8 Element Categories (`Money Flow`, `Saving & Financial Safety`, `Debt & Credit`, `Cost of Living`, `Financial Behavior`, `Life Events & Risk`, `Planning Tools`, `Digital Financial Safety`) seeded via idempotent upserts matching unique `name`.
-- **Rerun Idempotency Verified**: Executed `prisma db seed` twice against PostgreSQL:
-  - First run: Seeded 8 Categories (verified 8/8).
-  - Second run: Verified exactly 8 Categories total, 0 duplicates, IDs remained stable.
-- **In-Memory Pre-Write Validation Verified**: Duplicate category name fixture correctly rejected in memory before initiating database writes.
-- **Protected User/Activity Tables Intact**: Counts for `users` (0), `pets` (0), `user_elements` (0), `discovery_events` (0), `workspaces` (0), `workspace_nodes` (0), `workspace_edges` (0), `simulation_runs` (0) remained 0. No user data created.
-- **Remaining Content Datasets Unimplemented**: Elements, Discovery Details, Craft Recipes, Recipe Inputs, Relationships, and Simulations are planned in `CORE_CONTENT_SEED_PLAN.md` but not yet seeded.
+- **Auth Runtime Behavior Verified Complete**: Registration, Login, JWT access tokens, global `AuthGuard`, `@Public()`, `GET /auth/me`, `@CurrentUser()`, `@Roles()`, and global `RolesGuard` are 100% complete and verified.
+- **Skill v3 & Fakebuck Refactor Plan Canonical**: Skill v3 (`SKILL.md`) and `docs/ai/plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md` created. Approves `AuthController` -> `AuthService` -> (`UserService`, `BcryptService`, `AccessTokenService`) service-boundary pattern.
+- **No Application Code Changed**: No source code (`src/**`), Prisma schema, migrations, or dependencies were modified in this planning step.
+- **Seeded Content Intact**: 8 Element Categories seeded and verified in PostgreSQL database.
 
 ### Frontend (`fincraft-lab-web`)
 
@@ -52,8 +49,7 @@ git status --short
 - `pnpm lint` — 0 errors, 1 pre-existing warning in `main.ts` (`@typescript-eslint/no-floating-promises`)
 - `pnpm test` — 3/3 unit tests passed (HealthController status, service name, ISO timestamp)
 - `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` -> 200, `GET /` -> 404) via Node VM modules
-- Search for unsafe casts (`any`, `as any`, `as unknown`, `@ts-ignore`) in `prisma/seed/` — 0 matches
-- Seed executed twice & verified — passed
+- Search for unsafe casts (`any`, `as any`, `as unknown`, `@ts-ignore`) in `src/auth/` & `prisma/seed/` — 0 matches
 
 ## Active Project Rule: No Automatic Unit Spec Generation
 
@@ -62,11 +58,11 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P5_SEED_3_IMPLEMENT_ELEMENTS_AND_DETAILS_001 — Implement Elements (14 Starter, 22 Discovery) and 36 Discovery Details seed content steps.
+P4_AUTH_7_IMPLEMENT_USER_SERVICE_EXTRACTION_001 — Phase A of Fakebuck Auth Refactor: Create UserModule, UserService, and UserResponseDto without altering runtime Auth behavior.
 ```
 
 ## Related documents
 
 - Full file map → [`FILE_MAP.md`](FILE_MAP.md)
-- Submission Seed v1 Plan → [`plans/CORE_CONTENT_SEED_PLAN.md`](plans/CORE_CONTENT_SEED_PLAN.md)
+- Auth Fakebuck Refactor Plan → [`plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md`](plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md)
 - Stepwise loop method → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`

@@ -9,25 +9,26 @@ This document lists only files and folders that **actually exist** right now. Fu
 | `.gitignore` | Ignores `node_modules`, `dist`, `.env`, `fincraft-lab-api/src/database/generated/prisma/`, etc. | owner-maintained, extended for canonical Prisma Client output path | Update when a new pattern needs ignoring |
 | `AGENTS.md` | Canonical source of truth & rules for all AI tools | created in P0.5, updated in P5_PREP | Update when project-level rules change |
 | `CLAUDE.md` | Thin adapter for Claude Code | created in P0.5 | Update only for Claude-specific behavior |
-| `GEMINI.md` | Thin adapter for Gemini | created in P0.5, updated in P5_PREP | Update only for Gemini-specific behavior |
+| `GEMINI.md` | Thin adapter for Gemini | created in P0.5, updated in P4_AUTH_6 | Update only for Gemini-specific behavior |
 
 ## `.agents/skills/fincraft-teacher-stepwise-loop/`
 
 | Path | Responsibility | Origin | Next step allowed to change it |
 |---|---|---|---|
-| `SKILL.md` | FinCraft Lab — Teacher-Aligned Stepwise Development Skill v2 | owner-provided draft, revised in P0.5 & P5_PREP | Update when the loop or project sequence changes |
+| `SKILL.md` | FinCraft Lab — Fakebuck-Aligned Stepwise Development Skill v3 (operational stepwise loop, Fakebuck Auth service-boundary pattern, envelope conventions, project sequence) | owner-provided draft, revised in P0.5, P5_PREP, P4_AUTH_6 | Update when the loop or project sequence changes |
 
 ## `docs/ai/`
 
 | Path | Responsibility | Origin | Next step allowed to change it |
 |---|---|---|---|
 | `PROJECT_CONTEXT.md` | Relatively stable product context | created in P0.5 | Update when product scope changes |
-| `CODING_RULES.md` | Full coding rules & teacher-aligned readability guidelines | created in P0.5, updated in P5_PREP | Update when coding rules change |
+| `CODING_RULES.md` | Full coding rules & teacher-aligned readability/service-boundary guidelines | created in P0.5, updated in P4_AUTH_6 | Update when coding rules change |
 | `STEPWISE_WORKFLOW.md` | Lifecycle of each bounded step | created in P0.5 | Update when the workflow changes |
-| `CURRENT_STATUS.md` | Latest verified status | created in P0.5, updated in P5_SEED_2 | **Update at the end of every completed step** (evidence-based) |
-| `FILE_MAP.md` | This file | created in P0.5, updated in P5_SEED_2 | Update when a new file actually exists |
+| `CURRENT_STATUS.md` | Latest verified status | created in P0.5, updated in P4_AUTH_6 | **Update at the end of every completed step** (evidence-based) |
+| `FILE_MAP.md` | This file | created in P0.5, updated in P4_AUTH_6 | Update when a new file actually exists |
 | `plans/ELEMENT_CATEGORY_CRUD_PLAN.md` | Teacher-style design & bounded implementation plan for ElementCategory CRUD | created in P4A | Update if design decisions change |
 | `plans/CORE_CONTENT_SEED_PLAN.md` | Canonical specification and implementation plan for Submission Seed v1 | created in P5_SEED_1 | Update if seed specifications change |
+| `plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md` | Complete implementation plan for refactoring Auth to Fakebuck service-boundary architecture (`UserService`, `BcryptService`, `AccessTokenService`) | created in P4_AUTH_6 | Update if refactor decisions change |
 
 ## `fincraft-lab-api/` (Backend — created in P0)
 
@@ -88,7 +89,9 @@ Empty — not yet initialized (out of scope).
 ## Planned, not created
 
 ```text
-fincraft-lab-api/src/<feature>/         (created one feature at a time)
+fincraft-lab-api/src/user/
+fincraft-lab-api/src/infrastructure/hash/
+fincraft-lab-api/src/infrastructure/jwt/
 
 fincraft-lab-web/src/app/
 fincraft-lab-web/src/components/
@@ -98,4 +101,5 @@ fincraft-lab-web/src/lib/
 ## Related documents
 
 - Current status → [`CURRENT_STATUS.md`](CURRENT_STATUS.md)
+- Auth Fakebuck Refactor Plan → [`plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md`](plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md)
 - Stepwise loop method → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`

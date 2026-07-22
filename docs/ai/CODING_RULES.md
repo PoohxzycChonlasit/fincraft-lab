@@ -78,10 +78,9 @@ src/<feature>/
 
 Rules:
 
-- Controller receives HTTP input and calls the Service only.
+- Controller receives HTTP input, delegates to the Service layer, and wraps results in `{ data: result }`.
 - Controller stays thin.
-- Business logic lives in the Service.
-- Prisma queries live in the Service.
+- Business logic lives in the Service layer.
 - Use NestJS dependency injection directly.
 - Use DTOs with `class-validator` for request bodies.
 - Use NestJS Pipes for path parameters.
@@ -95,7 +94,7 @@ Rules:
 FinCraft-specific extensions that are allowed (because they are direct product requirements):
 
 - `USER` / `ADMIN` / `SUPER_ADMIN`;
-- minimal Role Guard;
+- minimal Role Guard (`RolesGuard`);
 - Craft transaction;
 - duplicate recipe protection;
 - rediscovery handling;
@@ -174,18 +173,23 @@ The owner has decided that unit spec files are no longer generated automatically
    - diff inspection.
 8. **This rule disables automatic unit-spec generation only — it never means "no verification is needed."** Never claim a step is done without real evidence.
 
-## G. Teacher-Aligned Readability
+## G. Teacher-Aligned Readability & Service Boundaries
 
-To ensure code matches the owner's teacher-led Fakebook/Fakebuck learning style, future code must be written with high readability and minimal abstraction:
+To ensure code matches the owner's teacher-led Fakebook/Fakebuck learning style, code must follow high-readability service boundaries:
 
-1. **Thin Controllers**: Controllers validate HTTP inputs and delegate to the service layer. Methods are typically 3–12 lines long.
-2. **Explicit Return Types**: All public controller methods and public service methods must declare explicit return types (e.g., `Promise<{ data: ElementCategoryResponse[] }>`).
-3. **Descriptive Parameter & Variable Names**: Use explicit, meaningful variable names rather than cryptic abbreviations.
-4. **Linear Services**: Service methods follow simple, top-to-bottom execution flows (typically 5–35 lines per method). Deep nesting is avoided via early exception guard clauses.
-5. **Direct Prisma Usage**: `PrismaService` is injected directly into services. No custom repository layers, generic base services, or use-case classes are allowed.
-6. **Minimal Abstraction**: Create helper abstractions only when real logic is reused, file line limits (500 physical lines) are approached, or third-party APIs are isolated.
-7. **Security Complexity Exception**: Files handling security, cryptography, JWT signing, guard evaluation, Prisma unique error mapping (`P2002`), seed validation, and transaction safety may remain more detailed when required for safety. Necessary safety checks must never be deleted to shorten code.
-8. **No Copying Another Repository File-for-File**: Do not copy teacher code blindly. Preserve FinCraft-specific models, routes, financial safety rules, response envelopes (`{ data: ... }`), and Craft/Simulation behaviors.
+1. **Auth Service Boundaries**:
+   - `AuthService` coordinates register, login, and current-user flows. It does not directly handle database access, bcrypt hashing, or JWT signing.
+   - `UserService` (`src/user/user.service.ts`) owns user database persistence, safe Prisma selects, and `P2002` duplicate email error mapping.
+   - `BcryptService` (`src/infrastructure/hash/bcrypt.service.ts`) owns password hashing and comparison.
+   - `AccessTokenService` (`src/infrastructure/jwt/access-token.service.ts`) owns JWT token signing.
+2. **Ordinary Feature Services (CRUD)**:
+   - Feature services for standard CRUD operations (such as `ElementCategoriesService`) continue using `PrismaService` directly.
+   - Do NOT create repository layers, persistence adapter interfaces, or generic base services for normal CRUD features.
+3. **Thin Controllers**: Controllers validate HTTP inputs, delegate to the service layer, and wrap results in `{ data: result }`. Methods are typically 3–12 lines long.
+4. **Explicit Return Types**: All public controller methods and public service methods must declare explicit return types (e.g., `UserResponseDto`, `LoginResponseDto`).
+5. **Minimal Abstraction**: Create helper abstractions only when real logic is reused, file line limits (500 physical lines) are approached, or third-party APIs are isolated.
+6. **Security Complexity Exception**: Files handling security, cryptography, JWT signing, guard evaluation, Prisma unique error mapping (`P2002`), seed validation, and transaction safety may remain more detailed when required for safety. Necessary safety checks must never be deleted to shorten code.
+7. **No Copying Another Repository File-for-File**: Do not copy teacher code blindly. Preserve FinCraft-specific models, routes, financial safety rules, response envelopes (`{ data: ... }`), and Craft/Simulation behaviors.
 
 ## Related documents
 
