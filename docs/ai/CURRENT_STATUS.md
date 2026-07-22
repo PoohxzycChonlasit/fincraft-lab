@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P4_AUTH_8_REALIGN_LITERAL_FAKEBUCK_STYLE)
+## Verified status (updated during P5_SEED_3_IMPLEMENT_STARTER_ELEMENTS)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -32,20 +32,18 @@ git status --short
 - **P5_SEED_2 checkpoint**: `d807255` — "feat: add core seed infrastructure and categories"
 - **P4_AUTH_6 checkpoint**: `709594a` — "docs: plan Fakebuck-aligned auth refactor"
 - **P4_AUTH_7 checkpoint**: `fe30daa` — "refactor: extract user persistence from auth"
-- **P4_AUTH_8 checkpoint**: "refactor: align auth code with Fakebuck style" (see git log)
+- **P4_AUTH_8 checkpoint**: `b611466` — "refactor: align auth code with Fakebuck style"
+- **P5_SEED_3 checkpoint**: "feat: seed starter financial elements" (see git log)
 
-### Backend (`fincraft-lab-api`) — Literal Fakebuck Auth Architecture Complete
+### Backend (`fincraft-lab-api`) — Submission Seed v1 (Starter Elements Slice Complete)
 
-- **Literal Fakebuck Services Implemented**:
-  - `BcryptService` (`src/infrastructure/hash/bcrypt.service.ts`) & `HashModule` (`src/infrastructure/hash/hash.module.ts`)
-  - `AccessTokenService` (`src/infrastructure/jwt/access-token.service.ts`) & `AccessTokenModule` (`src/infrastructure/jwt/access-token.module.ts`)
-  - `UserService` simplified to literal teacher style (`createUser` hashes via `BcryptService` and uses Prisma 7 `omit: { passwordHash: true }`; `getUserByEmail` returns standard `User` model; `getUserById` uses `omit`).
-  - `AuthService` delegates user creation to `UserService`, compares login passwords via `BcryptService`, signs JWT via `AccessTokenService`. Contains 0 imports or references to `bcrypt`, `JwtService`, `ConfigService`, `PrismaService`, or `Prisma`.
-  - `LoginResponseDto` (`src/auth/dto/login-response.dto.ts`) created for explicit service return type.
-  - `AuthModule` imports `UserModule`, `HashModule`, `AccessTokenModule`.
-- **Skill v4 Active**: Active agent skill upgraded to `FinCraft Lab — Literal Fakebuck-Aligned Stepwise Development Skill v4`.
-- **Auth Behavior & Security Invariants Verified**: Verified via Bcrypt isolation test (cost factor 12, salt uniqueness), 13-step programmatic live HTTP test (Register 201, Duplicate 409, Login 200, Wrong Password 401, Unknown Email 401, GET /auth/me 200, INACTIVE 401, BANNED 401, Stale Token 401, JWT claims sub/email/role, JWT 900s lifetime, Health 200, User count parity), and invalid config startup failure test (`JWT_ACCESS_EXPIRES_IN_SECONDS=0`).
-- **Seeded Content Intact**: 8 Element Categories remain intact in PostgreSQL.
+- **Seeded Starter Elements**: Exactly 14 Starter Elements implemented (`income`, `expense`, `saving`, `debt`, `interest`, `inflation`, `emergency-fund`, `food`, `rent`, `budget`, `needs`, `wants`, `fomo`, `job-loss`).
+- **Seeded Categories**: Exactly 8 Element Categories preserved.
+- **Category Resolution**: Dynamically resolved via Category Name lookup Map from PostgreSQL; missing category names fail before Element writes.
+- **Idempotent Upsert**: Slugs used as `@unique` stable keys. Seed rerun verified idempotent with 14/14 stable IDs, 0 duplicate Slugs, 0 protected table activity delta.
+- **Failure Safety**: In-memory pre-write validation verified rejecting duplicate Slugs and Mode A unknown category references before DB connection.
+- **Protected Tables Verified**: Count deltas (`currentCount - initialCount === 0`) verified for 8 protected tables (`users`, `pets`, `userElements`, `discoveryEvents`, `workspaces`, `workspaceNodes`, `workspaceEdges`, `simulationRuns`).
+- **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
 
 ### Frontend (`fincraft-lab-web`)
 
@@ -55,10 +53,11 @@ git status --short
 
 - `pnpm build` — passed
 - `pnpm lint` — 0 errors, 1 pre-existing warning in `main.ts` (`@typescript-eslint/no-floating-promises`)
-- `pnpm test` — 3/3 unit tests passed (HealthController status, service name, ISO timestamp)
-- `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` -> 200, `GET /` -> 404) via Node VM modules
-- Search for unsafe casts (`any`, `as any`, `as unknown`, `@ts-ignore`) in `src/` — 0 matches
-- Programmatic live verification & Bcrypt isolation test — passed
+- `pnpm test` — 3/3 unit tests passed
+- `pnpm test:e2e` — 2/2 e2e tests passed
+- `tsc --noEmit` — passed (0 errors)
+- `prisma validate` — passed (schema valid)
+- Search for unsafe casts (`any`, `as any`, `as unknown`, `@ts-ignore`) in `src/` and `prisma/seed/` — 0 matches
 
 ## Active Project Rule: No Automatic Unit Spec Generation
 
@@ -67,11 +66,12 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P5_SEED_3_IMPLEMENT_ELEMENTS_AND_DETAILS_001 — Implement Elements (14 Starter, 22 Discovery) and 36 Discovery Details seed content steps.
+P5_SEED_4_IMPLEMENT_DISCOVERY_ELEMENTS_AND_DETAILS_001 — Implement 22 Discovery Elements and 36 Discovery Details seed content.
 ```
 
 ## Related documents
 
 - Full file map → [`FILE_MAP.md`](FILE_MAP.md)
+- Core Content Seed Plan → [`plans/CORE_CONTENT_SEED_PLAN.md`](plans/CORE_CONTENT_SEED_PLAN.md)
 - Auth Fakebuck Refactor Plan → [`plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md`](plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md)
 - Stepwise loop method → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
