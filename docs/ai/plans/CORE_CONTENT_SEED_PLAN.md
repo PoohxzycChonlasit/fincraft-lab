@@ -213,7 +213,10 @@ Every Element has a corresponding 1:1 `DiscoveryDetail` record mapped directly t
 
 ### 9.1 Starter Element DiscoveryDetail Content v2 — FROZEN (FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2)
 
-The following 14 records contain exact, frozen, implementation-ready per-record valueexport const FROZEN_STARTER_ELEMENT_DETAILS = [
+The following 14 records contain exact, frozen, implementation-ready per-record values for all Starter Elements, verified at audit time with sufficient evidence that each official page exists and supports the relevant claim.
+
+```typescript
+export const FROZEN_STARTER_ELEMENT_DETAILS = [
   {
     elementSlug: 'income',
     shortDescription: 'Regular inflows of money earned through labor, employment, business operations, or asset yields.',
