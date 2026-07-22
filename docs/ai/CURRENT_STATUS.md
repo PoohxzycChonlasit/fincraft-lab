@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P4_AUTH_3_IMPLEMENT_AUTH_GUARD)
+## Verified status (updated during P4_AUTH_4_IMPLEMENT_ME)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -24,16 +24,17 @@ git status --short
 - **P4A checkpoint**: `6193f03` — "docs: plan ElementCategory CRUD"
 - **P4_AUTH_1 checkpoint**: `bf46ed2` — "feat: add user registration endpoint"
 - **P4_AUTH_2 checkpoint**: `29de3de` — "feat: add user login endpoint"
-- **P4_AUTH_3 checkpoint**: "feat: add global JWT auth guard" (see git log)
+- **P4_AUTH_3 checkpoint**: `5c01639` — "feat: add global JWT auth guard"
+- **P4_AUTH_4 checkpoint**: "feat: add current user endpoint" (see git log)
 
 ### Backend (`fincraft-lab-api`)
 
-- **Global AuthGuard Implemented**: `AuthGuard` registered globally as `APP_GUARD` in `AuthModule`. All application routes protected by default unless marked with `@Public()`.
-- **Public Routes Configured**: `@Public()` decorator applied to `POST /auth/register`, `POST /auth/login`, and `GET /health`. Reflector `getAllAndOverride` checks handler and controller class metadata.
-- **Bearer Extraction & Verification**: Reads `Authorization` header safely (requires `Bearer <token>`). Verifies token asynchronously using `JwtService.verifyAsync`. Throws generic `UnauthorizedException('Invalid or missing authentication token')` for all token failures (missing header, basic scheme, empty token, malformed JWT, wrong signature, expired token).
-- **Runtime Payload Validation**: `sub` validated as non-empty string; `email` validated as non-empty string; `role` validated as valid `UserRole` enum (`USER`, `ADMIN`, `SUPER_ADMIN`) using TypeScript type guard. Optional `iat` and `exp` validated as numbers. Validated payload attached to `request.user`. Zero unsafe TypeScript casts (`any`, `as any`, `as unknown`, `@ts-ignore`).
-- **Guard Isolation & Live Nest Verification Verified**: All 11 guard isolation tests passed 100%. Live application verified: Register (201), Login (200), Health (200), unmapped route (404), test user cleanup (exact UUID deleted, ending user count restored to 0).
-- **Out of Scope**: `GET /auth/me`, `@CurrentUser()` decorator, and `RolesGuard` not implemented in this task. Full HTTP proof of a protected route will occur in the next bounded `GET /auth/me` task.
+- **GET /auth/me Implemented & Protected**: `GET /auth/me` implemented in `AuthController` and protected by the global `AuthGuard`. Reads validated token payload via custom `@CurrentUser()` parameter decorator.
+- **Typed `@CurrentUser()` Decorator**: Created via Nest `createParamDecorator` in `src/auth/decorators/current-user.decorator.ts`. Reads `request.user` and returns typed `AccessTokenPayload`. Throws `UnauthorizedException('Authentication session is no longer valid')` if `request.user` is missing. Zero unsafe casts (`any`, `as any`, `as unknown`, `@ts-ignore`).
+- **Database User & Status Re-verification**: `AuthService.getCurrentUser(userId)` queries the user from PostgreSQL by `id` using Prisma `select`. Re-verifies that `user.status === UserStatus.ACTIVE`. Returns generic `UnauthorizedException('Authentication session is no longer valid')` for missing, deleted, inactive, or banned users without disclosing user status.
+- **Safe Response Envelope**: `GET /auth/me` returns `200 OK` with payload `{ "data": { id, email, displayName, avatarUrl, role, status, createdAt, updatedAt } }`. Excludes `passwordHash` at query time via Prisma `select`. Does not issue a new access token.
+- **Live Runtime & Stale Token Verification Passed**: Live tests verified: `GET /auth/me` without token -> 401; Basic scheme -> 401; malformed token -> 401; wrong signature -> 401; valid token -> 200 (valid payload returned); public endpoints (`/health` -> 200, `/auth/register` -> 201, `/auth/login` -> 200) remain intact; deleted user with old valid token -> 401 (`'Authentication session is no longer valid'`). Test user cleanup verified (0 ending rows).
+- **Out of Scope**: `@Roles()` decorator and `RolesGuard` not implemented in this task.
 
 ### Frontend (`fincraft-lab-web`)
 
@@ -46,7 +47,7 @@ git status --short
 - `pnpm test` — 3/3 unit tests passed (HealthController status, service name, ISO timestamp)
 - `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` -> 200, `GET /` -> 404) via Node VM modules
 - Search for unsafe casts (`any`, `as any`, `as unknown`, `@ts-ignore`) in `src/auth/` — 0 matches
-- 11 Guard Isolation unit tests & Live Nest Runtime Verification — passed
+- Live Runtime & Stale Token Re-verification — passed
 
 ## Active Project Rule: No Automatic Unit Spec Generation
 
@@ -55,7 +56,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P4_AUTH_4_IMPLEMENT_ME_001 — Implement only GET /auth/me and a typed CurrentUser decorator.
+P4_AUTH_5_IMPLEMENT_ROLES_GUARD_001 — Implement only @Roles() decorator and a global RolesGuard.
 ```
 
 ## Related documents

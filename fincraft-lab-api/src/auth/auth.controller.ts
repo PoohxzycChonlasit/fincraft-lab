@@ -1,8 +1,17 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { AccessTokenPayload } from './types/access-token-payload.type';
 
 @Controller('auth')
 export class AuthController {
@@ -22,5 +31,12 @@ export class AuthController {
   async login(@Body() dto: LoginDto) {
     const result = await this.authService.login(dto);
     return { data: result };
+  }
+
+  @Get('me')
+  @HttpCode(HttpStatus.OK)
+  async getMe(@CurrentUser() currentUser: AccessTokenPayload) {
+    const user = await this.authService.getCurrentUser(currentUser.sub);
+    return { data: user };
   }
 }
