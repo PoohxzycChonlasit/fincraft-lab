@@ -46,19 +46,19 @@ git status --short
 - **P5_SEED_7A2 audit**: PASS_WITH_DOC_FIXES (Single broken URL identified)
 - **P5_SEED_7A3 repair**: `157f788` — "docs: repair discovery detail batch b source"
 - **P5_SEED_7A4 audit**: PASS (Read-only verification of Batch B source repair)
-- **P5_SEED_7B checkpoint**: "feat: seed discovery detail batch b"
+- **P5_SEED_7B checkpoint**: `6b223c1` — "feat: seed discovery detail batch b"
+- **P5_SEED_7C audit**: PASS (Read-only post-commit audit of Batch B seed commit)
+- **P5_SEED_8A checkpoint**: frozen Core Craft Recipe V1 plan (`FROZEN_CORE_CRAFT_RECIPES_VALIDATED_V1`)
 
-### Backend (`fincraft-lab-api`) — Submission Seed v1 (Discovery Details Batch B Seeded)
+### Backend (`fincraft-lab-api`) — Core Craft Recipe V1 Plan Frozen (Seed Catalog Extended)
 
-- **Starter Details Seeded**: Exactly 14 DiscoveryDetail records targeting all 14 Starter Elements seeded in PostgreSQL database (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`).
-- **Discovery Details Batch A Seeded**: Exactly 11 DiscoveryDetail records targeting Batch A Discovery Elements (sortOrder 15-25) seeded in PostgreSQL database (`FROZEN_DISCOVERY_DETAILS_BATCH_A_SOURCE_VERIFIED_V1`).
-- **Discovery Details Batch B Seeded**: Exactly 11 DiscoveryDetail records targeting Batch B Discovery Elements (sortOrder 26-36) seeded in PostgreSQL database (`FROZEN_DISCOVERY_DETAILS_BATCH_B_SOURCE_VERIFIED_V1`). Broken URLs: 0. Source replacements remaining: 0.
-- **Total DiscoveryDetail Database Rows**: Exactly 36 rows in PostgreSQL database (14 Starter Element Details + 11 Batch A Discovery Element Details + 11 Batch B Discovery Element Details).
-- **Total Planned DiscoveryDetail Records**: Exactly 36/36 records frozen in `CORE_CONTENT_SEED_PLAN.md` and seeded in PostgreSQL.
-- **Source Counts (Batch B)**: 17 source objects across 11 Discovery Details, pointing to 8 unique URLs (`VERIFIED_SPECIFIC_PAGE`: 2, `VERIFIED_PUBLICATION`: 2, `VERIFIED_GENERAL_HUB`: 4). Reported separately from Starter and Batch A Details sources.
-- **Seeded Elements Table**: Exactly 36 Elements in PostgreSQL database (14 Starter Elements + 22 Discovery Elements).
-- **Seeded Categories Table**: Exactly 8 Element Categories in PostgreSQL database.
-- **Protected Tables Verified**: Protected table count deltas (`currentCount - initialCount === 0`) verified for 8 protected tables (`users`, `pets`, `userElements`, `discoveryEvents`, `workspaces`, `workspaceNodes`, `workspaceEdges`, `simulationRuns`). All deltas equal 0 (`delta = 0`).
+- **Discovery Details Phase Complete**: Exactly 36 DiscoveryDetail records (14 Starter + 11 Batch A + 11 Batch B) seeded in PostgreSQL database.
+- **Core Craft Recipe V1 Plan Status**: FROZEN (`FROZEN_CORE_CRAFT_RECIPES_VALIDATED_V1`).
+- **Target Recipe Count**: Exactly 22 canonical Recipes (1:1 output coverage for all 22 Discovery Elements).
+- **Target Recipe Inputs**: Exactly 44 input references (2 distinct inputs per Recipe).
+- **Progression Graph Metrics**: 22/22 reachable outputs, 0 starter outputs, 0 self-inputs, 0 duplicate unordered pairs, 0 circular dependencies, max reachable depth: 4.
+- **Database Recipe State**: `CraftRecipe` count = 0, `CraftRecipeInput` count = 0 (Documentation-only planning task; no code or database writes occurred).
+- **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
 
 ### Frontend (`fincraft-lab-web`)
@@ -82,12 +82,15 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P5_SEED_7C_POST_COMMIT_DISCOVERY_DETAIL_BATCH_B_AUDIT_001 — Independent read-only audit of commit "feat: seed discovery detail batch b" extending the seed chain.
+P5_SEED_8B_AUDIT_CORE_CRAFT_RECIPE_PLAN_001 — Independent read-only audit of frozen Core Craft Recipe V1 plan in CORE_CONTENT_SEED_PLAN.md.
 ```
 
 ## Related documents
 
 - Full file map → [`FILE_MAP.md`](FILE_MAP.md)
+- Full coding rules → [`CODING_RULES.md`](CODING_RULES.md)
+- Canonical Core Content Seed Plan → [`plans/CORE_CONTENT_SEED_PLAN.md`](plans/CORE_CONTENT_SEED_PLAN.md)
+
 - Core Content Seed Plan → [`plans/CORE_CONTENT_SEED_PLAN.md`](plans/CORE_CONTENT_SEED_PLAN.md)
 - Auth Fakebuck Refactor Plan → [`plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md`](plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md)
 - Stepwise loop method → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`

@@ -1173,90 +1173,148 @@ export const FROZEN_DISCOVERY_DETAILS_BATCH_B = [
       {
         title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
         organization: 'Bank of Thailand',
-        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
-      },
-      {
-        title: 'OECD Financial Education Competency Principles',
-        organization: 'OECD',
-        url: 'https://www.oecd.org/en/topics/financial-education.html',
-      },
-    ],
-  },
-];
-```
-
-#### Batch B Source Verification & Claim Support Matrix
-
-| # | elementSlug | Load-Bearing Claim | Source Title | Org | Resolved URL | Status | Exact Claim Supported | Accepted |
-|---|---|---|---|---|---|---|---|---|
-| 1 | `debt-payoff-strategy` | Structured debt acceleration prioritizing balances/rates | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | BOT | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Debt repayment acceleration & surplus allocation | Accepted |
-| 2 | `essential-baseline` | Fixed minimum monthly expense floor | แยกให้ปัง... Needs กับ Wants | SET | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Non-negotiable essential expense identification | Accepted |
-| 3 | `essential-baseline` | Household living expenditure survey floor | การสำรวจภาวะเศรษฐกิจและสังคมของครัวเรือน | NSO | `https://www.nso.go.th` | VERIFIED_GENERAL_HUB | Household fixed expenditure baseline surveys | Accepted (Justified) |
-| 4 | `discretionary-leakage` | Stealth micro-expenses compounding over time | แยกให้ปัง... Needs กับ Wants | SET | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Micro-expense tracking & cash leakage control | Accepted |
-| 5 | `digital-scam-risk` | Digital fraud vulnerability & channel verification | สตางค์ Story - ภัยทางการเงินและการป้องกันตนเอง | BOT | `https://www.bot.or.th/th/satang-story.html` | VERIFIED_PUBLICATION | Digital fraud patterns & channel verification | Accepted |
-| 6 | `digital-scam-risk` | Personal data protection & digital caution | ข้อควรระวังและการปกป้องข้อมูลส่วนบุคคล | ETDA | `https://www.etda.or.th` | VERIFIED_GENERAL_HUB | Digital privacy & online caution guidelines | Accepted (Justified) |
-| 7 | `financial-stability` | Ongoing financial resilience state & liquid reserves | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | BOT | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Financial resilience & liquid buffer maintenance | Accepted |
-| 8 | `financial-stability` | International adult financial literacy resilience | OECD Financial Education Competency Principles | OECD | `https://www.oecd.org/en/topics/financial-education.html` | VERIFIED_GENERAL_HUB | Financial stability & shock absorption competence | Accepted |
-| 9 | `debt-overload` | Severe debt service burden crowding out essential needs | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | BOT | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Severe debt overload & debt restructuring options | Accepted |
-| 10 | `emergency-survival` | Survival duration runway (liquid reserves ÷ essential spending) | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | BOT | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Emergency reserve duration calculation | Accepted |
-| 11 | `emergency-survival` | Labor protection & emergency shock survival | ILO Guidelines on Employment Protection | ILO | `https://www.ilo.org` | VERIFIED_GENERAL_HUB | Income shock mitigation & emergency protection | Accepted (Justified) |
-| 12 | `mindful-spending` | Value-aligned spending & cooling-off periods | แยกให้ปัง... Needs กับ Wants | SET | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Mindful consumption & cooling-off rules | Accepted |
-| 13 | `budget-optimizing` | Dynamic category reallocation as costs shift | การจัดทำงบประมาณและการวางแผนการเงิน | BOT | `https://www.bot.or.th/th/satang-story/money-plan/budgeting.html` | VERIFIED_SPECIFIC_PAGE | Flexible budget reallocation & margin control | Accepted |
-| 14 | `digital-hygiene` | Proactive security habits & multi-factor verification | ข้อควรระวังและการปกป้องข้อมูลส่วนบุคคล | ETDA | `https://www.etda.or.th` | VERIFIED_GENERAL_HUB | Digital hygiene & credential security controls | Accepted (Justified) |
-| 15 | `digital-hygiene` | Digital banking security & fraud prevention | สตางค์ Story - ภัยทางการเงินและการป้องกันตนเอง | BOT | `https://www.bot.or.th/th/satang-story.html` | VERIFIED_PUBLICATION | Digital banking security controls & 2FA | Accepted |
-| 16 | `financial-freedom-foundation` | Multi-year asset accumulation & choice expansion | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | BOT | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Long-term asset accumulation & independence core | Accepted |
-| 17 | `financial-freedom-foundation` | Long-term financial planning & literacy framework | OECD Financial Education Competency Principles | OECD | `https://www.oecd.org/en/topics/financial-education.html` | VERIFIED_GENERAL_HUB | Multi-year asset growth & financial autonomy | Accepted |
-
-#### Discovery Details Batch B Completeness Matrix
-
-| # | Target Slug | Required Fields Complete | Scalar realityLevel Assigned | Scalar safetyLabel Assigned | Sources Contract Valid | Claims Supported | Ready for Freeze |
-|---|---|---|---|---|---|---|---|
-| 1 | `debt-payoff-strategy` | ✅ Complete | GROUNDED | NOT_FINANCIAL_ADVICE | ✅ Valid (BOT) | ✅ Verified | ✅ Ready |
-| 2 | `essential-baseline` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (SET, NSO) | ✅ Verified | ✅ Ready |
-| 3 | `discretionary-leakage` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (SET) | ✅ Verified | ✅ Ready |
-| 4 | `digital-scam-risk` | ✅ Complete | GROUNDED | HIGH_RISK_TOPIC | ✅ Valid (BOT, ETDA) | ✅ Verified | ✅ Ready |
-| 5 | `financial-stability` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (BOT, OECD) | ✅ Verified | ✅ Ready |
-| 6 | `debt-overload` | ✅ Complete | SIMPLIFIED_MODEL | NOT_FINANCIAL_ADVICE | ✅ Valid (BOT) | ✅ Verified | ✅ Ready |
-| 7 | `emergency-survival` | ✅ Complete | SIMPLIFIED_MODEL | EDUCATION_ONLY | ✅ Valid (BOT, ILO) | ✅ Verified | ✅ Ready |
-| 8 | `mindful-spending` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (SET) | ✅ Verified | ✅ Ready |
-| 9 | `budget-optimizing` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (BOT) | ✅ Verified | ✅ Ready |
-| 10 | `digital-hygiene` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (ETDA, BOT) | ✅ Verified | ✅ Ready |
-| 11 | `financial-freedom-foundation` | ✅ Complete | SIMPLIFIED_MODEL | NOT_FINANCIAL_ADVICE | ✅ Valid (BOT, OECD) | ✅ Verified | ✅ Ready |
-
-- **Ready records**: 11 / 11
-- **Blocked records**: 0 / 11
-- **Missing values**: 0
-- **Placeholder values**: 0
-- **Agent decisions remaining**: 0
+        url: 'https://www.bot- **Agent decisions remaining**: 0
 
 ---
 
+## 10. Core Craft Recipe V1 Catalog (22 Recipes)
 
-## 10. Element Relationship Matrix (24 Relationships)
+### 10.1 Freeze Marker & Graph Verification
 
-| # | Source Slug | Target Slug | Relationship Type | Label | Strength |
-|---|---|---|---|---|---|
-| 1 | `income` | `cash-flow` | PRODUCES | Positive Cash Inflow | STRONG |
-| 2 | `expense` | `cash-flow` | REDUCES | Cash Outflow Impact | STRONG |
-| 3 | `saving` | `emergency-fund` | BUILDS | Safety Foundation | STRONG |
-| 4 | `debt` | `interest` | GENERATES | Debt Cost Generator | STRONG |
-| 5 | `interest` | `debt-trap` | ACCELERATES | Compounding Cost Risk | STRONG |
-| 6 | `inflation` | `purchasing-power-loss` | ERODES | Real Value Erosion | STRONG |
-| 7 | `emergency-fund` | `emergency-resilience` | PROVIDES | Shock Absorber | STRONG |
-| 8 | `fomo` | `impulse-spending` | TRIGGERS | Psychological Buying Impulse | MODERATE |
-| 9 | `budget` | `spending-plan` | ENABLES | Structured Planning | STRONG |
-| 10 | `income` | `lifestyle-creep` | EXPANDS | Expenditure Inflation Risk | MODERATE |
-| 11 | `expense` | `discretionary-leakage` | DRIVES | Unnoticed Cash Drain | MODERATE |
-| 12 | `job-loss` | `debt-overload` | AMPLIFIES | Financial Crisis Trigger | STRONG |
-| 13 | `debt-payoff-strategy` | `debt-pressure` | MITIGATES | Debt Burden Reduction | STRONG |
-| 14 | `mindful-spending` | `discretionary-leakage` | CONTROLS | Leakage Suppression | MODERATE |
-| 15 | `digital-hygiene` | `digital-scam-risk` | PROTECTS | Fraud Mitigation Shield | STRONG |
-| 16 | `financial-stability` | `financial-freedom-foundation` | LEADS_TO | Long-term Freedom Core | WEAK |
-| 17 | `needs` | `essential-baseline` | FORMS | Baseline Cost Floor | STRONG |
-| 18 | `wants` | `impulse-spending` | INFLUENCES | Discretionary Demand | MODERATE |
-| 19 | `savings-growth` | `financial-stability` | SUPPORTS | Wealth Cushioning | MODERATE |
-| 20 | `cost-pressure` | `cash-flow` | SQUEEZES | Margin Compression | MODERATE |
-| 21 | `emergency-liquidity` | `emergency-survival` | SUSTAINS | Survival Runway | STRONG |
+`FROZEN_CORE_CRAFT_RECIPES_VALIDATED_V1`
+
+All 22 Core Craft Recipes for Discovery Element V1 catalog have been designed, semantically aligned with target DiscoveryDetails, graph-validated, and frozen.
+
+#### Summary of Recipe Catalog Metrics
+- **Total Canonical Recipes**: Exactly 22 Recipes (1:1 per Discovery Element output).
+- **Total Recipe Inputs**: Exactly 44 input references (2 distinct inputs per Recipe).
+- **Discovery Output Coverage**: 22 / 22 Discovery Elements (100% complete coverage).
+- **Starter Outputs**: 0 (Starter Elements cannot be produced by Recipes).
+- **Self-Referential Inputs**: 0 (No Recipe uses the same Element as both inputA and inputB).
+- **Self-Output Inputs**: 0 (No Recipe output appears as one of its own inputs).
+- **Duplicate Unordered Pairs**: 0 (Every input pair is unique; A+B and B+A share identical canonical identity).
+- **Circular Dependencies**: 0 (Strict Directed Acyclic Graph / DAG property satisfied).
+- **100% Reachability from Starters**: 22 / 22 Discovery Elements reachable from Depth 0 Starter Elements.
+- **Progression Depth Distribution**:
+  - **Depth 0 (Starters)**: 14 Starter Elements (`income`, `expense`, `saving`, `debt`, `interest`, `inflation`, `emergency-fund`, `food`, `rent`, `budget`, `needs`, `wants`, `fomo`, `job-loss`)
+  - **Depth 1 (Base Recipes)**: 13 Recipes (`cash-flow`, `debt-pressure`, `cost-pressure`, `impulse-spending`, `essential-baseline`, `discretionary-leakage`, `digital-scam-risk`, `spending-plan`, `digital-hygiene`, `lifestyle-creep`, `savings-growth`, `debt-trap`, `emergency-liquidity`)
+  - **Depth 2 (Intermediate Recipes)**: 7 Recipes (`emergency-resilience`, `purchasing-power-loss`, `mindful-spending`, `debt-payoff-strategy`, `budget-optimizing`, `debt-overload`, `emergency-survival`)
+  - **Depth 3 (Advanced State)**: 1 Recipe (`financial-stability`)
+  - **Depth 4 (Cap Core)**: 1 Recipe (`financial-freedom-foundation`)
+
+---
+
+### 10.2 Recipe Architecture, Contract, & Invariants
+
+#### 1. Input Hash & Canonical Identity Policy
+- **Order-Independent Identity**: Crafting is commutative (`Craft(A, B) == Craft(B, A)`).
+- **Documentation Representation vs Database Storage**: The column `canonicalPairKeyForAuditOnly (NOT_DATABASE_INPUT_HASH)` in the planning matrix represents the lexicographically sorted string of input Slugs for human documentation and audit checking only. It is **NOT** the stored database `inputHash`.
+- **Shared Implementation Invariant**: The actual `inputHash` is calculated dynamically during Seed and NestJS runtime execution using a single shared helper (`calculateInputHash([id1, id2])` using lexicographically sorted UUIDs). No manual hash or UUID literal is frozen in documentation.
+
+#### 2. Database Constraints vs NestJS Business Invariants
+- **Database Schema Constraints**:
+  - `CraftRecipe.inputHash` is `@unique` (enforces no duplicate `inputHash` in DB).
+  - `CraftRecipeInput` has `@@unique([recipeId, inputOrder])` (enforces unique `inputOrder` per recipe).
+  - `CraftRecipe.outputElementId` is **NOT** `@unique` in PostgreSQL schema.
+- **Product & NestJS Policy Invariants**:
+  - **1 Recipe per Output**: Enforced strictly as a Core Recipe V1 Product Policy by NestJS validation and Seed runner (not by PostgreSQL `@unique`).
+  - **Distinct Inputs**: NestJS/Seed validates `inputOrder` set equals `{1, 2}`, `inputA !== inputB`, and input elements exist.
+
+#### 3. Deterministic Canonical Storage Order (`inputOrder`)
+- `inputOrder = 1` and `inputOrder = 2` store the input Elements in deterministic canonical (lexicographically sorted UUID) order in `craft_recipe_inputs`. It does not represent the user's drag-and-drop or selection sequence.
+
+#### 4. Progression Graph Scope
+- The progression graph analyzes Recipe prerequisites and unlocking sequence only. It does **NOT** create or imply database `ElementRelationship` rows. Database `ElementRelationship` rows remain **0**.
+
+---
+
+### 10.3 Legacy SRS Recipe Reconciliation Table
+
+| # | Legacy SRS Example | Current Catalog Target | Action | Reconciliation & Mapping Rationale |
+|---|---|---|---|---|
+| 1 | `Income` + `Expense` → `Cash Flow` | `income` + `expense` → `cash-flow` | `KEEP / MAP_TO_CURRENT_CATALOG` | Exact match with current catalog slugs (`income`, `expense`, `cash-flow`). |
+| 2 | `Debt` + `Interest` → `Debt Pressure` | `debt` + `interest` → `debt-pressure` | `KEEP / MAP_TO_CURRENT_CATALOG` | Exact match with current catalog slugs (`debt`, `interest`, `debt-pressure`). |
+| 3 | `Expense` + `Inflation` → `Cost Pressure` | `expense` + `inflation` → `cost-pressure` | `KEEP / MAP_TO_CURRENT_CATALOG` | Exact match with current catalog slugs (`expense`, `inflation`, `cost-pressure`). |
+| 4 | `Credit Card` + `Minimum Payment` | `debt` + `fomo` → `debt-trap` | `RETIRE_FROM_V1 / MAP_TO_CONCEPT` | Legacy terms `Credit Card` and `Minimum Payment` are not Base Elements in 14-Starter catalog; mapped to `debt` + `fomo` producing `debt-trap`. |
+| 5 | `Cash` + `Inflation` | `cost-pressure` + `inflation` → `purchasing-power-loss` | `MAP_TO_CURRENT_CATALOG` | Legacy `Cash` + `Inflation` concept mapped to `cost-pressure` + `inflation` producing `purchasing-power-loss`. |
+| 6 | `Inflation` + `Food` | `expense` + `inflation` → `cost-pressure` | `MAP_TO_CURRENT_CATALOG` | `Food` is an essential expense subset; mapped to general `expense` + `inflation` producing `cost-pressure`. |
+| 7 | `Emergency Fund` + `Job Loss` | `emergency-liquidity` + `job-loss` → `emergency-survival` | `MAP_TO_CURRENT_CATALOG` | `Emergency Fund` in discovery set is `emergency-liquidity` (sortOrder 25); combined with `job-loss` produces `emergency-survival`. |
+| 8 | `FOMO` + `Crypto` | `fomo` + `inflation` → `digital-scam-risk` | `RETIRE_FROM_V1 / MAP_TO_CONCEPT` | Unregulated `Crypto` not in 36-Element MVP catalog; mapped to `fomo` + `inflation` producing `digital-scam-risk`. |
+
+---
+
+### 10.4 Core Craft Recipe V1 Design Matrix (22 Recipes)
+
+| # | outputSlug | Output Name | sortOrder | inputSlugA | inputSlugB | canonicalPairKeyForAuditOnly (NOT_DATABASE_INPUT_HASH) | Prereq Depth | inputAvailabilityProof & Prerequisite Chain | Semantic Fit & Alignment with DiscoveryDetail | Safety & Pedagogical Rationale |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | `cash-flow` | Net Cash Flow | 15 | `income` | `expense` | `expense + income` | Depth 1 | Starters: `income` (Depth 0), `expense` (Depth 0) | Compares total cash inflows against living outflows over a period, directly forming net cash flow margin. | Core financial foundation; neutral cash flow accounting. |
+| 2 | `debt-pressure` | Debt Service Burden | 16 | `debt` | `interest` | `debt + interest` | Depth 1 | Starters: `debt` (Depth 0), `interest` (Depth 0) | Borrowed principal combined with interest rate obligations generates ongoing debt service strain. | Highlights debt service ratio risks; not financial advice. |
+| 3 | `cost-pressure` | Living Inflation Pressure | 17 | `expense` | `inflation` | `expense + inflation` | Depth 1 | Starters: `expense` (Depth 0), `inflation` (Depth 0) | General living expenses squeezed by market inflation rate create living cost pressure. | Educational illustration of purchasing power erosion. |
+| 4 | `impulse-spending` | Unplanned Impulse Purchase | 19 | `wants` | `fomo` | `fomo + wants` | Depth 1 | Starters: `wants` (Depth 0), `fomo` (Depth 0) | Uncontrolled discretionary wants driven by social pressure (FOMO) produce unplanned impulse purchases. | Behavioral spending awareness; non-judgmental. |
+| 5 | `essential-baseline` | Fixed Baseline Expenses | 27 | `needs` | `rent` | `needs + rent` | Depth 1 | Starters: `needs` (Depth 0), `rent` (Depth 0) | Non-negotiable essential living needs paired with fixed housing rent establish the baseline expense floor. | Teaches baseline expense tracking before discretionary spending. |
+| 6 | `discretionary-leakage` | Stealth Cash Leakage | 28 | `wants` | `food` | `food + wants` | Depth 1 | Starters: `wants` (Depth 0), `food` (Depth 0) | Discretionary food/beverage wants outside baseline nutrition accumulate into unmonitored cash leakage. | Highlights micro-expense accumulation over monthly cycles. |
+| 7 | `digital-scam-risk` | Digital Fraud Vulnerability | 29 | `fomo` | `inflation` | `fomo + inflation` | Depth 1 | Starters: `fomo` (Depth 0), `inflation` (Depth 0) | High-stress inflation pressures combined with emotional urgency (FOMO) expose individuals to digital scams. | Defensive fraud safety awareness; HIGH_RISK_TOPIC. |
+| 8 | `spending-plan` | Structured Spending Plan | 20 | `budget` | `income` | `budget + income` | Depth 1 | Starters: `budget` (Depth 0), `income` (Depth 0) | Structuring earned income using a budget planning tool creates an intentional monthly spending plan. | Encourages active cash flow allocation. |
+| 9 | `digital-hygiene` | Digital Security Shield | 35 | `budget` | `fomo` | `budget + fomo` | Depth 1 | Starters: `budget` (Depth 0), `fomo` (Depth 0) | Budgeting emotional urges and setting defensive boundaries against social pressure builds digital hygiene habits. | Teaches proactive account protection and credential security. |
+| 10 | `lifestyle-creep` | Lifestyle Inflation Creep | 24 | `income` | `wants` | `income + wants` | Depth 1 | Starters: `income` (Depth 0), `wants` (Depth 0) | Expanding discretionary wants in step with rising income leads to stealth lifestyle inflation creep. | Behavioral warning on spending expansion as income grows. |
+| 11 | `savings-growth` | Compounded Savings Growth | 21 | `saving` | `interest` | `interest + saving` | Depth 1 | Starters: `saving` (Depth 0), `interest` (Depth 0) | Basic savings earning compounding interest yields exponential savings accumulation over time. | Demonstrates compounding mechanics over multi-year horizons. |
+| 12 | `debt-trap` | Compound Interest Debt Trap | 22 | `debt` | `fomo` | `debt + fomo` | Depth 1 | Starters: `debt` (Depth 0), `fomo` (Depth 0) | Taking high-cost debt to fund impulsive social wants creates a severe compounding debt trap. | High-risk debt warning; NOT_FINANCIAL_ADVICE. |
+| 13 | `emergency-resilience` | Financial Safety Buffer | 18 | `cash-flow` | `saving` | `cash-flow + saving` | Depth 2 | `cash-flow` (Depth 1) + Starter `saving` (Depth 0) | Channeling positive net cash flow into basic savings creates a resilient liquid financial safety buffer. | Connects monthly margin to shock absorption buffer. |
+| 14 | `purchasing-power-loss` | Real Purchasing Power Erosion | 23 | `cost-pressure` | `inflation` | `cost-pressure + inflation` | Depth 2 | `cost-pressure` (Depth 1) + Starter `inflation` (Depth 0) | Compounding cost pressure under persistent inflation erodes real purchasing power over time. | Teaches difference between nominal cash and real value. |
+| 15 | `emergency-liquidity` | Immediate Liquid Cushion | 25 | `saving` | `job-loss` | `job-loss + saving` | Depth 1 | Starters: `saving` (Depth 0), `job-loss` (Depth 0) | Maintaining basic savings specifically set aside against job loss risk provides an immediate liquid cushion. | Liquid reserve accessibility in crisis scenarios. |
+| 16 | `mindful-spending` | Mindful Consumption Behavior | 33 | `impulse-spending` | `needs` | `impulse-spending + needs` | Depth 2 | `impulse-spending` (Depth 1) + Starter `needs` (Depth 0) | Filtering impulse spending urges through essential needs reflection yields mindful consumption habits. | Behavioral transformation through reflection & cooling-off. |
+| 17 | `debt-payoff-strategy` | Debt Acceleration Strategy | 26 | `debt-pressure` | `budget` | `budget + debt-pressure` | Depth 2 | `debt-pressure` (Depth 1) + Starter `budget` (Depth 0) | Applying budget planning tools to manage high debt pressure produces a structured debt payoff strategy. | Teaches systematic debt repayment allocation; NOT_FINANCIAL_ADVICE. |
+| 18 | `budget-optimizing` | Dynamic Allocation Strategy | 34 | `spending-plan` | `cost-pressure` | `cost-pressure + spending-plan` | Depth 2 | `spending-plan` (Depth 1) + `cost-pressure` (Depth 1) | Adjusting a spending plan dynamically in response to living cost pressure optimizes budget allocations. | Flexible spending reallocation under changing costs. |
+| 19 | `debt-overload` | Severe Debt Overload | 31 | `debt-trap` | `debt-pressure` | `debt-pressure + debt-trap` | Depth 2 | `debt-trap` (Depth 1) + `debt-pressure` (Depth 1) | Combining a compound debt trap with compounding debt pressure results in critical debt overload. | Severe insolvency warning; urges early creditor negotiation. |
+| 20 | `emergency-survival` | Shock Survival Capability | 32 | `emergency-liquidity` | `job-loss` | `emergency-liquidity + job-loss` | Depth 2 | `emergency-liquidity` (Depth 1) + Starter `job-loss` (Depth 0) | Evaluating an emergency liquid cushion against job loss disruption determines exact shock survival duration. | Quantifies survival runway in concrete months. |
+| 21 | `financial-stability` | Financial Resilience State | 30 | `emergency-resilience` | `essential-baseline` | `emergency-resilience + essential-baseline` | Depth 3 | `emergency-resilience` (Depth 2) + `essential-baseline` (Depth 1) | Combining an emergency safety buffer with a solid essential baseline creates a stable household financial state. | Ongoing operating stability; balance of buffer and baseline. |
+| 22 | `financial-freedom-foundation` | Financial Independence Core | 36 | `financial-stability` | `savings-growth` | `financial-stability + savings-growth` | Depth 4 | `financial-stability` (Depth 3) + `savings-growth` (Depth 1) | Building compounding savings growth on top of a financial stability state creates a financial independence foundation. | Long-term autonomy core; multi-year accumulation horizon. |
+
+---
+
+### 10.5 Progression Depth & Reachability Verification Matrix
+
+| Depth | Element Slug | Element Name | Category Name | Input Element A | Input Element B | Unlock Status |
+|---|---|---|---|---|---|---|
+| **Depth 0** | `income` | Earned Income | Money Flow | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `expense` | General Expense | Cost of Living | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `saving` | Basic Savings | Saving & Financial Safety | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `debt` | Borrowed Debt | Debt & Credit | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `interest` | Interest Rate | Debt & Credit | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `inflation` | Market Inflation | Cost of Living | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `emergency-fund` | Emergency Fund | Saving & Financial Safety | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `food` | Food & Groceries | Cost of Living | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `rent` | Shelter Rent | Cost of Living | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `budget` | Budget Plan | Planning Tools | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `needs` | Essential Needs | Cost of Living | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `wants` | Discretionary Wants | Financial Behavior | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `fomo` | Social Pressure / FOMO | Financial Behavior | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 0** | `job-loss` | Unexpected Job Loss | Life Events & Risk | (Starter Element) | (Starter Element) | ✅ Base Starter |
+| **Depth 1** | `cash-flow` | Net Cash Flow | Money Flow | `income` (D0) | `expense` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 1** | `debt-pressure` | Debt Service Burden | Debt & Credit | `debt` (D0) | `interest` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 1** | `cost-pressure` | Living Inflation Pressure | Cost of Living | `expense` (D0) | `inflation` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 1** | `impulse-spending` | Unplanned Impulse Purchase | Financial Behavior | `wants` (D0) | `fomo` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 1** | `essential-baseline` | Fixed Baseline Expenses | Cost of Living | `needs` (D0) | `rent` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 1** | `discretionary-leakage` | Stealth Cash Leakage | Financial Behavior | `wants` (D0) | `food` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 1** | `digital-scam-risk` | Digital Fraud Vulnerability | Digital Financial Safety | `fomo` (D0) | `inflation` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 1** | `spending-plan` | Structured Spending Plan | Planning Tools | `budget` (D0) | `income` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 1** | `digital-hygiene` | Digital Security Shield | Digital Financial Safety | `budget` (D0) | `fomo` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 1** | `lifestyle-creep` | Lifestyle Inflation Creep | Financial Behavior | `income` (D0) | `wants` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 1** | `savings-growth` | Compounded Savings Growth | Saving & Financial Safety | `saving` (D0) | `interest` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 1** | `debt-trap` | Compound Interest Debt Trap | Debt & Credit | `debt` (D0) | `fomo` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 1** | `emergency-liquidity` | Immediate Liquid Cushion | Saving & Financial Safety | `saving` (D0) | `job-loss` (D0) | ✅ Reachable (Depth 1) |
+| **Depth 2** | `emergency-resilience` | Financial Safety Buffer | Life Events & Risk | `cash-flow` (D1) | `saving` (D0) | ✅ Reachable (Depth 2) |
+| **Depth 2** | `purchasing-power-loss` | Real Purchasing Power Erosion | Cost of Living | `cost-pressure` (D1) | `inflation` (D0) | ✅ Reachable (Depth 2) |
+| **Depth 2** | `mindful-spending` | Mindful Consumption Behavior | Financial Behavior | `impulse-spending` (D1) | `needs` (D0) | ✅ Reachable (Depth 2) |
+| **Depth 2** | `debt-payoff-strategy` | Debt Acceleration Strategy | Planning Tools | `debt-pressure` (D1) | `budget` (D0) | ✅ Reachable (Depth 2) |
+| **Depth 2** | `budget-optimizing` | Dynamic Allocation Strategy | Planning Tools | `spending-plan` (D1) | `cost-pressure` (D1) | ✅ Reachable (Depth 2) |
+| **Depth 2** | `debt-overload` | Severe Debt Overload | Debt & Credit | `debt-trap` (D1) | `debt-pressure` (D1) | ✅ Reachable (Depth 2) |
+| **Depth 2** | `emergency-survival` | Shock Survival Capability | Life Events & Risk | `emergency-liquidity` (D1) | `job-loss` (D0) | ✅ Reachable (Depth 2) |
+| **Depth 3** | `financial-stability` | Financial Resilience State | Saving & Financial Safety | `emergency-resilience` (D2) | `essential-baseline` (D1) | ✅ Reachable (Depth 3) |
+| **Depth 4** | `financial-freedom-foundation` | Financial Independence Core | Planning Tools | `financial-stability` (D3) | `savings-growth` (D1) | ✅ Reachable (Depth 4) |
+
+---
+al Runway | STRONG |
 | 22 | `budget-optimizing` | `financial-freedom-foundation` | ACCELERATES | Efficiency Multiplier | WEAK |
 | 23 | `debt-trap` | `debt-overload` | ESCALATES | Insolvency Escalation | STRONG |
 | 24 | `emergency-resilience` | `job-loss` | BUFFERS | Shock Mitigation | STRONG |

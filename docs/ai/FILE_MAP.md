@@ -18,15 +18,15 @@ fincraft-lab/
 │   ├── CODING_RULES.md        # Comprehensive coding rules
 │   ├── STEPWISE_WORKFLOW.md   # Stepwise development rules
 │   └── plans/                 # Architectural plans
-│       ├── CORE_CONTENT_SEED_PLAN.md # Seed plan (v1 categories, starter/discovery elements, frozen starter element details v2, frozen discovery element details batch a v1)
+│       ├── CORE_CONTENT_SEED_PLAN.md # Seed plan (v1 categories, starter/discovery elements, frozen starter element details v2, frozen discovery details batch a v1, frozen discovery details batch b v1, frozen core craft recipes v1)
 │       └── AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md # Auth refactor plan
 ├── fincraft-lab-api/          # NestJS backend root
 │   ├── prisma/
 │   │   ├── schema.prisma      # Prisma 7.8 schema (PostgreSQL)
-│   │   ├── seed.ts            # Seed main runner script (in-memory validation -> seed categories -> seed elements -> seed starter details -> seed batch a details -> verifications)
+│   │   ├── seed.ts            # Seed main runner script (in-memory validation -> seed categories -> seed elements -> seed starter details -> seed batch a details -> seed batch b details -> verifications)
 │   │   └── seed/
 │   │       ├── seed-client.ts # Standalone PrismaClient factory for seeding
-│   │       ├── seed-manifest.ts # Seed manifest constants & counts (25 planned details total)
+│   │       ├── seed-manifest.ts # Seed manifest constants & counts (36 planned details total)
 │   │       ├── validate-seed.ts # In-memory pre-write validation for categories, elements, starter details, batch a details & batch b details
 │   │       ├── verify-seed.ts # Post-seed database verifications & protected table count check
 │   │       ├── content/
@@ -56,7 +56,7 @@ fincraft-lab/
 ## Key file responsibilities
 
 - `AGENTS.md` — Single canonical source of truth for all AI tools.
-- `docs/ai/plans/CORE_CONTENT_SEED_PLAN.md` — Contains 8 categories, 14 starter elements, 22 discovery elements, 14 frozen Starter Element DiscoveryDetails (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`), 11 frozen Discovery Element DiscoveryDetails Batch A (`FROZEN_DISCOVERY_DETAILS_BATCH_A_SOURCE_VERIFIED_V1`), and 11 frozen Discovery Element DiscoveryDetails Batch B (`FROZEN_DISCOVERY_DETAILS_BATCH_B_SOURCE_VERIFIED_V1`).
+- `docs/ai/plans/CORE_CONTENT_SEED_PLAN.md` — Contains 8 categories, 14 starter elements, 22 discovery elements, 14 frozen Starter Element DiscoveryDetails (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`), 11 frozen Discovery Element DiscoveryDetails Batch A (`FROZEN_DISCOVERY_DETAILS_BATCH_A_SOURCE_VERIFIED_V1`), 11 frozen Discovery Element DiscoveryDetails Batch B (`FROZEN_DISCOVERY_DETAILS_BATCH_B_SOURCE_VERIFIED_V1`), and 22 frozen Core Craft Recipes V1 (`FROZEN_CORE_CRAFT_RECIPES_VALIDATED_V1`).
 - `fincraft-lab-api/prisma/seed/content/starter-element-details.ts` — 14 `StarterElementDetailSeedInput` records copied 1:1 from `FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`.
 - `fincraft-lab-api/prisma/seed/content/discovery-element-details-batch-a.ts` — 11 `DiscoveryElementDetailSeedInput` records copied 1:1 from `FROZEN_DISCOVERY_DETAILS_BATCH_A_SOURCE_VERIFIED_V1`.
 - `fincraft-lab-api/prisma/seed/content/discovery-element-details-batch-b.ts` — 11 `DiscoveryElementDetailSeedInput` records copied 1:1 from `FROZEN_DISCOVERY_DETAILS_BATCH_B_SOURCE_VERIFIED_V1`.
