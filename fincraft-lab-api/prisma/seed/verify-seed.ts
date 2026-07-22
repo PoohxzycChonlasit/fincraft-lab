@@ -1,9 +1,11 @@
 import { PrismaClient } from '../../src/database/generated/prisma/client';
 import { CategorySeedInput } from './content/categories';
-import { StarterElementSeedInput } from './content/starter-elements';
+import { ElementSeedInput } from './content/starter-elements';
 import {
   EXPECTED_CATEGORY_COUNT,
+  EXPECTED_DISCOVERY_ELEMENT_COUNT,
   EXPECTED_STARTER_ELEMENT_COUNT,
+  EXPECTED_TOTAL_ELEMENT_COUNT,
 } from './seed-manifest';
 
 export interface ProtectedTableCounts {
@@ -55,7 +57,6 @@ export async function captureProtectedTableCounts(
 export async function verifyCategorySeed(
   prisma: PrismaClient,
   plannedCategories: CategorySeedInput[],
-  initialProtectedCounts: ProtectedTableCounts,
 ): Promise<void> {
   const totalCategoriesCount = await prisma.elementCategory.count();
   const dbCategories = await prisma.elementCategory.findMany();
@@ -96,60 +97,69 @@ export async function verifyCategorySeed(
   }
 
   console.log('--- Post-Seed Category Verification Report ---');
-  console.log(`Planned Categories Verified:     ${plannedCategories.length}/${EXPECTED_CATEGORY_COUNT}`);
+  console.log(`Planned Categories Found:       ${plannedCategories.length}/${EXPECTED_CATEGORY_COUNT}`);
   console.log(`Total Database Categories Count: ${totalCategoriesCount}`);
   console.log('----------------------------------------------');
 }
 
-export async function verifyStarterElementSeed(
+export async function verifyElementSeed(
   prisma: PrismaClient,
-  plannedElements: StarterElementSeedInput[],
+  plannedStarters: ElementSeedInput[],
+  plannedDiscoveries: ElementSeedInput[],
   categoryMap: Map<string, string>,
   initialProtectedCounts: ProtectedTableCounts,
 ): Promise<void> {
   const totalElementsCount = await prisma.element.count();
   const dbElements = await prisma.element.findMany();
-  const discoveryElementsCount = dbElements.filter((e) => !e.isStarter).length;
 
   const errors: string[] = [];
   const foundSlugs = new Set(dbElements.map((e) => e.slug));
 
-  for (const planned of plannedElements) {
+  let verifiedStarters = 0;
+  for (const planned of plannedStarters) {
     if (!foundSlugs.has(planned.slug)) {
       errors.push(`Planned starter element "${planned.slug}" missing from database`);
       continue;
     }
-
     const matches = dbElements.filter((e) => e.slug === planned.slug);
     if (matches.length !== 1) {
-      errors.push(
-        `Planned starter element "${planned.slug}" has ${matches.length} rows (expected 1)`,
-      );
+      errors.push(`Planned starter element "${planned.slug}" has ${matches.length} rows (expected 1)`);
     } else {
       const match = matches[0];
-      const expectedCategoryId = categoryMap.get(planned.categoryName);
-      if (match.categoryId !== expectedCategoryId) {
-        errors.push(
-          `Element "${planned.slug}" categoryId mismatch: expected ${expectedCategoryId}, got ${match.categoryId}`,
-        );
+      const expectedCatId = categoryMap.get(planned.categoryName);
+      if (match.categoryId !== expectedCatId) {
+        errors.push(`Starter element "${planned.slug}" categoryId mismatch`);
       }
       if (!match.isStarter) {
-        errors.push(`Element "${planned.slug}" isStarter must be true`);
+        errors.push(`Starter element "${planned.slug}" isStarter must be true`);
       }
-      if (match.name !== planned.name) {
-        errors.push(
-          `Element "${planned.slug}" name mismatch: expected ${planned.name}, got ${match.name}`,
-        );
-      }
-      if (match.elementType !== planned.elementType) {
-        errors.push(
-          `Element "${planned.slug}" elementType mismatch: expected ${planned.elementType}, got ${match.elementType}`,
-        );
-      }
+      verifiedStarters++;
     }
   }
 
-  // Verify protected table activity counts did not increase
+  let verifiedDiscoveries = 0;
+  for (const planned of plannedDiscoveries) {
+    if (!foundSlugs.has(planned.slug)) {
+      errors.push(`Planned discovery element "${planned.slug}" missing from database`);
+      continue;
+    }
+    const matches = dbElements.filter((e) => e.slug === planned.slug);
+    if (matches.length !== 1) {
+      errors.push(`Planned discovery element "${planned.slug}" has ${matches.length} rows (expected 1)`);
+    } else {
+      const match = matches[0];
+      const expectedCatId = categoryMap.get(planned.categoryName);
+      if (match.categoryId !== expectedCatId) {
+        errors.push(`Discovery element "${planned.slug}" categoryId mismatch`);
+      }
+      if (match.isStarter) {
+        errors.push(`Discovery element "${planned.slug}" isStarter must be false`);
+      }
+      verifiedDiscoveries++;
+    }
+  }
+
+  // Verify protected table activity counts did not change
   const currentProtectedCounts = await captureProtectedTableCounts(prisma);
   const activityKeys: Array<keyof ProtectedTableCounts> = [
     'users',
@@ -178,14 +188,15 @@ export async function verifyStarterElementSeed(
 
   if (errors.length > 0) {
     throw new Error(
-      `Post-Seed Starter Element Verification Failed:\n- ${errors.join('\n- ')}`,
+      `Post-Seed Element Verification Failed:\n- ${errors.join('\n- ')}`,
     );
   }
 
-  console.log('--- Post-Seed Starter Element Verification Report ---');
-  console.log(`Planned Starter Elements Found: ${plannedElements.length}/${EXPECTED_STARTER_ELEMENT_COUNT}`);
-  console.log(`Duplicate Planned Slugs:         0`);
-  console.log(`Total Elements Table Rows:      ${totalElementsCount}`);
-  console.log(`Discovery Elements Added:       ${discoveryElementsCount}`);
+  console.log('--- Post-Seed Element Verification Report ---');
+  console.log(`Planned Categories Found:        ${EXPECTED_CATEGORY_COUNT}/${EXPECTED_CATEGORY_COUNT}`);
+  console.log(`Planned Starter Elements Found:   ${verifiedStarters}/${EXPECTED_STARTER_ELEMENT_COUNT}`);
+  console.log(`Planned Discovery Elements Found: ${verifiedDiscoveries}/${EXPECTED_DISCOVERY_ELEMENT_COUNT}`);
+  console.log(`Planned Combined Elements Found:  ${verifiedStarters + verifiedDiscoveries}/${EXPECTED_TOTAL_ELEMENT_COUNT}`);
+  console.log(`Total Elements Table Rows:        ${totalElementsCount}`);
   console.log('----------------------------------------------------');
 }

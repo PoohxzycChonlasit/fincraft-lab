@@ -3,7 +3,7 @@ import {
   ElementType,
 } from '../../../src/database/generated/prisma/client';
 
-export interface StarterElementSeedInput {
+export interface ElementSeedInput {
   slug: string;
   name: string;
   categoryName: string;
@@ -11,9 +11,10 @@ export interface StarterElementSeedInput {
   emoji: string;
   isStarter: boolean;
   status: ContentStatus;
+  sortOrder: number;
 }
 
-export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
+export const STARTER_ELEMENT_SEED_DATA: ElementSeedInput[] = [
   {
     slug: 'income',
     name: 'Earned Income',
@@ -22,6 +23,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '💵',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 1,
   },
   {
     slug: 'expense',
@@ -31,6 +33,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '💳',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 2,
   },
   {
     slug: 'saving',
@@ -40,6 +43,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '🏦',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 3,
   },
   {
     slug: 'debt',
@@ -49,6 +53,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '📝',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 4,
   },
   {
     slug: 'interest',
@@ -58,6 +63,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '📈',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 5,
   },
   {
     slug: 'inflation',
@@ -67,6 +73,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '🎈',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 6,
   },
   {
     slug: 'emergency-fund',
@@ -76,6 +83,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '🛡️',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 7,
   },
   {
     slug: 'food',
@@ -85,6 +93,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '🍲',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 8,
   },
   {
     slug: 'rent',
@@ -94,6 +103,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '🏠',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 9,
   },
   {
     slug: 'budget',
@@ -103,6 +113,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '📊',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 10,
   },
   {
     slug: 'needs',
@@ -112,6 +123,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '🧱',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 11,
   },
   {
     slug: 'wants',
@@ -121,6 +133,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '🎁',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 12,
   },
   {
     slug: 'fomo',
@@ -130,6 +143,7 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '📱',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 13,
   },
   {
     slug: 'job-loss',
@@ -139,5 +153,6 @@ export const STARTER_ELEMENT_SEED_DATA: StarterElementSeedInput[] = [
     emoji: '⚡',
     isStarter: true,
     status: ContentStatus.ACTIVE,
+    sortOrder: 14,
   },
 ];

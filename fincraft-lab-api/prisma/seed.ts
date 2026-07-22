@@ -1,25 +1,30 @@
 import { CATEGORY_SEED_DATA } from './seed/content/categories';
+import { DISCOVERY_ELEMENT_SEED_DATA } from './seed/content/discovery-elements';
 import { STARTER_ELEMENT_SEED_DATA } from './seed/content/starter-elements';
 import { createSeedPrismaClient } from './seed/seed-client';
 import { seedCategoriesStep } from './seed/steps/seed-categories';
-import { seedStarterElementsStep } from './seed/steps/seed-elements';
+import { seedElementsStep } from './seed/steps/seed-elements';
 import {
+  validateAllElementContent,
   validateCategoryContent,
-  validateStarterElementContent,
 } from './seed/validate-seed';
 import {
   captureProtectedTableCounts,
   verifyCategorySeed,
-  verifyStarterElementSeed,
+  verifyElementSeed,
 } from './seed/verify-seed';
 
 async function main(): Promise<void> {
-  console.log('--- FinCraft Lab Seed v1 (Starter Elements Slice) ---');
+  console.log('--- FinCraft Lab Seed v1 (Complete Elements Slice) ---');
 
   // 1. In-memory pre-write validation before DB connection
-  console.log('1. Validating Category and Starter Element seed content in memory...');
+  console.log('1. Validating Category and 36 Element seed content in memory...');
   validateCategoryContent(CATEGORY_SEED_DATA);
-  validateStarterElementContent(STARTER_ELEMENT_SEED_DATA, CATEGORY_SEED_DATA);
+  validateAllElementContent(
+    STARTER_ELEMENT_SEED_DATA,
+    DISCOVERY_ELEMENT_SEED_DATA,
+    CATEGORY_SEED_DATA,
+  );
   console.log('   Pre-write content validation passed.');
 
   // 2. Connect standalone Prisma Client
@@ -37,7 +42,7 @@ async function main(): Promise<void> {
     });
     console.log('   Category upserts complete.');
 
-    // 5. Query and resolve Category IDs from database
+    // 5. Query and resolve Category IDs from database using Map<string, string>
     console.log('4. Querying and resolving Category IDs from database...');
     const dbCategories = await prisma.elementCategory.findMany();
     const categoryMap = new Map<string, string>();
@@ -45,9 +50,13 @@ async function main(): Promise<void> {
       categoryMap.set(cat.name, cat.id);
     }
 
-    // Mode B check: verify all required planned categories exist in DB lookup
+    // Mode B check: verify all required planned categories exist in DB Map
+    const allElements = [
+      ...STARTER_ELEMENT_SEED_DATA,
+      ...DISCOVERY_ELEMENT_SEED_DATA,
+    ];
     const missingCategoryNames: string[] = [];
-    for (const elem of STARTER_ELEMENT_SEED_DATA) {
+    for (const elem of allElements) {
       if (!categoryMap.has(elem.categoryName)) {
         missingCategoryNames.push(elem.categoryName);
       }
@@ -55,26 +64,27 @@ async function main(): Promise<void> {
 
     if (missingCategoryNames.length > 0) {
       throw new Error(
-        `Database missing required Categories for Starter Elements: ${Array.from(
+        `Database missing required Categories for Elements: ${Array.from(
           new Set(missingCategoryNames),
         ).join(', ')}`,
       );
     }
     console.log('   Category resolution complete.');
 
-    // 6. Run Starter Element upserts in transaction
-    console.log('5. Upserting 14 Starter Elements...');
+    // 6. Run all 36 Element upserts in transaction
+    console.log('5. Upserting 36 Elements (14 Starter + 22 Discovery)...');
     await prisma.$transaction(async (tx) => {
-      await seedStarterElementsStep(tx, STARTER_ELEMENT_SEED_DATA, categoryMap);
+      await seedElementsStep(tx, allElements, categoryMap);
     });
-    console.log('   Starter Element upserts complete.');
+    console.log('   Element upserts complete.');
 
     // 7. Run post-seed verification
     console.log('6. Verifying database state...');
-    await verifyCategorySeed(prisma, CATEGORY_SEED_DATA, initialCounts);
-    await verifyStarterElementSeed(
+    await verifyCategorySeed(prisma, CATEGORY_SEED_DATA);
+    await verifyElementSeed(
       prisma,
       STARTER_ELEMENT_SEED_DATA,
+      DISCOVERY_ELEMENT_SEED_DATA,
       categoryMap,
       initialCounts,
     );

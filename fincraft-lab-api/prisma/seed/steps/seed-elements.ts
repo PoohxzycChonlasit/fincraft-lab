@@ -1,9 +1,9 @@
 import { Element, Prisma } from '../../../src/database/generated/prisma/client';
-import { StarterElementSeedInput } from '../content/starter-elements';
+import { ElementSeedInput } from '../content/starter-elements';
 
-export async function seedStarterElementsStep(
+export async function seedElementsStep(
   tx: Prisma.TransactionClient,
-  elements: StarterElementSeedInput[],
+  elements: ElementSeedInput[],
   categoryMap: Map<string, string>,
 ): Promise<Element[]> {
   const seededElements: Element[] = [];
@@ -12,7 +12,7 @@ export async function seedStarterElementsStep(
     const categoryId = categoryMap.get(item.categoryName);
     if (!categoryId) {
       throw new Error(
-        `Database Category missing for Starter Element "${item.name}" (Category: "${item.categoryName}")`,
+        `Database Category missing for Element "${item.name}" (Category: "${item.categoryName}")`,
       );
     }
 

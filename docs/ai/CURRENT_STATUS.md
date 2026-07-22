@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P5_SEED_3_IMPLEMENT_STARTER_ELEMENTS)
+## Verified status (updated during P5_SEED_4_IMPLEMENT_DISCOVERY_ELEMENTS)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -33,15 +33,18 @@ git status --short
 - **P4_AUTH_6 checkpoint**: `709594a` — "docs: plan Fakebuck-aligned auth refactor"
 - **P4_AUTH_7 checkpoint**: `fe30daa` — "refactor: extract user persistence from auth"
 - **P4_AUTH_8 checkpoint**: `b611466` — "refactor: align auth code with Fakebuck style"
-- **P5_SEED_3 checkpoint**: "feat: seed starter financial elements" (see git log)
+- **P5_SEED_3 checkpoint**: `7b08d86` — "feat: seed starter financial elements"
+- **P5_SEED_4 checkpoint**: "feat: seed discovery financial elements" (see git log)
 
-### Backend (`fincraft-lab-api`) — Submission Seed v1 (Starter Elements Slice Complete)
+### Backend (`fincraft-lab-api`) — Submission Seed v1 (All 36 Elements Complete)
 
-- **Seeded Starter Elements**: Exactly 14 Starter Elements implemented (`income`, `expense`, `saving`, `debt`, `interest`, `inflation`, `emergency-fund`, `food`, `rent`, `budget`, `needs`, `wants`, `fomo`, `job-loss`).
+- **Seeded Discovery Elements**: Exactly 22 Discovery Elements implemented (`cash-flow` to `financial-freedom-foundation`), all with `isStarter: false`.
+- **Seeded Starter Elements**: Exactly 14 Starter Elements preserved, all with `isStarter: true`.
+- **Total Elements Count**: Exactly 36 Elements in database.
 - **Seeded Categories**: Exactly 8 Element Categories preserved.
-- **Category Resolution**: Dynamically resolved via Category Name lookup Map from PostgreSQL; missing category names fail before Element writes.
-- **Idempotent Upsert**: Slugs used as `@unique` stable keys. Seed rerun verified idempotent with 14/14 stable IDs, 0 duplicate Slugs, 0 protected table activity delta.
-- **Failure Safety**: In-memory pre-write validation verified rejecting duplicate Slugs and Mode A unknown category references before DB connection.
+- **Category Resolution**: Dynamically resolved via Category Name lookup `Map<string, string>` from PostgreSQL.
+- **Idempotent Upsert**: Slugs used as `@unique` stable keys. Seed rerun verified idempotent with 36/36 stable IDs, 0 duplicate Slugs, 0 protected table activity delta.
+- **Failure Safety**: In-memory pre-write validation verified rejecting Starter/Discovery Slug collision, duplicate Discovery Slug, `isStarter: true` on Discovery Element, and Mode A unknown category references before DB connection.
 - **Protected Tables Verified**: Count deltas (`currentCount - initialCount === 0`) verified for 8 protected tables (`users`, `pets`, `userElements`, `discoveryEvents`, `workspaces`, `workspaceNodes`, `workspaceEdges`, `simulationRuns`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
 
@@ -66,7 +69,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P5_SEED_4_IMPLEMENT_DISCOVERY_ELEMENTS_AND_DETAILS_001 — Implement 22 Discovery Elements and 36 Discovery Details seed content.
+P5_SEED_5_IMPLEMENT_DISCOVERY_DETAILS_001 — Implement 36 Discovery Details seed content (1:1 with 36 Elements).
 ```
 
 ## Related documents
