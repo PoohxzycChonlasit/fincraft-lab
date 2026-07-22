@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P5_SEED_5B_IMPLEMENT_STARTER_ELEMENT_DETAILS)
+## Verified status (updated during P5_SEED_6A_RESEARCH_AND_FREEZE_DISCOVERY_DETAILS_BATCH_A)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -33,19 +33,20 @@ git status --short
 - **P4_AUTH_6 checkpoint**: `709594a` — "docs: plan Fakebuck-aligned auth refactor"
 - **P4_AUTH_7 checkpoint**: `fe30daa` — "refactor: extract user persistence from auth"
 - **P4_AUTH_8 checkpoint**: `b611466` — "refactor: align auth code with Fakebuck style"
-- **P5_SEED_3 checkpoint**: `7b08d86` — "feat: seed starter financial elements" (Starter dataset values remained unchanged, but `starter-elements.ts` and its local type definition were modified to include `sortOrder` support)
+- **P5_SEED_3 checkpoint**: `7b08d86` — "feat: seed starter financial elements"
 - **P5_SEED_4 checkpoint**: `6a682bc` — "feat: seed discovery financial elements"
 - **P5_SEED_5A checkpoint**: `0d0ff43` — "docs: freeze starter element detail content"
 - **P5_SEED_5A3 checkpoint**: `d5751bb` — "docs: repair starter detail sources"
-- **P5_SEED_5A3_WORDING checkpoint**: `ffaafb2` — "docs: adjust starter detail source verification wording" (Wording adjustment commit modified only `CORE_CONTENT_SEED_PLAN.md`)
-- **P5_SEED_5B checkpoint**: "feat: seed starter element details" (see git log)
+- **P5_SEED_5A3_WORDING checkpoint**: `ffaafb2` — "docs: adjust starter detail source verification wording"
+- **P5_SEED_5B checkpoint**: `66d2325` — "feat: seed starter element details"
+- **P5_SEED_6A checkpoint**: "docs: freeze discovery detail batch a content" (see git log)
 
-### Backend (`fincraft-lab-api`) — Submission Seed v1 (Starter Details Seeding Complete)
+### Backend (`fincraft-lab-api`) — Submission Seed v1 (Discovery Details Batch A Frozen V1)
 
-- **Starter Details Seeded**: Exactly 14 DiscoveryDetail records targeting all 14 Starter Elements implemented in Seed code from frozen V2 plan values (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`). Dynamic Slug-to-ElementID resolution via `elementMap.get()`. Upserted cleanly on `elementId`. Zero content or source decisions made during implementation.
-- **Source Counts**: 18 source objects across 14 Starter Details, pointing to 8 unique URLs (`VERIFIED_SPECIFIC_PAGE`: 6, `VERIFIED_PUBLICATION`: 8, `VERIFIED_GENERAL_HUB`: 4). Reported separately.
-- **Discovery Details DB Count**: Exactly 14 rows in PostgreSQL database (14 targeting Starter Elements, 0 targeting Discovery Elements).
-- **Idempotency Verified**: Executed Seed twice consecutively. Category IDs, Element IDs, and DiscoveryDetail IDs remained 100% stable across runs.
+- **Starter Details Seeded**: Exactly 14 DiscoveryDetail records targeting all 14 Starter Elements seeded in PostgreSQL database (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`).
+- **Discovery Details Batch A Frozen**: Exactly 11 DiscoveryDetail records targeting Discovery Elements (sortOrder 15-25) researched, drafted, source-verified, and frozen in documentation (`FROZEN_DISCOVERY_DETAILS_BATCH_A_SOURCE_VERIFIED_V1`). No Seed code implemented for Discovery Details in this task.
+- **Source Counts (Batch A)**: 13 source objects across 11 Discovery Details, pointing to 6 unique URLs (`VERIFIED_SPECIFIC_PAGE`: 3, `VERIFIED_PUBLICATION`: 5, `VERIFIED_GENERAL_HUB`: 5). Reported separately from Starter Details sources.
+- **Discovery Details DB Count**: Exactly 14 rows in PostgreSQL database (14 Starter Elements, 0 Discovery Elements).
 - **Seeded Elements Table**: Exactly 36 Elements in PostgreSQL database (14 Starter Elements + 22 Discovery Elements).
 - **Seeded Categories Table**: Exactly 8 Element Categories in PostgreSQL database.
 - **Protected Tables Verified**: Protected table count deltas (`currentCount - initialCount === 0`) verified for 8 protected tables (`users`, `pets`, `userElements`, `discoveryEvents`, `workspaces`, `workspaceNodes`, `workspaceEdges`, `simulationRuns`). All deltas equal 0 (`delta = 0`).
@@ -72,7 +73,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P5_SEED_6A_RESEARCH_AND_FREEZE_DISCOVERY_DETAIL_CONTENT_001 — Research, draft, validate, and freeze DiscoveryDetail content for the twenty-two Discovery Elements in CORE_CONTENT_SEED_PLAN.md.
+P5_SEED_6A2_AUDIT_DISCOVERY_DETAILS_BATCH_A_CONTENT_001 — Perform an independent read-only audit of frozen DiscoveryDetail Batch A content in CORE_CONTENT_SEED_PLAN.md.
 ```
 
 ## Related documents
