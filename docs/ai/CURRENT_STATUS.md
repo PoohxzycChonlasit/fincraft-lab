@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P4_AUTH_1)
+## Verified status (updated during P4_AUTH_2_TYPESCRIPT_CONFIG_FIX)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -22,17 +22,17 @@ git status --short
 - **P3B.1 checkpoint**: `809e4b5` — "chore: add initial FinCraft MVP migration"
 - **P3B.2 checkpoint**: `a49dff9` — "docs: record initial MVP migration application"
 - **P4A checkpoint**: `6193f03` — "docs: plan ElementCategory CRUD"
-- **P4_AUTH_1 checkpoint**: "feat: add user registration endpoint" (see git log)
+- **P4_AUTH_1 checkpoint**: `bf46ed2` — "feat: add user registration endpoint"
+- **P4_AUTH_2 checkpoint**: "feat: add user login endpoint" (amended with numeric JWT expiration & type-safe startup validation)
 
 ### Backend (`fincraft-lab-api`)
 
-- **POST /auth/register implemented and verified**: `AuthModule`, `AuthController`, `AuthService`, and `RegisterDto` created without `.spec.ts` files (`--no-spec`).
-- **Input Validation & Normalization**: `email` is trimmed and lowercased; `displayName` is trimmed (min 1, max 100); `password` min 8, max 72 (untrimmed). Global `ValidationPipe` configured with `transform: true`, `whitelist: true`, `forbidNonWhitelisted: true`. Invalid inputs and unknown properties (e.g., `role: "SUPER_ADMIN"`) yield `400 Bad Request`.
-- **Password Hashing**: Passwords hashed asynchronously using `bcrypt` with `BCRYPT_SALT_ROUNDS = 12`. Plaintext passwords and hashes are never logged or exposed.
-- **Duplicate Handling**: Race-safe duplicate email check catches Prisma `P2002` unique constraint error and returns `409 Conflict`.
-- **Safe Response Envelope**: Returns `201 Created` with payload `{ "data": { id, email, displayName, avatarUrl: null, role: "USER", status: "ACTIVE", createdAt, updatedAt } }`. Does not return `password`, `passwordHash`, or `token`.
-- **No JWT Issued**: JWT generation, AuthGuard, and Login remain out of scope for this step.
-- **Database Security & Cleanup Verified**: Test user was created, verified for bcrypt matching and normalized email storage, and cleaned up cleanly by exact UUID. Total `users` table row count restored to 0.
+- **POST /auth/login implemented and verified**: `LoginDto`, `AuthModule`, `AuthController`, and `AuthService` updated with `@nestjs/jwt`.
+- **Numeric JWT Expiration & Startup Validation**: Expiration configured via numeric `JWT_ACCESS_EXPIRES_IN_SECONDS` (default `900`). In `AuthModule`, `expiresInSeconds` is validated as a positive safe integer using `Number.isSafeInteger()`. Rejects invalid configuration at startup with clear exception (`'JWT_ACCESS_EXPIRES_IN_SECONDS must be a positive integer'`). No unsafe casts (`as any`, `as unknown`, `@ts-ignore`) are used anywhere in the codebase.
+- **Credential Verification & Generic Response**: `email` is normalized (trim, lowercase); `password` is compared asynchronously using `bcrypt.compare`. Both wrong password and nonexistent email return identical generic `401 Unauthorized` (`'Invalid email or password'`). Non-ACTIVE users yield `401 Unauthorized` (`'Account is not active'`).
+- **JWT Access Token Issuance**: Signed asynchronously using `@nestjs/jwt` (`JwtModule.registerAsync`) and `ConfigService` (`JWT_ACCESS_SECRET`, `JWT_ACCESS_EXPIRES_IN_SECONDS`). Token payload contains exactly `{ sub: user.id, email: user.email, role: user.role }`. Does not contain `passwordHash`, `status`, or private data. Verified token lifetime `exp - iat = 900` seconds.
+- **Safe Response Envelope**: Returns `200 OK` with payload `{ "data": { "user": { id, email, displayName, avatarUrl: null, role: "USER", status: "ACTIVE", createdAt, updatedAt }, "accessToken": "..." } }`. Does not contain `password` or `passwordHash`.
+- **Database Security & Cleanup Verified**: Test user created via `POST /auth/register`, verified via `POST /auth/login` and JWT claim verification, and deleted by exact UUID. Total `users` table row count restored to 0.
 - **`GET /health` verified**: Returns `200 OK` with JSON payload `{ status: "ok", service: "fincraft-lab-api", timestamp }`.
 
 ### Frontend (`fincraft-lab-web`)
@@ -45,7 +45,8 @@ git status --short
 - `pnpm lint` — 0 errors, 1 pre-existing warning in `main.ts` (`@typescript-eslint/no-floating-promises`)
 - `pnpm test` — 3/3 unit tests passed (HealthController status, service name, ISO timestamp)
 - `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` -> 200, `GET /` -> 404) via Node VM modules
-- Live runtime NestJS boot — passed (`GET /health` -> 200, `POST /auth/register` -> 201/409/400 verified)
+- Search for unsafe casts (`as any`, `as unknown`, `@ts-ignore`) in `src/auth/` — 0 matches
+- Live runtime NestJS boot & invalid config rejection — passed
 
 ## Active Project Rule: No Automatic Unit Spec Generation
 
@@ -54,7 +55,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P4_AUTH_2_IMPLEMENT_LOGIN_001 — Implement only POST /auth/login with password verification and access JWT issuance.
+P4_AUTH_3_IMPLEMENT_AUTH_GUARD_001 — Implement AuthGuard for JWT access token verification.
 ```
 
 ## Related documents
