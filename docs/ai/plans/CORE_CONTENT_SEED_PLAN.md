@@ -1004,9 +1004,9 @@ export const FROZEN_DISCOVERY_DETAILS_BATCH_B = [
     safetyLabel: 'HIGH_RISK_TOPIC',
     sources: [
       {
-        title: 'ภัยทางการเงินและการป้องกันตนเอง',
+        title: 'สตางค์ Story - ภัยทางการเงินและการป้องกันตนเอง',
         organization: 'Bank of Thailand',
-        url: 'https://www.bot.or.th/th/satang-story/financial-threats.html',
+        url: 'https://www.bot.or.th/th/satang-story.html',
       },
       {
         title: 'ข้อควรระวังและการปกป้องข้อมูลส่วนบุคคลในโลกดิจิทัล',
@@ -1150,9 +1150,9 @@ export const FROZEN_DISCOVERY_DETAILS_BATCH_B = [
         url: 'https://www.etda.or.th',
       },
       {
-        title: 'ภัยทางการเงินและการป้องกันตนเอง',
+        title: 'สตางค์ Story - ภัยทางการเงินและการป้องกันตนเอง',
         organization: 'Bank of Thailand',
-        url: 'https://www.bot.or.th/th/satang-story/financial-threats.html',
+        url: 'https://www.bot.or.th/th/satang-story.html',
       },
     ],
   },
@@ -1193,7 +1193,7 @@ export const FROZEN_DISCOVERY_DETAILS_BATCH_B = [
 | 2 | `essential-baseline` | Fixed minimum monthly expense floor | แยกให้ปัง... Needs กับ Wants | SET | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Non-negotiable essential expense identification | Accepted |
 | 3 | `essential-baseline` | Household living expenditure survey floor | การสำรวจภาวะเศรษฐกิจและสังคมของครัวเรือน | NSO | `https://www.nso.go.th` | VERIFIED_GENERAL_HUB | Household fixed expenditure baseline surveys | Accepted (Justified) |
 | 4 | `discretionary-leakage` | Stealth micro-expenses compounding over time | แยกให้ปัง... Needs กับ Wants | SET | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Micro-expense tracking & cash leakage control | Accepted |
-| 5 | `digital-scam-risk` | Digital fraud vulnerability & channel verification | ภัยทางการเงินและการป้องกันตนเอง | BOT | `https://www.bot.or.th/th/satang-story/financial-threats.html` | VERIFIED_SPECIFIC_PAGE | Digital fraud patterns & channel verification | Accepted |
+| 5 | `digital-scam-risk` | Digital fraud vulnerability & channel verification | สตางค์ Story - ภัยทางการเงินและการป้องกันตนเอง | BOT | `https://www.bot.or.th/th/satang-story.html` | VERIFIED_PUBLICATION | Digital fraud patterns & channel verification | Accepted |
 | 6 | `digital-scam-risk` | Personal data protection & digital caution | ข้อควรระวังและการปกป้องข้อมูลส่วนบุคคล | ETDA | `https://www.etda.or.th` | VERIFIED_GENERAL_HUB | Digital privacy & online caution guidelines | Accepted (Justified) |
 | 7 | `financial-stability` | Ongoing financial resilience state & liquid reserves | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | BOT | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Financial resilience & liquid buffer maintenance | Accepted |
 | 8 | `financial-stability` | International adult financial literacy resilience | OECD Financial Education Competency Principles | OECD | `https://www.oecd.org/en/topics/financial-education.html` | VERIFIED_GENERAL_HUB | Financial stability & shock absorption competence | Accepted |
@@ -1203,7 +1203,7 @@ export const FROZEN_DISCOVERY_DETAILS_BATCH_B = [
 | 12 | `mindful-spending` | Value-aligned spending & cooling-off periods | แยกให้ปัง... Needs กับ Wants | SET | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Mindful consumption & cooling-off rules | Accepted |
 | 13 | `budget-optimizing` | Dynamic category reallocation as costs shift | การจัดทำงบประมาณและการวางแผนการเงิน | BOT | `https://www.bot.or.th/th/satang-story/money-plan/budgeting.html` | VERIFIED_SPECIFIC_PAGE | Flexible budget reallocation & margin control | Accepted |
 | 14 | `digital-hygiene` | Proactive security habits & multi-factor verification | ข้อควรระวังและการปกป้องข้อมูลส่วนบุคคล | ETDA | `https://www.etda.or.th` | VERIFIED_GENERAL_HUB | Digital hygiene & credential security controls | Accepted (Justified) |
-| 15 | `digital-hygiene` | Digital banking security & fraud prevention | ภัยทางการเงินและการป้องกันตนเอง | BOT | `https://www.bot.or.th/th/satang-story/financial-threats.html` | VERIFIED_SPECIFIC_PAGE | Digital banking security controls & 2FA | Accepted |
+| 15 | `digital-hygiene` | Digital banking security & fraud prevention | สตางค์ Story - ภัยทางการเงินและการป้องกันตนเอง | BOT | `https://www.bot.or.th/th/satang-story.html` | VERIFIED_PUBLICATION | Digital banking security controls & 2FA | Accepted |
 | 16 | `financial-freedom-foundation` | Multi-year asset accumulation & choice expansion | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | BOT | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Long-term asset accumulation & independence core | Accepted |
 | 17 | `financial-freedom-foundation` | Long-term financial planning & literacy framework | OECD Financial Education Competency Principles | OECD | `https://www.oecd.org/en/topics/financial-education.html` | VERIFIED_GENERAL_HUB | Multi-year asset growth & financial autonomy | Accepted |
 
