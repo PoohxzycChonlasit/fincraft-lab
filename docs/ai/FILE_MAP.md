@@ -52,8 +52,10 @@ fincraft-lab/
 │   │   │   └── craft/
 │   │   │       └── calculate-craft-input-hash.ts # Pure SHA-256 Craft Input Identity Helper
 │   │   ├── craft/
-│   │   │   └── dto/
-│   │   │       └── craft-request.dto.ts # Request DTO validating inputElementIds for POST /craft
+│   │   │   ├── dto/
+│   │   │   │   └── craft-request.dto.ts # Request DTO validating inputElementIds for POST /craft
+│   │   │   └── types/
+│   │   │       └── craft-response.type.ts # Public CraftService result contract types (CraftResult discriminated union)
 │   │   ├── prisma/            # Global Prisma module & service
 │   │   ├── auth/              # Auth module (register, login, me endpoints)
 │   │   ├── users/             # User persistence & management
