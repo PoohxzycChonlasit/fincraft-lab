@@ -1,47 +1,30 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { Prisma } from '../database/generated/prisma/client';
+import { Prisma, User } from '../database/generated/prisma/client';
 import { PrismaService } from '../database/prisma.service';
+import { BcryptService } from '../infrastructure/hash/bcrypt.service';
 import { UserResponseDto } from './dto/user-response.dto';
-
-export interface CreateUserInput {
-  email: string;
-  displayName: string;
-  passwordHash: string;
-}
-
-export const userResponseSelect = {
-  id: true,
-  email: true,
-  displayName: true,
-  avatarUrl: true,
-  role: true,
-  status: true,
-  createdAt: true,
-  updatedAt: true,
-} satisfies Prisma.UserSelect;
-
-export const userWithPasswordSelect = {
-  ...userResponseSelect,
-  passwordHash: true,
-} satisfies Prisma.UserSelect;
-
-export type UserWithPassword = Prisma.UserGetPayload<{
-  select: typeof userWithPasswordSelect;
-}>;
+import { UserCreateInput } from './types/user.type';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly bcryptService: BcryptService,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  async createUser(createUserInput: CreateUserInput): Promise<UserResponseDto> {
+  async createUser(input: UserCreateInput): Promise<UserResponseDto> {
+    const passwordHash = await this.bcryptService.hash(input.password);
+
     try {
       const user = await this.prisma.user.create({
         data: {
-          email: createUserInput.email,
-          passwordHash: createUserInput.passwordHash,
-          displayName: createUserInput.displayName,
+          email: input.email,
+          passwordHash,
+          displayName: input.displayName,
         },
-        select: userResponseSelect,
+        omit: {
+          passwordHash: true,
+        },
       });
 
       return user;
@@ -64,17 +47,18 @@ export class UserService {
     }
   }
 
-  async getUserByEmail(email: string): Promise<UserWithPassword | null> {
+  async getUserByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { email },
-      select: userWithPasswordSelect,
     });
   }
 
   async getUserById(id: string): Promise<UserResponseDto | null> {
     return this.prisma.user.findUnique({
       where: { id },
-      select: userResponseSelect,
+      omit: {
+        passwordHash: true,
+      },
     });
   }
 }

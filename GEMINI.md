@@ -6,14 +6,15 @@ This file is a **thin adapter** for Gemini only. It is not a source of rules.
 
 1. Read [`AGENTS.md`](AGENTS.md) in full first — it is the true canonical rule file.
 2. Read [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) for the latest verified status.
-3. Follow the skill: [FinCraft Fakebuck-Aligned Stepwise Development Skill v3](.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md)
-   (use it as the operational guide for the stepwise loop and teacher-aligned coding style).
+3. Follow the skill: [FinCraft Lab — Literal Fakebuck-Aligned Stepwise Development Skill v4](.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md)
+   (use it as the operational guide for the stepwise loop and literal teacher-aligned coding style).
 
 ## Gemini-specific operational directives
 
 - **Model Guidance**: Use Gemini Flash with **Standard or Medium thinking only**. Never use High thinking by default unless explicitly instructed by the owner.
 - **Bounded Focus**: Perform exactly one bounded task per step. Do not scaffold future modules or refactor unrelated files.
-- **Fakebuck Auth Service Boundaries**: Follow the approved Auth architecture (`AuthController` -> `AuthService` -> `UserService`, `BcryptService`, `AccessTokenService`).
+- **Literal Fakebuck Auth Service Boundaries**: Follow the approved Auth architecture (`AuthController` -> `AuthService` -> `UserService`, `BcryptService`, `AccessTokenService`). `UserService` hashes passwords on create via `BcryptService`. `AuthService` compares passwords on login via `BcryptService`.
+- **Simple, Direct Coding Style**: Prefer direct methods over advanced select constants or derived payload types. Use generated Prisma model types (`User`) and inline `omit: { passwordHash: true }`.
 - **Ordinary Features**: Ordinary CRUD features (e.g. `ElementCategoriesService`) continue using `PrismaService` directly.
 - **Explicit Return Contracts**: Use explicit DTO/class return types on public controller and service methods. Controller wraps responses in `{ data: result }`.
 - **Strict TypeScript**: Preserve strict mode. Never introduce `any`, `as any`, `as unknown as T` to silence errors, `@ts-ignore`, or undocumented `@ts-expect-error`.

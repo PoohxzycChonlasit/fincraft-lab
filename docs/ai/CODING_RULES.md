@@ -113,8 +113,7 @@ src/
 ├── components/
 │   ├── features/
 │   ├── layout/
-│   ├── shared/
-│   └── ui/
+│   └── shared/
 └── lib/
     ├── api/
     ├── actions/
@@ -173,23 +172,26 @@ The owner has decided that unit spec files are no longer generated automatically
    - diff inspection.
 8. **This rule disables automatic unit-spec generation only — it never means "no verification is needed."** Never claim a step is done without real evidence.
 
-## G. Teacher-Aligned Readability & Service Boundaries
+## G. Literal Teacher-Aligned Readability & Service Boundaries
 
-To ensure code matches the owner's teacher-led Fakebook/Fakebuck learning style, code must follow high-readability service boundaries:
+To ensure code matches the owner's teacher-led Fakebook/Fakebuck learning style, code must follow literal teacher-aligned service boundaries:
 
 1. **Auth Service Boundaries**:
    - `AuthService` coordinates register, login, and current-user flows. It does not directly handle database access, bcrypt hashing, or JWT signing.
-   - `UserService` (`src/user/user.service.ts`) owns user database persistence, safe Prisma selects, and `P2002` duplicate email error mapping.
-   - `BcryptService` (`src/infrastructure/hash/bcrypt.service.ts`) owns password hashing and comparison.
+   - `UserService` (`src/user/user.service.ts`) owns user database persistence, hashes passwords on create via `BcryptService`, and maps Prisma `P2002` duplicate email errors.
+   - `BcryptService` (`src/infrastructure/hash/bcrypt.service.ts`) owns password hashing (salt rounds 12) and comparison.
    - `AccessTokenService` (`src/infrastructure/jwt/access-token.service.ts`) owns JWT token signing.
-2. **Ordinary Feature Services (CRUD)**:
+2. **Simple, Direct Methods over Type Machinery**:
+   - Prefer direct, readable methods over advanced reusable type machinery (such as exported Prisma `select` constants, `satisfies Prisma.UserSelect`, or complex derived payload types).
+   - Use generated Prisma model types (`User`) and inline `omit: { passwordHash: true }`.
+3. **Ordinary Feature Services (CRUD)**:
    - Feature services for standard CRUD operations (such as `ElementCategoriesService`) continue using `PrismaService` directly.
    - Do NOT create repository layers, persistence adapter interfaces, or generic base services for normal CRUD features.
-3. **Thin Controllers**: Controllers validate HTTP inputs, delegate to the service layer, and wrap results in `{ data: result }`. Methods are typically 3–12 lines long.
-4. **Explicit Return Types**: All public controller methods and public service methods must declare explicit return types (e.g., `UserResponseDto`, `LoginResponseDto`).
-5. **Minimal Abstraction**: Create helper abstractions only when real logic is reused, file line limits (500 physical lines) are approached, or third-party APIs are isolated.
-6. **Security Complexity Exception**: Files handling security, cryptography, JWT signing, guard evaluation, Prisma unique error mapping (`P2002`), seed validation, and transaction safety may remain more detailed when required for safety. Necessary safety checks must never be deleted to shorten code.
-7. **No Copying Another Repository File-for-File**: Do not copy teacher code blindly. Preserve FinCraft-specific models, routes, financial safety rules, response envelopes (`{ data: ... }`), and Craft/Simulation behaviors.
+4. **Thin Controllers**: Controllers validate HTTP inputs, delegate to the service layer, and wrap results in `{ data: result }`. Methods are typically 3–12 lines long.
+5. **Explicit Return Types**: All public controller methods and public service methods must declare explicit return types (e.g., `UserResponseDto`, `LoginResponseDto`).
+6. **Minimal Abstraction**: Create helper abstractions only when real logic is reused, file line limits (500 physical lines) are approached, or third-party APIs are isolated.
+7. **Security Complexity Exception**: Files handling security, cryptography, JWT signing, guard evaluation, Prisma unique error mapping (`P2002`), seed validation, and transaction safety may remain more detailed when required for safety. Necessary safety checks must never be deleted to shorten code.
+8. **No Copying Another Repository File-for-File**: Do not copy teacher code blindly. Preserve FinCraft-specific models, routes, financial safety rules, response envelopes (`{ data: ... }`), and Craft/Simulation behaviors.
 
 ## Related documents
 

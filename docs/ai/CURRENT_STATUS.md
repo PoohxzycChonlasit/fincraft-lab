@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P4_AUTH_7_IMPLEMENT_USER_SERVICE_EXTRACTION)
+## Verified status (updated during P4_AUTH_8_REALIGN_LITERAL_FAKEBUCK_STYLE)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -31,15 +31,20 @@ git status --short
 - **P5_SEED_1 checkpoint**: `66851c0` — "docs: plan core content seed"
 - **P5_SEED_2 checkpoint**: `d807255` — "feat: add core seed infrastructure and categories"
 - **P4_AUTH_6 checkpoint**: `709594a` — "docs: plan Fakebuck-aligned auth refactor"
-- **P4_AUTH_7 checkpoint**: "refactor: extract user persistence from auth" (see git log)
+- **P4_AUTH_7 checkpoint**: `fe30daa` — "refactor: extract user persistence from auth"
+- **P4_AUTH_8 checkpoint**: "refactor: align auth code with Fakebuck style" (see git log)
 
-### Backend (`fincraft-lab-api`) — Phase A Fakebuck Auth Refactor Complete
+### Backend (`fincraft-lab-api`) — Literal Fakebuck Auth Architecture Complete
 
-- **Phase A UserService Extraction Implemented**: Created `UserModule`, `UserService` (`src/user/user.service.ts`), and `UserResponseDto` (`src/user/dto/user-response.dto.ts`).
-- **Prisma User Persistence & P2002 Error Mapping Moved**: All database queries (`createUser`, `getUserByEmail`, `getUserById`), safe `select` clauses (`userResponseSelect`, `userWithPasswordSelect`), and Prisma `P2002` duplicate email error mapping are owned by `UserService`.
-- **`AuthService` Prisma Dependency Removed**: `AuthService` delegates user persistence to `UserService`. `AuthService` contains 0 imports or references to `PrismaService`, `Prisma`, or `this.prisma`.
-- **Phase A Boundary Respected**: `AuthService` retains direct `bcrypt` hashing and `JwtService` signing for Phase A. `BcryptService` and `AccessTokenService` are deferred to Phase B (`P4_AUTH_8`).
-- **Auth Behavior & Security Invariants Verified**: Verified via 11-step programmatic live HTTP test (Register 201, Duplicate Email 409, Login 200, Wrong Password 401, Unknown Email 401, GET /auth/me 200, INACTIVE 401, BANNED 401, Stale Token 401, Health 200, User count parity).
+- **Literal Fakebuck Services Implemented**:
+  - `BcryptService` (`src/infrastructure/hash/bcrypt.service.ts`) & `HashModule` (`src/infrastructure/hash/hash.module.ts`)
+  - `AccessTokenService` (`src/infrastructure/jwt/access-token.service.ts`) & `AccessTokenModule` (`src/infrastructure/jwt/access-token.module.ts`)
+  - `UserService` simplified to literal teacher style (`createUser` hashes via `BcryptService` and uses Prisma 7 `omit: { passwordHash: true }`; `getUserByEmail` returns standard `User` model; `getUserById` uses `omit`).
+  - `AuthService` delegates user creation to `UserService`, compares login passwords via `BcryptService`, signs JWT via `AccessTokenService`. Contains 0 imports or references to `bcrypt`, `JwtService`, `ConfigService`, `PrismaService`, or `Prisma`.
+  - `LoginResponseDto` (`src/auth/dto/login-response.dto.ts`) created for explicit service return type.
+  - `AuthModule` imports `UserModule`, `HashModule`, `AccessTokenModule`.
+- **Skill v4 Active**: Active agent skill upgraded to `FinCraft Lab — Literal Fakebuck-Aligned Stepwise Development Skill v4`.
+- **Auth Behavior & Security Invariants Verified**: Verified via Bcrypt isolation test (cost factor 12, salt uniqueness), 13-step programmatic live HTTP test (Register 201, Duplicate 409, Login 200, Wrong Password 401, Unknown Email 401, GET /auth/me 200, INACTIVE 401, BANNED 401, Stale Token 401, JWT claims sub/email/role, JWT 900s lifetime, Health 200, User count parity), and invalid config startup failure test (`JWT_ACCESS_EXPIRES_IN_SECONDS=0`).
 - **Seeded Content Intact**: 8 Element Categories remain intact in PostgreSQL.
 
 ### Frontend (`fincraft-lab-web`)
@@ -53,7 +58,7 @@ git status --short
 - `pnpm test` — 3/3 unit tests passed (HealthController status, service name, ISO timestamp)
 - `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` -> 200, `GET /` -> 404) via Node VM modules
 - Search for unsafe casts (`any`, `as any`, `as unknown`, `@ts-ignore`) in `src/` — 0 matches
-- Programmatic 11-step live HTTP verification — passed
+- Programmatic live verification & Bcrypt isolation test — passed
 
 ## Active Project Rule: No Automatic Unit Spec Generation
 
@@ -62,7 +67,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P4_AUTH_8_IMPLEMENT_HASH_AND_ACCESS_TOKEN_SERVICES_001 — Phase B of Fakebuck Auth Refactor: Create HashModule (BcryptService) and AccessTokenModule (AccessTokenService).
+P5_SEED_3_IMPLEMENT_ELEMENTS_AND_DETAILS_001 — Implement Elements (14 Starter, 22 Discovery) and 36 Discovery Details seed content steps.
 ```
 
 ## Related documents

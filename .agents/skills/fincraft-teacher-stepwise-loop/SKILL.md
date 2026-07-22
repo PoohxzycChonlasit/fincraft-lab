@@ -1,4 +1,4 @@
-# FinCraft Lab — Fakebuck-Aligned Stepwise Development Skill v3
+# FinCraft Lab — Literal Fakebuck-Aligned Stepwise Development Skill v4
 
 ## Purpose
 
@@ -7,7 +7,7 @@ Use this skill when building **FinCraft Lab** with AI agents.
 The skill exists to ensure that the project is developed:
 
 - one bounded step at a time;
-- in the teacher-aligned coding shape modeled after the teacher's Fakebook/Fakebuck projects;
+- in the literal teacher-aligned coding shape modeled after the teacher's Fakebook/Fakebuck projects;
 - with explanation before implementation;
 - with evidence after implementation;
 - without scaffolding entire modules in advance;
@@ -56,70 +56,66 @@ Do not implement an entire feature module in one loop unless the owner explicitl
 
 ---
 
-## Current Project Baseline
+## Permanent Skill v4 Rules — Literal Teacher Coding Style
 
-The repository is fully initialized with NestJS, PostgreSQL, Prisma (15-model MVP schema migrated), Backend Auth MVP complete, and Core Seed Infrastructure (8 Element Categories seeded) at commit `d807255`.
-
-### Superceded Rules Notice
-
-Skill v3 explicitly supersedes the following previous rules:
-- *Old rule superceded*: "AuthService must directly handle PrismaService, bcrypt, and JwtService in a single file."
-- *Old rule superceded*: "Do not add BcryptService, HashModule, or AccessTokenService under any circumstances."
-- *Old rule superceded*: "Completed Auth must not be refactored to resemble Fakebuck."
-
-Skill v3 approves and mandates the teacher's Fakebuck service-boundary architecture for Authentication.
+1. **Teacher Reference Code is Primary**: When the owner supplies or refers to teacher-written reference code (Fakebook/Fakebuck), its visible coding shape is the primary style reference.
+2. **Simple, Direct Methods over Type Machinery**: Prefer direct, readable methods over advanced reusable type machinery (such as exported Prisma `select` constants, `satisfies Prisma.UserSelect`, or complex derived payload types).
+3. **Generated Models & Inline Omit**: Prefer generated Prisma model types (`User`) and inline `omit: { passwordHash: true }` for simple methods.
+4. **Internal Input Types**: Define real shared internal service inputs in a small `types/` folder (e.g., `src/user/types/user.type.ts` exporting `UserCreateInput`). Do not call internal inputs DTOs.
+5. **Cross-Cutting Concern Services**:
+   - `BcryptService` (`src/infrastructure/hash/`) encapsulates password hashing (salt rounds 12) & comparison.
+   - `AccessTokenService` (`src/infrastructure/jwt/`) encapsulates JWT signing.
+6. **Ordinary CRUD Feature Services**: Feature services for standard CRUD operations (such as `ElementCategoriesService`) continue using `PrismaService` directly.
+7. **Prohibited Layers**: Do NOT create custom repository interfaces, persistence adapter layers, generic base services, CQRS, or mapper services.
+8. **Envelope Convention**:
+   - `Service` methods return feature data objects (`UserResponseDto`, `LoginResponseDto`, `User`).
+   - `Controller` wraps service results in `{ data: result }`.
+   - Explicit return types are required on all public controller and service methods.
+9. **Security & Behavior Invariants**: Preserve project-specific security rules, response envelopes (`{ data: ... }`), and domain invariants even when matching the teacher's coding shape.
+10. **Public Client Exports Only**: Do not import private/internal generated Prisma paths.
 
 ---
 
 ## Teacher-Aligned Service Boundary Architecture
 
-### A. Auth Feature Service Boundaries
-
-Authentication combines user persistence, password cryptography, and access token issuance. To mirror the owner's Fakebuck project, Auth logic is structured into dedicated, single-responsibility services:
-
 ```text
 AuthController
 └── AuthService (Coordinator)
-    ├── UserService (src/user/)
-    ├── BcryptService (src/infrastructure/hash/)
-    └── AccessTokenService (src/infrastructure/jwt/)
+    ├── UserService (src/user/) ──► BcryptService & PrismaService
+    ├── BcryptService (src/infrastructure/hash/) ──► bcrypt (12 salt rounds)
+    └── AccessTokenService (src/infrastructure/jwt/) ──► JwtService
 ```
 
-1. **`AuthService` (Coordinator)**:
-   - Coordinates `register`, `login`, and `getCurrentUser` flows.
-   - Evaluates credential validity, user active status, and composes feature responses.
-   - **Does NOT directly import**: `PrismaService`, Prisma error classes, `bcrypt`, `JwtService`, or `ConfigService`.
+### Folder Structure
 
-2. **`UserService` (`src/user/user.service.ts`)**:
-   - Owns user creation, user queries by ID or email via `PrismaService`, safe Prisma `select` clauses, and Prisma `P2002` duplicate email conflict mapping.
-   - Exposes clean methods: `createUser()`, `getUserByEmail()`, `getUserById()`.
-   - **Does NOT import**: `bcrypt`, `JwtService`, or `ConfigService`.
-
-3. **`BcryptService` (`src/infrastructure/hash/bcrypt.service.ts`)**:
-   - Encapsulates password cryptography using `bcrypt` (12 salt rounds).
-   - Exposes: `hash(plain: string): Promise<string>` and `compare(plain: string, hashed: string): Promise<boolean>`.
-   - Directly injected into `AuthService`.
-
-4. **`AccessTokenService` (`src/infrastructure/jwt/access-token.service.ts`)**:
-   - Encapsulates JWT access token signing (`signToken(payload)`).
-   - Injected into `AuthService`. `AccessTokenModule` manages `JwtModule.registerAsync` and exports `JwtModule`/`JwtService` for both `AccessTokenService` and `AuthGuard`.
-
-### B. Ordinary Feature Services (CRUD)
-
-- Features that are standard CRUD operations (such as `ElementCategoriesService`, `ElementsService`) continue to use `PrismaService` directly inside their respective feature services.
-- **Do NOT create custom repository interfaces, persistence adapter layers, or generic base controllers** for ordinary CRUD modules.
-
-### C. Envelope Convention & DTOs
-
-- **Envelope Convention**:
-  - `Service` methods return raw feature objects or DTO instances.
-  - `Controller` wraps service results in the FinCraft `{ data: result }` envelope.
-  - Explicit return types are required on all public controller and service methods.
-- **DTO Structure**:
-  - `src/auth/dto/`: `register.dto.ts`, `login.dto.ts`, `login-response.dto.ts`.
-  - `src/user/dto/`: `user-response.dto.ts`.
-  - Register and `GET /auth/me` endpoints reuse `UserResponseDto`.
-  - `passwordHash` is never exposed in response DTOs or wire responses.
+```text
+src/
+├── auth/
+│   ├── dto/
+│   │   ├── login-response.dto.ts
+│   │   ├── login.dto.ts
+│   │   └── register.dto.ts
+│   ├── guards/
+│   │   ├── auth.guard.ts
+│   │   └── roles.guard.ts
+│   ├── auth.controller.ts
+│   ├── auth.module.ts
+│   └── auth.service.ts
+├── user/
+│   ├── dto/
+│   │   └── user-response.dto.ts
+│   ├── types/
+│   │   └── user.type.ts
+│   ├── user.module.ts
+│   └── user.service.ts
+└── infrastructure/
+    ├── hash/
+    │   ├── bcrypt.service.ts
+    │   └── hash.module.ts
+    └── jwt/
+        ├── access-token.service.ts
+        └── access-token.module.ts
+```
 
 ---
 
@@ -163,26 +159,3 @@ Every implementation step must follow this exact loop:
 5. **Teach Back**: Explain the changes and code flow to the owner in Thai.
 6. **Checkpoint**: Create one local Git commit (`git commit -m "..."`). Do not push unless instructed.
 7. **Stop**: Recommend exactly one next bounded step, then stop and wait for owner approval.
-
----
-
-## Project Execution Sequence
-
-```text
-Backend Auth MVP & Seed Categories Complete (Commit d807255)
-  │
-  ▼
-P4_AUTH_6_ALIGN_SKILL_AND_PLAN_FAKEBUCK_REFACTOR_001 (Current Documentation & Plan Step)
-  │
-  ▼
-P4_AUTH_7_IMPLEMENT_USER_SERVICE_EXTRACTION_001 (Phase A: UserModule & UserService)
-  │
-  ▼
-P4_AUTH_8_IMPLEMENT_HASH_AND_JWT_INFRASTRUCTURE_001 (Phase B: HashModule & AccessTokenModule)
-  │
-  ▼
-P4_AUTH_9_REFACTOR_AUTH_SERVICE_AND_DTOS_001 (Phase C & D: AuthService refactor, DTOs & Verification)
-  │
-  ▼
-P5_SEED_3_IMPLEMENT_ELEMENTS_AND_DETAILS_001 (Resume Content Seeding)
-```
