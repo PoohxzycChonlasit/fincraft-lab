@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P4_AUTH_2_TYPESCRIPT_CONFIG_FIX)
+## Verified status (updated during P4_AUTH_3_IMPLEMENT_AUTH_GUARD)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -23,17 +23,17 @@ git status --short
 - **P3B.2 checkpoint**: `a49dff9` — "docs: record initial MVP migration application"
 - **P4A checkpoint**: `6193f03` — "docs: plan ElementCategory CRUD"
 - **P4_AUTH_1 checkpoint**: `bf46ed2` — "feat: add user registration endpoint"
-- **P4_AUTH_2 checkpoint**: "feat: add user login endpoint" (amended with numeric JWT expiration & type-safe startup validation)
+- **P4_AUTH_2 checkpoint**: `29de3de` — "feat: add user login endpoint"
+- **P4_AUTH_3 checkpoint**: "feat: add global JWT auth guard" (see git log)
 
 ### Backend (`fincraft-lab-api`)
 
-- **POST /auth/login implemented and verified**: `LoginDto`, `AuthModule`, `AuthController`, and `AuthService` updated with `@nestjs/jwt`.
-- **Numeric JWT Expiration & Startup Validation**: Expiration configured via numeric `JWT_ACCESS_EXPIRES_IN_SECONDS` (default `900`). In `AuthModule`, `expiresInSeconds` is validated as a positive safe integer using `Number.isSafeInteger()`. Rejects invalid configuration at startup with clear exception (`'JWT_ACCESS_EXPIRES_IN_SECONDS must be a positive integer'`). No unsafe casts (`as any`, `as unknown`, `@ts-ignore`) are used anywhere in the codebase.
-- **Credential Verification & Generic Response**: `email` is normalized (trim, lowercase); `password` is compared asynchronously using `bcrypt.compare`. Both wrong password and nonexistent email return identical generic `401 Unauthorized` (`'Invalid email or password'`). Non-ACTIVE users yield `401 Unauthorized` (`'Account is not active'`).
-- **JWT Access Token Issuance**: Signed asynchronously using `@nestjs/jwt` (`JwtModule.registerAsync`) and `ConfigService` (`JWT_ACCESS_SECRET`, `JWT_ACCESS_EXPIRES_IN_SECONDS`). Token payload contains exactly `{ sub: user.id, email: user.email, role: user.role }`. Does not contain `passwordHash`, `status`, or private data. Verified token lifetime `exp - iat = 900` seconds.
-- **Safe Response Envelope**: Returns `200 OK` with payload `{ "data": { "user": { id, email, displayName, avatarUrl: null, role: "USER", status: "ACTIVE", createdAt, updatedAt }, "accessToken": "..." } }`. Does not contain `password` or `passwordHash`.
-- **Database Security & Cleanup Verified**: Test user created via `POST /auth/register`, verified via `POST /auth/login` and JWT claim verification, and deleted by exact UUID. Total `users` table row count restored to 0.
-- **`GET /health` verified**: Returns `200 OK` with JSON payload `{ status: "ok", service: "fincraft-lab-api", timestamp }`.
+- **Global AuthGuard Implemented**: `AuthGuard` registered globally as `APP_GUARD` in `AuthModule`. All application routes protected by default unless marked with `@Public()`.
+- **Public Routes Configured**: `@Public()` decorator applied to `POST /auth/register`, `POST /auth/login`, and `GET /health`. Reflector `getAllAndOverride` checks handler and controller class metadata.
+- **Bearer Extraction & Verification**: Reads `Authorization` header safely (requires `Bearer <token>`). Verifies token asynchronously using `JwtService.verifyAsync`. Throws generic `UnauthorizedException('Invalid or missing authentication token')` for all token failures (missing header, basic scheme, empty token, malformed JWT, wrong signature, expired token).
+- **Runtime Payload Validation**: `sub` validated as non-empty string; `email` validated as non-empty string; `role` validated as valid `UserRole` enum (`USER`, `ADMIN`, `SUPER_ADMIN`) using TypeScript type guard. Optional `iat` and `exp` validated as numbers. Validated payload attached to `request.user`. Zero unsafe TypeScript casts (`any`, `as any`, `as unknown`, `@ts-ignore`).
+- **Guard Isolation & Live Nest Verification Verified**: All 11 guard isolation tests passed 100%. Live application verified: Register (201), Login (200), Health (200), unmapped route (404), test user cleanup (exact UUID deleted, ending user count restored to 0).
+- **Out of Scope**: `GET /auth/me`, `@CurrentUser()` decorator, and `RolesGuard` not implemented in this task. Full HTTP proof of a protected route will occur in the next bounded `GET /auth/me` task.
 
 ### Frontend (`fincraft-lab-web`)
 
@@ -45,8 +45,8 @@ git status --short
 - `pnpm lint` — 0 errors, 1 pre-existing warning in `main.ts` (`@typescript-eslint/no-floating-promises`)
 - `pnpm test` — 3/3 unit tests passed (HealthController status, service name, ISO timestamp)
 - `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` -> 200, `GET /` -> 404) via Node VM modules
-- Search for unsafe casts (`as any`, `as unknown`, `@ts-ignore`) in `src/auth/` — 0 matches
-- Live runtime NestJS boot & invalid config rejection — passed
+- Search for unsafe casts (`any`, `as any`, `as unknown`, `@ts-ignore`) in `src/auth/` — 0 matches
+- 11 Guard Isolation unit tests & Live Nest Runtime Verification — passed
 
 ## Active Project Rule: No Automatic Unit Spec Generation
 
@@ -55,7 +55,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P4_AUTH_3_IMPLEMENT_AUTH_GUARD_001 — Implement AuthGuard for JWT access token verification.
+P4_AUTH_4_IMPLEMENT_ME_001 — Implement only GET /auth/me and a typed CurrentUser decorator.
 ```
 
 ## Related documents

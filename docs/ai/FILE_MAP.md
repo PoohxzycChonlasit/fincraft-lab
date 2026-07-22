@@ -49,12 +49,15 @@ This document lists only files and folders that **actually exist** right now. Fu
 | `src/database/database.module.ts` | Declares and exports `PrismaService` globally | created in P2B.2 | Edit only if DatabaseModule structure changes |
 | `src/database/prisma.service.ts` | Extends `PrismaClient` with `@prisma/adapter-pg`, connects to PostgreSQL and verifies via `SELECT 1` on startup | created in P2B.2 | Edit only if database lifecycle behavior changes |
 | `src/health/health.module.ts` | Declares `HealthController`, provides `HealthService` | created in P1 | Edit only if Health feature changes |
-| `src/health/health.controller.ts` | Route prefix `health`; `GET /health` calls `HealthService` | created in P1 | Edit only if Health feature changes |
+| `src/health/health.controller.ts` | Route prefix `health`; `GET /health` decorated with `@Public()` | updated in P4_AUTH_3 | Edit only if Health feature changes |
 | `src/health/health.service.ts` | Returns `{ status, service, timestamp }` | created in P1 | Edit only if Health feature changes |
 | `src/health/health.controller.spec.ts` | Unit test: status, service name, valid ISO-8601 timestamp | created in P1 | Extend only if HealthController behavior changes |
-| `src/auth/auth.module.ts` | Imports `DatabaseModule`, registers `JwtModule.registerAsync` with numeric expiration validation, `AuthController`, and `AuthService` | updated in P4_AUTH_2 | Edit when new auth features are added |
-| `src/auth/auth.controller.ts` | Route prefix `auth`; `POST /auth/register` and `POST /auth/login` | updated in P4_AUTH_2 | Add new routes when authorized |
-| `src/auth/auth.service.ts` | Handles registration with bcrypt and login with password verification & JWT signing | updated in P4_AUTH_2 | Add new auth logic when authorized |
+| `src/auth/auth.module.ts` | Imports `DatabaseModule`, registers `JwtModule.registerAsync`, global `AuthGuard` (`APP_GUARD`), `AuthController`, and `AuthService` | updated in P4_AUTH_3 | Edit when new auth features are added |
+| `src/auth/auth.controller.ts` | Route prefix `auth`; `POST /auth/register` and `POST /auth/login` decorated with `@Public()` | updated in P4_AUTH_3 | Add new routes when authorized |
+| `src/auth/auth.service.ts` | Handles registration with bcrypt and login with password verification & JWT signing | created in P4_AUTH_1, updated in P4_AUTH_2 | Add new auth logic when authorized |
+| `src/auth/decorators/public.decorator.ts` | Custom `@Public()` decorator for unauthenticated route bypass | created in P4_AUTH_3 | Do not edit unless public metadata rules change |
+| `src/auth/guards/auth.guard.ts` | Global `AuthGuard` protecting routes by default, extracting Bearer token, verifying via `JwtService.verifyAsync`, and validating payload | created in P4_AUTH_3 | Do not edit unless guard rules change |
+| `src/auth/types/access-token-payload.type.ts` | Type definition for validated `AccessTokenPayload` (`sub`, `email`, `role`, optional `iat`, `exp`) | created in P4_AUTH_3 | Do not edit unless payload structure changes |
 | `src/auth/dto/register.dto.ts` | Validates `email` (trim, lowercase, valid email), `password` (8-72 chars), `displayName` (trim, 1-100 chars) | created in P4_AUTH_1 | Do not edit unless register rules change |
 | `src/auth/dto/login.dto.ts` | Validates `email` (trim, lowercase, valid email), `password` (8-72 chars, untrimmed) | created in P4_AUTH_2 | Do not edit unless login rules change |
 | `test/app.e2e-spec.ts` | e2e test setup — verifies `GET /health` (200) and `GET /` (404) | created in P1 | Use as template for future e2e tests |
