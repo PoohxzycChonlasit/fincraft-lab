@@ -51,6 +51,8 @@ At approximately 400 lines:
 - propose a small extraction before the file exceeds 500 lines;
 - preserve behavior while splitting.
 
+Target length for maintained source files: **below 300 lines**.
+
 Exceptions (do not count toward the limit, and do not edit purely to shorten):
 
 - generated Prisma clients;
@@ -171,6 +173,19 @@ The owner has decided that unit spec files are no longer generated automatically
    - existing E2E tests;
    - diff inspection.
 8. **This rule disables automatic unit-spec generation only — it never means "no verification is needed."** Never claim a step is done without real evidence.
+
+## G. Teacher-Aligned Readability
+
+To ensure code matches the owner's teacher-led Fakebook/Fakebuck learning style, future code must be written with high readability and minimal abstraction:
+
+1. **Thin Controllers**: Controllers validate HTTP inputs and delegate to the service layer. Methods are typically 3–12 lines long.
+2. **Explicit Return Types**: All public controller methods and public service methods must declare explicit return types (e.g., `Promise<{ data: ElementCategoryResponse[] }>`).
+3. **Descriptive Parameter & Variable Names**: Use explicit, meaningful variable names rather than cryptic abbreviations.
+4. **Linear Services**: Service methods follow simple, top-to-bottom execution flows (typically 5–35 lines per method). Deep nesting is avoided via early exception guard clauses.
+5. **Direct Prisma Usage**: `PrismaService` is injected directly into services. No custom repository layers, generic base services, or use-case classes are allowed.
+6. **Minimal Abstraction**: Create helper abstractions only when real logic is reused, file line limits (500 physical lines) are approached, or third-party APIs are isolated.
+7. **Security Complexity Exception**: Files handling security, cryptography, JWT signing, guard evaluation, Prisma unique error mapping (`P2002`), seed validation, and transaction safety may remain more detailed when required for safety. Necessary safety checks must never be deleted to shorten code.
+8. **No Copying Another Repository File-for-File**: Do not copy teacher code blindly. Preserve FinCraft-specific models, routes, financial safety rules, response envelopes (`{ data: ... }`), and Craft/Simulation behaviors.
 
 ## Related documents
 

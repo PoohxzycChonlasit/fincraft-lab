@@ -24,7 +24,7 @@ Short summary — full detail in [`docs/ai/PROJECT_CONTEXT.md`](docs/ai/PROJECT_
 
 - **FinCraft Lab** is a Financial Literacy Discovery Lab for learning finance by combining Elements, discovering Concepts, and running Simulations.
 - This is a learning project (school personal project) — **Education Only, Simulation Only, Not Financial Advice**.
-- Backend: NestJS + PostgreSQL + Prisma (Prisma is not installed yet).
+- Backend: NestJS + PostgreSQL + Prisma 7.8 (PostgreSQL connected through PrismaService, approved 15-model MVP schema migrated).
 - Frontend: Next.js App Router.
 - Package manager: **pnpm only**.
 

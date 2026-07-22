@@ -1,4 +1,4 @@
-# FinCraft Lab — Teacher-Style Stepwise Loop Skill
+# FinCraft Lab — Teacher-Aligned Stepwise Development Skill v2
 
 ## Purpose
 
@@ -7,13 +7,13 @@ Use this skill when building **FinCraft Lab** with AI agents.
 The skill exists to ensure that the project is developed:
 
 - one bounded step at a time;
-- in the coding style learned from the teacher's Fakebook projects;
+- in the teacher-aligned coding style learned from the teacher's Fakebook/Fakebuck projects;
 - with explanation before implementation;
 - with evidence after implementation;
-- without scaffolding the entire system in advance;
-- without introducing architecture that has not been taught or required.
+- without scaffolding entire modules in advance;
+- without introducing unnecessary architectural abstractions.
 
-This skill applies to both repositories:
+This skill applies to both workspace locations:
 
 ```text
 C:\devnest 101\single-project\fincraft-lab\fincraft-lab-api
@@ -22,16 +22,16 @@ C:\devnest 101\single-project\fincraft-lab\fincraft-lab-web
 
 ## Source of Truth — read this first
 
-This file describes **only the stepwise execution method** (how to run one loop, per function or endpoint). It is not the canonical rule file.
+This file describes **only the stepwise execution method** (how to run one loop per function or endpoint) and teacher-aligned coding style guidelines. It is not the canonical rule file.
 
 Before using this skill, read in order:
 
 1. `AGENTS.md` at the project root — canonical rules for every AI tool
 2. `docs/ai/CURRENT_STATUS.md` — latest verified state (do not trust memory)
 3. `docs/ai/PROJECT_CONTEXT.md` — product context
-4. `docs/ai/CODING_RULES.md` — full coding rules (this file only summarizes)
+4. `docs/ai/CODING_RULES.md` — full coding rules (this file summarizes operational rules)
 
-If anything in this file appears to conflict with `AGENTS.md`, `AGENTS.md` wins.
+If anything in this file appears to conflict with `AGENTS.md`, `AGENTS.md` takes precedence.
 
 ---
 
@@ -50,67 +50,221 @@ Each loop may implement only one of the following:
 - one validation rule;
 - one database relation;
 - one UI interaction;
-- one direct test for the current function.
+- one direct test or verification script for the current step.
 
 Do not implement an entire feature module in one loop unless the owner explicitly requests it.
 
 ---
 
-## Teacher-Style Baseline (summary only)
+## Current Project Baseline
 
-Full rules live in `docs/ai/CODING_RULES.md` (sections C and D). Quick reminder for use during a loop:
+The repository is fully initialized with NestJS, PostgreSQL, Prisma (15-model MVP schema migrated), and a completed Backend Auth MVP at commit `cd910c6`:
 
-- **Backend**: organize by feature (`src/<feature>/`), controllers stay thin, business logic and Prisma queries live in the service, no repository layer, DTOs use `class-validator`, UUID primary keys.
-- **Frontend**: Next.js App Router, Server Components by default, Client Components only for interactive UI (Canvas included), business logic never lives in page components.
+- `POST /auth/register` (email normalization, bcrypt password hash, ConflictException mapping)
+- `POST /auth/login` (JWT access token issuance, generic 401 Unauthorized)
+- Global `AuthGuard` (`APP_GUARD`) with `@Public()` decorator bypass
+- `GET /auth/me` with `@CurrentUser()` parameter decorator and database status recheck
+- Typed `@Roles()` decorator (`USER`, `ADMIN`, `SUPER_ADMIN`) and global `RolesGuard` (`APP_GUARD`)
 
-Do not re-derive or copy the full rule lists here — read `docs/ai/CODING_RULES.md` when detail is needed.
+The current next step is:
+
+```text
+P5_SEED_1_PLAN_CORE_CONTENT_001 — Plan core seed infrastructure and Submission Seed v1 content set (Plan-only task).
+```
 
 ---
 
-## FinCraft-Specific Required Extensions
+## Teacher-Aligned Coding Style Guidelines
 
-The teacher's sample project does not contain every FinCraft requirement.
+Future code must match the owner's teacher-led Fakebook/Fakebuck coding style while remaining specific to FinCraft Lab.
 
-The following additions are allowed because they are direct product requirements:
+### A. Teacher-Aligned Controller Style
 
-- `USER`, `ADMIN`, and `SUPER_ADMIN` roles;
-- minimal role guards;
-- Canvas Client Components;
-- Craft transactions;
-- duplicate recipe protection;
-- rediscovery handling;
-- Knowledge Graph responses;
-- simulation calculation services;
-- direct tests for Craft and Simulation behavior.
+Controllers must:
 
-Do not introduce generic RBAC tables, CQRS, event buses, microservices, or repository abstractions.
+- remain thin (normally 3–12 lines per method);
+- use descriptive DTO parameter names;
+- have explicit public return types;
+- preserve the FinCraft `{ data: ... }` response envelope;
+- receive validated DTOs or parsed parameters from NestJS Pipes;
+- call exactly one relevant service method and return its result;
+- contain no Prisma queries;
+- contain no bcrypt or JWT logic;
+- contain no business logic;
+- avoid unnecessary try/catch blocks.
+
+Conceptual Example:
+
+```ts
+@Get()
+async findAll(): Promise<{ data: ElementCategoryResponse[] }> {
+  const categories = await this.elementCategoriesService.findAll();
+  return { data: categories };
+}
+```
+
+### B. Teacher-Aligned Service Style
+
+Services must:
+
+- use simple, top-to-bottom linear execution flows;
+- use `PrismaService` directly via NestJS Dependency Injection;
+- keep one public service method per use case (normally 5–35 lines; explain or split if over 40 lines);
+- use early exceptions (guard clauses) rather than deep nesting;
+- use explicit safe Prisma `select` clauses where needed;
+- use named constants for meaningful financial or simulation thresholds;
+- create private helper methods only for repeated, security-sensitive, or difficult-to-read logic;
+- avoid repository layers;
+- avoid use-case classes;
+- avoid command buses, CQRS, and generic base service classes;
+- avoid splitting code only to make a file look shorter.
+
+File Size Limits:
+
+- Target maintained source file length: below 300 lines.
+- Hard limit for manually maintained files: 500 physical lines (start considering extraction at ~400 lines).
+- Generated Prisma files, lockfiles, framework files, and migration SQL are exempt.
+
+### C. DTO and Response Style
+
+Request DTOs:
+
+- belong in `dto/`;
+- use `class-validator` and `class-transformer` decorators;
+- normalize values only when required (e.g., trim and lowercase emails, trim display names);
+- never trim passwords;
+- never accept server-controlled fields (`id`, `role`, `status`, `createdAt`, `updatedAt`).
+
+Public Endpoints and Responses:
+
+- use explicit TypeScript response types/contracts (placed in `types/` when shared);
+- avoid creating unnecessary DTO files for trivial return shapes;
+- preserve the FinCraft `{ data: ... }` response envelope;
+- never return sensitive fields (e.g., `passwordHash`);
+- `Date` objects are used internally, and standard ISO strings cross the JSON wire boundary.
+
+### D. TypeScript Policy
+
+Strict TypeScript remains mandatory across the entire codebase.
+
+Forbidden:
+
+- `any` or `as any`;
+- `as unknown as T` used to silence type errors;
+- `@ts-ignore`;
+- undocumented `@ts-expect-error`;
+- unsafe non-null assertions (`!`) on untrusted data;
+- custom string enums duplicating generated Prisma enums.
+
+Required:
+
+- explicit public return types for controller and service methods;
+- generated Prisma enums (`UserRole`, `UserStatus`, `ElementType`, etc.) and types;
+- runtime type validation at HTTP, JWT, environment, and file boundaries;
+- runtime classes when NestJS decorator metadata (`emitDecoratorMetadata` + `isolatedModules`) requires a runtime value.
+
+### E. Security Complexity Exception
+
+Security, data-integrity, and core infrastructure files may remain more verbose when required for safety:
+
+- JWT configuration and signing;
+- `AuthGuard` token verification and claim checks;
+- `RolesGuard` metadata and permission evaluation;
+- Password hashing and verification;
+- Prisma unique error mapping (`P2002`);
+- Seed validation and hash verification;
+- Transaction safety in Craft and Simulation operations.
+
+Do not delete necessary security or integrity checks merely to make code visually shorter.
+
+### F. Abstraction Policy
+
+Do NOT introduce abstractions merely because Fakebuck or another project has them:
+
+- `BcryptService` or `HashModule`
+- `AccessTokenService`
+- Custom JWT wrapper infrastructure
+- Repository interfaces or pattern classes
+- Generic base controllers or base services
+- Global `@types` Express augmentation
+- CQRS, event buses, microservices
+
+Create an abstraction ONLY when:
+
+1. real behavior is reused across multiple feature modules;
+2. readability limits (500 physical lines) are exceeded;
+3. it isolates a volatile third-party integration;
+4. the owner explicitly approves it.
+
+Do not refactor completed Auth code (`POST /auth/register`, `POST /auth/login`, `AuthGuard`, `RolesGuard`, `GET /auth/me`) merely to resemble Fakebuck. Apply the new style to future code and perform targeted cleanup only when a touched file genuinely needs it.
+
+### G. Frontend Style
+
+When frontend development begins (`fincraft-lab-web`):
+
+- Next.js App Router;
+- Server Components by default;
+- Client Components only for interactive UI (e.g., Canvas, forms);
+- Page files compose layout sections; feature logic lives outside page files;
+- Native `fetch` through a small API helper;
+- Zod and React Hook Form for form handling;
+- Explicit loading, empty, success, and error states;
+- No global state library until proven necessary;
+- Functional submission UI before implementing advanced animations.
+
+### H. Seed Infrastructure & Content Style
+
+Expected directory structure:
+
+```text
+prisma/
+├── seed.ts
+└── seed/
+    ├── content/
+    ├── steps/
+    ├── seed-manifest.ts
+    ├── seed-utils.ts
+    └── verify-seed.ts
+```
+
+Rules:
+
+- `seed.ts` is a small entry-point runner;
+- Content is split cleanly by financial domain;
+- Validate foreign key references before writing;
+- Use stable, predictable slugs;
+- Use canonical recipe hashes for Craft combinations;
+- Perform idempotent upserts (`upsert` / `findUnique` + `create`);
+- Use Prisma transactions for related records;
+- Do not seed core user activity records;
+- Optional local-only demo profile;
+- Never commit passwords or credentials to Git;
+- Document explicit sources, assumptions, safety labels, and limitations;
+- Include no misleading financial claims (**Education Only, Simulation Only**).
 
 ---
 
 ## NestJS Generator Policy — No Automatic Unit Specs
 
-Full policy lives in `docs/ai/CODING_RULES.md` (section F) — this is the operational reminder for use during a loop:
-
-- Run every `nest g ...` generator that can create a test file with `--no-spec`.
-- Do not hand-create a `*.spec.ts` file unless the owner explicitly asks for a unit test in the current bounded step.
-- Never delete an existing spec or the E2E test file for this reason alone.
-- This does not reduce verification — see "4. Verify" below for what evidence to use instead.
+- Run every `nest g ...` generator with `--no-spec`.
+- Do not hand-create a `*.spec.ts` file unless the owner explicitly requests a unit test in that step.
+- Never delete existing spec files or e2e test files.
+- Verification is accomplished through `prisma validate`, `pnpm build`, `pnpm lint`, direct runtime verification scripts, database checks, and existing E2E tests.
+- Temporary verification scripts must be deleted before committing.
 
 ---
 
 ## Stepwise Learning Loop
 
-Every implementation step must follow this exact loop. Full description of each stage lives in `docs/ai/STEPWISE_WORKFLOW.md` — this section keeps the actionable checklist.
+Every implementation step must follow this exact loop:
 
 ### 1. Observe
 
 Before changing files:
 
-- confirm the repository path;
+- confirm the repository path and working directory;
+- inspect git status (`git status --short`, `git log -1 --oneline`);
 - inspect only files relevant to the current step;
-- display current Git status if Git exists;
-- identify existing patterns that the new function must follow;
-- do not scan the entire repository without a concrete reason;
 - if unexpected uncommitted changes exist, stop and report — do not overwrite.
 
 ### 2. Explain
@@ -121,288 +275,88 @@ Before writing code, explain in Thai:
 - why the step matters;
 - scope;
 - out-of-scope;
-- files that will be read;
-- files that may be created or modified;
+- files to create or modify;
 - request flow;
-- expected success case;
-- expected error case;
+- expected success case & error cases;
 - risks.
-
-The owner must be able to understand how the function works before implementation starts.
 
 ### 3. Implement
 
-Implement only the current bounded step.
+Implement only the current bounded step:
 
-Rules:
-
-- create only files required by the current step;
-- do not create future feature folders;
+- create/modify only files required for this step;
+- do not scaffold future feature modules;
 - do not install unrelated packages;
-- do not refactor unrelated code;
-- do not rename unrelated files;
-- preserve the existing teacher-style structure;
-- prefer the simplest implementation that satisfies the current requirement;
-- use `--no-spec` on any Nest CLI generator run; do not hand-create a unit spec unless the owner explicitly requested one for this step.
+- do not refactor completed code unless touched and approved;
+- use `--no-spec` on Nest CLI generators.
 
 ### 4. Verify
 
-Run only the smallest useful verification. A step with no new unit spec is not unverified — use whichever of these actually applies:
+Perform static and runtime verification:
 
-- compile or type-check the touched area;
-- build and lint;
-- Prisma format/validate/generate, when relevant;
-- call the endpoint manually when relevant;
-- verify both success and error behavior;
-- run the existing E2E test when it covers the change;
-- inspect the diff;
-- confirm no unrelated files changed.
-
-Never claim success without evidence.
+- `prisma validate`
+- `pnpm build`
+- `pnpm lint`
+- `pnpm test` & `pnpm test:e2e`
+- Search changed files for unsafe type casts (`any`, `as any`, `as unknown`, `@ts-ignore`)
+- Run a temporary untracked verification script for live runtime testing
+- Clean up test data and remove temporary verification scripts before committing.
 
 ### 5. Teach Back
 
-After verification, explain:
+Explain to the owner in Thai:
 
-- what each changed file does;
-- how the files call one another;
-- the full request flow;
-- what data enters;
-- what data is stored;
-- what response leaves;
-- what error can happen;
-- what the owner should remember.
-
-Use a compact flow such as:
-
-```text
-Request
-→ Controller
-→ DTO / Pipe
-→ Service
-→ Prisma
-→ PostgreSQL
-→ Response
-```
+- what files were touched and created;
+- how the logic flows top-to-bottom;
+- how it connects to existing modules;
+- key design decisions.
 
 ### 6. Checkpoint
 
-End every loop with:
+Create one local Git commit:
 
-```text
-STEP_RESULT:
-STATUS:
-FILES_CHANGED:
-VERIFICATION:
-WHAT_WAS_LEARNED:
-NEXT_RECOMMENDED_STEP:
-STOPPED_BEFORE_NEXT_STEP: YES
-```
-
-Create one semantic local commit only when verification has passed and the owner has authorized it. Never push without explicit owner instruction.
+- stage only authorized tracked files;
+- use a descriptive commit message (`feat: ...`, `fix: ...`, `docs: ...`);
+- do not push to remote unless explicitly instructed.
 
 ### 7. Stop
 
-Stop after the current step.
-
-Do not automatically continue to the next function.
+Recommend exactly one next bounded step, then stop and wait for owner approval. Never continue automatically.
 
 ---
 
-## Scope Control
-
-### Allowed in one loop
-
-Examples:
-
-- create `GET /health`;
-- connect Prisma to PostgreSQL;
-- create one Prisma model;
-- create `GET /element-categories`;
-- create `POST /element-categories`;
-- create one DTO;
-- create one direct test;
-- connect one frontend page to one backend endpoint.
-
-### Not allowed in one loop
-
-Examples:
-
-- generate all 15 ERD models at once;
-- create all feature folders;
-- implement full authentication;
-- implement all CRUD endpoints;
-- build the entire Canvas;
-- build all simulations;
-- create frontend and backend for multiple modules together;
-- install a large package set for future use.
-
----
-
-## Runtime Safety and Data Rules (summary)
-
-Full hard safety rules live in `AGENTS.md`. Quick reminders relevant to this skill:
-
-- Never delete or overwrite existing owner files without explicit approval.
-- Never modify the Fakebook teacher repositories.
-- Never run destructive database or migration commands without approval.
-- Never commit secrets or store plain-text passwords.
-- Never hard-delete shared master data such as Elements or Craft Recipes in the MVP — use status fields for deactivation instead.
-
----
-
-## FinCraft Data Behavior
-
-### Existing Element
-
-If Craft produces an Element that already exists:
-
-- return the existing Element;
-- do not create a duplicate Element;
-- create `user_elements` only if the user has not unlocked it;
-- create a discovery event for every Craft attempt;
-- return whether the result is new for that user.
-
-### Recipe Duplicate
-
-For commutative recipes:
+## Project Execution Sequence
 
 ```text
-Income + Expense
-Expense + Income
+Backend Auth MVP Complete (Commit cd910c6)
+  │
+  ▼
+P5_SEED_1_PLAN_CORE_CONTENT_001 (Current Next Step — Plan-only task)
+  │
+  ▼
+Implement Seed Infrastructure
+  │
+  ▼
+Seed Core Content Set
+  │
+  ▼
+ElementCategory & Element Read APIs
+  │
+  ▼
+Admin CRUD Endpoints
+  │
+  ▼
+Craft Recipe & Discovery Engines (POST /craft)
+  │
+  ▼
+User Discoveries & Knowledge Graph
+  │
+  ▼
+Basic Simulation Engine & Runs
+  │
+  ▼
+Frontend App Router Submission Flow
+  │
+  ▼
+Final Presentation & Verification
 ```
-
-must resolve to the same canonical input hash. NestJS creates the hash; PostgreSQL enforces uniqueness.
-
-### Simulation
-
-- formulas live in NestJS;
-- inputs and outputs may be stored in `simulation_runs`;
-- simulation runs are historical records and must not be edited;
-- assumptions must be shown to users even when they are defined in code.
-
----
-
-## Evidence Standard
-
-A step is complete only when the agent provides direct evidence such as:
-
-- command output;
-- passing direct test;
-- HTTP response;
-- Prisma query result;
-- type-check result;
-- diff summary.
-
-The agent must distinguish: observed fact, inference, recommendation, unresolved question.
-
----
-
-## Required Response Before Coding
-
-```text
-CURRENT STEP:
-OBJECTIVE:
-WHY IT MATTERS:
-SCOPE:
-OUT OF SCOPE:
-FILES TO READ:
-FILES TO CREATE OR MODIFY:
-REQUEST FLOW:
-RISKS:
-VERIFICATION PLAN:
-WAITING FOR IMPLEMENTATION APPROVAL:
-```
-
-If the owner has already explicitly requested implementation, replace the final line with:
-
-```text
-IMPLEMENTATION AUTHORIZED: YES
-```
-
----
-
-## Required Response After Coding
-
-```text
-STEP_RESULT:
-STATUS: PASS | FAIL | BLOCKED
-
-FILES_CHANGED:
-- path
-- path
-
-HOW THE FILES CONNECT:
-1.
-2.
-3.
-
-VERIFICATION:
-- command:
-- result:
-
-SUCCESS CASE:
-ERROR CASE:
-
-WHAT WAS LEARNED:
-
-NEXT RECOMMENDED STEP:
-
-STOPPED_BEFORE_NEXT_STEP: YES
-```
-
----
-
-## Initial Project Sequence
-
-Follow this order unless the owner changes it:
-
-```text
-STEP 0  — Initialize NestJS backend only              [DONE — commit 34117a1]
-STEP 1  — Explain generated NestJS files               [DONE]
-STEP 2  — Add GET /health                              ← next bounded step (P1)
-STEP 3  — Connect Prisma and PostgreSQL
-STEP 4  — Create the first Prisma model only
-STEP 5  — GET /element-categories
-STEP 6  — GET /element-categories/:id
-STEP 7  — POST /element-categories
-STEP 8  — PATCH /element-categories/:id
-STEP 9  — Authentication foundation
-STEP 10 — Elements
-STEP 11 — Craft Recipe
-STEP 12 — Craft action
-STEP 13 — Workspace
-STEP 14 — One Simulation
-STEP 15 — Connect the first frontend page
-```
-
-Do not jump ahead because a later feature appears more interesting.
-
----
-
-## Current Next Step
-
-Verified baseline (see `docs/ai/CURRENT_STATUS.md` for full evidence):
-
-- P0 backend foundation is complete and committed at `34117a1`.
-- `fincraft-lab-api` runs, builds, lints, and tests pass.
-- Prisma is not installed. PostgreSQL is not configured.
-- `GET /health` does not exist yet.
-- `fincraft-lab-web` remains empty and out of scope until its own step.
-
-The next bounded step is:
-
-```text
-STEP 2 — Implement GET /health as one bounded teacher-style backend function
-in fincraft-lab-api.
-```
-
-This step must not:
-
-- install Prisma or configure PostgreSQL;
-- create authentication;
-- initialize the frontend;
-- install unrelated packages;
-- implement any endpoint beyond `GET /health`.
-
-After implementation, verify and teach back what each changed file does, then stop.
