@@ -52,17 +52,16 @@ git status --short
 - **P5_SEED_8B audit**: PASS (Read-only post-commit audit of Core Craft Recipe V1 plan)
 - **P5_SEED_8C checkpoint**: `761b672` — "feat: seed core craft recipes"
 - **P5_SEED_8D audit**: PASS (Read-only post-commit audit of Core Craft Recipe seed commit)
-- **P6_CRAFT_API_1A checkpoint**: frozen Craft API V1 contract (`FROZEN_CRAFT_API_CONTRACT_V1`)
+- **P6_CRAFT_API_1A checkpoint**: `bc5182d` — "docs: freeze craft api contract v1"
+- **P6_CRAFT_API_1B audit**: PASS (Read-only post-commit audit of Craft API V1 contract)
+- **P6_CRAFT_API_2A checkpoint**: "feat: add craft request dto"
 
-### Backend (`fincraft-lab-api`) — Craft API V1 Contract Frozen (`POST /craft`)
+### Backend (`fincraft-lab-api`) — Craft API Request DTO Implemented (`CraftRequestDto`)
 
-- **Craft API Status**: Plan FROZEN (`FROZEN_CRAFT_API_CONTRACT_V1` in `docs/ai/plans/CRAFT_API_PLAN.md`).
-- **Endpoint**: `POST /craft` (authenticated via `AuthGuard`).
-- **Request DTO**: `{ inputElementIds: [string, string] }` (exactly 2 distinct UUIDs).
-- **Core Engine Helper**: `calculateCraftInputHash(idA, idB)` in `src/common/craft/calculate-craft-input-hash.ts`.
-- **Response Union**: `DISCOVERY` (`isNewDiscovery: true/false`, `element`, `detail`) vs `NO_RECIPE` (both HTTP 200 OK).
-- **Audit Event Logging**: `DiscoveryEvent` natively logs `SUCCESS` and `NO_RECIPE` outcomes.
-- **Database Code Implementation**: Not yet implemented (Documentation-only contract planning task; no source, schema, or DB changes occurred).
+- **Craft Request DTO**: Implemented in `src/craft/dto/craft-request.dto.ts` (15 physical lines).
+- **Validation Rules**: Uses `@IsArray()`, `@ArrayMinSize(2)`, `@ArrayMaxSize(2)`, `@ArrayUnique()`, `@IsUUID('4', { each: true })` to validate body format for `POST /craft`.
+- **Validation Pipe Compatibility**: Fully verified against global `ValidationPipe` settings (`transform: true, whitelist: true, forbidNonWhitelisted: true`) across 17 test cases.
+- **Craft Module / Controller / Service Status**: Not implemented yet (DTO-only task; no controller, service, module, DB access, or schema changes occurred).
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
@@ -88,8 +87,9 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P6_CRAFT_API_1B_AUDIT_CRAFT_CONTRACT_001 — Independent read-only audit of frozen Craft API V1 contract in CRAFT_API_PLAN.md.
+P6_CRAFT_API_2B_POST_COMMIT_CRAFT_REQUEST_DTO_AUDIT_001 — Independent read-only audit of commit "feat: add craft request dto".
 ```
+
 
 
 ## Related documents
