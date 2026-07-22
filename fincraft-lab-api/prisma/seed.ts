@@ -1,4 +1,5 @@
 import { CATEGORY_SEED_DATA } from './seed/content/categories';
+import { DISCOVERY_ELEMENT_DETAIL_BATCH_A_SEED_DATA } from './seed/content/discovery-element-details-batch-a';
 import { DISCOVERY_ELEMENT_SEED_DATA } from './seed/content/discovery-elements';
 import { STARTER_ELEMENT_DETAIL_SEED_DATA } from './seed/content/starter-element-details';
 import { STARTER_ELEMENT_SEED_DATA } from './seed/content/starter-elements';
@@ -19,10 +20,10 @@ import {
 } from './seed/verify-seed';
 
 async function main(): Promise<void> {
-  console.log('--- FinCraft Lab Seed v1 (Starter Element Details Slice) ---');
+  console.log('--- FinCraft Lab Seed v1 (Starter Details + Discovery Details Batch A) ---');
 
   // 1. In-memory pre-write validation before DB connection
-  console.log('1. Validating Category, Element, and Starter Detail seed content in memory...');
+  console.log('1. Validating Category, Element, Starter Detail, and Discovery Detail Batch A seed content in memory...');
   validateCategoryContent(CATEGORY_SEED_DATA);
   validateAllElementContent(
     STARTER_ELEMENT_SEED_DATA,
@@ -31,6 +32,7 @@ async function main(): Promise<void> {
   );
   validateAllDetailContent(
     STARTER_ELEMENT_DETAIL_SEED_DATA,
+    DISCOVERY_ELEMENT_DETAIL_BATCH_A_SEED_DATA,
     STARTER_ELEMENT_SEED_DATA,
     DISCOVERY_ELEMENT_SEED_DATA,
   );
@@ -100,14 +102,14 @@ async function main(): Promise<void> {
       );
     }
 
-    const elementMap = new Map<string, string>();
+    const starterElementMap = new Map<string, string>();
     for (const elem of dbStarters) {
       if (!elem.isStarter) {
         throw new Error(
           `Target Element "${elem.slug}" is not a Starter Element (isStarter is false)`,
         );
       }
-      elementMap.set(elem.slug, elem.id);
+      starterElementMap.set(elem.slug, elem.id);
     }
     console.log('   Starter Element resolution complete.');
 
@@ -117,13 +119,49 @@ async function main(): Promise<void> {
       await seedDiscoveryDetailsStep(
         tx,
         STARTER_ELEMENT_DETAIL_SEED_DATA,
-        elementMap,
+        starterElementMap,
       );
     });
     console.log('   Starter Element DiscoveryDetail upserts complete.');
 
-    // 9. Run post-seed verifications
-    console.log('8. Verifying database state...');
+    // 9. Resolve 11 Batch A Discovery Element IDs by Slug and verify isStarter false
+    console.log('8. Resolving 11 Batch A Discovery Element IDs and verifying isStarter status...');
+    const batchASlugs = DISCOVERY_ELEMENT_DETAIL_BATCH_A_SEED_DATA.map((d) => d.elementSlug);
+    const dbBatchADiscoveries = await prisma.element.findMany({
+      where: { slug: { in: batchASlugs } },
+      select: { id: true, slug: true, isStarter: true },
+    });
+
+    if (dbBatchADiscoveries.length !== DISCOVERY_ELEMENT_DETAIL_BATCH_A_SEED_DATA.length) {
+      throw new Error(
+        `Expected ${DISCOVERY_ELEMENT_DETAIL_BATCH_A_SEED_DATA.length} Batch A Discovery Elements in DB, found ${dbBatchADiscoveries.length}`,
+      );
+    }
+
+    const batchADiscoveryElementMap = new Map<string, string>();
+    for (const elem of dbBatchADiscoveries) {
+      if (elem.isStarter) {
+        throw new Error(
+          `Target Batch A Element "${elem.slug}" is a Starter Element (isStarter is true)`,
+        );
+      }
+      batchADiscoveryElementMap.set(elem.slug, elem.id);
+    }
+    console.log('   Batch A Discovery Element resolution complete.');
+
+    // 10. Run 11 Batch A Discovery Detail upserts in transaction
+    console.log('9. Upserting 11 Batch A Discovery Element DiscoveryDetails...');
+    await prisma.$transaction(async (tx) => {
+      await seedDiscoveryDetailsStep(
+        tx,
+        DISCOVERY_ELEMENT_DETAIL_BATCH_A_SEED_DATA,
+        batchADiscoveryElementMap,
+      );
+    });
+    console.log('   Batch A Discovery Element DiscoveryDetail upserts complete.');
+
+    // 11. Run post-seed verifications
+    console.log('10. Verifying database state...');
     await verifyCategorySeed(prisma, CATEGORY_SEED_DATA);
     await verifyElementSeed(
       prisma,
@@ -135,6 +173,7 @@ async function main(): Promise<void> {
     await verifyDetailSeed(
       prisma,
       STARTER_ELEMENT_DETAIL_SEED_DATA,
+      DISCOVERY_ELEMENT_DETAIL_BATCH_A_SEED_DATA,
       STARTER_ELEMENT_SEED_DATA,
       DISCOVERY_ELEMENT_SEED_DATA,
     );

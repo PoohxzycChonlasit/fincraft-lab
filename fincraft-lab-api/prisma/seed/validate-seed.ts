@@ -1,12 +1,15 @@
 import { RealityLevel, SafetyLabel } from '../../src/database/generated/prisma/client';
 import { CategorySeedInput } from './content/categories';
+import { DiscoveryElementDetailSeedInput } from './content/discovery-element-details-batch-a';
 import { StarterElementDetailSeedInput } from './content/starter-element-details';
 import { ElementSeedInput } from './content/starter-elements';
 import {
   EXPECTED_CATEGORY_COUNT,
+  EXPECTED_DISCOVERY_DETAIL_BATCH_A_COUNT,
   EXPECTED_DISCOVERY_ELEMENT_COUNT,
   EXPECTED_STARTER_DETAIL_COUNT,
   EXPECTED_STARTER_ELEMENT_COUNT,
+  EXPECTED_TOTAL_DETAIL_COUNT,
   EXPECTED_TOTAL_ELEMENT_COUNT,
 } from './seed-manifest';
 
@@ -152,30 +155,48 @@ export function validateAllElementContent(
 }
 
 export function validateAllDetailContent(
-  details: StarterElementDetailSeedInput[],
+  starterDetails: StarterElementDetailSeedInput[],
+  batchADetails: DiscoveryElementDetailSeedInput[],
   starters: ElementSeedInput[],
   discoveries: ElementSeedInput[],
 ): void {
   const errors: string[] = [];
 
-  if (details.length !== EXPECTED_STARTER_DETAIL_COUNT) {
+  if (starterDetails.length !== EXPECTED_STARTER_DETAIL_COUNT) {
     errors.push(
-      `Expected exactly ${EXPECTED_STARTER_DETAIL_COUNT} starter details, but found ${details.length}`,
+      `Expected exactly ${EXPECTED_STARTER_DETAIL_COUNT} starter details, but found ${starterDetails.length}`,
+    );
+  }
+
+  if (batchADetails.length !== EXPECTED_DISCOVERY_DETAIL_BATCH_A_COUNT) {
+    errors.push(
+      `Expected exactly ${EXPECTED_DISCOVERY_DETAIL_BATCH_A_COUNT} Batch A discovery details, but found ${batchADetails.length}`,
+    );
+  }
+
+  const combinedDetails = [...starterDetails, ...batchADetails];
+  if (combinedDetails.length !== EXPECTED_TOTAL_DETAIL_COUNT) {
+    errors.push(
+      `Expected exactly ${EXPECTED_TOTAL_DETAIL_COUNT} combined details, but found ${combinedDetails.length}`,
     );
   }
 
   const starterSlugSet = new Set(starters.map((s) => s.slug));
-  const discoverySlugSet = new Set(discoveries.map((d) => d.slug));
-  const seenSlugs = new Set<string>();
+  const batchADiscoverySlugs = discoveries.slice(0, 11).map((d) => d.slug);
+  const batchBDiscoverySlugs = discoveries.slice(11).map((d) => d.slug);
+  const batchADiscoverySlugSet = new Set(batchADiscoverySlugs);
+  const batchBDiscoverySlugSet = new Set(batchBDiscoverySlugs);
 
+  const seenSlugs = new Set<string>();
   const validRealityLevels = new Set(Object.values(RealityLevel));
   const validSafetyLabels = new Set(Object.values(SafetyLabel));
 
-  for (let i = 0; i < details.length; i++) {
-    const detail = details[i];
+  // Validate Starter Details
+  for (let i = 0; i < starterDetails.length; i++) {
+    const detail = starterDetails[i];
 
     if (!detail.elementSlug || detail.elementSlug.trim().length === 0) {
-      errors.push(`Detail index ${i} has empty elementSlug`);
+      errors.push(`Starter Detail index ${i} has empty elementSlug`);
     } else {
       const slug = detail.elementSlug.trim().toLowerCase();
       if (seenSlugs.has(slug)) {
@@ -184,14 +205,40 @@ export function validateAllDetailContent(
       seenSlugs.add(slug);
 
       if (!starterSlugSet.has(slug)) {
-        errors.push(`Detail elementSlug "${detail.elementSlug}" is not a recognized Starter Element`);
-      }
-
-      if (discoverySlugSet.has(slug)) {
-        errors.push(`Detail elementSlug "${detail.elementSlug}" targets a Discovery Element, which is forbidden in this task`);
+        errors.push(`Starter Detail elementSlug "${detail.elementSlug}" is not a recognized Starter Element`);
       }
     }
+  }
 
+  // Validate Batch A Discovery Details
+  for (let i = 0; i < batchADetails.length; i++) {
+    const detail = batchADetails[i];
+
+    if (!detail.elementSlug || detail.elementSlug.trim().length === 0) {
+      errors.push(`Batch A Detail index ${i} has empty elementSlug`);
+    } else {
+      const slug = detail.elementSlug.trim().toLowerCase();
+      if (seenSlugs.has(slug)) {
+        errors.push(`Duplicate detail elementSlug detected across sets: "${detail.elementSlug}"`);
+      }
+      seenSlugs.add(slug);
+
+      if (starterSlugSet.has(slug)) {
+        errors.push(`Batch A Detail elementSlug "${detail.elementSlug}" targets a Starter Element, which is forbidden`);
+      }
+
+      if (batchBDiscoverySlugSet.has(slug)) {
+        errors.push(`Batch A Detail elementSlug "${detail.elementSlug}" targets a Batch B Discovery Element, which is forbidden`);
+      }
+
+      if (!batchADiscoverySlugSet.has(slug)) {
+        errors.push(`Batch A Detail elementSlug "${detail.elementSlug}" is not a recognized Batch A Discovery Element`);
+      }
+    }
+  }
+
+  // Validate shared content fields for all details
+  for (const detail of combinedDetails) {
     const textFields: Array<{ name: keyof StarterElementDetailSeedInput; val: string | undefined }> = [
       { name: 'shortDescription', val: detail.shortDescription },
       { name: 'realLesson', val: detail.realLesson },

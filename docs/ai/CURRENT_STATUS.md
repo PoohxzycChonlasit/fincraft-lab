@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P5_SEED_6A_RESEARCH_AND_FREEZE_DISCOVERY_DETAILS_BATCH_A)
+## Verified status (updated during P5_SEED_6B_IMPLEMENT_DISCOVERY_DETAILS_BATCH_A)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -39,14 +39,15 @@ git status --short
 - **P5_SEED_5A3 checkpoint**: `d5751bb` — "docs: repair starter detail sources"
 - **P5_SEED_5A3_WORDING checkpoint**: `ffaafb2` — "docs: adjust starter detail source verification wording"
 - **P5_SEED_5B checkpoint**: `66d2325` — "feat: seed starter element details"
-- **P5_SEED_6A checkpoint**: "docs: freeze discovery detail batch a content" (see git log)
+- **P5_SEED_6A checkpoint**: `337d066` — "docs: freeze discovery detail batch a content"
+- **P5_SEED_6B checkpoint**: "feat: seed discovery detail batch a" (see git log)
 
-### Backend (`fincraft-lab-api`) — Submission Seed v1 (Discovery Details Batch A Frozen V1)
+### Backend (`fincraft-lab-api`) — Submission Seed v1 (Discovery Details Batch A Implemented)
 
 - **Starter Details Seeded**: Exactly 14 DiscoveryDetail records targeting all 14 Starter Elements seeded in PostgreSQL database (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`).
-- **Discovery Details Batch A Frozen**: Exactly 11 DiscoveryDetail records targeting Discovery Elements (sortOrder 15-25) researched, drafted, source-verified, and frozen in documentation (`FROZEN_DISCOVERY_DETAILS_BATCH_A_SOURCE_VERIFIED_V1`). No Seed code implemented for Discovery Details in this task.
-- **Source Counts (Batch A)**: 13 source objects across 11 Discovery Details, pointing to 6 unique URLs (`VERIFIED_SPECIFIC_PAGE`: 3, `VERIFIED_PUBLICATION`: 5, `VERIFIED_GENERAL_HUB`: 5). Reported separately from Starter Details sources.
-- **Discovery Details DB Count**: Exactly 14 rows in PostgreSQL database (14 Starter Elements, 0 Discovery Elements).
+- **Discovery Details Batch A Seeded**: Exactly 11 DiscoveryDetail records targeting Batch A Discovery Elements (sortOrder 15-25) seeded in PostgreSQL database (`FROZEN_DISCOVERY_DETAILS_BATCH_A_SOURCE_VERIFIED_V1`).
+- **Total DiscoveryDetail Database Rows**: Exactly 25 rows in PostgreSQL database (14 Starter Element Details + 11 Batch A Discovery Element Details + 0 Batch B Discovery Element Details).
+- **Source Counts (Batch A)**: 13 source objects across 11 Discovery Details, pointing to 7 unique URLs (`VERIFIED_SPECIFIC_PAGE`: 2, `VERIFIED_PUBLICATION`: 1, `VERIFIED_GENERAL_HUB`: 4). Reported separately from Starter Details sources.
 - **Seeded Elements Table**: Exactly 36 Elements in PostgreSQL database (14 Starter Elements + 22 Discovery Elements).
 - **Seeded Categories Table**: Exactly 8 Element Categories in PostgreSQL database.
 - **Protected Tables Verified**: Protected table count deltas (`currentCount - initialCount === 0`) verified for 8 protected tables (`users`, `pets`, `userElements`, `discoveryEvents`, `workspaces`, `workspaceNodes`, `workspaceEdges`, `simulationRuns`). All deltas equal 0 (`delta = 0`).
@@ -73,7 +74,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P5_SEED_6A2_AUDIT_DISCOVERY_DETAILS_BATCH_A_CONTENT_001 — Perform an independent read-only audit of frozen DiscoveryDetail Batch A content in CORE_CONTENT_SEED_PLAN.md.
+P5_SEED_7A_RESEARCH_AND_FREEZE_DISCOVERY_DETAILS_BATCH_B_001 — Research, draft, validate, source-verify, and freeze DiscoveryDetail content for the remaining eleven Discovery Elements in Batch B (sortOrder 26 through 36) in CORE_CONTENT_SEED_PLAN.md.
 ```
 
 ## Related documents
