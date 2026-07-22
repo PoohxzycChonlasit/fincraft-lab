@@ -24,8 +24,8 @@ This document lists only files and folders that **actually exist** right now. Fu
 | `PROJECT_CONTEXT.md` | Relatively stable product context | created in P0.5 | Update when product scope changes |
 | `CODING_RULES.md` | Full coding rules & teacher-aligned readability/service-boundary guidelines | created in P0.5, updated in P4_AUTH_6 | Update when coding rules change |
 | `STEPWISE_WORKFLOW.md` | Lifecycle of each bounded step | created in P0.5 | Update when the workflow changes |
-| `CURRENT_STATUS.md` | Latest verified status | created in P0.5, updated in P4_AUTH_6 | **Update at the end of every completed step** (evidence-based) |
-| `FILE_MAP.md` | This file | created in P0.5, updated in P4_AUTH_6 | Update when a new file actually exists |
+| `CURRENT_STATUS.md` | Latest verified status | created in P0.5, updated in P4_AUTH_7 | **Update at the end of every completed step** (evidence-based) |
+| `FILE_MAP.md` | This file | created in P0.5, updated in P4_AUTH_7 | Update when a new file actually exists |
 | `plans/ELEMENT_CATEGORY_CRUD_PLAN.md` | Teacher-style design & bounded implementation plan for ElementCategory CRUD | created in P4A | Update if design decisions change |
 | `plans/CORE_CONTENT_SEED_PLAN.md` | Canonical specification and implementation plan for Submission Seed v1 | created in P5_SEED_1 | Update if seed specifications change |
 | `plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md` | Complete implementation plan for refactoring Auth to Fakebuck service-boundary architecture (`UserService`, `BcryptService`, `AccessTokenService`) | created in P4_AUTH_6 | Update if refactor decisions change |
@@ -61,9 +61,12 @@ This document lists only files and folders that **actually exist** right now. Fu
 | `src/health/health.controller.ts` | Route prefix `health`; `GET /health` decorated with `@Public()` | updated in P4_AUTH_3 | Edit only if Health feature changes |
 | `src/health/health.service.ts` | Returns `{ status, service, timestamp }` | created in P1 | Edit only if Health feature changes |
 | `src/health/health.controller.spec.ts` | Unit test: status, service name, valid ISO-8601 timestamp | created in P1 | Extend only if HealthController behavior changes |
-| `src/auth/auth.module.ts` | Imports `DatabaseModule`, registers `JwtModule.registerAsync`, global `AuthGuard` and `RolesGuard` (`APP_GUARD`), `AuthController`, and `AuthService` | updated in P4_AUTH_5 | Edit when new auth features are added |
+| `src/user/user.module.ts` | Imports `DatabaseModule`, declares and exports `UserService` | created in P4_AUTH_7 | Edit when new User features are added |
+| `src/user/user.service.ts` | Handles user creation, user lookups by email & id, safe Prisma selects, and P2002 duplicate email mapping | created in P4_AUTH_7 | Add new User queries when authorized |
+| `src/user/dto/user-response.dto.ts` | Safe User response contract class (`id`, `email`, `displayName`, `avatarUrl`, `role`, `status`, `createdAt`, `updatedAt`) | created in P4_AUTH_7 | Do not edit unless User response fields change |
+| `src/auth/auth.module.ts` | Imports `UserModule`, registers `JwtModule.registerAsync`, global `AuthGuard` and `RolesGuard` (`APP_GUARD`), `AuthController`, and `AuthService` | updated in P4_AUTH_7 | Edit when new auth features are added |
 | `src/auth/auth.controller.ts` | Route prefix `auth`; `POST /auth/register`, `POST /auth/login`, and `GET /auth/me` | updated in P4_AUTH_4 | Add new routes when authorized |
-| `src/auth/auth.service.ts` | Handles registration with bcrypt, login with password verification & JWT signing, and getCurrentUser | updated in P4_AUTH_4 | Add new auth logic when authorized |
+| `src/auth/auth.service.ts` | Coordinates registration, login, and current-user flows by delegating user persistence to `UserService` | updated in P4_AUTH_7 | Add new auth logic when authorized |
 | `src/auth/decorators/public.decorator.ts` | Custom `@Public()` decorator for unauthenticated route bypass | created in P4_AUTH_3 | Do not edit unless public metadata rules change |
 | `src/auth/decorators/current-user.decorator.ts` | Custom `@CurrentUser()` parameter decorator returning `AccessTokenPayload` | created in P4_AUTH_4 | Do not edit unless decorator rules change |
 | `src/auth/decorators/roles.decorator.ts` | Custom `@Roles(...roles: UserRole[])` decorator for role-based metadata | created in P4_AUTH_5 | Do not edit unless roles decorator rules change |
@@ -89,7 +92,6 @@ Empty — not yet initialized (out of scope).
 ## Planned, not created
 
 ```text
-fincraft-lab-api/src/user/
 fincraft-lab-api/src/infrastructure/hash/
 fincraft-lab-api/src/infrastructure/jwt/
 

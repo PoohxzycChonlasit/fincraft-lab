@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P4_AUTH_6_ALIGN_SKILL_AND_PLAN_FAKEBUCK_REFACTOR)
+## Verified status (updated during P4_AUTH_7_IMPLEMENT_USER_SERVICE_EXTRACTION)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -30,14 +30,17 @@ git status --short
 - **P5_PREP checkpoint**: `8451344` — "docs: align AI agents with teacher coding style"
 - **P5_SEED_1 checkpoint**: `66851c0` — "docs: plan core content seed"
 - **P5_SEED_2 checkpoint**: `d807255` — "feat: add core seed infrastructure and categories"
-- **P4_AUTH_6 checkpoint**: "docs: plan Fakebuck-aligned auth refactor" (see git log)
+- **P4_AUTH_6 checkpoint**: `709594a` — "docs: plan Fakebuck-aligned auth refactor"
+- **P4_AUTH_7 checkpoint**: "refactor: extract user persistence from auth" (see git log)
 
-### Backend (`fincraft-lab-api`) — Skill v3 & Fakebuck Refactor Planned
+### Backend (`fincraft-lab-api`) — Phase A Fakebuck Auth Refactor Complete
 
-- **Auth Runtime Behavior Verified Complete**: Registration, Login, JWT access tokens, global `AuthGuard`, `@Public()`, `GET /auth/me`, `@CurrentUser()`, `@Roles()`, and global `RolesGuard` are 100% complete and verified.
-- **Skill v3 & Fakebuck Refactor Plan Canonical**: Skill v3 (`SKILL.md`) and `docs/ai/plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md` created. Approves `AuthController` -> `AuthService` -> (`UserService`, `BcryptService`, `AccessTokenService`) service-boundary pattern.
-- **No Application Code Changed**: No source code (`src/**`), Prisma schema, migrations, or dependencies were modified in this planning step.
-- **Seeded Content Intact**: 8 Element Categories seeded and verified in PostgreSQL database.
+- **Phase A UserService Extraction Implemented**: Created `UserModule`, `UserService` (`src/user/user.service.ts`), and `UserResponseDto` (`src/user/dto/user-response.dto.ts`).
+- **Prisma User Persistence & P2002 Error Mapping Moved**: All database queries (`createUser`, `getUserByEmail`, `getUserById`), safe `select` clauses (`userResponseSelect`, `userWithPasswordSelect`), and Prisma `P2002` duplicate email error mapping are owned by `UserService`.
+- **`AuthService` Prisma Dependency Removed**: `AuthService` delegates user persistence to `UserService`. `AuthService` contains 0 imports or references to `PrismaService`, `Prisma`, or `this.prisma`.
+- **Phase A Boundary Respected**: `AuthService` retains direct `bcrypt` hashing and `JwtService` signing for Phase A. `BcryptService` and `AccessTokenService` are deferred to Phase B (`P4_AUTH_8`).
+- **Auth Behavior & Security Invariants Verified**: Verified via 11-step programmatic live HTTP test (Register 201, Duplicate Email 409, Login 200, Wrong Password 401, Unknown Email 401, GET /auth/me 200, INACTIVE 401, BANNED 401, Stale Token 401, Health 200, User count parity).
+- **Seeded Content Intact**: 8 Element Categories remain intact in PostgreSQL.
 
 ### Frontend (`fincraft-lab-web`)
 
@@ -49,7 +52,8 @@ git status --short
 - `pnpm lint` — 0 errors, 1 pre-existing warning in `main.ts` (`@typescript-eslint/no-floating-promises`)
 - `pnpm test` — 3/3 unit tests passed (HealthController status, service name, ISO timestamp)
 - `pnpm test:e2e` — 2/2 e2e tests passed (`GET /health` -> 200, `GET /` -> 404) via Node VM modules
-- Search for unsafe casts (`any`, `as any`, `as unknown`, `@ts-ignore`) in `src/auth/` & `prisma/seed/` — 0 matches
+- Search for unsafe casts (`any`, `as any`, `as unknown`, `@ts-ignore`) in `src/` — 0 matches
+- Programmatic 11-step live HTTP verification — passed
 
 ## Active Project Rule: No Automatic Unit Spec Generation
 
@@ -58,7 +62,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P4_AUTH_7_IMPLEMENT_USER_SERVICE_EXTRACTION_001 — Phase A of Fakebuck Auth Refactor: Create UserModule, UserService, and UserResponseDto without altering runtime Auth behavior.
+P4_AUTH_8_IMPLEMENT_HASH_AND_ACCESS_TOKEN_SERVICES_001 — Phase B of Fakebuck Auth Refactor: Create HashModule (BcryptService) and AccessTokenModule (AccessTokenService).
 ```
 
 ## Related documents
