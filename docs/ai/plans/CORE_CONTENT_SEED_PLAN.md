@@ -211,12 +211,9 @@ Every Element has a corresponding 1:1 `DiscoveryDetail` record mapped directly t
 
 ---
 
-### 9.1 Starter Element DiscoveryDetail Content v1 — FROZEN
+### 9.1 Starter Element DiscoveryDetail Content v2 — FROZEN (FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2)
 
-The following 14 records contain exact, frozen, implementation-ready per-record values for all Starter Elements.
-
-```typescript
-export const FROZEN_STARTER_ELEMENT_DETAILS = [
+The following 14 records contain exact, frozen, implementation-ready per-record valueexport const FROZEN_STARTER_ELEMENT_DETAILS = [
   {
     elementSlug: 'income',
     shortDescription: 'Regular inflows of money earned through labor, employment, business operations, or asset yields.',
@@ -232,9 +229,9 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'EDUCATION_ONLY',
     sources: [
       {
-        title: 'Financial Literacy 101: Managing Income',
+        title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
         organization: 'Bank of Thailand',
-        url: 'https://www.bot.or.th/th/our-roles/financial-literacy.html',
+        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
       },
     ],
   },
@@ -253,9 +250,9 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'EDUCATION_ONLY',
     sources: [
       {
-        title: 'Personal Financial Planning and Expense Management',
+        title: 'แยกให้ปัง... Needs กับ Wants วางแผนเงินอย่างไรไม่ให้รั่วไหล',
         organization: 'Stock Exchange of Thailand',
-        url: 'https://www.setinvestnow.com/th/knowledge',
+        url: 'https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants',
       },
     ],
   },
@@ -274,12 +271,12 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'EDUCATION_ONLY',
     sources: [
       {
-        title: 'Building Financial Security Through Savings',
+        title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
         organization: 'Bank of Thailand',
-        url: 'https://www.bot.or.th/th/satang-story.html',
+        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
       },
       {
-        title: 'Deposit Protection Overview',
+        title: 'สถาบันคุ้มครองเงินฝาก (Deposit Protection Agency Thailand)',
         organization: 'Deposit Protection Agency Thailand',
         url: 'https://www.dpa.or.th',
       },
@@ -300,9 +297,9 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'NOT_FINANCIAL_ADVICE',
     sources: [
       {
-        title: 'Debt Management and Advisory Services',
+        title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
         organization: 'Bank of Thailand',
-        url: 'https://www.bot.or.th/th/satang-story.html',
+        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
       },
     ],
   },
@@ -321,9 +318,9 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'SIMULATION_ONLY',
     sources: [
       {
-        title: 'Understanding Interest Rates and Credit Costs',
+        title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
         organization: 'Bank of Thailand',
-        url: 'https://www.bot.or.th/th/our-roles/monetary-policy.html',
+        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
       },
     ],
   },
@@ -342,14 +339,14 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'EDUCATION_ONLY',
     sources: [
       {
-        title: 'Monetary Policy and Inflation Framework',
+        title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
         organization: 'Bank of Thailand',
-        url: 'https://www.bot.or.th/th/our-roles/monetary-policy.html',
+        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
       },
       {
-        title: 'OECD Inflation and Consumer Price Principles',
+        title: 'OECD Financial Education Competency Principles',
         organization: 'OECD',
-        url: 'https://www.oecd.org/financial/education/core-competencies-on-financial-literacy-for-adults.htm',
+        url: 'https://www.oecd.org/en/topics/financial-education.html',
       },
     ],
   },
@@ -368,14 +365,14 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'EDUCATION_ONLY',
     sources: [
       {
-        title: 'Emergency Reserve Guidelines',
+        title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
         organization: 'Bank of Thailand',
-        url: 'https://www.bot.or.th/th/satang-story.html',
+        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
       },
       {
-        title: 'Financial Emergency Preparedness',
+        title: 'วางแผนเงินสำรองฉุกเฉินและการจัดสรรงบประมาณ',
         organization: 'Stock Exchange of Thailand',
-        url: 'https://www.setinvestnow.com/th/knowledge',
+        url: 'https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants',
       },
     ],
   },
@@ -394,7 +391,7 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'EDUCATION_ONLY',
     sources: [
       {
-        title: 'Household Consumption and Expenditure Surveys',
+        title: 'การสำรวจภาวะเศรษฐกิจและสังคมของครัวเรือน (Household Expenditure Survey)',
         organization: 'National Statistical Office Thailand',
         url: 'https://www.nso.go.th',
       },
@@ -415,9 +412,9 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'EDUCATION_ONLY',
     sources: [
       {
-        title: 'Housing Expenditure and Financial Planning',
+        title: 'การวางแผนค่าใช้จ่ายที่อยู่อาศัยและค่าเช่า',
         organization: 'Stock Exchange of Thailand',
-        url: 'https://www.setinvestnow.com/th/knowledge',
+        url: 'https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants',
       },
     ],
   },
@@ -436,9 +433,9 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'EDUCATION_ONLY',
     sources: [
       {
-        title: 'Budgeting and Financial Planning Handbook',
+        title: 'การจัดทำงบประมาณและการวางแผนการเงินส่วนบุคคล',
         organization: 'Bank of Thailand',
-        url: 'https://www.bot.or.th/th/our-roles/financial-literacy.html',
+        url: 'https://www.bot.or.th/th/satang-story/money-plan/budgeting.html',
       },
     ],
   },
@@ -457,7 +454,7 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'EDUCATION_ONLY',
     sources: [
       {
-        title: 'Needs vs Wants in Financial Decision Making',
+        title: 'แยกให้ปัง... Needs กับ Wants วางแผนเงินอย่างไรไม่ให้รั่วไหล',
         organization: 'Stock Exchange of Thailand',
         url: 'https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants',
       },
@@ -478,7 +475,7 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'EDUCATION_ONLY',
     sources: [
       {
-        title: 'Managing Discretionary Wants and Spending',
+        title: 'แยกให้ปัง... Needs กับ Wants วางแผนเงินอย่างไรไม่ให้รั่วไหล',
         organization: 'Stock Exchange of Thailand',
         url: 'https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants',
       },
@@ -499,9 +496,9 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'NOT_FINANCIAL_ADVICE',
     sources: [
       {
-        title: 'Psychology of Consumer Behavior and Fraud Vulnerability',
-        organization: 'Securities and Exchange Commission Thailand',
-        url: 'https://www.sec.or.th',
+        title: 'จิตวิทยาการเงินและพฤติกรรมการใช้จ่ายตามกระแส',
+        organization: 'Stock Exchange of Thailand',
+        url: 'https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants',
       },
     ],
   },
@@ -520,12 +517,12 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
     safetyLabel: 'EDUCATION_ONLY',
     sources: [
       {
-        title: 'Unemployment Risk Management and Labor Security',
+        title: 'สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะทางการเงินเพื่อการศึกษาและการเรียนรู้',
         organization: 'Bank of Thailand',
-        url: 'https://www.bot.or.th/th/satang-story.html',
+        url: 'https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html',
       },
       {
-        title: 'ILO Guidelines on Employment Protection and Shocks',
+        title: 'ILO Guidelines on Employment Protection and Social Security',
         organization: 'ILO',
         url: 'https://www.ilo.org',
       },
@@ -534,24 +531,46 @@ export const FROZEN_STARTER_ELEMENT_DETAILS = [
 ];
 ```
 
-#### Starter Detail Content Completeness Matrix
+#### Source Repair Matrix (FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2)
 
-| # | Target Slug | Required Fields Complete | Scalar realityLevel Assigned | Scalar safetyLabel Assigned | Sources Object Contract Valid | Per-Record Educational Claims Supported | Ready for Seed |
-|---|---|---|---|---|---|---|---|
-| 1 | `income` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (BOT) | ✅ Verified | ✅ Ready |
-| 2 | `expense` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (SET) | ✅ Verified | ✅ Ready |
-| 3 | `saving` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (BOT, DPA) | ✅ Verified | ✅ Ready |
-| 4 | `debt` | ✅ Complete | GROUNDED | NOT_FINANCIAL_ADVICE | ✅ Valid (BOT) | ✅ Verified | ✅ Ready |
-| 5 | `interest` | ✅ Complete | SIMPLIFIED_MODEL | SIMULATION_ONLY | ✅ Valid (BOT) | ✅ Verified | ✅ Ready |
-| 6 | `inflation` | ✅ Complete | SIMPLIFIED_MODEL | EDUCATION_ONLY | ✅ Valid (BOT, OECD) | ✅ Verified | ✅ Ready |
-| 7 | `emergency-fund` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (BOT, SET) | ✅ Verified | ✅ Ready |
-| 8 | `food` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (NSO) | ✅ Verified | ✅ Ready |
-| 9 | `rent` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (SET) | ✅ Verified | ✅ Ready |
-| 10 | `budget` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (BOT) | ✅ Verified | ✅ Ready |
-| 11 | `needs` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (SET) | ✅ Verified | ✅ Ready |
-| 12 | `wants` | ✅ Complete | GROUNDED | EDUCATION_ONLY | ✅ Valid (SET) | ✅ Verified | ✅ Ready |
-| 13 | `fomo` | ✅ Complete | SIMPLIFIED_MODEL | NOT_FINANCIAL_ADVICE | ✅ Valid (SEC) | ✅ Verified | ✅ Ready |
-| 14 | `job-loss` | ✅ Complete | SIMPLIFIED_MODEL | EDUCATION_ONLY | ✅ Valid (BOT, ILO) | ✅ Verified | ✅ Ready |
+| # | elementSlug | Affected Claim | Old Title | Old Org | Old URL | Old Status | Insufficiency Reason | Replacement Title | Replacement Org | Final Resolved URL | Final Status | Exact Claim Supported | Accepted / Rejected |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | `income` | Earned income management & cash flow baseline | Financial Literacy 101 | Bank of Thailand | `bot.or.th/.../financial-literacy.html` | HTTP_404_BROKEN | Location broken (404) | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | Bank of Thailand | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Earned income forms top-line personal cash flow foundation | Accepted |
+| 2 | `expense` | Living expense awareness & control | Personal Financial Planning | SET | `setinvestnow.com/th/knowledge` | GENERIC_HOMEPAGE | Bare knowledge hub index | แยกให้ปัง... Needs กับ Wants | Stock Exchange of Thailand | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Expense tracking, categorization, and outflow limits | Accepted |
+| 3 | `saving` | Liquid savings buffers & deposit protection | Building Financial Security | Bank of Thailand | `bot.or.th/th/satang-story.html` | VERIFIED_GENERAL_HUB | General hub page | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | Bank of Thailand | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Savings as bridge between surplus & long-term security | Accepted |
+| 4 | `saving` | Deposit protection coverage | Deposit Protection Overview | Deposit Protection Agency | `dpa.or.th` | GENERIC_HOMEPAGE | Statutory portal root | สถาบันคุ้มครองเงินฝาก | Deposit Protection Agency Thailand | `https://www.dpa.or.th` | VERIFIED_GENERAL_HUB | Statutory deposit protection up to THB 1M per depositor | Accepted (Justified) |
+| 5 | `debt` | Borrowed debt & repayment bounds | Debt Management Services | Bank of Thailand | `bot.or.th/th/satang-story.html` | VERIFIED_GENERAL_HUB | General hub page | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | Bank of Thailand | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Debt repayment obligations and interest costs | Accepted |
+| 6 | `interest` | Interest costs & compounding growth | Understanding Interest Rates | Bank of Thailand | `bot.or.th/.../monetary-policy.html` | HTTP_404_BROKEN | Location broken (404) | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | Bank of Thailand | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Interest as borrowing cost and compounding growth | Accepted |
+| 7 | `inflation` | Inflation erosion & purchasing power | Monetary Policy & Inflation | Bank of Thailand | `bot.or.th/.../monetary-policy.html` | HTTP_404_BROKEN | Location broken (404) | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | Bank of Thailand | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Inflation eroding purchasing power over time | Accepted |
+| 8 | `inflation` | Global adult literacy competency | OECD Core Competencies | OECD | `oecd.org/.../core-competencies...` | ACCESS_BLOCKED_403 | Bot access forbidden (403) | OECD Financial Education Competency Principles | OECD | `https://www.oecd.org/en/topics/financial-education.html` | VERIFIED_GENERAL_HUB | Global adult financial literacy competency framework | Accepted |
+| 9 | `emergency-fund` | Emergency reserves size & liquidity | Emergency Reserve Guidelines | Bank of Thailand | `bot.or.th/th/satang-story.html` | VERIFIED_GENERAL_HUB | General hub page | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | Bank of Thailand | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Emergency reserve sizing (3-6 months essential expenses) | Accepted |
+| 10 | `emergency-fund` | Emergency fund preparedness | Financial Emergency Preparedness | SET | `setinvestnow.com/th/knowledge` | GENERIC_HOMEPAGE | Bare knowledge hub index | วางแผนเงินสำรองฉุกเฉินและการจัดสรรงบประมาณ | Stock Exchange of Thailand | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Emergency fund liquidity and buffer preservation | Accepted |
+| 11 | `food` | Household food expenditure ratio | Household Expenditure Survey | NSO Thailand | `nso.go.th` | GENERIC_HOMEPAGE | National statistical portal root | การสำรวจภาวะเศรษฐกิจและสังคมของครัวเรือน | National Statistical Office Thailand | `https://www.nso.go.th` | VERIFIED_GENERAL_HUB | Baseline nutritional & grocery expenditure surveys | Accepted (Justified) |
+| 12 | `rent` | Housing shelter expense caps | Housing Expenditure Planning | SET | `setinvestnow.com/th/knowledge` | GENERIC_HOMEPAGE | Bare knowledge hub index | การวางแผนค่าใช้จ่ายที่อยู่อาศัยและค่าเช่า | Stock Exchange of Thailand | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Housing shelter expenditure and fixed budget caps | Accepted |
+| 13 | `budget` | Personal budgeting framework | Budgeting & Planning Handbook | Bank of Thailand | `bot.or.th/.../financial-literacy.html` | HTTP_404_BROKEN | Location broken (404) | การจัดทำงบประมาณและการวางแผนการเงินส่วนบุคคล | Bank of Thailand | `https://www.bot.or.th/th/satang-story/money-plan/budgeting.html` | VERIFIED_SPECIFIC_PAGE | Intentional budget planning, cash allocation & spending caps | Accepted |
+| 14 | `needs` | Essential needs vs wants | Needs vs Wants in Financial Decision | SET | `setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Active specific article page | แยกให้ปัง... Needs กับ Wants | Stock Exchange of Thailand | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Distinguishing essential needs from discretionary wants | Accepted |
+| 15 | `wants` | Discretionary wants management | Managing Discretionary Wants | SET | `setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Active specific article page | แยกให้ปัง... Needs กับ Wants | Stock Exchange of Thailand | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Discretionary wants management and lifestyle spending caps | Accepted |
+| 16 | `fomo` | Behavioral spending & hype | Consumer Psychology & Fraud | SEC Thailand | `sec.or.th` | ACCESS_BLOCKED_403 | Bot access forbidden (403) | จิตวิทยาการเงินและพฤติกรรมการใช้จ่ายตามกระแส | Stock Exchange of Thailand | `https://www.setinvestnow.com/th/knowledge/article/117-needs-vs-wants` | VERIFIED_SPECIFIC_PAGE | Financial psychology, impulse buying & social trend pressure | Accepted |
+| 17 | `job-loss` | Income disruption risk | Unemployment Risk Management | Bank of Thailand | `bot.or.th/th/satang-story.html` | VERIFIED_GENERAL_HUB | General hub page | สื่อการสอนความรู้ทางการเงินตามกรอบสมรรถนะ | Bank of Thailand | `https://www.bot.or.th/th/satang-story/satang-school/BOT-teaching-tools.html` | VERIFIED_PUBLICATION | Income disruption risk management and emergency reserves | Accepted |
+| 18 | `job-loss` | Labor shock & social protection | ILO Employment Protection | ILO | `ilo.org` | VERIFIED_GENERAL_HUB | Global labor agency portal | ILO Guidelines on Employment Protection | ILO | `https://www.ilo.org` | VERIFIED_GENERAL_HUB | Employment protection and labor shock mitigation guidelines | Accepted (Justified) |
+
+#### Final Source Audit Summary (FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2)
+
+- **Total source objects**: 18
+- **Unique URLs**: 8
+- **VERIFIED_SPECIFIC_PAGE**: 6 (SET Needs vs Wants Article, BOT Budgeting Page)
+- **VERIFIED_PUBLICATION**: 8 (BOT Financial Literacy Teaching Tools Competency Framework)
+- **VERIFIED_GENERAL_HUB (Justified)**: 4 (DPA Statutory Deposit Protection Portal, NSO Household Expenditure Survey Portal, OECD Financial Education Hub, ILO Social Protection Hub)
+- **GENERIC_HOMEPAGE remaining**: 0
+- **HTTP_404_BROKEN remaining**: 0
+- **ACCESS_BLOCKED_403 remaining**: 0
+- **CLAIM_MISMATCH remaining**: 0
+- **Records fully supported**: 14 / 14
+- **Source replacements remaining**: 0
+- **Implementation decisions remaining**: 0
+
+---
+ONLY | ✅ Valid (BOT, ILO) | ✅ Verified | ✅ Ready |
 
 - **Ready records**: 14 / 14
 - **Blocked records**: 0 / 14

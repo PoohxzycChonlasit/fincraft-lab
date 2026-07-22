@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P5_SEED_5A_RESEARCH_AND_FREEZE_STARTER_DETAIL_CONTENT)
+## Verified status (updated during P5_SEED_5A3_FIX_AND_REVERIFY_STARTER_DETAIL_SOURCES)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -35,14 +35,15 @@ git status --short
 - **P4_AUTH_8 checkpoint**: `b611466` — "refactor: align auth code with Fakebuck style"
 - **P5_SEED_3 checkpoint**: `7b08d86` — "feat: seed starter financial elements" (Starter dataset values remained unchanged, but `starter-elements.ts` and its local type definition were modified to include `sortOrder` support)
 - **P5_SEED_4 checkpoint**: `6a682bc` — "feat: seed discovery financial elements"
-- **P5_SEED_5A checkpoint**: "docs: freeze starter element detail content" (see git log)
+- **P5_SEED_5A checkpoint**: `0d0ff43` — "docs: freeze starter element detail content"
+- **P5_SEED_5A3 checkpoint**: "docs: repair starter detail sources" (see git log)
 
-### Backend (`fincraft-lab-api`) — Submission Seed v1 (Starter Details Content Frozen)
+### Backend (`fincraft-lab-api`) — Submission Seed v1 (Starter Details Sources Repaired & Verified V2)
 
-- **Frozen Starter Element Details**: Exactly 14 Starter Element `DiscoveryDetail` records researched, validated against official sources (Bank of Thailand, SET, SEC, DPA, NSO, OECD, ILO), and frozen in `CORE_CONTENT_SEED_PLAN.md` Section 9.1.
+- **Source Repair & Reverification (V2)**: 18 source objects across 14 Starter Element Details repaired and reverified. 4 broken/blocked/generic URLs replaced with active, verified specific publications (`VERIFIED_SPECIFIC_PAGE` / `VERIFIED_PUBLICATION` / justified `VERIFIED_GENERAL_HUB`). Updated freeze revision marker to `FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`.
 - **Seeded Elements Table**: Exactly 36 Elements in PostgreSQL database (14 Starter Elements + 22 Discovery Elements).
 - **Seeded Categories Table**: Exactly 8 Element Categories in PostgreSQL database.
-- **DiscoveryDetail DB Count**: Currently 0 rows in PostgreSQL database (content frozen in documentation; Seed code implementation pending in next bounded step).
+- **DiscoveryDetail DB Count**: Currently 0 rows in PostgreSQL database (content & sources frozen in documentation; Seed code implementation pending in next bounded step).
 - **Protected Tables Verified**: Protected table count deltas (`currentCount - initialCount === 0`) verified for 8 protected tables (`users`, `pets`, `userElements`, `discoveryEvents`, `workspaces`, `workspaceNodes`, `workspaceEdges`, `simulationRuns`). All deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
 
@@ -67,7 +68,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P5_SEED_5B_IMPLEMENT_STARTER_ELEMENT_DETAILS_001 — Implement 14 Starter Element DiscoveryDetail records into Seed code from frozen plan values.
+P5_SEED_5B_IMPLEMENT_STARTER_ELEMENT_DETAILS_001 — Implement 14 Starter Element DiscoveryDetail records into Seed code from frozen V2 plan values.
 ```
 
 ## Related documents

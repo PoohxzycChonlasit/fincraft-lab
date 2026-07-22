@@ -24,10 +24,10 @@ This document lists only files and folders that **actually exist** right now. Fu
 | `PROJECT_CONTEXT.md` | Relatively stable product context | created in P0.5 | Update when product scope changes |
 | `CODING_RULES.md` | Full coding rules & literal teacher-aligned readability guidelines | created in P0.5, updated in P4_AUTH_8 | Update when coding rules change |
 | `STEPWISE_WORKFLOW.md` | Lifecycle of each bounded step | created in P0.5 | Update when the workflow changes |
-| `CURRENT_STATUS.md` | Latest verified status | created in P0.5, updated in P5_SEED_5A | **Update at the end of every completed step** (evidence-based) |
-| `FILE_MAP.md` | This file | created in P0.5, updated in P5_SEED_5A | Update when a new file actually exists |
+| `CURRENT_STATUS.md` | Latest verified status | created in P0.5, updated in P5_SEED_5A3 | **Update at the end of every completed step** (evidence-based) |
+| `FILE_MAP.md` | This file | created in P0.5, updated in P5_SEED_5A3 | Update when a new file actually exists |
 | `plans/ELEMENT_CATEGORY_CRUD_PLAN.md` | Teacher-style design & bounded implementation plan for ElementCategory CRUD | created in P4A | Update if design decisions change |
-| `plans/CORE_CONTENT_SEED_PLAN.md` | Canonical specification, implementation plan, and Section 9.1 frozen Starter Element Details dataset for Submission Seed v1 | updated in P5_SEED_5A | Update if seed specifications change |
+| `plans/CORE_CONTENT_SEED_PLAN.md` | Canonical specification, implementation plan, and Section 9.1 (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`) Starter Element Details dataset for Submission Seed v1 | updated in P5_SEED_5A3 | Update if seed specifications change |
 | `plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md` | Complete implementation plan for refactoring Auth to Fakebuck service-boundary architecture (`UserService`, `BcryptService`, `AccessTokenService`) | created in P4_AUTH_6 | Update if refactor decisions change |
 
 ## `fincraft-lab-api/` (Backend — created in P0)
