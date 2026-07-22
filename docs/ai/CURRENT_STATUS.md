@@ -50,19 +50,21 @@ git status --short
 - **P5_SEED_7C audit**: PASS (Read-only post-commit audit of Batch B seed commit)
 - **P5_SEED_8A checkpoint**: `b746d79` — "docs: freeze core craft recipe plan"
 - **P5_SEED_8B audit**: PASS (Read-only post-commit audit of Core Craft Recipe V1 plan)
-- **P5_SEED_8C checkpoint**: "feat: seed core craft recipes"
+- **P5_SEED_8C checkpoint**: `761b672` — "feat: seed core craft recipes"
+- **P5_SEED_8D audit**: PASS (Read-only post-commit audit of Core Craft Recipe seed commit)
+- **P6_CRAFT_API_1A checkpoint**: frozen Craft API V1 contract (`FROZEN_CRAFT_API_CONTRACT_V1`)
 
-### Backend (`fincraft-lab-api`) — Submission Seed v1 (Core Craft Recipes Seeded)
+### Backend (`fincraft-lab-api`) — Craft API V1 Contract Frozen (`POST /craft`)
 
-- **Categories Seeded**: Exactly 8 ElementCategory records in PostgreSQL database.
-- **Elements Seeded**: Exactly 36 Element records (14 Starter + 22 Discovery) in PostgreSQL database.
-- **Discovery Details Seeded**: Exactly 36 DiscoveryDetail records (14 Starter + 11 Batch A + 11 Batch B) in PostgreSQL database.
-- **Core Craft Recipes Seeded**: Exactly 22 CraftRecipe records targeting all 22 Discovery Elements seeded in PostgreSQL database (`FROZEN_CORE_CRAFT_RECIPES_VALIDATED_V1`).
-- **Core Craft Recipe Inputs Seeded**: Exactly 44 CraftRecipeInput records (2 distinct inputs per Recipe) seeded in PostgreSQL database.
-- **Shared Craft Input Identity Helper**: `src/common/craft/calculate-craft-input-hash.ts` (SHA-256 canonical hash helper).
-- **Idempotency Verified**: Executed `prisma db seed` twice; Recipe IDs and Input IDs remained 100% stable across runs (0 deltas).
-- **Protected Tables Verified**: Protected table count deltas (`currentCount - initialCount === 0`) verified for 8 protected tables (`users`, `pets`, `userElements`, `discoveryEvents`, `workspaces`, `workspaceNodes`, `workspaceEdges`, `simulationRuns`). All deltas equal 0 (`delta = 0`).
-- **Non-Recipe Content Tables**: `element_relationships` count = 0, `simulations` count = 0.
+- **Craft API Status**: Plan FROZEN (`FROZEN_CRAFT_API_CONTRACT_V1` in `docs/ai/plans/CRAFT_API_PLAN.md`).
+- **Endpoint**: `POST /craft` (authenticated via `AuthGuard`).
+- **Request DTO**: `{ inputElementIds: [string, string] }` (exactly 2 distinct UUIDs).
+- **Core Engine Helper**: `calculateCraftInputHash(idA, idB)` in `src/common/craft/calculate-craft-input-hash.ts`.
+- **Response Union**: `DISCOVERY` (`isNewDiscovery: true/false`, `element`, `detail`) vs `NO_RECIPE` (both HTTP 200 OK).
+- **Audit Event Logging**: `DiscoveryEvent` natively logs `SUCCESS` and `NO_RECIPE` outcomes.
+- **Database Code Implementation**: Not yet implemented (Documentation-only contract planning task; no source, schema, or DB changes occurred).
+- **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
+- **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
 
 ### Frontend (`fincraft-lab-web`)
@@ -86,8 +88,9 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P5_SEED_8D_POST_COMMIT_CORE_CRAFT_RECIPE_SEED_AUDIT_001 — Independent read-only audit of commit "feat: seed core craft recipes" extending the seed chain.
+P6_CRAFT_API_1B_AUDIT_CRAFT_CONTRACT_001 — Independent read-only audit of frozen Craft API V1 contract in CRAFT_API_PLAN.md.
 ```
+
 
 ## Related documents
 

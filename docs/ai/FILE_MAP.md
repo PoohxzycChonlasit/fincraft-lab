@@ -19,6 +19,7 @@ fincraft-lab/
 │   ├── STEPWISE_WORKFLOW.md   # Stepwise development rules
 │   └── plans/                 # Architectural plans
 │       ├── CORE_CONTENT_SEED_PLAN.md # Seed plan (v1 categories, starter/discovery elements, frozen starter element details v2, frozen discovery details batch a v1, frozen discovery details batch b v1, frozen core craft recipes v1)
+│       ├── CRAFT_API_PLAN.md  # Frozen Craft API V1 contract plan (POST /craft)
 │       └── AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md # Auth refactor plan
 ├── fincraft-lab-api/          # NestJS backend root
 │   ├── prisma/
