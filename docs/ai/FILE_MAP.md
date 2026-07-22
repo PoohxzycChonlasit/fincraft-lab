@@ -9,13 +9,13 @@ This document lists only files and folders that **actually exist** right now. Fu
 | `.gitignore` | Ignores `node_modules`, `dist`, `.env`, `fincraft-lab-api/src/database/generated/prisma/`, etc. | owner-maintained, extended for canonical Prisma Client output path | Update when a new pattern needs ignoring |
 | `AGENTS.md` | Canonical source of truth & rules for all AI tools | created in P0.5, updated in P5_PREP | Update when project-level rules change |
 | `CLAUDE.md` | Thin adapter for Claude Code | created in P0.5 | Update only for Claude-specific behavior |
-| `GEMINI.md` | Thin adapter for Gemini (points to AGENTS.md & SKILL.md, specifies Flash Standard/Medium thinking, thin operational directives) | created in P0.5, updated in P5_PREP | Update only for Gemini-specific behavior |
+| `GEMINI.md` | Thin adapter for Gemini | created in P0.5, updated in P5_PREP | Update only for Gemini-specific behavior |
 
 ## `.agents/skills/fincraft-teacher-stepwise-loop/`
 
 | Path | Responsibility | Origin | Next step allowed to change it |
 |---|---|---|---|
-| `SKILL.md` | FinCraft Lab — Teacher-Aligned Stepwise Development Skill v2 (operational stepwise loop, teacher-aligned coding style, seed guidelines, project sequence) | owner-provided draft, revised in P0.5 & P5_PREP | Update when the loop or project sequence changes |
+| `SKILL.md` | FinCraft Lab — Teacher-Aligned Stepwise Development Skill v2 | owner-provided draft, revised in P0.5 & P5_PREP | Update when the loop or project sequence changes |
 
 ## `docs/ai/`
 
@@ -24,9 +24,10 @@ This document lists only files and folders that **actually exist** right now. Fu
 | `PROJECT_CONTEXT.md` | Relatively stable product context | created in P0.5 | Update when product scope changes |
 | `CODING_RULES.md` | Full coding rules & teacher-aligned readability guidelines | created in P0.5, updated in P5_PREP | Update when coding rules change |
 | `STEPWISE_WORKFLOW.md` | Lifecycle of each bounded step | created in P0.5 | Update when the workflow changes |
-| `CURRENT_STATUS.md` | Latest verified status | created in P0.5, updated in P5_PREP | **Update at the end of every completed step** (evidence-based) |
-| `FILE_MAP.md` | This file | created in P0.5, updated in P5_PREP | Update when a new file actually exists |
+| `CURRENT_STATUS.md` | Latest verified status | created in P0.5, updated in P5_SEED_1 | **Update at the end of every completed step** (evidence-based) |
+| `FILE_MAP.md` | This file | created in P0.5, updated in P5_SEED_1 | Update when a new file actually exists |
 | `plans/ELEMENT_CATEGORY_CRUD_PLAN.md` | Teacher-style design & bounded implementation plan for ElementCategory CRUD | created in P4A | Update if design decisions change |
+| `plans/CORE_CONTENT_SEED_PLAN.md` | Canonical specification and implementation plan for Submission Seed v1 (8 categories, 36 elements, 36 details, 48 recipes, 96 recipe inputs, 24 relationships, 2 simulations) | created in P5_SEED_1 | Update if seed specifications change |
 
 ## `fincraft-lab-api/` (Backend — created in P0)
 
