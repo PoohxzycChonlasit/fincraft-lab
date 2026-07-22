@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P5_SEED_6B_IMPLEMENT_DISCOVERY_DETAILS_BATCH_A)
+## Verified status (updated during P5_SEED_7B_IMPLEMENT_DISCOVERY_DETAILS_BATCH_B)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -44,15 +44,17 @@ git status --short
 - **P5_SEED_6C checkpoint**: audit passed (Post-commit audit PASS)
 - **P5_SEED_7A checkpoint**: `b338b98` — "docs: freeze discovery detail batch b content"
 - **P5_SEED_7A2 audit**: PASS_WITH_DOC_FIXES (Single broken URL identified)
-- **P5_SEED_7A3 repair**: "docs: repair discovery detail batch b source"
+- **P5_SEED_7A3 repair**: `157f788` — "docs: repair discovery detail batch b source"
+- **P5_SEED_7A4 audit**: PASS (Read-only verification of Batch B source repair)
+- **P5_SEED_7B checkpoint**: "feat: seed discovery detail batch b"
 
-### Backend (`fincraft-lab-api`) — Submission Seed v1 (Discovery Details Batch B Source Repaired)
+### Backend (`fincraft-lab-api`) — Submission Seed v1 (Discovery Details Batch B Seeded)
 
 - **Starter Details Seeded**: Exactly 14 DiscoveryDetail records targeting all 14 Starter Elements seeded in PostgreSQL database (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`).
 - **Discovery Details Batch A Seeded**: Exactly 11 DiscoveryDetail records targeting Batch A Discovery Elements (sortOrder 15-25) seeded in PostgreSQL database (`FROZEN_DISCOVERY_DETAILS_BATCH_A_SOURCE_VERIFIED_V1`).
-- **Discovery Details Batch B Frozen & Repaired**: Exactly 11 DiscoveryDetail records targeting Batch B Discovery Elements (sortOrder 26-36) researched, validated, source-verified, repaired, and frozen in `CORE_CONTENT_SEED_PLAN.md` (`FROZEN_DISCOVERY_DETAILS_BATCH_B_SOURCE_VERIFIED_V1`). Broken URLs: 0. Source replacements remaining: 0.
-- **Total DiscoveryDetail Database Rows**: Exactly 25 rows in PostgreSQL database (14 Starter Element Details + 11 Batch A Discovery Element Details + 0 Batch B Discovery Element Details). Batch B database rows remain 0/11 (documentation-only task).
-- **Total Planned DiscoveryDetail Records**: Exactly 36/36 records frozen in `CORE_CONTENT_SEED_PLAN.md`.
+- **Discovery Details Batch B Seeded**: Exactly 11 DiscoveryDetail records targeting Batch B Discovery Elements (sortOrder 26-36) seeded in PostgreSQL database (`FROZEN_DISCOVERY_DETAILS_BATCH_B_SOURCE_VERIFIED_V1`). Broken URLs: 0. Source replacements remaining: 0.
+- **Total DiscoveryDetail Database Rows**: Exactly 36 rows in PostgreSQL database (14 Starter Element Details + 11 Batch A Discovery Element Details + 11 Batch B Discovery Element Details).
+- **Total Planned DiscoveryDetail Records**: Exactly 36/36 records frozen in `CORE_CONTENT_SEED_PLAN.md` and seeded in PostgreSQL.
 - **Source Counts (Batch B)**: 17 source objects across 11 Discovery Details, pointing to 8 unique URLs (`VERIFIED_SPECIFIC_PAGE`: 2, `VERIFIED_PUBLICATION`: 2, `VERIFIED_GENERAL_HUB`: 4). Reported separately from Starter and Batch A Details sources.
 - **Seeded Elements Table**: Exactly 36 Elements in PostgreSQL database (14 Starter Elements + 22 Discovery Elements).
 - **Seeded Categories Table**: Exactly 8 Element Categories in PostgreSQL database.
@@ -80,7 +82,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P5_SEED_7A4_VERIFY_DISCOVERY_DETAILS_BATCH_B_SOURCE_REPAIR_001 — Read-only verification of Batch B source repair in CORE_CONTENT_SEED_PLAN.md before seed implementation.
+P5_SEED_7C_POST_COMMIT_DISCOVERY_DETAIL_BATCH_B_AUDIT_001 — Independent read-only audit of commit "feat: seed discovery detail batch b" extending the seed chain.
 ```
 
 ## Related documents

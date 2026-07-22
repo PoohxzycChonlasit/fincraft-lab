@@ -6,6 +6,7 @@ import { ElementSeedInput } from './content/starter-elements';
 import {
   EXPECTED_CATEGORY_COUNT,
   EXPECTED_DISCOVERY_DETAIL_BATCH_A_COUNT,
+  EXPECTED_DISCOVERY_DETAIL_BATCH_B_COUNT,
   EXPECTED_DISCOVERY_ELEMENT_COUNT,
   EXPECTED_STARTER_DETAIL_COUNT,
   EXPECTED_STARTER_ELEMENT_COUNT,
@@ -210,6 +211,7 @@ export async function verifyDetailSeed(
   prisma: PrismaClient,
   plannedStarterDetails: StarterElementDetailSeedInput[],
   plannedBatchADetails: DiscoveryElementDetailSeedInput[],
+  plannedBatchBDetails: DiscoveryElementDetailSeedInput[],
   plannedStarters: ElementSeedInput[],
   plannedDiscoveries: ElementSeedInput[],
 ): Promise<void> {
@@ -360,14 +362,24 @@ export async function verifyDetailSeed(
     }
   }
 
-  // Check that 0 details target Batch B Discovery Elements
-  const batchBDetailsFound = dbDetails.filter((d) =>
-    batchBDiscoverySlugSet.has(d.element.slug),
-  );
-  if (batchBDetailsFound.length > 0) {
-    errors.push(
-      `Forbidden details targeting Batch B Discovery Elements found: ${batchBDetailsFound.length} rows`,
-    );
+  let verifiedBatchBDetails = 0;
+  for (const planned of plannedBatchBDetails) {
+    const matches = dbDetails.filter((d) => d.element.slug === planned.elementSlug);
+    if (matches.length === 0) {
+      errors.push(`Planned detail for Batch B discovery element "${planned.elementSlug}" missing from database`);
+    } else if (matches.length > 1) {
+      errors.push(`Duplicate detail rows found for Batch B discovery element "${planned.elementSlug}" (${matches.length} rows)`);
+    } else {
+      const match = matches[0];
+      if (match.element.isStarter) {
+        errors.push(`Batch B detail "${planned.elementSlug}" attached to a Starter element (expected isStarter false)`);
+      }
+      if (!batchBDiscoverySlugSet.has(planned.elementSlug)) {
+        errors.push(`Batch B detail "${planned.elementSlug}" is not in Batch B discovery set`);
+      }
+      verifyDetailFields(match, planned);
+      verifiedBatchBDetails++;
+    }
   }
 
   if (totalDetailsCount !== EXPECTED_TOTAL_DETAIL_COUNT) {
@@ -399,7 +411,7 @@ export async function verifyDetailSeed(
   console.log('--- Post-Seed DiscoveryDetail Verification Report ---');
   console.log(`Planned Starter Details Found:   ${verifiedStarterDetails}/${EXPECTED_STARTER_DETAIL_COUNT}`);
   console.log(`Planned Batch A Details Found:   ${verifiedBatchADetails}/${EXPECTED_DISCOVERY_DETAIL_BATCH_A_COUNT}`);
-  console.log(`Batch B Discovery Details Found: 0/11`);
+  console.log(`Planned Batch B Details Found:   ${verifiedBatchBDetails}/${EXPECTED_DISCOVERY_DETAIL_BATCH_B_COUNT}`);
   console.log(`Total Database Detail Rows:      ${totalDetailsCount}/${EXPECTED_TOTAL_DETAIL_COUNT}`);
   console.log('----------------------------------------------------');
 }

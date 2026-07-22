@@ -1,5 +1,6 @@
 import { CATEGORY_SEED_DATA } from './seed/content/categories';
 import { DISCOVERY_ELEMENT_DETAIL_BATCH_A_SEED_DATA } from './seed/content/discovery-element-details-batch-a';
+import { DISCOVERY_ELEMENT_DETAIL_BATCH_B_SEED_DATA } from './seed/content/discovery-element-details-batch-b';
 import { DISCOVERY_ELEMENT_SEED_DATA } from './seed/content/discovery-elements';
 import { STARTER_ELEMENT_DETAIL_SEED_DATA } from './seed/content/starter-element-details';
 import { STARTER_ELEMENT_SEED_DATA } from './seed/content/starter-elements';
@@ -20,10 +21,10 @@ import {
 } from './seed/verify-seed';
 
 async function main(): Promise<void> {
-  console.log('--- FinCraft Lab Seed v1 (Starter Details + Discovery Details Batch A) ---');
+  console.log('--- FinCraft Lab Seed v1 (Starter Details + Batch A Details + Batch B Details) ---');
 
   // 1. In-memory pre-write validation before DB connection
-  console.log('1. Validating Category, Element, Starter Detail, and Discovery Detail Batch A seed content in memory...');
+  console.log('1. Validating Category, Element, Starter Detail, Batch A Detail, and Batch B Detail seed content in memory...');
   validateCategoryContent(CATEGORY_SEED_DATA);
   validateAllElementContent(
     STARTER_ELEMENT_SEED_DATA,
@@ -33,6 +34,7 @@ async function main(): Promise<void> {
   validateAllDetailContent(
     STARTER_ELEMENT_DETAIL_SEED_DATA,
     DISCOVERY_ELEMENT_DETAIL_BATCH_A_SEED_DATA,
+    DISCOVERY_ELEMENT_DETAIL_BATCH_B_SEED_DATA,
     STARTER_ELEMENT_SEED_DATA,
     DISCOVERY_ELEMENT_SEED_DATA,
   );
@@ -160,8 +162,44 @@ async function main(): Promise<void> {
     });
     console.log('   Batch A Discovery Element DiscoveryDetail upserts complete.');
 
-    // 11. Run post-seed verifications
-    console.log('10. Verifying database state...');
+    // 11. Resolve 11 Batch B Discovery Element IDs by Slug and verify isStarter false
+    console.log('10. Resolving 11 Batch B Discovery Element IDs and verifying isStarter status...');
+    const batchBSlugs = DISCOVERY_ELEMENT_DETAIL_BATCH_B_SEED_DATA.map((d) => d.elementSlug);
+    const dbBatchBDiscoveries = await prisma.element.findMany({
+      where: { slug: { in: batchBSlugs } },
+      select: { id: true, slug: true, isStarter: true },
+    });
+
+    if (dbBatchBDiscoveries.length !== DISCOVERY_ELEMENT_DETAIL_BATCH_B_SEED_DATA.length) {
+      throw new Error(
+        `Expected ${DISCOVERY_ELEMENT_DETAIL_BATCH_B_SEED_DATA.length} Batch B Discovery Elements in DB, found ${dbBatchBDiscoveries.length}`,
+      );
+    }
+
+    const batchBDiscoveryElementMap = new Map<string, string>();
+    for (const elem of dbBatchBDiscoveries) {
+      if (elem.isStarter) {
+        throw new Error(
+          `Target Batch B Element "${elem.slug}" is a Starter Element (isStarter is true)`,
+        );
+      }
+      batchBDiscoveryElementMap.set(elem.slug, elem.id);
+    }
+    console.log('   Batch B Discovery Element resolution complete.');
+
+    // 12. Run 11 Batch B Discovery Detail upserts in transaction
+    console.log('11. Upserting 11 Batch B Discovery Element DiscoveryDetails...');
+    await prisma.$transaction(async (tx) => {
+      await seedDiscoveryDetailsStep(
+        tx,
+        DISCOVERY_ELEMENT_DETAIL_BATCH_B_SEED_DATA,
+        batchBDiscoveryElementMap,
+      );
+    });
+    console.log('   Batch B Discovery Element DiscoveryDetail upserts complete.');
+
+    // 13. Run post-seed verifications
+    console.log('12. Verifying database state...');
     await verifyCategorySeed(prisma, CATEGORY_SEED_DATA);
     await verifyElementSeed(
       prisma,
@@ -174,6 +212,7 @@ async function main(): Promise<void> {
       prisma,
       STARTER_ELEMENT_DETAIL_SEED_DATA,
       DISCOVERY_ELEMENT_DETAIL_BATCH_A_SEED_DATA,
+      DISCOVERY_ELEMENT_DETAIL_BATCH_B_SEED_DATA,
       STARTER_ELEMENT_SEED_DATA,
       DISCOVERY_ELEMENT_SEED_DATA,
     );

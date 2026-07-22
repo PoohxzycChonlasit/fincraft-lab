@@ -6,6 +6,7 @@ import { ElementSeedInput } from './content/starter-elements';
 import {
   EXPECTED_CATEGORY_COUNT,
   EXPECTED_DISCOVERY_DETAIL_BATCH_A_COUNT,
+  EXPECTED_DISCOVERY_DETAIL_BATCH_B_COUNT,
   EXPECTED_DISCOVERY_ELEMENT_COUNT,
   EXPECTED_STARTER_DETAIL_COUNT,
   EXPECTED_STARTER_ELEMENT_COUNT,
@@ -111,37 +112,38 @@ export function validateAllElementContent(
     if (!elem.slug || elem.slug.trim().length === 0) {
       errors.push(`Element index ${i} has empty slug`);
     } else {
-      const normalizedSlug = elem.slug.trim().toLowerCase();
-      if (seenSlugs.has(normalizedSlug)) {
+      const slug = elem.slug.trim().toLowerCase();
+      if (!/^[a-z0-9-]+$/.test(slug)) {
+        errors.push(`Element slug "${elem.slug}" has invalid format`);
+      }
+      if (seenSlugs.has(slug)) {
         errors.push(`Duplicate element slug detected: "${elem.slug}"`);
       }
-      seenSlugs.add(normalizedSlug);
+      seenSlugs.add(slug);
     }
 
     if (!elem.name || elem.name.trim().length === 0) {
-      errors.push(`Element index ${i} has empty name`);
+      errors.push(`Element "${elem.slug}" has empty name`);
     } else {
       const normalizedName = elem.name.trim().toLowerCase();
       if (seenNames.has(normalizedName)) {
-        errors.push(`Duplicate element name detected: "${elem.name}"`);
+        errors.push(`Duplicate element name detected: "${elem.name.trim()}"`);
       }
       seenNames.add(normalizedName);
     }
 
-    if (!elem.emoji || elem.emoji.trim().length === 0) {
-      errors.push(`Element "${elem.slug}" has empty emoji`);
-    }
-
-    if (!plannedCategoryNames.has(elem.categoryName)) {
+    if (!elem.categoryName || elem.categoryName.trim().length === 0) {
+      errors.push(`Element "${elem.slug}" has empty categoryName`);
+    } else if (!plannedCategoryNames.has(elem.categoryName)) {
       errors.push(
-        `Element "${elem.slug}" references unknown category name: "${elem.categoryName}"`,
+        `Element "${elem.slug}" references unmapped categoryName "${elem.categoryName}"`,
       );
     }
 
     if (elem.sortOrder === undefined || elem.sortOrder < 1) {
       errors.push(`Element "${elem.slug}" has invalid sortOrder: ${elem.sortOrder}`);
     } else if (seenSortOrders.has(elem.sortOrder)) {
-      errors.push(`Duplicate element sortOrder detected: ${elem.sortOrder} on "${elem.slug}"`);
+      errors.push(`Element "${elem.slug}" has duplicate sortOrder: ${elem.sortOrder}`);
     } else {
       seenSortOrders.add(elem.sortOrder);
     }
@@ -157,6 +159,7 @@ export function validateAllElementContent(
 export function validateAllDetailContent(
   starterDetails: StarterElementDetailSeedInput[],
   batchADetails: DiscoveryElementDetailSeedInput[],
+  batchBDetails: DiscoveryElementDetailSeedInput[],
   starters: ElementSeedInput[],
   discoveries: ElementSeedInput[],
 ): void {
@@ -174,7 +177,13 @@ export function validateAllDetailContent(
     );
   }
 
-  const combinedDetails = [...starterDetails, ...batchADetails];
+  if (batchBDetails.length !== EXPECTED_DISCOVERY_DETAIL_BATCH_B_COUNT) {
+    errors.push(
+      `Expected exactly ${EXPECTED_DISCOVERY_DETAIL_BATCH_B_COUNT} Batch B discovery details, but found ${batchBDetails.length}`,
+    );
+  }
+
+  const combinedDetails = [...starterDetails, ...batchADetails, ...batchBDetails];
   if (combinedDetails.length !== EXPECTED_TOTAL_DETAIL_COUNT) {
     errors.push(
       `Expected exactly ${EXPECTED_TOTAL_DETAIL_COUNT} combined details, but found ${combinedDetails.length}`,
@@ -235,6 +244,54 @@ export function validateAllDetailContent(
         errors.push(`Batch A Detail elementSlug "${detail.elementSlug}" is not a recognized Batch A Discovery Element`);
       }
     }
+  }
+
+  // Validate Batch B Discovery Details
+  for (let i = 0; i < batchBDetails.length; i++) {
+    const detail = batchBDetails[i];
+
+    if (!detail.elementSlug || detail.elementSlug.trim().length === 0) {
+      errors.push(`Batch B Detail index ${i} has empty elementSlug`);
+    } else {
+      const slug = detail.elementSlug.trim().toLowerCase();
+      if (seenSlugs.has(slug)) {
+        errors.push(`Duplicate detail elementSlug detected across sets: "${detail.elementSlug}"`);
+      }
+      seenSlugs.add(slug);
+
+      if (starterSlugSet.has(slug)) {
+        errors.push(`Batch B Detail elementSlug "${detail.elementSlug}" targets a Starter Element, which is forbidden`);
+      }
+
+      if (batchADiscoverySlugSet.has(slug)) {
+        errors.push(`Batch B Detail elementSlug "${detail.elementSlug}" targets a Batch A Discovery Element, which is forbidden`);
+      }
+
+      if (!batchBDiscoverySlugSet.has(slug)) {
+        errors.push(`Batch B Detail elementSlug "${detail.elementSlug}" is not a recognized Batch B Discovery Element`);
+      }
+    }
+  }
+
+  let batchBSourceObjectCount = 0;
+  const batchBUrls = new Set<string>();
+  for (const detail of batchBDetails) {
+    if (Array.isArray(detail.sources)) {
+      batchBSourceObjectCount += detail.sources.length;
+      for (const src of detail.sources) {
+        if (src.url) {
+          batchBUrls.add(src.url);
+        }
+      }
+    }
+  }
+
+  if (batchBSourceObjectCount !== 17) {
+    errors.push(`Expected Batch B source object count to be 17, but found ${batchBSourceObjectCount}`);
+  }
+
+  if (batchBUrls.size !== 8) {
+    errors.push(`Expected Batch B unique URL count to be 8, but found ${batchBUrls.size}`);
   }
 
   // Validate shared content fields for all details

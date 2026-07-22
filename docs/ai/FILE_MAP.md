@@ -27,14 +27,15 @@ fincraft-lab/
 │   │   └── seed/
 │   │       ├── seed-client.ts # Standalone PrismaClient factory for seeding
 │   │       ├── seed-manifest.ts # Seed manifest constants & counts (25 planned details total)
-│   │       ├── validate-seed.ts # In-memory pre-write validation for categories, elements, starter details & batch a details
+│   │       ├── validate-seed.ts # In-memory pre-write validation for categories, elements, starter details, batch a details & batch b details
 │   │       ├── verify-seed.ts # Post-seed database verifications & protected table count check
 │   │       ├── content/
 │   │       │   ├── categories.ts                        # 8 Category Seed Inputs
 │   │       │   ├── starter-elements.ts                  # 14 Starter Element Seed Inputs
 │   │       │   ├── discovery-elements.ts                # 22 Discovery Element Seed Inputs
 │   │       │   ├── starter-element-details.ts           # 14 Starter Element DiscoveryDetail Seed Inputs (FROZEN V2)
-│   │       │   └── discovery-element-details-batch-a.ts # 11 Discovery Element DiscoveryDetail Seed Inputs Batch A (FROZEN V1)
+│   │       │   ├── discovery-element-details-batch-a.ts # 11 Discovery Element DiscoveryDetail Seed Inputs Batch A (FROZEN V1)
+│   │       │   └── discovery-element-details-batch-b.ts # 11 Discovery Element DiscoveryDetail Seed Inputs Batch B (FROZEN V1)
 │   │       └── steps/
 │   │           ├── seed-categories.ts                   # Step 1: Category upserts
 │   │           ├── seed-elements.ts                     # Step 2: Element upserts with category resolution
@@ -58,5 +59,6 @@ fincraft-lab/
 - `docs/ai/plans/CORE_CONTENT_SEED_PLAN.md` — Contains 8 categories, 14 starter elements, 22 discovery elements, 14 frozen Starter Element DiscoveryDetails (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`), 11 frozen Discovery Element DiscoveryDetails Batch A (`FROZEN_DISCOVERY_DETAILS_BATCH_A_SOURCE_VERIFIED_V1`), and 11 frozen Discovery Element DiscoveryDetails Batch B (`FROZEN_DISCOVERY_DETAILS_BATCH_B_SOURCE_VERIFIED_V1`).
 - `fincraft-lab-api/prisma/seed/content/starter-element-details.ts` — 14 `StarterElementDetailSeedInput` records copied 1:1 from `FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`.
 - `fincraft-lab-api/prisma/seed/content/discovery-element-details-batch-a.ts` — 11 `DiscoveryElementDetailSeedInput` records copied 1:1 from `FROZEN_DISCOVERY_DETAILS_BATCH_A_SOURCE_VERIFIED_V1`.
+- `fincraft-lab-api/prisma/seed/content/discovery-element-details-batch-b.ts` — 11 `DiscoveryElementDetailSeedInput` records copied 1:1 from `FROZEN_DISCOVERY_DETAILS_BATCH_B_SOURCE_VERIFIED_V1`.
 - `fincraft-lab-api/prisma/seed/steps/seed-discovery-details.ts` — Implements `seedDiscoveryDetailsStep()` for `DiscoveryDetail` upserts.
-- `fincraft-lab-api/prisma/seed.ts` — Main seed runner implementing in-memory pre-write validation, element category upsert, starter & discovery element upsert, starter detail upsert, Batch A detail upsert, and post-seed database verification.
+- `fincraft-lab-api/prisma/seed.ts` — Main seed runner implementing in-memory pre-write validation, element category upsert, starter & discovery element upsert, starter detail upsert, Batch A detail upsert, Batch B detail upsert, and post-seed database verification.
