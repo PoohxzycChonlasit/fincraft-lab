@@ -1,4 +1,5 @@
 import { CATEGORY_SEED_DATA } from './seed/content/categories';
+import { CORE_CRAFT_RECIPE_SEED_DATA } from './seed/content/core-craft-recipes';
 import { DISCOVERY_ELEMENT_DETAIL_BATCH_A_SEED_DATA } from './seed/content/discovery-element-details-batch-a';
 import { DISCOVERY_ELEMENT_DETAIL_BATCH_B_SEED_DATA } from './seed/content/discovery-element-details-batch-b';
 import { DISCOVERY_ELEMENT_SEED_DATA } from './seed/content/discovery-elements';
@@ -6,13 +7,16 @@ import { STARTER_ELEMENT_DETAIL_SEED_DATA } from './seed/content/starter-element
 import { STARTER_ELEMENT_SEED_DATA } from './seed/content/starter-elements';
 import { createSeedPrismaClient } from './seed/seed-client';
 import { seedCategoriesStep } from './seed/steps/seed-categories';
+import { seedCraftRecipes } from './seed/steps/seed-craft-recipes';
 import { seedDiscoveryDetailsStep } from './seed/steps/seed-discovery-details';
 import { seedElementsStep } from './seed/steps/seed-elements';
+import { validateCraftRecipeSeed } from './seed/validate-craft-recipe-seed';
 import {
   validateAllDetailContent,
   validateAllElementContent,
   validateCategoryContent,
 } from './seed/validate-seed';
+import { verifyCraftRecipeSeed } from './seed/verify-craft-recipe-seed';
 import {
   captureProtectedTableCounts,
   verifyCategorySeed,
@@ -21,10 +25,10 @@ import {
 } from './seed/verify-seed';
 
 async function main(): Promise<void> {
-  console.log('--- FinCraft Lab Seed v1 (Starter Details + Batch A Details + Batch B Details) ---');
+  console.log('--- FinCraft Lab Seed v1 (Starter + Details + Core Recipes) ---');
 
   // 1. In-memory pre-write validation before DB connection
-  console.log('1. Validating Category, Element, Starter Detail, Batch A Detail, and Batch B Detail seed content in memory...');
+  console.log('1. Validating Category, Element, Detail, and Core Recipe seed content in memory...');
   validateCategoryContent(CATEGORY_SEED_DATA);
   validateAllElementContent(
     STARTER_ELEMENT_SEED_DATA,
@@ -35,6 +39,11 @@ async function main(): Promise<void> {
     STARTER_ELEMENT_DETAIL_SEED_DATA,
     DISCOVERY_ELEMENT_DETAIL_BATCH_A_SEED_DATA,
     DISCOVERY_ELEMENT_DETAIL_BATCH_B_SEED_DATA,
+    STARTER_ELEMENT_SEED_DATA,
+    DISCOVERY_ELEMENT_SEED_DATA,
+  );
+  validateCraftRecipeSeed(
+    CORE_CRAFT_RECIPE_SEED_DATA,
     STARTER_ELEMENT_SEED_DATA,
     DISCOVERY_ELEMENT_SEED_DATA,
   );
@@ -198,8 +207,13 @@ async function main(): Promise<void> {
     });
     console.log('   Batch B Discovery Element DiscoveryDetail upserts complete.');
 
-    // 13. Run post-seed verifications
-    console.log('12. Verifying database state...');
+    // 13. Run Core Craft Recipe preflight check & upserts
+    console.log('12. Running preflight check and upserting 22 Core Craft Recipes (44 Inputs)...');
+    await seedCraftRecipes(prisma);
+    console.log('   Core Craft Recipe upserts complete.');
+
+    // 14. Run post-seed verifications
+    console.log('13. Verifying database state...');
     await verifyCategorySeed(prisma, CATEGORY_SEED_DATA);
     await verifyElementSeed(
       prisma,
@@ -216,6 +230,7 @@ async function main(): Promise<void> {
       STARTER_ELEMENT_SEED_DATA,
       DISCOVERY_ELEMENT_SEED_DATA,
     );
+    await verifyCraftRecipeSeed(prisma);
     console.log('--- Seed execution finished successfully ---');
   } finally {
     await prisma.$disconnect();

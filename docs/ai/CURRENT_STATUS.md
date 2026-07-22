@@ -48,17 +48,21 @@ git status --short
 - **P5_SEED_7A4 audit**: PASS (Read-only verification of Batch B source repair)
 - **P5_SEED_7B checkpoint**: `6b223c1` — "feat: seed discovery detail batch b"
 - **P5_SEED_7C audit**: PASS (Read-only post-commit audit of Batch B seed commit)
-- **P5_SEED_8A checkpoint**: frozen Core Craft Recipe V1 plan (`FROZEN_CORE_CRAFT_RECIPES_VALIDATED_V1`)
+- **P5_SEED_8A checkpoint**: `b746d79` — "docs: freeze core craft recipe plan"
+- **P5_SEED_8B audit**: PASS (Read-only post-commit audit of Core Craft Recipe V1 plan)
+- **P5_SEED_8C checkpoint**: "feat: seed core craft recipes"
 
-### Backend (`fincraft-lab-api`) — Core Craft Recipe V1 Plan Frozen (Seed Catalog Extended)
+### Backend (`fincraft-lab-api`) — Submission Seed v1 (Core Craft Recipes Seeded)
 
-- **Discovery Details Phase Complete**: Exactly 36 DiscoveryDetail records (14 Starter + 11 Batch A + 11 Batch B) seeded in PostgreSQL database.
-- **Core Craft Recipe V1 Plan Status**: FROZEN (`FROZEN_CORE_CRAFT_RECIPES_VALIDATED_V1`).
-- **Target Recipe Count**: Exactly 22 canonical Recipes (1:1 output coverage for all 22 Discovery Elements).
-- **Target Recipe Inputs**: Exactly 44 input references (2 distinct inputs per Recipe).
-- **Progression Graph Metrics**: 22/22 reachable outputs, 0 starter outputs, 0 self-inputs, 0 duplicate unordered pairs, 0 circular dependencies, max reachable depth: 4.
-- **Database Recipe State**: `CraftRecipe` count = 0, `CraftRecipeInput` count = 0 (Documentation-only planning task; no code or database writes occurred).
-- **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
+- **Categories Seeded**: Exactly 8 ElementCategory records in PostgreSQL database.
+- **Elements Seeded**: Exactly 36 Element records (14 Starter + 22 Discovery) in PostgreSQL database.
+- **Discovery Details Seeded**: Exactly 36 DiscoveryDetail records (14 Starter + 11 Batch A + 11 Batch B) in PostgreSQL database.
+- **Core Craft Recipes Seeded**: Exactly 22 CraftRecipe records targeting all 22 Discovery Elements seeded in PostgreSQL database (`FROZEN_CORE_CRAFT_RECIPES_VALIDATED_V1`).
+- **Core Craft Recipe Inputs Seeded**: Exactly 44 CraftRecipeInput records (2 distinct inputs per Recipe) seeded in PostgreSQL database.
+- **Shared Craft Input Identity Helper**: `src/common/craft/calculate-craft-input-hash.ts` (SHA-256 canonical hash helper).
+- **Idempotency Verified**: Executed `prisma db seed` twice; Recipe IDs and Input IDs remained 100% stable across runs (0 deltas).
+- **Protected Tables Verified**: Protected table count deltas (`currentCount - initialCount === 0`) verified for 8 protected tables (`users`, `pets`, `userElements`, `discoveryEvents`, `workspaces`, `workspaceNodes`, `workspaceEdges`, `simulationRuns`). All deltas equal 0 (`delta = 0`).
+- **Non-Recipe Content Tables**: `element_relationships` count = 0, `simulations` count = 0.
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
 
 ### Frontend (`fincraft-lab-web`)
@@ -82,7 +86,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P5_SEED_8B_AUDIT_CORE_CRAFT_RECIPE_PLAN_001 — Independent read-only audit of frozen Core Craft Recipe V1 plan in CORE_CONTENT_SEED_PLAN.md.
+P5_SEED_8D_POST_COMMIT_CORE_CRAFT_RECIPE_SEED_AUDIT_001 — Independent read-only audit of commit "feat: seed core craft recipes" extending the seed chain.
 ```
 
 ## Related documents
@@ -90,8 +94,6 @@ P5_SEED_8B_AUDIT_CORE_CRAFT_RECIPE_PLAN_001 — Independent read-only audit of f
 - Full file map → [`FILE_MAP.md`](FILE_MAP.md)
 - Full coding rules → [`CODING_RULES.md`](CODING_RULES.md)
 - Canonical Core Content Seed Plan → [`plans/CORE_CONTENT_SEED_PLAN.md`](plans/CORE_CONTENT_SEED_PLAN.md)
-
-- Core Content Seed Plan → [`plans/CORE_CONTENT_SEED_PLAN.md`](plans/CORE_CONTENT_SEED_PLAN.md)
 - Auth Fakebuck Refactor Plan → [`plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md`](plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md)
 - Stepwise loop method → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
 

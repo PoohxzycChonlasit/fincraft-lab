@@ -23,26 +23,33 @@ fincraft-lab/
 ├── fincraft-lab-api/          # NestJS backend root
 │   ├── prisma/
 │   │   ├── schema.prisma      # Prisma 7.8 schema (PostgreSQL)
-│   │   ├── seed.ts            # Seed main runner script (in-memory validation -> seed categories -> seed elements -> seed starter details -> seed batch a details -> seed batch b details -> verifications)
+│   │   ├── seed.ts            # Seed main runner script (in-memory validation -> seed categories -> seed elements -> seed starter details -> seed batch a details -> seed batch b details -> seed core craft recipes -> verifications)
 │   │   └── seed/
 │   │       ├── seed-client.ts # Standalone PrismaClient factory for seeding
-│   │       ├── seed-manifest.ts # Seed manifest constants & counts (36 planned details total)
+│   │       ├── seed-manifest.ts # Seed manifest constants & counts (36 details, 22 recipes, 44 inputs total)
 │   │       ├── validate-seed.ts # In-memory pre-write validation for categories, elements, starter details, batch a details & batch b details
+│   │       ├── validate-craft-recipe-seed.ts # In-memory pre-write validation for 22 Core Craft Recipes & progression graph
 │   │       ├── verify-seed.ts # Post-seed database verifications & protected table count check
+│   │       ├── verify-craft-recipe-seed.ts # Post-seed database verifications for 22 Core Craft Recipes (44 Inputs)
 │   │       ├── content/
 │   │       │   ├── categories.ts                        # 8 Category Seed Inputs
 │   │       │   ├── starter-elements.ts                  # 14 Starter Element Seed Inputs
 │   │       │   ├── discovery-elements.ts                # 22 Discovery Element Seed Inputs
 │   │       │   ├── starter-element-details.ts           # 14 Starter Element DiscoveryDetail Seed Inputs (FROZEN V2)
 │   │       │   ├── discovery-element-details-batch-a.ts # 11 Discovery Element DiscoveryDetail Seed Inputs Batch A (FROZEN V1)
-│   │       │   └── discovery-element-details-batch-b.ts # 11 Discovery Element DiscoveryDetail Seed Inputs Batch B (FROZEN V1)
+│   │       │   ├── discovery-element-details-batch-b.ts # 11 Discovery Element DiscoveryDetail Seed Inputs Batch B (FROZEN V1)
+│   │       │   └── core-craft-recipes.ts                # 22 Core Craft Recipe Seed Inputs (FROZEN V1)
 │   │       └── steps/
 │   │           ├── seed-categories.ts                   # Step 1: Category upserts
 │   │           ├── seed-elements.ts                     # Step 2: Element upserts with category resolution
-│   │           └── seed-discovery-details.ts            # Step 3: DiscoveryDetail upserts with element resolution
+│   │           ├── seed-discovery-details.ts            # Step 3: DiscoveryDetail upserts with element resolution
+│   │           └── seed-craft-recipes.ts                # Step 4: Core Craft Recipe upserts with SHA-256 canonical hashing
 │   ├── src/
 │   │   ├── main.ts            # App entry point
 │   │   ├── app.module.ts      # Root module
+│   │   ├── common/
+│   │   │   └── craft/
+│   │   │       └── calculate-craft-input-hash.ts # Pure SHA-256 Craft Input Identity Helper
 │   │   ├── prisma/            # Global Prisma module & service
 │   │   ├── auth/              # Auth module (register, login, me endpoints)
 │   │   ├── users/             # User persistence & management
@@ -57,7 +64,9 @@ fincraft-lab/
 
 - `AGENTS.md` — Single canonical source of truth for all AI tools.
 - `docs/ai/plans/CORE_CONTENT_SEED_PLAN.md` — Contains 8 categories, 14 starter elements, 22 discovery elements, 14 frozen Starter Element DiscoveryDetails (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`), 11 frozen Discovery Element DiscoveryDetails Batch A (`FROZEN_DISCOVERY_DETAILS_BATCH_A_SOURCE_VERIFIED_V1`), 11 frozen Discovery Element DiscoveryDetails Batch B (`FROZEN_DISCOVERY_DETAILS_BATCH_B_SOURCE_VERIFIED_V1`), and 22 frozen Core Craft Recipes V1 (`FROZEN_CORE_CRAFT_RECIPES_VALIDATED_V1`).
-- `fincraft-lab-api/prisma/seed/content/starter-element-details.ts` — 14 `StarterElementDetailSeedInput` records copied 1:1 from `FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`.
+- `fincraft-lab-api/src/common/craft/calculate-craft-input-hash.ts` — Pure SHA-256 Craft Input Identity Helper (deterministic, commutative, zero-dependency).
+- `fincraft-lab-api/prisma/seed/content/core-craft-recipes.ts` — 22 `CraftRecipeSeedInput` records copied 1:1 from `FROZEN_CORE_CRAFT_RECIPES_VALIDATED_V1`.
+- `fincraft-lab-api/prisma/seed/steps/seed-craft-recipes.ts` — Step 4 runner resolving element IDs, generating SHA-256 hashes, and upserting 22 CraftRecipes and 44 CraftRecipeInputs.
 - `fincraft-lab-api/prisma/seed/content/discovery-element-details-batch-a.ts` — 11 `DiscoveryElementDetailSeedInput` records copied 1:1 from `FROZEN_DISCOVERY_DETAILS_BATCH_A_SOURCE_VERIFIED_V1`.
 - `fincraft-lab-api/prisma/seed/content/discovery-element-details-batch-b.ts` — 11 `DiscoveryElementDetailSeedInput` records copied 1:1 from `FROZEN_DISCOVERY_DETAILS_BATCH_B_SOURCE_VERIFIED_V1`.
 - `fincraft-lab-api/prisma/seed/steps/seed-discovery-details.ts` — Implements `seedDiscoveryDetailsStep()` for `DiscoveryDetail` upserts.
