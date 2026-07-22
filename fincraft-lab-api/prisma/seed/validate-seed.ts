@@ -1,8 +1,11 @@
+import { RealityLevel, SafetyLabel } from '../../src/database/generated/prisma/client';
 import { CategorySeedInput } from './content/categories';
+import { StarterElementDetailSeedInput } from './content/starter-element-details';
 import { ElementSeedInput } from './content/starter-elements';
 import {
   EXPECTED_CATEGORY_COUNT,
   EXPECTED_DISCOVERY_ELEMENT_COUNT,
+  EXPECTED_STARTER_DETAIL_COUNT,
   EXPECTED_STARTER_ELEMENT_COUNT,
   EXPECTED_TOTAL_ELEMENT_COUNT,
 } from './seed-manifest';
@@ -144,6 +147,114 @@ export function validateAllElementContent(
   if (errors.length > 0) {
     throw new Error(
       `Element Pre-Write Validation Failed:\n- ${errors.join('\n- ')}`,
+    );
+  }
+}
+
+export function validateAllDetailContent(
+  details: StarterElementDetailSeedInput[],
+  starters: ElementSeedInput[],
+  discoveries: ElementSeedInput[],
+): void {
+  const errors: string[] = [];
+
+  if (details.length !== EXPECTED_STARTER_DETAIL_COUNT) {
+    errors.push(
+      `Expected exactly ${EXPECTED_STARTER_DETAIL_COUNT} starter details, but found ${details.length}`,
+    );
+  }
+
+  const starterSlugSet = new Set(starters.map((s) => s.slug));
+  const discoverySlugSet = new Set(discoveries.map((d) => d.slug));
+  const seenSlugs = new Set<string>();
+
+  const validRealityLevels = new Set(Object.values(RealityLevel));
+  const validSafetyLabels = new Set(Object.values(SafetyLabel));
+
+  for (let i = 0; i < details.length; i++) {
+    const detail = details[i];
+
+    if (!detail.elementSlug || detail.elementSlug.trim().length === 0) {
+      errors.push(`Detail index ${i} has empty elementSlug`);
+    } else {
+      const slug = detail.elementSlug.trim().toLowerCase();
+      if (seenSlugs.has(slug)) {
+        errors.push(`Duplicate detail elementSlug detected: "${detail.elementSlug}"`);
+      }
+      seenSlugs.add(slug);
+
+      if (!starterSlugSet.has(slug)) {
+        errors.push(`Detail elementSlug "${detail.elementSlug}" is not a recognized Starter Element`);
+      }
+
+      if (discoverySlugSet.has(slug)) {
+        errors.push(`Detail elementSlug "${detail.elementSlug}" targets a Discovery Element, which is forbidden in this task`);
+      }
+    }
+
+    const textFields: Array<{ name: keyof StarterElementDetailSeedInput; val: string | undefined }> = [
+      { name: 'shortDescription', val: detail.shortDescription },
+      { name: 'realLesson', val: detail.realLesson },
+      { name: 'example', val: detail.example },
+      { name: 'possibleBenefit', val: detail.possibleBenefit },
+      { name: 'possibleTradeoff', val: detail.possibleTradeoff },
+      { name: 'hiddenRisk', val: detail.hiddenRisk },
+      { name: 'worksWhen', val: detail.worksWhen },
+      { name: 'becomesDifficultWhen', val: detail.becomesDifficultWhen },
+      { name: 'whatChangesOutcome', val: detail.whatChangesOutcome },
+    ];
+
+    for (const field of textFields) {
+      if (!field.val || field.val.trim().length === 0) {
+        errors.push(`Detail "${detail.elementSlug}" has empty field: ${field.name}`);
+      } else {
+        if (field.val.includes('TODO') || field.val.includes('TBD')) {
+          errors.push(`Detail "${detail.elementSlug}" has placeholder text in field ${field.name}`);
+        }
+      }
+    }
+
+    if (!validRealityLevels.has(detail.realityLevel)) {
+      errors.push(`Detail "${detail.elementSlug}" has invalid realityLevel: ${String(detail.realityLevel)}`);
+    }
+
+    if (!validSafetyLabels.has(detail.safetyLabel)) {
+      errors.push(`Detail "${detail.elementSlug}" has invalid safetyLabel: ${String(detail.safetyLabel)}`);
+    }
+
+    if (!Array.isArray(detail.sources) || detail.sources.length === 0) {
+      errors.push(`Detail "${detail.elementSlug}" must have at least one source object`);
+    } else {
+      for (let j = 0; j < detail.sources.length; j++) {
+        const src = detail.sources[j];
+        if (!src.title || src.title.trim().length === 0) {
+          errors.push(`Detail "${detail.elementSlug}" source ${j} has empty title`);
+        }
+        if (!src.organization || src.organization.trim().length === 0) {
+          errors.push(`Detail "${detail.elementSlug}" source ${j} has empty organization`);
+        }
+        if (!src.url || src.url.trim().length === 0) {
+          errors.push(`Detail "${detail.elementSlug}" source ${j} has empty url`);
+        } else {
+          if (src.url.includes('example.com') || src.url.includes('placeholder')) {
+            errors.push(`Detail "${detail.elementSlug}" source ${j} has placeholder URL: "${src.url}"`);
+          }
+          try {
+            const parsedUrl = new URL(src.url);
+            if (parsedUrl.protocol !== 'https:') {
+              errors.push(`Detail "${detail.elementSlug}" source ${j} URL scheme must be https: (got ${parsedUrl.protocol})`);
+            }
+          } catch {
+            errors.push(`Detail "${detail.elementSlug}" source ${j} has invalid URL syntax: "${src.url}"`);
+          }
+        }
+      }
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(
+      `Detail Pre-Write Validation Failed:\n- ${errors.join('\n- ')}`,
     );
   }
 }

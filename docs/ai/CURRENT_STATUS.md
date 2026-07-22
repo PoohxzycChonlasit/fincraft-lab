@@ -11,7 +11,7 @@ git log -1 --oneline
 git status --short
 ```
 
-## Verified status (updated during P5_SEED_5A3_FIX_AND_REVERIFY_STARTER_DETAIL_SOURCES)
+## Verified status (updated during P5_SEED_5B_IMPLEMENT_STARTER_ELEMENT_DETAILS)
 
 - **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
 - **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
@@ -36,14 +36,18 @@ git status --short
 - **P5_SEED_3 checkpoint**: `7b08d86` — "feat: seed starter financial elements" (Starter dataset values remained unchanged, but `starter-elements.ts` and its local type definition were modified to include `sortOrder` support)
 - **P5_SEED_4 checkpoint**: `6a682bc` — "feat: seed discovery financial elements"
 - **P5_SEED_5A checkpoint**: `0d0ff43` — "docs: freeze starter element detail content"
-- **P5_SEED_5A3 checkpoint**: "docs: repair starter detail sources" (see git log)
+- **P5_SEED_5A3 checkpoint**: `d5751bb` — "docs: repair starter detail sources"
+- **P5_SEED_5A3_WORDING checkpoint**: `ffaafb2` — "docs: adjust starter detail source verification wording" (Wording adjustment commit modified only `CORE_CONTENT_SEED_PLAN.md`)
+- **P5_SEED_5B checkpoint**: "feat: seed starter element details" (see git log)
 
-### Backend (`fincraft-lab-api`) — Submission Seed v1 (Starter Details Sources Repaired & Verified V2)
+### Backend (`fincraft-lab-api`) — Submission Seed v1 (Starter Details Seeding Complete)
 
-- **Source Repair & Reverification (V2)**: 18 source objects across 14 Starter Element Details repaired and reverified. 4 broken/blocked/generic URLs replaced with active, verified specific publications (`VERIFIED_SPECIFIC_PAGE` / `VERIFIED_PUBLICATION` / justified `VERIFIED_GENERAL_HUB`). Updated freeze revision marker to `FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`.
+- **Starter Details Seeded**: Exactly 14 DiscoveryDetail records targeting all 14 Starter Elements implemented in Seed code from frozen V2 plan values (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`). Dynamic Slug-to-ElementID resolution via `elementMap.get()`. Upserted cleanly on `elementId`. Zero content or source decisions made during implementation.
+- **Source Counts**: 18 source objects across 14 Starter Details, pointing to 8 unique URLs (`VERIFIED_SPECIFIC_PAGE`: 6, `VERIFIED_PUBLICATION`: 8, `VERIFIED_GENERAL_HUB`: 4). Reported separately.
+- **Discovery Details DB Count**: Exactly 14 rows in PostgreSQL database (14 targeting Starter Elements, 0 targeting Discovery Elements).
+- **Idempotency Verified**: Executed Seed twice consecutively. Category IDs, Element IDs, and DiscoveryDetail IDs remained 100% stable across runs.
 - **Seeded Elements Table**: Exactly 36 Elements in PostgreSQL database (14 Starter Elements + 22 Discovery Elements).
 - **Seeded Categories Table**: Exactly 8 Element Categories in PostgreSQL database.
-- **DiscoveryDetail DB Count**: Currently 0 rows in PostgreSQL database (content & sources frozen in documentation; Seed code implementation pending in next bounded step).
 - **Protected Tables Verified**: Protected table count deltas (`currentCount - initialCount === 0`) verified for 8 protected tables (`users`, `pets`, `userElements`, `discoveryEvents`, `workspaces`, `workspaceNodes`, `workspaceEdges`, `simulationRuns`). All deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
 
@@ -68,7 +72,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P5_SEED_5B_IMPLEMENT_STARTER_ELEMENT_DETAILS_001 — Implement 14 Starter Element DiscoveryDetail records into Seed code from frozen V2 plan values.
+P5_SEED_6A_RESEARCH_AND_FREEZE_DISCOVERY_DETAIL_CONTENT_001 — Research, draft, validate, and freeze DiscoveryDetail content for the twenty-two Discovery Elements in CORE_CONTENT_SEED_PLAN.md.
 ```
 
 ## Related documents

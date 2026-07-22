@@ -24,8 +24,8 @@ This document lists only files and folders that **actually exist** right now. Fu
 | `PROJECT_CONTEXT.md` | Relatively stable product context | created in P0.5 | Update when product scope changes |
 | `CODING_RULES.md` | Full coding rules & literal teacher-aligned readability guidelines | created in P0.5, updated in P4_AUTH_8 | Update when coding rules change |
 | `STEPWISE_WORKFLOW.md` | Lifecycle of each bounded step | created in P0.5 | Update when the workflow changes |
-| `CURRENT_STATUS.md` | Latest verified status | created in P0.5, updated in P5_SEED_5A3 | **Update at the end of every completed step** (evidence-based) |
-| `FILE_MAP.md` | This file | created in P0.5, updated in P5_SEED_5A3 | Update when a new file actually exists |
+| `CURRENT_STATUS.md` | Latest verified status | created in P0.5, updated in P5_SEED_5B | **Update at the end of every completed step** (evidence-based) |
+| `FILE_MAP.md` | This file | created in P0.5, updated in P5_SEED_5B | Update when a new file actually exists |
 | `plans/ELEMENT_CATEGORY_CRUD_PLAN.md` | Teacher-style design & bounded implementation plan for ElementCategory CRUD | created in P4A | Update if design decisions change |
 | `plans/CORE_CONTENT_SEED_PLAN.md` | Canonical specification, implementation plan, and Section 9.1 (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`) Starter Element Details dataset for Submission Seed v1 | updated in P5_SEED_5A3 | Update if seed specifications change |
 | `plans/AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md` | Complete implementation plan for refactoring Auth to Fakebuck service-boundary architecture (`UserService`, `BcryptService`, `AccessTokenService`) | created in P4_AUTH_6 | Update if refactor decisions change |
@@ -39,16 +39,18 @@ This document lists only files and folders that **actually exist** right now. Fu
 | `prisma/migrations/migration_lock.toml` | Prisma migration lock file specifying provider (`postgresql`) | created in P3B.1 | Managed by Prisma CLI |
 | `prisma/migrations/20260721123912_init_mvp_schema/migration.sql` | Initial DDL SQL migration file creating 12 enums, 15 tables, foreign keys, and indexes for MVP schema (applied to `fincraft_lab` database in P3B.2) | created in P3B.1, applied in P3B.2 | Do not edit or delete |
 | `prisma.config.ts` | Prisma CLI config — schema path, migrations path, `DATABASE_URL` loaded via `env()`, `migrations.seed = "tsx prisma/seed.ts"` | updated in P5_SEED_2 | Edit only if config or migrations path changes |
-| `prisma/seed.ts` | Entry-point runner for Submission Seed v1 (pre-write validation, client connection, transaction execution, verification) | updated in P5_SEED_4 | Add new seed steps when authorized |
+| `prisma/seed.ts` | Entry-point runner for Submission Seed v1 (pre-write validation, client connection, transaction execution, verification) | updated in P5_SEED_5B | Add new seed steps when authorized |
 | `prisma/seed/seed-client.ts` | Standalone Prisma Client builder with `@prisma/adapter-pg` | created in P5_SEED_2 | Do not edit unless database connection logic changes |
-| `prisma/seed/seed-manifest.ts` | Seed manifest defining expected counts (`categories = 8`, `starterElements = 14`, `discoveryElements = 22`, `totalElements = 36`) | updated in P5_SEED_4 | Extend when new content models are added |
-| `prisma/seed/validate-seed.ts` | In-memory pre-write validation for categories and combined 36 elements | updated in P5_SEED_4 | Add validation functions for new content models |
-| `prisma/seed/verify-seed.ts` | Post-seed database verification reporter & protected table count checker | updated in P5_SEED_4 | Add verification reporters for new content models |
+| `prisma/seed/seed-manifest.ts` | Seed manifest defining expected counts (`categories = 8`, `starterElements = 14`, `discoveryElements = 22`, `totalElements = 36`, `starterDetails = 14`, `discoveryDetails = 0`) | updated in P5_SEED_5B | Extend when new content models are added |
+| `prisma/seed/validate-seed.ts` | In-memory pre-write validation for categories, combined 36 elements, and 14 starter element details | updated in P5_SEED_5B | Add validation functions for new content models |
+| `prisma/seed/verify-seed.ts` | Post-seed database verification reporter, protected table count checker, and Json runtime narrowing validator | updated in P5_SEED_5B | Add verification reporters for new content models |
 | `prisma/seed/content/categories.ts` | Tracked dataset for 8 Element Categories | created in P5_SEED_2 | Do not edit unless Category definitions change |
 | `prisma/seed/content/starter-elements.ts` | Tracked dataset for 14 Starter Elements (`isStarter: true`, sortOrder 1-14) | updated in P5_SEED_4 | Do not edit unless Starter Element definitions change |
 | `prisma/seed/content/discovery-elements.ts` | Tracked dataset for 22 Discovery Elements (`isStarter: false`, sortOrder 15-36) | created in P5_SEED_4 | Do not edit unless Discovery Element definitions change |
+| `prisma/seed/content/starter-element-details.ts` | Tracked dataset for 14 Starter Element DiscoveryDetails (`FROZEN_STARTER_ELEMENT_DETAILS_SOURCE_VERIFIED_V2`) | created in P5_SEED_5B | Do not edit unless Starter Element Detail definitions change |
 | `prisma/seed/steps/seed-categories.ts` | Database step for Category upserts in Prisma transaction | created in P5_SEED_2 | Do not edit unless Category step logic changes |
-| `prisma/seed/steps/seed-elements.ts` | Database step for Element upserts (Starters & Discoveries) in Prisma transaction | updated in P5_SEED_4 | Extend when Discovery Details are added |
+| `prisma/seed/steps/seed-elements.ts` | Database step for Element upserts (Starters & Discoveries) in Prisma transaction | updated in P5_SEED_4 | Do not edit unless Element step logic changes |
+| `prisma/seed/steps/seed-discovery-details.ts` | Database step for Starter Element DiscoveryDetail upserts in Prisma transaction | created in P5_SEED_5B | Extend when Discovery Element Details are added |
 | `.env.example` | Documented placeholder for `DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_ACCESS_EXPIRES_IN_SECONDS` | created in P2B.1, updated in P4_AUTH_2 | Update if new environment variables are introduced |
 | `pnpm-lock.yaml` | Dependency lockfile | updated in P5_SEED_2 | Never hand-edit |
 | `pnpm-workspace.yaml` | Stores pnpm's `allowBuilds` approval (includes `bcrypt`, `esbuild`) | updated in P5_SEED_2 | Edit when a new build script needs approval |

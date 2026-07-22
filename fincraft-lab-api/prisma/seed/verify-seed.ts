@@ -1,9 +1,11 @@
 import { PrismaClient } from '../../src/database/generated/prisma/client';
 import { CategorySeedInput } from './content/categories';
+import { StarterElementDetailSeedInput } from './content/starter-element-details';
 import { ElementSeedInput } from './content/starter-elements';
 import {
   EXPECTED_CATEGORY_COUNT,
   EXPECTED_DISCOVERY_ELEMENT_COUNT,
+  EXPECTED_STARTER_DETAIL_COUNT,
   EXPECTED_STARTER_ELEMENT_COUNT,
   EXPECTED_TOTAL_ELEMENT_COUNT,
 } from './seed-manifest';
@@ -198,5 +200,166 @@ export async function verifyElementSeed(
   console.log(`Planned Discovery Elements Found: ${verifiedDiscoveries}/${EXPECTED_DISCOVERY_ELEMENT_COUNT}`);
   console.log(`Planned Combined Elements Found:  ${verifiedStarters + verifiedDiscoveries}/${EXPECTED_TOTAL_ELEMENT_COUNT}`);
   console.log(`Total Elements Table Rows:        ${totalElementsCount}`);
+  console.log('----------------------------------------------------');
+}
+
+export async function verifyDetailSeed(
+  prisma: PrismaClient,
+  plannedDetails: StarterElementDetailSeedInput[],
+  plannedStarters: ElementSeedInput[],
+  plannedDiscoveries: ElementSeedInput[],
+): Promise<void> {
+  const totalDetailsCount = await prisma.discoveryDetail.count();
+  const dbDetails = await prisma.discoveryDetail.findMany({
+    include: { element: true },
+  });
+
+  const errors: string[] = [];
+
+  const starterSlugSet = new Set(plannedStarters.map((s) => s.slug));
+  const discoverySlugSet = new Set(plannedDiscoveries.map((d) => d.slug));
+
+  let verifiedStarterDetails = 0;
+
+  for (const planned of plannedDetails) {
+    const matches = dbDetails.filter((d) => d.element.slug === planned.elementSlug);
+    if (matches.length === 0) {
+      errors.push(`Planned detail for starter element "${planned.elementSlug}" missing from database`);
+    } else if (matches.length > 1) {
+      errors.push(`Duplicate detail rows found for starter element "${planned.elementSlug}" (${matches.length} rows)`);
+    } else {
+      const match = matches[0];
+      if (!match.element.isStarter) {
+        errors.push(`Detail "${planned.elementSlug}" attached to an element where isStarter is false`);
+      }
+      if (match.shortDescription !== planned.shortDescription) {
+        errors.push(`Detail "${planned.elementSlug}" shortDescription mismatch`);
+      }
+      if (match.realLesson !== planned.realLesson) {
+        errors.push(`Detail "${planned.elementSlug}" realLesson mismatch`);
+      }
+      if (match.example !== planned.example) {
+        errors.push(`Detail "${planned.elementSlug}" example mismatch`);
+      }
+      if (match.possibleBenefit !== planned.possibleBenefit) {
+        errors.push(`Detail "${planned.elementSlug}" possibleBenefit mismatch`);
+      }
+      if (match.possibleTradeoff !== planned.possibleTradeoff) {
+        errors.push(`Detail "${planned.elementSlug}" possibleTradeoff mismatch`);
+      }
+      if (match.hiddenRisk !== planned.hiddenRisk) {
+        errors.push(`Detail "${planned.elementSlug}" hiddenRisk mismatch`);
+      }
+      if (match.worksWhen !== planned.worksWhen) {
+        errors.push(`Detail "${planned.elementSlug}" worksWhen mismatch`);
+      }
+      if (match.becomesDifficultWhen !== planned.becomesDifficultWhen) {
+        errors.push(`Detail "${planned.elementSlug}" becomesDifficultWhen mismatch`);
+      }
+      if (match.whatChangesOutcome !== planned.whatChangesOutcome) {
+        errors.push(`Detail "${planned.elementSlug}" whatChangesOutcome mismatch`);
+      }
+      if (match.realityLevel !== planned.realityLevel) {
+        errors.push(`Detail "${planned.elementSlug}" realityLevel mismatch`);
+      }
+      if (match.safetyLabel !== planned.safetyLabel) {
+        errors.push(`Detail "${planned.elementSlug}" safetyLabel mismatch`);
+      }
+
+      // Safe runtime narrowing for Prisma JsonValue sources
+      const rawSources = match.sources;
+      if (!Array.isArray(rawSources)) {
+        errors.push(`Detail "${planned.elementSlug}" sources is not an array`);
+      } else {
+        if (rawSources.length !== planned.sources.length) {
+          errors.push(
+            `Detail "${planned.elementSlug}" sources count mismatch: expected ${planned.sources.length}, got ${rawSources.length}`,
+          );
+        }
+        for (let i = 0; i < rawSources.length; i++) {
+          const item = rawSources[i];
+          const expectedSrc = planned.sources[i];
+
+          if (
+            item === null ||
+            typeof item !== 'object' ||
+            Array.isArray(item)
+          ) {
+            errors.push(`Detail "${planned.elementSlug}" source ${i} is not a valid non-null object`);
+            continue;
+          }
+
+          const keys = Object.keys(item).sort();
+          if (keys.join(',') !== 'organization,title,url') {
+            errors.push(
+              `Detail "${planned.elementSlug}" source ${i} has unexpected keys: ${keys.join(',')}`,
+            );
+          }
+
+          const srcObj = item as Record<string, unknown>;
+          if (
+            typeof srcObj.title !== 'string' ||
+            typeof srcObj.organization !== 'string' ||
+            typeof srcObj.url !== 'string'
+          ) {
+            errors.push(`Detail "${planned.elementSlug}" source ${i} has non-string properties`);
+          } else {
+            if (srcObj.title !== expectedSrc.title) {
+              errors.push(
+                `Detail "${planned.elementSlug}" source ${i} title mismatch: expected "${expectedSrc.title}", got "${srcObj.title}"`,
+              );
+            }
+            if (srcObj.organization !== expectedSrc.organization) {
+              errors.push(
+                `Detail "${planned.elementSlug}" source ${i} organization mismatch: expected "${expectedSrc.organization}", got "${srcObj.organization}"`,
+              );
+            }
+            if (srcObj.url !== expectedSrc.url) {
+              errors.push(
+                `Detail "${planned.elementSlug}" source ${i} url mismatch: expected "${expectedSrc.url}", got "${srcObj.url}"`,
+              );
+            }
+          }
+        }
+      }
+
+      verifiedStarterDetails++;
+    }
+  }
+
+  // Check that 0 details target Discovery Elements
+  const discoveryDetailsFound = dbDetails.filter((d) =>
+    discoverySlugSet.has(d.element.slug),
+  );
+  if (discoveryDetailsFound.length > 0) {
+    errors.push(
+      `Forbidden details targeting Discovery Elements found: ${discoveryDetailsFound.length} rows`,
+    );
+  }
+
+  // Confirm non-detail core models remain zero
+  const [recipes, recipeInputs, relationships, simulations] = await Promise.all([
+    prisma.craftRecipe.count(),
+    prisma.craftRecipeInput.count(),
+    prisma.elementRelationship.count(),
+    prisma.simulation.count(),
+  ]);
+
+  if (recipes !== 0 || recipeInputs !== 0 || relationships !== 0 || simulations !== 0) {
+    errors.push(
+      `Unexpected task data created: recipes=${recipes}, recipeInputs=${recipeInputs}, relationships=${relationships}, simulations=${simulations}`,
+    );
+  }
+
+  if (errors.length > 0) {
+    throw new Error(
+      `Post-Seed DiscoveryDetail Verification Failed:\n- ${errors.join('\n- ')}`,
+    );
+  }
+
+  console.log('--- Post-Seed DiscoveryDetail Verification Report ---');
+  console.log(`Planned Starter Details Found:   ${verifiedStarterDetails}/${EXPECTED_STARTER_DETAIL_COUNT}`);
+  console.log(`Discovery Element Details Found: 0/${EXPECTED_DISCOVERY_ELEMENT_COUNT}`);
+  console.log(`Total Database Detail Rows:      ${totalDetailsCount}`);
   console.log('----------------------------------------------------');
 }
