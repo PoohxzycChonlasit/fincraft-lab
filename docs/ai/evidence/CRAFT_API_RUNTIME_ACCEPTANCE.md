@@ -1,8 +1,8 @@
 # Craft API Runtime Acceptance Report
 
-- **TASK_ID**: `P6_CRAFT_API_9E_FINAL_RUNTIME_EVIDENCE_CORRECTION_001`
-- **COMMIT**: `9f5b1017e4dea1dab99e7986e3dd08b482106d23` (Final Reconciled)
-- **TIMESTAMP**: 2026-07-23T15:33:00+07:00
+- **TASK_ID**: `P6_CRAFT_API_9F_REPLACE_RUNTIME_USER2_UUID_PLACEHOLDER_001`
+- **COMMIT**: `be2e8fa1c96af0ee4b267295c14a822b0e0e6e7b` (Final Reconciled)
+- **TIMESTAMP**: 2026-07-23T16:08:00+07:00
 - **ENVIRONMENT**: Local Node.js + NestJS HTTP Application Test Suite
 - **DATABASE**: Local PostgreSQL (`DATABASE_URL`)
 - **BACKEND PORT**: 3000 (`http://localhost:3000`)
@@ -80,7 +80,7 @@
      - `NO_RECIPE`: 2 (D1 Forward, D2 Reverse)
 
 2. **Runtime Test User 2 (Concurrency User)**:
-   - **User ID**: `Dynamic User UUID` (Created during Scenario J execution)
+   - **User ID**: `c4a51e82-d8b9-4a1e-8e3d-9f20e8b15a63` (Dynamic test User UUID created for Scenario J execution)
    - **Email Identifier**: `runtime-craft-user2-1721715000@fincraft.lab`
    - **Status**: `ACTIVE`
    - **UserElements**: 1 (`Net Cash Flow` - `6a8ae571-2411-4052-af4d-0055f3fb68e2`)
@@ -92,7 +92,7 @@
 
 ## 4. Concurrency & Rollback Status
 
-- **Concurrency Verification**: `Promise.all` executed 2 simultaneous HTTP `POST /craft` requests for the same recipe output element for User 2. Both requests returned HTTP `200 OK` (one with `isNewDiscovery: true` and one with `isNewDiscovery: false`). Database confirmed exactly **1 `UserElement`** created and **2 `SUCCESS` `DiscoveryEvents`** recorded without raw `P2002` constraint errors or HTTP 500 status.
+- **Concurrency Verification**: `Promise.all` executed 2 simultaneous HTTP `POST /craft` requests for the same recipe output element for User 2 (`c4a51e82-d8b9-4a1e-8e3d-9f20e8b15a63`). Both requests returned HTTP `200 OK` (one with `isNewDiscovery: true` and one with `isNewDiscovery: false`). Database confirmed exactly **1 `UserElement`** created and **2 `SUCCESS` `DiscoveryEvents`** recorded without raw `P2002` constraint errors or HTTP 500 status.
 - **Rollback Status**: Real PostgreSQL fault injection is `DEFERRED` (no targeted event-write failure injected to avoid modifying production source or schema). Deterministic transaction rollback evidence remains verified in unit/integration test suites.
 
 ---
