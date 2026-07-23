@@ -74,7 +74,9 @@ git status --short
 - **P6_CRAFT_API_6C audit**: PASS (Read-only post-commit audit of split CraftService implementation)
 - **P6_CRAFT_API_7A checkpoint**: `974ce1e` — "feat: add craft module"
 - **P6_CRAFT_API_7B audit**: PASS_WITH_FIXES (Read-only post-commit audit of CraftModule)
-- **P6_CRAFT_API_7C checkpoint**: "refactor: keep craft module internal"
+- **P6_CRAFT_API_7C checkpoint**: `ff5ab3e` — "refactor: keep craft module internal"
+- **P6_CRAFT_API_7D audit**: PASS (Read-only post-fix audit of CraftModule boundary correction)
+- **P6_CRAFT_API_8A checkpoint**: "feat: add craft controller"
 
 ### Backend (`fincraft-lab-api`) — Non-Mutating Lint Workflow Repaired (`pnpm lint` vs `pnpm lint:fix`)
 
@@ -85,10 +87,11 @@ git status --short
 - **Craft Sources Parser**: Implemented & fixed in `src/craft/parsers/craft-sources.parser.ts` (78 physical lines). Resolved TS2322 using type predicate guard `isObjectRecord` without unsafe assertions. Pure, framework-independent runtime validator converting untrusted raw JSON sources into `CraftSourceResponse[]` with exact title/organization/url validation and reference independence. No `*.spec.ts` files created (verified via temporary untracked script).
 - **Craft Response Mapper**: Implemented in `src/craft/mappers/craft-response.mapper.ts` (80 physical lines). Pure, framework-independent helper explicitly selecting public fields for `CraftDiscoveryResult` and `CraftNoRecipeResult` to prevent internal metadata leakage. Uses `parseCraftSources` for detail sources parsing with full reference independence and zero `*.spec.ts` files created (verified via temporary untracked script).
 - **CraftService & Helpers**: Refactored into clean modular boundaries (`src/craft/craft.service.ts`, `src/craft/helpers/craft-prisma-error.helper.ts`, `src/craft/types/craft-service.type.ts`). `craft.service.ts` owns business flow and transaction orchestration; `craft-prisma-error.helper.ts` exports safe `isUserElementUniqueConflict` (0 `as` casts, returns `false` on missing `meta.target`) and `ExpectedUserElementRaceError`; `craft-service.type.ts` exports internal structural types. `NO_RECIPE` writes wrapped in `$transaction`. `executeDiscoveryTransaction` returns `{ isNewDiscovery: boolean }` and calls `mapCraftDiscoveryResult` after successful transaction commit.
-- **CraftModule**: Implemented in `src/craft/craft.module.ts` (8 physical lines). Wires `DatabaseModule` (`imports: [DatabaseModule]`) and provides `CraftService` (`providers: [CraftService]`). Unnecessary `exports: [CraftService]` removed per YAGNI finding in audit P6_CRAFT_API_7B (co-located `CraftController` will consume `CraftService` internally within the same module). Zero `*.spec.ts` files created (verified via temporary untracked Nest TestingModule script).
+- **CraftModule**: Implemented in `src/craft/craft.module.ts` (10 physical lines). Wires `DatabaseModule` (`imports: [DatabaseModule]`), declares `CraftController` (`controllers: [CraftController]`), and provides `CraftService` (`providers: [CraftService]`). Zero `*.spec.ts` files created (verified via temporary untracked Nest TestingModule script).
+- **CraftController**: Implemented in `src/craft/craft.controller.ts` (23 physical lines). Exposes `POST /craft` with `@HttpCode(HttpStatus.OK)`. Extracts authenticated User ID from `@CurrentUser() user: AccessTokenPayload` (`user.sub`), validates `CraftRequestDto`, delegates to `craftService.craft(user.sub, dto)`, and wraps result in `{ data: result }`. Protected by global `AuthGuard`.
 - **Exported Types**: `CraftSourceResponse`, `CraftElementResponse`, `CraftDiscoveryDetailResponse`, `CraftDiscoveryResult`, `CraftNoRecipeResult`, and `CraftResult` (discriminated union on `outcome: 'DISCOVERY' | 'NO_RECIPE'`).
 - **Craft Service Implementation Plan**: Updated & frozen in `docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md` with explicit No-Spec testing policy, concrete Postman deliverable (`P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001`), exact transaction boundary sequence, and narrow P2002 1-retry concurrency strategy.
-- **CraftController / AppModule Registration Status**: Controller is not implemented (`src/craft/craft.controller.ts` absent); `src/app.module.ts` remains unchanged; `POST /craft` remains non-operational.
+- **AppModule Registration Status**: `src/app.module.ts` remains unchanged; `POST /craft` remains non-operational in the full application until AppModule integration.
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
@@ -114,7 +117,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P6_CRAFT_API_7D_POST_FIX_CRAFT_MODULE_AUDIT_001 — Read-only post-fix audit of CraftModule boundary correction.
+P6_CRAFT_API_8B_POST_COMMIT_CRAFT_CONTROLLER_AUDIT_001 — Read-only post-commit audit of CraftController implementation.
 ```
 
 
