@@ -1,15 +1,15 @@
 # Craft API Runtime Acceptance Report
 
-- **TASK_ID**: `P6_CRAFT_API_9C_CORRECT_RUNTIME_EVIDENCE_001`
-- **COMMIT**: `2318a050f33c1a3e02f128ded0af456d5cd8235b` (Reconciled)
-- **TIMESTAMP**: 2026-07-23T15:05:00+07:00
+- **TASK_ID**: `P6_CRAFT_API_9E_FINAL_RUNTIME_EVIDENCE_CORRECTION_001`
+- **COMMIT**: `9f5b1017e4dea1dab99e7986e3dd08b482106d23` (Final Reconciled)
+- **TIMESTAMP**: 2026-07-23T15:33:00+07:00
 - **ENVIRONMENT**: Local Node.js + NestJS HTTP Application Test Suite
 - **DATABASE**: Local PostgreSQL (`DATABASE_URL`)
 - **BACKEND PORT**: 3000 (`http://localhost:3000`)
 - **CLASSIFICATION**:
   - Runtime HTTP / PostgreSQL Acceptance: **PASS_WITH_DEFERRED_ROLLBACK**
   - Postman / Newman Acceptance: **PENDING**
-  - Evidence Reconciliation: **CORRECTED**
+  - Evidence Reconciliation: **FINAL_CORRECTED**
 
 ---
 
@@ -18,8 +18,10 @@
 - **Postman Collection Execution**: `NOT_RUN`
 - **Newman CLI Execution**: `NOT_RUN` (Newman CLI was unavailable in the tested environment)
 - **Live HTTP Test Suite**: `RUN` (22 HTTP scenarios executed against live NestJS HTTP application)
-- **Scenarios Executed**: 22
-- **Scenarios Passed**: 21 Passed, 1 Deferred (`C2 Inactive Element`)
+- **Live HTTP Scenarios Executed**: 22
+- **Live HTTP Scenarios Passed**: 22 (100% pass rate for executed HTTP requests)
+- **Live HTTP Scenarios Failed**: 0
+- **Separately Deferred Scenarios**: 1 (`C2 Inactive Element` - `DEFERRED_NOT_AVAILABLE`, not executed because all 36 seeded elements were active)
 - **Postman Acceptance Status**: `PENDING` (Requires explicit Newman or Postman Desktop execution when CLI is available)
 
 ---
@@ -52,7 +54,7 @@
 | | H2 | BANNED User status | 403 | 403 | 0 UserElements, 0 DiscoveryEvents | PASS |
 | **J. Concurrency** | J | `Promise.all` Overlap First Discovery | 200 / 200 | 200 / 200 | Exactly 1 `UserElement`, 2 `SUCCESS` Events (1 `isNewDiscovery: true`, 1 `false`) | PASS |
 
-> *Note on Scenario C2*: All 36 seeded Elements in PostgreSQL have `status = 'ACTIVE'`. No inactive element exists in standard seed data; C2 is correctly classified as `DEFERRED_NOT_AVAILABLE`.
+> *Note on Scenario C2*: All 36 seeded Elements in PostgreSQL have `status = 'ACTIVE'`. No inactive element exists in standard seed data; C2 is correctly classified as `DEFERRED_NOT_AVAILABLE` and is reported separately from the 22 executed HTTP scenarios.
 
 ---
 
@@ -78,7 +80,7 @@
      - `NO_RECIPE`: 2 (D1 Forward, D2 Reverse)
 
 2. **Runtime Test User 2 (Concurrency User)**:
-   - **User ID**: Dedicated UUID generated for Scenario J
+   - **User ID**: `Dynamic User UUID` (Created during Scenario J execution)
    - **Email Identifier**: `runtime-craft-user2-1721715000@fincraft.lab`
    - **Status**: `ACTIVE`
    - **UserElements**: 1 (`Net Cash Flow` - `6a8ae571-2411-4052-af4d-0055f3fb68e2`)
