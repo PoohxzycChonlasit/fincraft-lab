@@ -5,6 +5,5 @@ import { CraftService } from './craft.service';
 @Module({
   imports: [DatabaseModule],
   providers: [CraftService],
-  exports: [CraftService],
 })
 export class CraftModule {}

@@ -64,7 +64,7 @@ fincraft-lab/
 │   │   │   ├── types/
 │   │   │   │   ├── craft-response.type.ts # Public CraftService result contract types (CraftResult discriminated union)
 │   │   │   │   └── craft-service.type.ts # Service-internal structural input & transaction result types
-│   │   │   ├── craft.module.ts # NestJS dependency boundary for CraftService wiring DatabaseModule
+│   │   │   ├── craft.module.ts # Internal NestJS module boundary for CraftService wiring DatabaseModule
 │   │   │   └── craft.service.ts # Core Craft business logic, User/Input/Recipe validation, transactions, & P2002 retry
 │   │   ├── prisma/            # Global Prisma module & service
 │   │   ├── auth/              # Auth module (register, login, me endpoints)
