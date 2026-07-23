@@ -57,7 +57,8 @@ export class WorkspaceService {
   ): Promise<WorkspaceResponse> {
     await this.validateUser(userId);
 
-    const trimmedName = typeof dto.name === 'string' ? dto.name.trim() : dto.name;
+    const trimmedName =
+      typeof dto.name === 'string' ? dto.name.trim() : dto.name;
 
     if (!trimmedName || trimmedName.length === 0) {
       throw new BadRequestException('Workspace name cannot be empty');
@@ -78,11 +79,7 @@ export class WorkspaceService {
 
     const workspaces = await this.prisma.workspace.findMany({
       where: { userId },
-      orderBy: [
-        { updatedAt: 'desc' },
-        { createdAt: 'desc' },
-        { id: 'asc' },
-      ],
+      orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }, { id: 'asc' }],
     });
 
     return workspaces.map((w) => this.mapWorkspaceResponse(w));
@@ -129,7 +126,8 @@ export class WorkspaceService {
     const updateData: { name?: string; status?: WorkspaceStatus } = {};
 
     if (dto.name !== undefined) {
-      const trimmedName = typeof dto.name === 'string' ? dto.name.trim() : dto.name;
+      const trimmedName =
+        typeof dto.name === 'string' ? dto.name.trim() : dto.name;
       if (!trimmedName || trimmedName.length === 0) {
         throw new BadRequestException('Workspace name cannot be empty');
       }
