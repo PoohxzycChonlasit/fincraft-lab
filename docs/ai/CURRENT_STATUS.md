@@ -70,7 +70,9 @@ git status --short
 - **P6_CRAFT_API_5A checkpoint**: `3f1a70a` — "feat: add craft response mapper"
 - **P6_CRAFT_API_5B audit**: PASS (Read-only post-commit audit of Craft response mapper)
 - **P6_CRAFT_API_6A checkpoint**: `a6b4da6` — "feat: add craft service"
-- **P6_CRAFT_API_6B checkpoint**: "refactor: split craft service boundaries"
+- **P6_CRAFT_API_6B checkpoint**: `40c0051` — "refactor: split craft service boundaries"
+- **P6_CRAFT_API_6C audit**: PASS (Read-only post-commit audit of split CraftService implementation)
+- **P6_CRAFT_API_7A checkpoint**: "feat: add craft module"
 
 ### Backend (`fincraft-lab-api`) — Non-Mutating Lint Workflow Repaired (`pnpm lint` vs `pnpm lint:fix`)
 
@@ -81,9 +83,10 @@ git status --short
 - **Craft Sources Parser**: Implemented & fixed in `src/craft/parsers/craft-sources.parser.ts` (78 physical lines). Resolved TS2322 using type predicate guard `isObjectRecord` without unsafe assertions. Pure, framework-independent runtime validator converting untrusted raw JSON sources into `CraftSourceResponse[]` with exact title/organization/url validation and reference independence. No `*.spec.ts` files created (verified via temporary untracked script).
 - **Craft Response Mapper**: Implemented in `src/craft/mappers/craft-response.mapper.ts` (80 physical lines). Pure, framework-independent helper explicitly selecting public fields for `CraftDiscoveryResult` and `CraftNoRecipeResult` to prevent internal metadata leakage. Uses `parseCraftSources` for detail sources parsing with full reference independence and zero `*.spec.ts` files created (verified via temporary untracked script).
 - **CraftService & Helpers**: Refactored into clean modular boundaries (`src/craft/craft.service.ts`, `src/craft/helpers/craft-prisma-error.helper.ts`, `src/craft/types/craft-service.type.ts`). `craft.service.ts` owns business flow and transaction orchestration; `craft-prisma-error.helper.ts` exports safe `isUserElementUniqueConflict` (0 `as` casts, returns `false` on missing `meta.target`) and `ExpectedUserElementRaceError`; `craft-service.type.ts` exports internal structural types. `NO_RECIPE` writes wrapped in `$transaction`. `executeDiscoveryTransaction` returns `{ isNewDiscovery: boolean }` and calls `mapCraftDiscoveryResult` after successful transaction commit.
+- **CraftModule**: Implemented in `src/craft/craft.module.ts` (10 physical lines). Wires `DatabaseModule` (`imports: [DatabaseModule]`), provides `CraftService` (`providers: [CraftService]`), and exports `CraftService` (`exports: [CraftService]`). Zero `*.spec.ts` files created (verified via temporary untracked Nest TestingModule script).
 - **Exported Types**: `CraftSourceResponse`, `CraftElementResponse`, `CraftDiscoveryDetailResponse`, `CraftDiscoveryResult`, `CraftNoRecipeResult`, and `CraftResult` (discriminated union on `outcome: 'DISCOVERY' | 'NO_RECIPE'`).
 - **Craft Service Implementation Plan**: Updated & frozen in `docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md` with explicit No-Spec testing policy, concrete Postman deliverable (`P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001`), exact transaction boundary sequence, and narrow P2002 1-retry concurrency strategy.
-- **Craft Module / Controller Status**: Not implemented yet (CraftService post-commit audit is next bounded step).
+- **CraftController / AppModule Registration Status**: Controller is not implemented (`src/craft/craft.controller.ts` absent); `src/app.module.ts` remains unchanged; `POST /craft` remains non-operational.
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
@@ -109,7 +112,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P6_CRAFT_API_6C_POST_COMMIT_CRAFT_SERVICE_AUDIT_001 — Read-only post-commit audit of split CraftService implementation.
+P6_CRAFT_API_7B_POST_COMMIT_CRAFT_MODULE_AUDIT_001 — Read-only post-commit audit of CraftModule implementation.
 ```
 
 
