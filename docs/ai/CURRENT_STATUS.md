@@ -124,8 +124,8 @@ git status --short
 
 - `pnpm build` — passed
 - `pnpm lint` — passed (0 errors, 1 pre-existing warning in `main.ts` — non-mutating)
-- `pnpm test` — 3/3 unit tests passed
-- `pnpm test:e2e` — 2/2 e2e tests passed
+- `pnpm test` — passed (1/1 unit test suite passed, 3/3 tests)
+- `pnpm test:e2e` — passed (1/1 e2e test suite passed, 2/2 tests)
 - `tsc --noEmit` — passed (0 errors)
 - `prisma validate` — passed (schema valid)
 - Search for unsafe casts (`any`, `as any`, `as unknown`, `@ts-ignore`) in `src/` and `prisma/seed/` — 0 matches
