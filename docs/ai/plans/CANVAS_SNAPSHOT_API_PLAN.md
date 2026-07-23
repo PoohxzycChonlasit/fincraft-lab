@@ -1,11 +1,12 @@
 # Canvas Graph Snapshot API Implementation Plan
 
-- **TASK_ID**: `P9_WORKSPACE_GRAPH_API_1A_FIX_CANVAS_SNAPSHOT_CONTRACT_001`
+- **TASK_ID**: `P9_WORKSPACE_GRAPH_API_1A_FINAL_CANVAS_CONTRACT_RECONCILIATION_001`
 - **MARKER**: `FROZEN_CANVAS_SNAPSHOT_API_CONTRACT_V1`
-- **STATUS**: FROZEN CONTRACT & IMPLEMENTATION PLAN (CORRECTED)
+- **STATUS**: FROZEN CONTRACT & IMPLEMENTATION PLAN (FINAL RECONCILED)
 - **CORRECTION HISTORY**:
   - `P9_WORKSPACE_GRAPH_API_1A_FREEZE_CANVAS_SNAPSHOT_CONTRACT_001` (Initial contract freeze)
   - `P9_WORKSPACE_GRAPH_API_1A_FIX_CANVAS_SNAPSHOT_CONTRACT_001` (Corrected element display, timestamp exclusions, valueData/label limits, ID collision 409, directed duplicate edge tuple rules, aligned element error mapping, and WorkspaceCanvasService boundary)
+  - `P9_WORKSPACE_GRAPH_API_1A_FINAL_CANVAS_CONTRACT_RECONCILIATION_001` (Reconciled workspaceUpdatedAt semantics, current Element master display semantics, MAX_CANVAS_SNAPSHOT_BYTES total payload ceiling, and authorized NestJS body-parser 1 MB limit)
 - **PROJECT ROOT**: `C:\devnest 101\single-project\fincraft-lab`
 - **BACKEND ROOT**: `C:\devnest 101\single-project\fincraft-lab\fincraft-lab-api`
 
@@ -15,15 +16,16 @@
 
 The FinCraft Lab Canvas allows users to visually arrange financial Elements into interactive discovery graphs. Rather than exposing granular Node and Edge CRUD endpoints during MVP, the Canvas API persists and restores the complete graph structure via an atomic **Canvas Snapshot API**:
 
-1. `GET /workspaces/:workspaceId/canvas` — Loads all persisted `WorkspaceNode` and `WorkspaceEdge` records for an owned Workspace, returning public Element display data for historical canvas rendering.
+1. `GET /workspaces/:workspaceId/canvas` — Loads all persisted `WorkspaceNode` and `WorkspaceEdge` records for an owned Workspace, embedding current public Element display metadata.
 2. `PUT /workspaces/:workspaceId/canvas` — Atomically replaces the entire persisted Canvas graph with a new snapshot in one database transaction.
 
-This document freezes the exact contract, validation rules, error behavior, database transaction ordering, service boundaries, and runtime acceptance plan before source code implementation begins.
+This document freezes the exact contract, validation rules, error behavior, database transaction ordering, service boundaries, body-parser requirements, and runtime acceptance plan before source code implementation begins.
 
 ---
 
-## 2. Actual Prisma Schema Observations
+## 2. Actual Prisma Schema & Application Configuration Observations
 
+### Database Schema
 Inspection of `prisma/schema.prisma` confirms the exact model definitions:
 
 - **Model 11 `Workspace`**:
@@ -52,15 +54,18 @@ Inspection of `prisma/schema.prisma` confirms the exact model definitions:
   - `label`: `String`
   - `createdAt`: `DateTime @default(now())`
 
-### Key Schema Compatibility Confirmation
-Client-supplied UUID v4 values for `WorkspaceNode.id` and `WorkspaceEdge.id` are 100% compatible with Prisma `@default(uuid()) @db.Uuid`. This enables the frontend client to generate node and edge UUIDs locally and submit matching `sourceNodeId` and `targetNodeId` references within a single snapshot payload without temporary ID mappings.
+### Application HTTP Body-Parser Setup
+Inspection of `src/main.ts` reveals:
+- NestJS uses Express as its default HTTP platform.
+- Express body-parser defaults to a 100 KB ceiling (`100kb` / 102,400 bytes).
+- No custom body-parser ceiling is currently configured in `src/main.ts`.
 
 ---
 
 ## 3. Contract Scope
 
 ### In Scope
-- `GET /workspaces/:workspaceId/canvas` — Retrieve current Canvas graph snapshot with embedded public Element display objects.
+- `GET /workspaces/:workspaceId/canvas` — Retrieve current Canvas graph snapshot.
 - `PUT /workspaces/:workspaceId/canvas` — Atomic snapshot replacement.
 
 ### Out of Scope (Explicitly Deferred)
@@ -69,6 +74,8 @@ Client-supplied UUID v4 values for `WorkspaceNode.id` and `WorkspaceEdge.id` are
 - Autosave scheduling, debounce, or retry orchestration (handled by frontend).
 - Undo / redo state tracking.
 - Canvas versioning or audit history.
+- Dedicated `canvasUpdatedAt` schema field.
+- Immutable historical Element display snapshot.
 - Collaboration, WebSockets, or realtime cursors.
 - Canvas templates or simulation execution.
 
@@ -76,7 +83,7 @@ Client-supplied UUID v4 values for `WorkspaceNode.id` and `WorkspaceEdge.id` are
 
 ## 4. Authentication, User Status & Ownership Isolation
 
-- **Authentication**: Both routes are protected by the global `AuthGuard`. User ID is extracted exclusively from JWT claims (`user.sub`).
+- **Authentication**: Both routes are protected by global `AuthGuard`. User ID is extracted exclusively from JWT claims (`user.sub`).
 - **User Status Policy**:
   - Missing authenticated User -> `401 Unauthorized` (`"User account not found"`).
   - `INACTIVE` or `BANNED` User -> `403 Forbidden` (`"User account is disabled"`).
@@ -100,16 +107,26 @@ Client-supplied UUID v4 values for `WorkspaceNode.id` and `WorkspaceEdge.id` are
 
 ---
 
-## 6. Public Response & Timestamp Contract
+## 6. Timestamp Semantics (`workspaceUpdatedAt`)
 
-### Node & Edge Timestamps Excluded
-Because `PUT /canvas` uses delete-and-recreate replacement semantics, `WorkspaceNode.createdAt`, `WorkspaceNode.updatedAt`, and `WorkspaceEdge.createdAt` are **excluded** from the public Canvas API.
+The Prisma `Workspace` model contains a single `updatedAt` timestamp field. This field is modified by both:
+- Metadata `PATCH /workspaces/:workspaceId` operations
+- Successful Canvas `PUT /workspaces/:workspaceId/canvas` operations
 
-`Workspace.updatedAt` serves as the single canonical Canvas save timestamp:
-- `GET /canvas`: Returns current `Workspace.updatedAt` ISO-8601 string without mutating it.
-- `PUT /canvas`: Returns committed `Workspace.updatedAt` ISO-8601 string updated inside the transaction.
+Because it is shared between metadata and graph mutations, it is not an exclusive Canvas save timestamp.
 
-### Historical Element Display Object
+### Rules for `workspaceUpdatedAt`
+- Public response field name: `workspaceUpdatedAt: string` (ISO-8601 string).
+- `GET /canvas`: Returns `Workspace.updatedAt` as `workspaceUpdatedAt` without database writes or timestamp mutation.
+- `PUT /canvas`: Updates `Workspace.updatedAt` inside the transaction and returns the committed value as `workspaceUpdatedAt`.
+- Failed `PUT /canvas`: Leaves `Workspace.updatedAt` unchanged.
+- `PATCH /workspaces/:workspaceId`: Modifies the exact same `Workspace.updatedAt` field.
+- Node/Edge timestamps (`createdAt`/`updatedAt`) are excluded from public responses.
+
+---
+
+## 7. Public Element Display Semantics
+
 `GET` and `PUT` responses embed a public Element display object inside each Node:
 
 ```typescript
@@ -124,16 +141,28 @@ export interface CanvasElementDisplayResponse {
 }
 ```
 
-- **Historical Read Preservation**: `GET /canvas` returns this Element display object even if the persisted Element or its Category later becomes inactive. Historical workspaces remain readable and renderable. `GET` does not reapply current availability filters to persisted nodes.
+### Display Semantics & Historical Read Wording
+- **Stored Reference**: `WorkspaceNode` stores `elementId` foreign key only.
+- **Current Master Join**: `GET /canvas` joins the current `Element` master-data row.
+- **Active Filter Excluded**: `GET /canvas` does not filter `Element` or `Category` by current active status. Inactive historical references remain renderable.
+- **Current Display Metadata Definition**: The embedded `element` object represents **current public display metadata**, NOT an immutable snapshot captured when the Node was saved.
+- **Consequences**:
+  - Later Element name changes in master data appear when reading old Workspaces.
+  - Later emoji or iconUrl changes in master data appear when reading old Workspaces.
+  - Old presentation values are not preserved immutably.
 - **Exclusions**: `status`, `categoryId`, Category status, relation arrays, `DiscoveryDetail`, and `UserElement` records are **not exposed**.
-- Element deletion remains protected by the database `onDelete: Restrict` relation.
+- Element deletion remains protected by the foreign-key `onDelete: Restrict` relation.
+
+---
+
+## 8. Public Response Shape
 
 ### Response Shape (HTTP 200 OK)
 ```json
 {
   "data": {
     "workspaceId": "d25ae2dd-151a-4712-ae31-3ef5a59efcf6",
-    "updatedAt": "2026-07-23T10:00:00.000Z",
+    "workspaceUpdatedAt": "2026-07-23T10:00:00.000Z",
     "nodes": [
       {
         "id": "e43adfa0-2039-4670-a48e-0b92dc278f57",
@@ -174,7 +203,7 @@ For both `GET` and `PUT` responses:
 {
   "data": {
     "workspaceId": "d25ae2dd-151a-4712-ae31-3ef5a59efcf6",
-    "updatedAt": "2026-07-23T10:00:00.000Z",
+    "workspaceUpdatedAt": "2026-07-23T10:00:00.000Z",
     "nodes": [],
     "edges": []
   }
@@ -183,50 +212,41 @@ For both `GET` and `PUT` responses:
 
 ---
 
-## 7. PUT Replacement Contract & Payload Limits
+## 9. Total Request Payload Contract & Body-Parser Limits
 
-### Replacement Semantics
-- `PUT /canvas` replaces the complete graph state.
-- Existing `WorkspaceEdge` and `WorkspaceNode` records not present in the request are deleted.
-- Empty arrays `{ "nodes": [], "edges": [] }` clear the canvas completely and update `Workspace.updatedAt`.
-
-### Payload Safety & Size Limits
+### Named Limits Constants
 - `MAX_CANVAS_NODES = 100` (Safety limit for school MVP frontend rendering)
 - `MAX_CANVAS_EDGES = 200` (Safety limit for school MVP graph complexity)
 - `MAX_NODE_VALUE_DATA_BYTES = 4096` (Serialized UTF-8 bytes per node `valueData`)
 - `MAX_CANVAS_EDGE_LABEL_LENGTH = 100` (Max characters for edge label)
+- `MAX_CANVAS_SNAPSHOT_BYTES = 524288` (512 KB total serialized UTF-8 payload ceiling)
 
-### Request Shape
-```json
-{
-  "nodes": [
-    {
-      "id": "e43adfa0-2039-4670-a48e-0b92dc278f57",
-      "elementId": "a1111111-1111-4111-a111-111111111111",
-      "positionX": 150.5,
-      "positionY": 200.0,
-      "valueData": { "amount": 5000 }
-    }
-  ],
-  "edges": [
-    {
-      "id": "f5555555-5555-4555-a555-555555555555",
-      "sourceNodeId": "e43adfa0-2039-4670-a48e-0b92dc278f57",
-      "targetNodeId": "e43adfa0-2039-4670-a48e-0b92dc278f58",
-      "label": "FLOWS_TO"
-    }
-  ]
-}
-```
+### Rationale & Headroom Calculation
+- 100 nodes x 4096 max valueData bytes = 409,600 bytes (~400 KB).
+- Adding 100 node metadata objects (~20 KB) + 200 edge objects (~30 KB) yields a theoretical max raw JSON payload of ~460 KB.
+- `MAX_CANVAS_SNAPSHOT_BYTES = 524288` (512 KB) provides headroom above max theoretical payload (~460 KB) while establishing a strict ceiling against memory exhaustion.
+
+### Total Payload Validation Behavior
+- Compute UTF-8 serialized byte size of normalized snapshot request body.
+- If payload size > `MAX_CANVAS_SNAPSHOT_BYTES` (512 KB) -> `HTTP 400 Bad Request`.
+- Exact error message: `"Canvas snapshot payload is too large"`.
+- Validation occurs before any database write. Failed validation causes 0 DB writes.
+
+### Framework Body-Parser Decision (Option B Authorized)
+Express default body-parser ceiling is 100 KB (`100kb`). Because `MAX_CANVAS_SNAPSHOT_BYTES` (512 KB) exceeds 100 KB, Option B is explicitly authorized:
+- During implementation phase (`P9_WORKSPACE_GRAPH_API_1B`), `src/main.ts` will configure Express body-parser with `express.json({ limit: '1mb' })`.
+- This change is an application-wide configuration change in `src/main.ts`.
+- Limited to 1 MB (`1mb` / 1,048,576 bytes) to comfortably accommodate the 512 KB Canvas limit without exposing the application to denial-of-service vulnerabilities.
+- Full regression testing across all endpoints (`/auth`, `/craft`, `/elements`, `/workspaces`) will be conducted.
 
 ---
 
-## 8. Node Validation & Value Data Contract
+## 10. Node & Value Data Rules
 
 ### Node Input Rules
 1. `id`: Required valid UUID v4. Duplicate node IDs in payload -> `400 Bad Request`.
 2. `elementId`: Required valid UUID v4.
-3. `positionX`, `positionY`: Required finite numbers (`Number.isFinite()`). Non-finite (e.g. `NaN`, `Infinity`, string) -> `400 Bad Request`.
+3. `positionX`, `positionY`: Required finite numbers (`Number.isFinite()`). Non-finite -> `400 Bad Request`.
 4. `valueData`: Optional plain JSON object (`Record<string, unknown>`).
    - Default: `{}` if omitted.
    - Rejects null, arrays, or primitive values -> `400 Bad Request` (`"valueData must be a plain object"`).
@@ -242,37 +262,33 @@ During `PUT /canvas`, every submitted `elementId` is validated against establish
 
 ---
 
-## 9. Edge Validation & Graph Integrity Rules
+## 11. Edge & Directed Graph Rules
 
 ### Edge Input Rules
 1. `id`: Required valid UUID v4. Duplicate edge IDs in payload -> `400 Bad Request`.
 2. `sourceNodeId`: Required valid UUID v4. Must exist in submitted `nodes` array -> `400 Bad Request` (`"Source node '<sourceNodeId>' does not exist in canvas snapshot"`).
 3. `targetNodeId`: Required valid UUID v4. Must exist in submitted `nodes` array -> `400 Bad Request` (`"Target node '<targetNodeId>' does not exist in canvas snapshot"`).
-4. `label`: Required string.
-   - Safe trim when string. Empty string `""` represents an unlabeled edge.
-   - Length > 100 chars -> `400 Bad Request` (`"label exceeds maximum length (100)"`).
-   - Null or non-string -> `400 Bad Request` (`"label must be a string"`).
+4. `label`: Required string (safe trim). Empty string `""` represents unlabeled edge. Length > 100 -> `400 Bad Request` (`"label exceeds maximum length (100)"`). Null/non-string -> `400 Bad Request` (`"label must be a string"`).
 
 ### Directed Graph Duplicate Rules
-- **Directed Graph**: Edge `A -> B` is distinct from `B -> A`. Reversing direction is allowed.
-- **Self-Edges**: Forbidden (`sourceNodeId === targetNodeId`). Self-edge -> `400 Bad Request` (`"Self-connecting edges are not allowed"`).
+- **Directed Graph**: `A -> B` is distinct from `B -> A`.
+- **Self-Edges**: Forbidden (`sourceNodeId === targetNodeId` -> `400 Bad Request` `"Self-connecting edges are not allowed"`).
 - **Parallel Edges**: Allowed ONLY when normalized labels differ.
-- **Duplicate Tuple**: `sourceNodeId + targetNodeId + normalizedLabel` duplicate inside payload -> `400 Bad Request` (`"Duplicate edge connection in canvas snapshot"`).
+- **Duplicate Tuple**: `sourceNodeId + targetNodeId + normalizedLabel` duplicate -> `400 Bad Request` (`"Duplicate edge connection in canvas snapshot"`).
 
 ---
 
-## 10. Global Client-ID Collision Rule
+## 12. Global Client-ID Collision Rule
 
 Client-generated UUID v4 IDs for Nodes and Edges are validated inside the transaction against existing database rows:
-
-1. Requested Node IDs currently belonging to **another Workspace** -> `409 Conflict` (`"Canvas identifier conflict"`).
-2. Requested Edge IDs currently belonging to **another Workspace** -> `409 Conflict` (`"Canvas identifier conflict"`).
-3. Node or Edge IDs already belonging to the **current Workspace** ARE allowed (since the snapshot replaces the current workspace graph).
-4. Raw Prisma `P2002` errors are caught and reclassified safely to `409 Conflict`. Zero external tenant data leaked.
+1. Requested Node IDs belonging to **another Workspace** -> `409 Conflict` (`"Canvas identifier conflict"`).
+2. Requested Edge IDs belonging to **another Workspace** -> `409 Conflict` (`"Canvas identifier conflict"`).
+3. Node or Edge IDs belonging to the **current Workspace** ARE allowed (replaced during snapshot PUT).
+4. Raw Prisma `P2002` reclassified safely to `409 Conflict`. Zero external tenant data leaked.
 
 ---
 
-## 11. Transaction & Race Boundary Sequence
+## 13. Transaction & Race Boundary Sequence
 
 All ownership-sensitive, status-sensitive, and database-sensitive operations execute inside a single Prisma interactive `$transaction`:
 
@@ -300,7 +316,7 @@ All ownership-sensitive, status-sensitive, and database-sensitive operations exe
    prisma.workspaceNode.createMany({ data: newNodesWithWorkspaceId })
 9. Create requested WorkspaceEdges:
    prisma.workspaceEdge.createMany({ data: newEdgesWithWorkspaceId })
-10. Fetch updated Workspace to retrieve canonical updatedAt ISO timestamp.
+10. Fetch updated Workspace to retrieve committed workspaceUpdatedAt ISO timestamp.
 11. Return committed CanvasSnapshotResponse ordered deterministically (id ASC).
 ```
 
@@ -309,7 +325,7 @@ If node creation, edge creation, foreign key check, or validation fails, all gra
 
 ---
 
-## 12. Complete Aligned Error Matrix
+## 14. Complete Aligned Error Matrix
 
 | Condition | HTTP Code | Error Message |
 | :--- | :---: | :--- |
@@ -322,6 +338,7 @@ If node creation, edge creation, foreign key check, or validation fails, all gra
 | `PUT` on `ARCHIVED` workspace | 409 | `"Workspace is archived"` |
 | Missing `nodes` array in body | 400 | `"nodes must be an array"` |
 | Missing `edges` array in body | 400 | `"edges must be an array"` |
+| Total body > 512 KB | 400 | `"Canvas snapshot payload is too large"` |
 | Exceeds 100 nodes / 200 edges | 400 | `"Canvas exceeds maximum node limit (100)"` / `"Canvas exceeds maximum edge limit (200)"` |
 | Duplicate node ID in payload | 400 | `"Duplicate node ID '<id>' in snapshot"` |
 | Duplicate edge ID in payload | 400 | `"Duplicate edge ID '<id>' in snapshot"` |
@@ -341,7 +358,7 @@ If node creation, edge creation, foreign key check, or validation fails, all gra
 
 ---
 
-## 13. Service Boundary & Proposed Source Map
+## 15. Service Boundary & Proposed Source Map
 
 To preserve thin controllers and maintain files under 300 physical lines, Canvas snapshot operations will be handled by a dedicated `WorkspaceCanvasService`:
 
@@ -353,24 +370,27 @@ To preserve thin controllers and maintain files under 300 physical lines, Canvas
 - `src/workspace/types/canvas-snapshot-response.type.ts` (~30 lines) — Public response types with embedded Element display object.
 - `src/workspace/workspace.controller.ts` (Modifies ~25 lines) — Exposes `GET /:workspaceId/canvas` and `PUT /:workspaceId/canvas`.
 - `src/workspace/workspace.module.ts` (Modifies ~5 lines) — Adds `WorkspaceCanvasService` to `providers`.
+- `src/main.ts` (Modifies ~2 lines) — Configures `express.json({ limit: '1mb' })`.
 
 No new `GraphModule` is created. `WorkspaceService` remains focused on metadata CRUD.
 
 ---
 
-## 14. Runtime Acceptance Plan (44 Scenarios)
+## 16. Runtime Acceptance Plan (48 Scenarios)
 
-The future implementation will be verified against a 44-scenario live HTTP/PostgreSQL suite compiled through `nest build`:
+The future implementation will be verified against a 48-scenario live HTTP/PostgreSQL suite compiled through `nest build`:
 
 - **Auth & User Status (Scenarios 1-5)**: No token 401, malformed token 401, missing user 401, inactive/banned user 403.
 - **Ownership Privacy (Scenarios 6-9)**: Missing vs non-owned workspace GET/PUT return identical 404.
-- **GET Canvas & Historical Read (Scenarios 10-15)**: Empty canvas 200 with `[]`; active workspace snapshot 200; deterministic ordering (`id ASC`); historical GET returns Element display data for inactive Element / inactive Category; zero DB writes; archived workspace GET returns 200.
-- **PUT Replacement (Scenarios 16-22)**: 1-node save 200; multi-node/edge save 200; replace removes omitted nodes/edges; empty snapshot `{ nodes: [], edges: [] }` clears canvas; `Workspace.updatedAt` updates on save; failed save leaves `updatedAt` unchanged; archived workspace PUT returns 409 Conflict.
-- **Node Validation & Value Data (Scenarios 23-30)**: Missing/null nodes array 400; duplicate node ID 400; non-finite coordinates 400; null valueData 400; array valueData 400; primitive valueData 400; valueData > 4096 bytes 400; valueData default `{}`.
-- **Element Availability Alignment (Scenarios 31-34)**: Non-existent Element 404 `"Element not found"`; inactive Element 400 `"Element is not active"`; inactive Category 400 `"Element category is not active"`; locked non-starter 403 `"Element is not unlocked by user"`.
-- **Edge Validation & Directed Tuples (Scenarios 35-39)**: Missing/null edges array 400; duplicate edge ID 400; dangling sourceNodeId 400; dangling targetNodeId 400; self-edge 400; non-string label 400; duplicate directed edge tuple 400; reversed edge direction allowed; parallel edges with different labels allowed.
-- **ID Collisions & Concurrent Race (Scenarios 40-42)**: Node ID collision with another workspace 409; Edge ID collision with another workspace 409; concurrent archive vs PUT rollback test.
-- **Regression (Scenarios 43-44)**: Existing Workspace metadata CRUD, Health, Auth, Craft, and Elements routes unchanged.
+- **GET Canvas & Timestamp Semantics (Scenarios 10-15)**: GET exposes `workspaceUpdatedAt`; GET causes 0 timestamp writes; metadata PATCH changes same `workspaceUpdatedAt` field; GET returns empty arrays `[]` for empty canvas; active snapshot 200; deterministic ordering (`id ASC`).
+- **Historical Read & Display Metadata (Scenarios 16-19)**: Old Canvas uses current Element name/emoji/icon after master-data edits; inactive Element remains renderable through GET; inactive Category remains renderable through GET; archived workspace GET returns 200.
+- **PUT Replacement & Timestamps (Scenarios 20-26)**: 1-node save 200; multi-node/edge save 200; replace removes omitted nodes/edges; empty snapshot `{ nodes: [], edges: [] }` clears canvas; successful Canvas PUT changes `workspaceUpdatedAt`; failed Canvas PUT leaves `workspaceUpdatedAt` unchanged; archived workspace PUT returns 409 Conflict.
+- **Payload Size & Limits (Scenarios 27-29)**: Payload exactly within 512 KB (`MAX_CANVAS_SNAPSHOT_BYTES`) accepted; payload > 512 KB returns 400 (`"Canvas snapshot payload is too large"`) and 0 writes; Express body-parser ceiling (1 MB in `main.ts`) accepts valid 512 KB payload without 413.
+- **Node Validation & Value Data (Scenarios 30-36)**: Missing/null nodes array 400; duplicate node ID 400; non-finite coordinates 400; null valueData 400; array valueData 400; primitive valueData 400; valueData > 4096 bytes 400; valueData default `{}`.
+- **Element Availability Alignment (Scenarios 37-40)**: Non-existent Element 404 `"Element not found"`; inactive Element 400 `"Element is not active"`; inactive Category 400 `"Element category is not active"`; locked non-starter 403 `"Element is not unlocked by user"`.
+- **Edge Validation & Directed Tuples (Scenarios 41-44)**: Missing/null edges array 400; duplicate edge ID 400; dangling sourceNodeId 400; dangling targetNodeId 400; self-edge 400; non-string label 400; duplicate directed edge tuple 400; reversed edge direction allowed; parallel edges with different labels allowed.
+- **ID Collisions & Concurrent Race (Scenarios 45-46)**: Node ID collision with another workspace 409; Edge ID collision with another workspace 409; concurrent archive vs PUT rollback test.
+- **Regression (Scenarios 47-48)**: Existing Workspace metadata CRUD, Health, Auth, Craft, and Elements routes unchanged.
 
 ### Execution Status in Planning Phase
 - **Scenarios Executed**: 0 (Contract planning phase only)
@@ -379,10 +399,10 @@ The future implementation will be verified against a 44-scenario live HTTP/Postg
 
 ---
 
-## 15. Success Criteria
+## 17. Success Criteria
 
 - Contract frozen under marker `FROZEN_CANVAS_SNAPSHOT_API_CONTRACT_V1`.
-- All 12 correction requirements incorporated in `CANVAS_SNAPSHOT_API_PLAN.md`.
+- All 3 final reconciliation items incorporated in `CANVAS_SNAPSHOT_API_PLAN.md`.
 - Zero source files created during planning phase.
 - Zero Prisma, migration, or database changes during planning phase.
 - Ready for implementation phase `P9_WORKSPACE_GRAPH_API_1B_IMPLEMENT_CANVAS_SNAPSHOT_001`.
