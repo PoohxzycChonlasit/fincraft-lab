@@ -26,7 +26,8 @@ fincraft-lab/
 │   │   └── AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md # Auth refactor plan
 │   └── evidence/              # Verification & acceptance evidence
 │       ├── CRAFT_API_RUNTIME_ACCEPTANCE.md # Runtime acceptance report for POST /craft against real PostgreSQL
-│       └── AVAILABLE_ELEMENTS_API_RUNTIME_ACCEPTANCE.md # Runtime acceptance report for GET /elements against real PostgreSQL
+│       ├── AVAILABLE_ELEMENTS_API_RUNTIME_ACCEPTANCE.md # Runtime acceptance report for GET /elements against real PostgreSQL
+│       └── WORKSPACE_CRUD_API_RUNTIME_ACCEPTANCE.md # Runtime acceptance report for /workspaces CRUD against real PostgreSQL
 ├── fincraft-lab-api/          # NestJS backend root
 │   ├── prisma/
 │   │   ├── schema.prisma      # Prisma 7.8 schema (PostgreSQL)

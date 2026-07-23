@@ -5,6 +5,7 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { CraftModule } from './craft/craft.module';
 import { ElementModule } from './element/element.module';
+import { WorkspaceModule } from './workspace/workspace.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ElementModule } from './element/element.module';
     AuthModule,
     CraftModule,
     ElementModule,
+    WorkspaceModule,
   ],
 })
 export class AppModule {}
