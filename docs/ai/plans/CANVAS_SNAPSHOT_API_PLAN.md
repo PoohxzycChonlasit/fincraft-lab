@@ -1,12 +1,13 @@
 # Canvas Graph Snapshot API Implementation Plan
 
-- **TASK_ID**: `P9_WORKSPACE_GRAPH_API_1A_FINAL_CANVAS_CONTRACT_RECONCILIATION_001`
+- **TASK_ID**: `P9_WORKSPACE_GRAPH_API_1A_BODY_LIMIT_CONTRACT_FIX_001`
 - **MARKER**: `FROZEN_CANVAS_SNAPSHOT_API_CONTRACT_V1`
-- **STATUS**: FROZEN CONTRACT & IMPLEMENTATION PLAN (FINAL RECONCILED)
+- **STATUS**: FROZEN CONTRACT & IMPLEMENTATION PLAN (RECONCILED & BODY-LIMIT CORRECTED)
 - **CORRECTION HISTORY**:
   - `P9_WORKSPACE_GRAPH_API_1A_FREEZE_CANVAS_SNAPSHOT_CONTRACT_001` (Initial contract freeze)
   - `P9_WORKSPACE_GRAPH_API_1A_FIX_CANVAS_SNAPSHOT_CONTRACT_001` (Corrected element display, timestamp exclusions, valueData/label limits, ID collision 409, directed duplicate edge tuple rules, aligned element error mapping, and WorkspaceCanvasService boundary)
   - `P9_WORKSPACE_GRAPH_API_1A_FINAL_CANVAS_CONTRACT_RECONCILIATION_001` (Reconciled workspaceUpdatedAt semantics, current Element master display semantics, MAX_CANVAS_SNAPSHOT_BYTES total payload ceiling, and authorized NestJS body-parser 1 MB limit)
+  - `P9_WORKSPACE_GRAPH_API_1A_BODY_LIMIT_CONTRACT_FIX_001` (Corrected NestExpressApplication.useBodyParser configuration, two-layer size policy with 400 vs 413 rejections, and aggregate vs per-item limit semantics)
 - **PROJECT ROOT**: `C:\devnest 101\single-project\fincraft-lab`
 - **BACKEND ROOT**: `C:\devnest 101\single-project\fincraft-lab\fincraft-lab-api`
 
@@ -19,7 +20,7 @@ The FinCraft Lab Canvas allows users to visually arrange financial Elements into
 1. `GET /workspaces/:workspaceId/canvas` — Loads all persisted `WorkspaceNode` and `WorkspaceEdge` records for an owned Workspace, embedding current public Element display metadata.
 2. `PUT /workspaces/:workspaceId/canvas` — Atomically replaces the entire persisted Canvas graph with a new snapshot in one database transaction.
 
-This document freezes the exact contract, validation rules, error behavior, database transaction ordering, service boundaries, body-parser requirements, and runtime acceptance plan before source code implementation begins.
+This document freezes the exact contract, validation rules, error behavior, database transaction ordering, service boundaries, framework body-parser requirements, and runtime acceptance plan before source code implementation begins.
 
 ---
 
@@ -56,8 +57,8 @@ Inspection of `prisma/schema.prisma` confirms the exact model definitions:
 
 ### Application HTTP Body-Parser Setup
 Inspection of `src/main.ts` reveals:
-- NestJS uses Express as its default HTTP platform.
-- Express body-parser defaults to a 100 KB ceiling (`100kb` / 102,400 bytes).
+- NestJS uses Express as its default HTTP platform (`NestExpressApplication`).
+- Express default JSON body-parser ceiling is 100 KB (`100kb` / 102,400 bytes).
 - No custom body-parser ceiling is currently configured in `src/main.ts`.
 
 ---
@@ -212,32 +213,57 @@ For both `GET` and `PUT` responses:
 
 ---
 
-## 9. Total Request Payload Contract & Body-Parser Limits
+## 9. Framework Body-Parser & Two-Layer Size Policy
 
-### Named Limits Constants
-- `MAX_CANVAS_NODES = 100` (Safety limit for school MVP frontend rendering)
-- `MAX_CANVAS_EDGES = 200` (Safety limit for school MVP graph complexity)
-- `MAX_NODE_VALUE_DATA_BYTES = 4096` (Serialized UTF-8 bytes per node `valueData`)
+### Framework Parser Configuration API
+During the implementation phase (`P9_WORKSPACE_GRAPH_API_1B`), `src/main.ts` will configure the NestJS Express adapter using its canonical API:
+
+```typescript
+import type { NestExpressApplication } from '@nestjs/platform-express';
+
+const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+app.useBodyParser('json', {
+  limit: '1mb',
+});
+```
+
+- **Rules**:
+  - Uses `NestExpressApplication.useBodyParser('json', { limit: '1mb' })`.
+  - No direct `express.json()` middleware.
+  - No duplicate JSON parser.
+  - No `bodyParser: false` unless later direct evidence requires it.
+  - No shared provider or dependency-injection changes.
+  - No new dependencies.
+  - The parser adjustment is application-wide in `src/main.ts` and will undergo regression testing across all endpoints (`/auth`, `/craft`, `/elements`, `/workspaces`).
+
+### Frozen Named Size Constants
+- `FRAMEWORK_JSON_BODY_LIMIT` = `1mb` (1 MB framework parser ceiling)
+- `MAX_CANVAS_NODES = 100` (Max nodes per snapshot)
+- `MAX_CANVAS_EDGES = 200` (Max edges per snapshot)
+- `MAX_NODE_VALUE_DATA_BYTES = 4096` (Max serialized UTF-8 bytes per node `valueData`)
 - `MAX_CANVAS_EDGE_LABEL_LENGTH = 100` (Max characters for edge label)
-- `MAX_CANVAS_SNAPSHOT_BYTES = 524288` (512 KB total serialized UTF-8 payload ceiling)
+- `MAX_CANVAS_SNAPSHOT_BYTES = 524288` (512 KB aggregate domain limit)
 
-### Rationale & Headroom Calculation
-- 100 nodes x 4096 max valueData bytes = 409,600 bytes (~400 KB).
-- Adding 100 node metadata objects (~20 KB) + 200 edge objects (~30 KB) yields a theoretical max raw JSON payload of ~460 KB.
-- `MAX_CANVAS_SNAPSHOT_BYTES = 524288` (512 KB) provides headroom above max theoretical payload (~460 KB) while establishing a strict ceiling against memory exhaustion.
+### Aggregate vs Per-Item Limit Semantics
+The limits apply cumulatively:
+1. Every individual item limit (`MAX_NODE_VALUE_DATA_BYTES = 4096`, `MAX_CANVAS_EDGE_LABEL_LENGTH = 100`).
+2. Every collection count limit (`MAX_CANVAS_NODES = 100`, `MAX_CANVAS_EDGES = 200`).
+3. The total aggregate payload limit (`MAX_CANVAS_SNAPSHOT_BYTES = 524288` / 512 KB).
 
-### Total Payload Validation Behavior
-- Compute UTF-8 serialized byte size of normalized snapshot request body.
-- If payload size > `MAX_CANVAS_SNAPSHOT_BYTES` (512 KB) -> `HTTP 400 Bad Request`.
-- Exact error message: `"Canvas snapshot payload is too large"`.
-- Validation occurs before any database write. Failed validation causes 0 DB writes.
+A request must satisfy **all three tiers**. The client is NOT guaranteed to use every individual maximum simultaneously (e.g. 100 nodes each with 4096 bytes valueData + 200 edges each with 100-char labels simultaneously would exceed 512 KB). The 1 MB framework ceiling provides headroom so that requests between 512 KB and 1 MB are received safely by NestJS and returned as a controlled Canvas domain error rather than crashing or causing framework errors.
 
-### Framework Body-Parser Decision (Option B Authorized)
-Express default body-parser ceiling is 100 KB (`100kb`). Because `MAX_CANVAS_SNAPSHOT_BYTES` (512 KB) exceeds 100 KB, Option B is explicitly authorized:
-- During implementation phase (`P9_WORKSPACE_GRAPH_API_1B`), `src/main.ts` will configure Express body-parser with `express.json({ limit: '1mb' })`.
-- This change is an application-wide configuration change in `src/main.ts`.
-- Limited to 1 MB (`1mb` / 1,048,576 bytes) to comfortably accommodate the 512 KB Canvas limit without exposing the application to denial-of-service vulnerabilities.
-- Full regression testing across all endpoints (`/auth`, `/craft`, `/elements`, `/workspaces`) will be conducted.
+### Two-Layer Rejection Behavior
+1. **Request <= 512 KB (`MAX_CANVAS_SNAPSHOT_BYTES`)**:
+   - Proceeds to DTO normalization, graph validation, and Prisma transaction.
+2. **Request > 512 KB and <= 1 MB (`FRAMEWORK_JSON_BODY_LIMIT`)**:
+   - Rejected at domain validation level BEFORE database writes.
+   - `HTTP 400 Bad Request` with exact message: `"Canvas snapshot payload is too large"`.
+   - Zero database writes performed.
+3. **Request > 1 MB (`FRAMEWORK_JSON_BODY_LIMIT`)**:
+   - Rejected at framework/adapter level before controller/domain execution.
+   - Framework returns `HTTP 413 Payload Too Large`.
+   - Zero database writes performed.
 
 ---
 
@@ -338,7 +364,8 @@ If node creation, edge creation, foreign key check, or validation fails, all gra
 | `PUT` on `ARCHIVED` workspace | 409 | `"Workspace is archived"` |
 | Missing `nodes` array in body | 400 | `"nodes must be an array"` |
 | Missing `edges` array in body | 400 | `"edges must be an array"` |
-| Total body > 512 KB | 400 | `"Canvas snapshot payload is too large"` |
+| Payload > 1 MB (framework limit) | 413 | Framework `413 Payload Too Large` |
+| Domain payload > 512 KB | 400 | `"Canvas snapshot payload is too large"` |
 | Exceeds 100 nodes / 200 edges | 400 | `"Canvas exceeds maximum node limit (100)"` / `"Canvas exceeds maximum edge limit (200)"` |
 | Duplicate node ID in payload | 400 | `"Duplicate node ID '<id>' in snapshot"` |
 | Duplicate edge ID in payload | 400 | `"Duplicate edge ID '<id>' in snapshot"` |
@@ -370,27 +397,27 @@ To preserve thin controllers and maintain files under 300 physical lines, Canvas
 - `src/workspace/types/canvas-snapshot-response.type.ts` (~30 lines) — Public response types with embedded Element display object.
 - `src/workspace/workspace.controller.ts` (Modifies ~25 lines) — Exposes `GET /:workspaceId/canvas` and `PUT /:workspaceId/canvas`.
 - `src/workspace/workspace.module.ts` (Modifies ~5 lines) — Adds `WorkspaceCanvasService` to `providers`.
-- `src/main.ts` (Modifies ~2 lines) — Configures `express.json({ limit: '1mb' })`.
+- `src/main.ts` (Modifies ~3 lines) — Configures `app.useBodyParser('json', { limit: '1mb' })`.
 
 No new `GraphModule` is created. `WorkspaceService` remains focused on metadata CRUD.
 
 ---
 
-## 16. Runtime Acceptance Plan (48 Scenarios)
+## 16. Runtime Acceptance Plan (50 Scenarios)
 
-The future implementation will be verified against a 48-scenario live HTTP/PostgreSQL suite compiled through `nest build`:
+The future implementation will be verified against a 50-scenario live HTTP/PostgreSQL suite compiled through `nest build`:
 
 - **Auth & User Status (Scenarios 1-5)**: No token 401, malformed token 401, missing user 401, inactive/banned user 403.
 - **Ownership Privacy (Scenarios 6-9)**: Missing vs non-owned workspace GET/PUT return identical 404.
 - **GET Canvas & Timestamp Semantics (Scenarios 10-15)**: GET exposes `workspaceUpdatedAt`; GET causes 0 timestamp writes; metadata PATCH changes same `workspaceUpdatedAt` field; GET returns empty arrays `[]` for empty canvas; active snapshot 200; deterministic ordering (`id ASC`).
 - **Historical Read & Display Metadata (Scenarios 16-19)**: Old Canvas uses current Element name/emoji/icon after master-data edits; inactive Element remains renderable through GET; inactive Category remains renderable through GET; archived workspace GET returns 200.
 - **PUT Replacement & Timestamps (Scenarios 20-26)**: 1-node save 200; multi-node/edge save 200; replace removes omitted nodes/edges; empty snapshot `{ nodes: [], edges: [] }` clears canvas; successful Canvas PUT changes `workspaceUpdatedAt`; failed Canvas PUT leaves `workspaceUpdatedAt` unchanged; archived workspace PUT returns 409 Conflict.
-- **Payload Size & Limits (Scenarios 27-29)**: Payload exactly within 512 KB (`MAX_CANVAS_SNAPSHOT_BYTES`) accepted; payload > 512 KB returns 400 (`"Canvas snapshot payload is too large"`) and 0 writes; Express body-parser ceiling (1 MB in `main.ts`) accepts valid 512 KB payload without 413.
-- **Node Validation & Value Data (Scenarios 30-36)**: Missing/null nodes array 400; duplicate node ID 400; non-finite coordinates 400; null valueData 400; array valueData 400; primitive valueData 400; valueData > 4096 bytes 400; valueData default `{}`.
-- **Element Availability Alignment (Scenarios 37-40)**: Non-existent Element 404 `"Element not found"`; inactive Element 400 `"Element is not active"`; inactive Category 400 `"Element category is not active"`; locked non-starter 403 `"Element is not unlocked by user"`.
-- **Edge Validation & Directed Tuples (Scenarios 41-44)**: Missing/null edges array 400; duplicate edge ID 400; dangling sourceNodeId 400; dangling targetNodeId 400; self-edge 400; non-string label 400; duplicate directed edge tuple 400; reversed edge direction allowed; parallel edges with different labels allowed.
-- **ID Collisions & Concurrent Race (Scenarios 45-46)**: Node ID collision with another workspace 409; Edge ID collision with another workspace 409; concurrent archive vs PUT rollback test.
-- **Regression (Scenarios 47-48)**: Existing Workspace metadata CRUD, Health, Auth, Craft, and Elements routes unchanged.
+- **Two-Layer Payload Size & Body-Parser (Scenarios 27-31)**: Valid payload below 512 KB reaches Canvas endpoint and succeeds; payload exactly at or safely below 512 KB is accepted when all validation passes; payload > 512 KB and <= 1 MB returns Canvas-specific 400 (`"Canvas snapshot payload is too large"`) and 0 writes; payload > 1 MB returns framework 413 Payload Too Large and 0 writes; existing non-Canvas JSON endpoints continue to work after application-wide parser adjustment.
+- **Node Validation & Value Data (Scenarios 32-38)**: Missing/null nodes array 400; duplicate node ID 400; non-finite coordinates 400; null valueData 400; array valueData 400; primitive valueData 400; valueData > 4096 bytes 400; valueData default `{}`.
+- **Element Availability Alignment (Scenarios 39-42)**: Non-existent Element 404 `"Element not found"`; inactive Element 400 `"Element is not active"`; inactive Category 400 `"Element category is not active"`; locked non-starter 403 `"Element is not unlocked by user"`.
+- **Edge Validation & Directed Tuples (Scenarios 43-46)**: Missing/null edges array 400; duplicate edge ID 400; dangling sourceNodeId 400; dangling targetNodeId 400; self-edge 400; non-string label 400; duplicate directed edge tuple 400; reversed edge direction allowed; parallel edges with different labels allowed.
+- **ID Collisions & Concurrent Race (Scenarios 47-48)**: Node ID collision with another workspace 409; Edge ID collision with another workspace 409; concurrent archive vs PUT rollback test.
+- **Regression & AppModule Integration (Scenarios 49-50)**: Existing Workspace metadata CRUD, Health, Auth, Craft, and Elements routes unchanged; compiled AppModule uses `NestExpressApplication.useBodyParser` without shared-provider changes.
 
 ### Execution Status in Planning Phase
 - **Scenarios Executed**: 0 (Contract planning phase only)
@@ -402,7 +429,7 @@ The future implementation will be verified against a 48-scenario live HTTP/Postg
 ## 17. Success Criteria
 
 - Contract frozen under marker `FROZEN_CANVAS_SNAPSHOT_API_CONTRACT_V1`.
-- All 3 final reconciliation items incorporated in `CANVAS_SNAPSHOT_API_PLAN.md`.
+- All body-limit corrections incorporated in `CANVAS_SNAPSHOT_API_PLAN.md`.
 - Zero source files created during planning phase.
 - Zero Prisma, migration, or database changes during planning phase.
 - Ready for implementation phase `P9_WORKSPACE_GRAPH_API_1B_IMPLEMENT_CANVAS_SNAPSHOT_001`.
