@@ -79,7 +79,9 @@ git status --short
 - **P6_CRAFT_API_8A checkpoint**: `4f4b0db` — "feat: add craft controller"
 - **P6_CRAFT_API_8C checkpoint**: `8d950ed` — "feat: register craft module"
 - **P6_CRAFT_API_8D audit**: PASS_WITH_FIXES (AppModule Craft integration audit identified redundant Reflector provider in AuthModule)
-- **P6_CRAFT_API_8E checkpoint**: "fix: remove redundant auth reflector provider"
+- **P6_CRAFT_API_8E checkpoint**: `b87e45e` — "fix: remove redundant auth reflector provider"
+- **P6_CRAFT_API_8F audit**: PASS (Read-only post-fix audit of AppModule Craft integration & Auth boundary correction)
+- **P6_CRAFT_API_9A runtime acceptance**: PASS (Real local PostgreSQL & HTTP runtime acceptance completed, all 22 scenarios passed)
 
 ### Backend (`fincraft-lab-api`) — Non-Mutating Lint Workflow Repaired (`pnpm lint` vs `pnpm lint:fix`)
 
@@ -94,7 +96,8 @@ git status --short
 - **CraftController**: Implemented in `src/craft/craft.controller.ts` (23 physical lines). Exposes `POST /craft` with `@HttpCode(HttpStatus.OK)`. Extracts authenticated User ID from `@CurrentUser() user: AccessTokenPayload` (`user.sub`), validates `CraftRequestDto`, delegates to `craftService.craft(user.sub, dto)`, and wraps result in `{ data: result }`. Protected by global `AuthGuard`.
 - **Exported Types**: `CraftSourceResponse`, `CraftElementResponse`, `CraftDiscoveryDetailResponse`, `CraftDiscoveryResult`, `CraftNoRecipeResult`, and `CraftResult` (discriminated union on `outcome: 'DISCOVERY' | 'NO_RECIPE'`).
 - **Craft Service Implementation Plan**: Updated & frozen in `docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md` with explicit No-Spec testing policy, concrete Postman deliverable (`P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001`), exact transaction boundary sequence, and narrow P2002 1-retry concurrency strategy.
-- **AppModule Registration Status**: `CraftModule` is registered in `src/app.module.ts`. `POST /craft` is part of the full application graph and protected by global `AuthGuard` (returns `401 Unauthorized` when unauthenticated). Database-backed runtime execution pending Postman acceptance.
+- **AppModule Registration Status**: `CraftModule` is registered in `src/app.module.ts`. `POST /craft` is part of the full application graph and protected by global `AuthGuard` (returns `401 Unauthorized` when unauthenticated).
+- **Craft API Runtime Acceptance**: Verified against real local PostgreSQL database (`POST /craft`). Auth, DTO validation, Element access, NO_RECIPE, First Discovery, Rediscovery, Public Field Leakage audit, User Status, and Concurrent First Discovery (`Promise.all` P2002 race condition handling) verified. Documented in `docs/ai/evidence/CRAFT_API_RUNTIME_ACCEPTANCE.md`.
 - **Auth Architecture & Reflector**: Cleaned in `src/auth/auth.module.ts`. Redundant `Reflector` provider removed (Nest core provides `Reflector` globally). Global `AuthGuard` remains active and effective via `APP_GUARD`.
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
@@ -121,7 +124,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P6_CRAFT_API_8F_POST_FIX_CRAFT_APP_INTEGRATION_AUDIT_001 — Read-only post-fix audit of AppModule Craft integration & Auth boundary correction.
+P6_CRAFT_API_9B_POST_RUNTIME_ACCEPTANCE_AUDIT_001 — Read-only post-runtime acceptance audit of Craft API implementation & documentation.
 ```
 
 

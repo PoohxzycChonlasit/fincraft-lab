@@ -17,11 +17,13 @@ fincraft-lab/
 │   ├── PROJECT_CONTEXT.md     # Product context
 │   ├── CODING_RULES.md        # Comprehensive coding rules
 │   ├── STEPWISE_WORKFLOW.md   # Stepwise development rules
-│   └── plans/                 # Architectural plans
-│       ├── CORE_CONTENT_SEED_PLAN.md # Seed plan (v1 categories, starter/discovery elements, frozen starter element details v2, frozen discovery details batch a v1, frozen discovery details batch b v1, frozen core craft recipes v1)
-│       ├── CRAFT_API_PLAN.md  # Frozen Craft API V1 contract plan (POST /craft)
-│       ├── CRAFT_SERVICE_IMPLEMENTATION_PLAN.md # Frozen CraftService implementation plan (No-Spec policy, Postman deliverable P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001, exact transaction boundary & 1-retry concurrency strategy)
-│       └── AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md # Auth refactor plan
+│   ├── plans/                 # Architectural plans
+│   │   ├── CORE_CONTENT_SEED_PLAN.md # Seed plan (v1 categories, starter/discovery elements, frozen starter element details v2, frozen discovery details batch a v1, frozen discovery details batch b v1, frozen core craft recipes v1)
+│   │   ├── CRAFT_API_PLAN.md  # Frozen Craft API V1 contract plan (POST /craft)
+│   │   ├── CRAFT_SERVICE_IMPLEMENTATION_PLAN.md # Frozen CraftService implementation plan (No-Spec policy, Postman deliverable P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001, exact transaction boundary & 1-retry concurrency strategy)
+│   │   └── AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md # Auth refactor plan
+│   └── evidence/              # Verification & acceptance evidence
+│       └── CRAFT_API_RUNTIME_ACCEPTANCE.md # Runtime acceptance report for POST /craft against real PostgreSQL
 ├── fincraft-lab-api/          # NestJS backend root
 │   ├── prisma/
 │   │   ├── schema.prisma      # Prisma 7.8 schema (PostgreSQL)
