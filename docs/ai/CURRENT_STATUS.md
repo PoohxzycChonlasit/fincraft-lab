@@ -65,7 +65,9 @@ git status --short
 - **P6_CRAFT_API_3D audit**: PASS (Read-only post-fix audit of CraftService implementation plan)
 - **P6_CRAFT_API_4A checkpoint**: `eb6a8bc` — "feat: add craft sources parser"
 - **P6_CRAFT_API_4B audit**: FIX_REQUIRED (Read-only post-commit audit identified TS2322 in craft-sources.parser.ts)
-- **P6_CRAFT_API_4C checkpoint**: "fix: narrow craft source objects safely"
+- **P6_CRAFT_API_4C checkpoint**: `5600958` — "fix: narrow craft source objects safely"
+- **P6_CRAFT_API_4D audit**: PASS (Read-only post-fix audit of Craft sources parser)
+- **P6_CRAFT_API_5A checkpoint**: "feat: add craft response mapper"
 
 ### Backend (`fincraft-lab-api`) — Non-Mutating Lint Workflow Repaired (`pnpm lint` vs `pnpm lint:fix`)
 
@@ -73,10 +75,11 @@ git status --short
 - **Explicit Fix Command**: `pnpm lint:fix` added to `package.json` (`eslint "{src,apps,libs,test}/**/*.ts" --fix`) for explicit opt-in formatting.
 - **Dirty Seed Reconciliation**: `prisma/seed.ts` formatting diff audited and safely reconciled to HEAD `4ac94ac`.
 - **Craft Response Types**: Implemented in `src/craft/types/craft-response.type.ts` (43 physical lines).
-- **Craft Sources Parser**: Implemented & fixed in `src/craft/parsers/craft-sources.parser.ts` (72 physical lines). Resolved TS2322 using type predicate guard `isObjectRecord` without unsafe assertions. Pure, framework-independent runtime validator converting untrusted raw JSON sources into `CraftSourceResponse[]` with exact title/organization/url validation and reference independence. No `*.spec.ts` files created (verified via temporary untracked script).
+- **Craft Sources Parser**: Implemented & fixed in `src/craft/parsers/craft-sources.parser.ts` (78 physical lines). Resolved TS2322 using type predicate guard `isObjectRecord` without unsafe assertions. Pure, framework-independent runtime validator converting untrusted raw JSON sources into `CraftSourceResponse[]` with exact title/organization/url validation and reference independence. No `*.spec.ts` files created (verified via temporary untracked script).
+- **Craft Response Mapper**: Implemented in `src/craft/mappers/craft-response.mapper.ts` (68 physical lines). Pure, framework-independent helper explicitly selecting public fields for `CraftDiscoveryResult` and `CraftNoRecipeResult` to prevent internal metadata leakage. Uses `parseCraftSources` for detail sources parsing with full reference independence and zero `*.spec.ts` files created (verified via temporary untracked script).
 - **Exported Types**: `CraftSourceResponse`, `CraftElementResponse`, `CraftDiscoveryDetailResponse`, `CraftDiscoveryResult`, `CraftNoRecipeResult`, and `CraftResult` (discriminated union on `outcome: 'DISCOVERY' | 'NO_RECIPE'`).
 - **Craft Service Implementation Plan**: Updated & frozen in `docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md` with explicit No-Spec testing policy, concrete Postman deliverable (`P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001`), exact transaction boundary sequence, and narrow P2002 1-retry concurrency strategy.
-- **Craft Mapper / Service / Module / Controller Status**: Not implemented yet (Post-fix parser audit is next bounded step).
+- **Craft Service / Module / Controller Status**: Not implemented yet (Mapper post-commit audit is next bounded step).
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
@@ -102,7 +105,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P6_CRAFT_API_4D_POST_FIX_CRAFT_SOURCES_PARSER_AUDIT_001 — Audit Craft sources parser after type predicate narrowing fix.
+P6_CRAFT_API_5B_POST_COMMIT_CRAFT_RESPONSE_MAPPER_AUDIT_001 — Audit Craft response mapper commit against schema and implementation plan constraints.
 ```
 
 

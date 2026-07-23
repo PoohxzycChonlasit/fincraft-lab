@@ -55,6 +55,8 @@ fincraft-lab/
 │   │   ├── craft/
 │   │   │   ├── dto/
 │   │   │   │   └── craft-request.dto.ts # Request DTO validating inputElementIds for POST /craft
+│   │   │   ├── mappers/
+│   │   │   │   └── craft-response.mapper.ts # Pure mapping from selected Craft data to safe public CraftResult shapes
 │   │   │   ├── parsers/
 │   │   │   │   └── craft-sources.parser.ts # Pure runtime validator for DiscoveryDetail.sources Json converting to CraftSourceResponse[]
 │   │   │   └── types/
