@@ -81,7 +81,9 @@ git status --short
 - **P6_CRAFT_API_8D audit**: PASS_WITH_FIXES (AppModule Craft integration audit identified redundant Reflector provider in AuthModule)
 - **P6_CRAFT_API_8E checkpoint**: `b87e45e` — "fix: remove redundant auth reflector provider"
 - **P6_CRAFT_API_8F audit**: PASS (Read-only post-fix audit of AppModule Craft integration & Auth boundary correction)
-- **P6_CRAFT_API_9A runtime acceptance**: PASS (Real local PostgreSQL & HTTP runtime acceptance completed, all 22 scenarios passed)
+- **P6_CRAFT_API_9A runtime acceptance**: PASS (Real local PostgreSQL & HTTP runtime acceptance completed, 22 scenarios executed)
+- **P6_CRAFT_API_9B audit**: PASS_WITH_FIXES (Read-only post-runtime acceptance audit identified 4 documentation reconciliation points)
+- **P6_CRAFT_API_9C checkpoint**: "docs: reconcile craft runtime acceptance evidence"
 
 ### Backend (`fincraft-lab-api`) — Non-Mutating Lint Workflow Repaired (`pnpm lint` vs `pnpm lint:fix`)
 
@@ -97,7 +99,7 @@ git status --short
 - **Exported Types**: `CraftSourceResponse`, `CraftElementResponse`, `CraftDiscoveryDetailResponse`, `CraftDiscoveryResult`, `CraftNoRecipeResult`, and `CraftResult` (discriminated union on `outcome: 'DISCOVERY' | 'NO_RECIPE'`).
 - **Craft Service Implementation Plan**: Updated & frozen in `docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md` with explicit No-Spec testing policy, concrete Postman deliverable (`P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001`), exact transaction boundary sequence, and narrow P2002 1-retry concurrency strategy.
 - **AppModule Registration Status**: `CraftModule` is registered in `src/app.module.ts`. `POST /craft` is part of the full application graph and protected by global `AuthGuard` (returns `401 Unauthorized` when unauthenticated).
-- **Craft API Runtime Acceptance**: Verified against real local PostgreSQL database (`POST /craft`). Auth, DTO validation, Element access, NO_RECIPE, First Discovery, Rediscovery, Public Field Leakage audit, User Status, and Concurrent First Discovery (`Promise.all` P2002 race condition handling) verified. Documented in `docs/ai/evidence/CRAFT_API_RUNTIME_ACCEPTANCE.md`.
+- **Craft API Runtime Acceptance**: Reconciled and documented in `docs/ai/evidence/CRAFT_API_RUNTIME_ACCEPTANCE.md`. 22 live HTTP scenarios executed via NestJS live HTTP test suite (21 passed, C2 `DEFERRED_NOT_AVAILABLE`). Preserved PostgreSQL counts: 2 Users, 2 UserElements, 7 DiscoveryEvents (5 `SUCCESS`, 2 `NO_RECIPE`). Promise.all concurrency P2002 race condition handling verified. Postman collection execution `NOT_RUN` / `PENDING`.
 - **Auth Architecture & Reflector**: Cleaned in `src/auth/auth.module.ts`. Redundant `Reflector` provider removed (Nest core provides `Reflector` globally). Global `AuthGuard` remains active and effective via `APP_GUARD`.
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
@@ -124,7 +126,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P6_CRAFT_API_9B_POST_RUNTIME_ACCEPTANCE_AUDIT_001 — Read-only post-runtime acceptance audit of Craft API implementation & documentation.
+P6_CRAFT_API_9D_POST_COMMIT_RUNTIME_EVIDENCE_AUDIT_001 — Read-only post-commit audit of reconciled Craft API runtime acceptance evidence.
 ```
 
 
