@@ -2,7 +2,7 @@
 
 ## Goal & Scope
 
-This document specifies the implementation plan for **CraftService V1** in **FinCraft Lab** to back the frozen `POST /craft` contract.
+This document specifies the frozen implementation plan for **CraftService V1** in **FinCraft Lab** to back the frozen `POST /craft` contract.
 
 Crafting is the core discovery mechanism of FinCraft Lab. Authenticated users combine two financial Elements (e.g. `income` + `expense`) to produce a new Discovery Element or receive a `NO_RECIPE` outcome.
 
@@ -49,117 +49,74 @@ export class CraftService {
 
 ---
 
-## Step-by-Step Execution Architecture
+## Exact Step-by-Step Execution Boundary
 
-```mermaid
-flowchart TD
-    A[Request: userId, dto.inputElementIds] --> B[1. User Status Query]
-    B -->|BANNED / INACTIVE| B_ERR[403 Forbidden]
-    B -->|Not Found| B_401[401 Unauthorized]
-    B -->|ACTIVE| C[2. Input Element Resolution]
-    
-    C -->|Count !== 2| C_404[404 Not Found]
-    C -->|Any status !== ACTIVE| C_400[400 Bad Request]
-    C -->|All active| D[3. Availability Check]
-    
-    D -->|Non-Starter missing UserElement| D_403[403 Forbidden]
-    D -->|Starter OR Owned Non-Starter| E[4. Hash Calculation & Recipe Query]
-    
-    E --> F{Active COMMUTATIVE Recipe Found?}
-    
-    F -->|No / Inactive| G[5A. NO_RECIPE Flow]
-    G --> G1[prisma.$transaction: Record DiscoveryEvent NO_RECIPE]
-    G1 --> G2[Return outcome: NO_RECIPE]
-    
-    F -->|Yes| H[5B. DISCOVERY Flow & Invariant Check]
-    H -->|Invalid Detail / Inactive Output| H_500[500 Internal Server Error]
-    H -->|Valid Output & Detail| I[prisma.$transaction: Check UserElement & Upsert]
-    I --> J[Record DiscoveryEvent SUCCESS]
-    J --> K[Return outcome: DISCOVERY with element & detail]
-```
+The plan enforces one strict execution boundary sequence across all requests:
+
+### BEFORE TRANSACTION:
+1. **DTO Validation**: Validated prior to service entry (`CraftRequestDto`: exactly 2 distinct UUID v4s).
+2. **Input Hash Calculation**: Call `calculateCraftInputHash(dto.inputElementIds[0], dto.inputElementIds[1])` to generate `canonicalElementIds` (`[id1, id2]`) and SHA-256 `inputHash`.
+3. **User Status Verification**: Query `User` by `userId`. Throw `UnauthorizedException('User account not found')` (401) if missing; throw `ForbiddenException('User account is disabled')` (403) if `status` is `INACTIVE` or `BANNED`.
+4. **Input Element Resolution**: Query `Element` table where `id` in `dto.inputElementIds`. Throw `NotFoundException('Element not found')` (404) if count !== 2; throw `BadRequestException('Input element is not active')` (400) if any `status !== ContentStatus.ACTIVE`.
+5. **Input Availability Verification**: For non-Starter inputs (`isStarter === false`), query `UserElement` where `userId === userId` AND `elementId` in `nonStarterElementIds`. Throw `ForbiddenException('Input element is not unlocked by user')` (403) if returned count !== non-Starter inputs length. (Starter elements are globally available).
+6. **Recipe & Output Invariant Lookup**: Query `CraftRecipe` by `@unique inputHash` with relation `outputElement` including `discoveryDetail`.
+   - If no matching active commutative recipe exists (`recipe === null` or `ruleType !== COMMUTATIVE` or `status !== ACTIVE`): Flag outcome as `NO_RECIPE`.
+   - If matching active commutative recipe exists: Verify `outputElement.status === ContentStatus.ACTIVE`, `outputElement.isStarter === false`, `outputElement.discoveryDetail !== null`, and parse `discoveryDetail.sources` via `parseCraftSources()`. Throw `InternalServerErrorException('Invalid output element or discovery detail configuration')` (500) if any invariant fails.
+
+### INSIDE TRANSACTION (`prisma.$transaction(async (tx) => ...)`):
+7. **NO_RECIPE Outcome**:
+   - Create `DiscoveryEvent` (`userId`, `recipeId: null`, `resultElementId: null`, `inputElementIds: canonicalElementIds`, `resultStatus: DiscoveryResultStatus.NO_RECIPE`, `discoveredAt: new Date()`).
+   - Commit transaction.
+8. **DISCOVERY Outcome**:
+   - Call `tx.userElement.findUnique({ where: { userId_elementId: { userId, elementId: outputElement.id } } })`.
+   - If `UserElement` exists: Set `isNewDiscovery = false`.
+   - If `UserElement` does not exist: Call `tx.userElement.create({ data: { userId, elementId: outputElement.id, unlockedAt: new Date() } })` and set `isNewDiscovery = true`.
+   - Create `DiscoveryEvent` (`userId`, `recipeId: recipe.id`, `resultElementId: outputElement.id`, `inputElementIds: canonicalElementIds`, `resultStatus: DiscoveryResultStatus.SUCCESS`, `discoveredAt: new Date()`).
+   - Commit transaction.
+
+### AFTER COMMIT:
+9. **Response Mapping**: Map Prisma entity data to `CraftResult` (`CraftDiscoveryResult` or `CraftNoRecipeResult`). Controller envelope `{ data: result }` remains outside `CraftService`.
+
+*Content Consistency Note*: Master content tables (`Element`, `CraftRecipe`, `DiscoveryDetail`) are assumed stable during single-request execution. Write atomicity strictly covers `UserElement` and `DiscoveryEvent`.
 
 ---
 
-## Technical Decisions (Frozen)
+## Technical Decisions & Concurrency Strategy
 
 ### 1. User Status Policy
 - `AuthGuard` verifies JWT signature and payload claims but does not query PostgreSQL.
 - `CraftService` queries `User` status during request execution:
-  - If `User` row does not exist: Throws `UnauthorizedException('User account not found')` (401).
-  - If `user.status === UserStatus.INACTIVE` or `UserStatus.BANNED`: Throws `ForbiddenException('User account is disabled')` (403).
+  - Missing user: Throws `UnauthorizedException('User account not found')` (401).
+  - `user.status === UserStatus.INACTIVE / BANNED`: Throws `ForbiddenException('User account is disabled')` (403).
 
-### 2. Input Element Resolution & Availability Policy
-- **Resolution**:
-  - Query `Element` table where `id` in `dto.inputElementIds`.
-  - If returned elements count !== 2: Throws `NotFoundException('Element not found')` (404).
-  - If any element has `status !== ContentStatus.ACTIVE`: Throws `BadRequestException('Input element is not active')` (400).
-- **Availability**:
-  - Filter input elements for non-Starters (`isStarter === false`).
-  - If non-Starter elements exist, query `UserElement` where `userId === userId` AND `elementId` in `nonStarterElementIds`.
-  - If returned `UserElement` count !== nonStarterElementIds.length: Throws `ForbiddenException('Input element is not unlocked by user')` (403).
-
-### 3. Hash Calculation & Recipe Lookup
-- Calls pure shared helper `calculateCraftInputHash(dto.inputElementIds[0], dto.inputElementIds[1])`.
-- Returns `{ canonicalElementIds: [string, string], inputHash: string }`.
-- Queries `CraftRecipe` by `@unique inputHash` with relation `outputElement` including `discoveryDetail`.
-- A valid recipe requires:
-  - `recipe !== null`
-  - `recipe.ruleType === CraftRuleType.COMMUTATIVE`
-  - `recipe.status === ContentStatus.ACTIVE`
-
-### 4. Output & Discovery Detail Invariants
-- For a matching recipe, `CraftService` verifies:
-  - `outputElement !== null` AND `outputElement.status === ContentStatus.ACTIVE`
-  - `outputElement.isStarter === false` (Under Core Recipe V1, all craft outputs are Discovery elements)
-  - `outputElement.discoveryDetail !== null`
-  - `discoveryDetail.sources` parses successfully via `parseCraftSources()`.
-- If any output invariant fails: Throws `InternalServerErrorException('Invalid output element or discovery detail configuration')` (500). No `UserElement` or `DiscoveryEvent` is created.
-
-### 5. Runtime Sources Parser
+### 2. Runtime Sources Parser
 - Pure helper function `parseCraftSources(rawSources: unknown): CraftSourceResponse[]` located in `src/craft/parsers/craft-sources.parser.ts`.
 - Validates:
   - `rawSources` is an Array.
-  - Each item is a non-null Object with string properties `title`, `organization`, `url`.
-  - Rejects missing fields, non-string types, or malformed structures by throwing an Error (which gets caught and mapped to 500 Internal Server Error).
+  - Each item is a non-null Object with non-empty string properties `title`, `organization`, `url`.
+  - Rejects missing fields, non-string types, empty strings, or extra fields by throwing an Error (mapped to 500 Internal Server Error).
 
-### 6. Transaction Boundary & Outcome Logging
-All DB writes run inside `prisma.$transaction(async (tx) => ...)`:
+### 3. Concurrency Strategy (`@@unique([userId, elementId])`)
+- **First Unlock & Rediscovery Strategy**:
+  1. Inside interactive `$transaction`, call `tx.userElement.findUnique({ where: { userId_elementId: { userId, elementId: outputElement.id } } })`.
+  2. If row exists: Set `isNewDiscovery = false`, create `SUCCESS` `DiscoveryEvent`.
+  3. If row is missing: Attempt `tx.userElement.create(...)`, set `isNewDiscovery = true`, create `SUCCESS` `DiscoveryEvent`.
+  4. If `tx.userElement.create` encounters a concurrent unique collision:
+     - The current PostgreSQL transaction block aborts (`25P02`). Do not continue inside that transaction block.
+     - Catch the error outside `$transaction` and pass through a narrow P2002 classifier.
+     - Start **1 fresh `$transaction` retry**.
+  5. On retry, `tx.userElement.findUnique` finds the existing `UserElement` row created by the winning request, sets `isNewDiscovery = false`, and successfully records the second `DiscoveryEvent`.
+  6. Maximum fresh transaction retries: **1**.
+  7. Prisma `upsert` is **prohibited** for `isNewDiscovery` boolean determination.
 
-#### A. NO_RECIPE Outcome:
-- Create `DiscoveryEvent`:
-  - `userId`: `userId`
-  - `recipeId`: `null`
-  - `resultElementId`: `null`
-  - `inputElementIds`: `canonicalElementIds` (canonical sorted string array)
-  - `resultStatus`: `DiscoveryResultStatus.NO_RECIPE`
-  - `discoveredAt`: `new Date()`
-- Return `{ outcome: 'NO_RECIPE' }`.
+### 4. Narrow P2002 Classification
+Retry is permitted **only** when all of the following conditions are true:
+- Error is an instance of `Prisma.PrismaClientKnownRequestError` imported from `src/database/generated/prisma/client`.
+- `error.code === 'P2002'`.
+- `error.meta?.target` (or error metadata) identifies the `UserElement` composite unique constraint (`userId` + `elementId`).
+- The failed operation occurred on the `tx.userElement.create` path.
 
-#### B. DISCOVERY Outcome:
-- Check existing `UserElement` for `(userId, outputElement.id)`.
-- If `UserElement` exists:
-  - `isNewDiscovery = false`
-- If `UserElement` does not exist:
-  - Create `UserElement` (`userId`, `elementId: outputElement.id`, `unlockedAt: new Date()`).
-  - `isNewDiscovery = true`
-- Create `DiscoveryEvent`:
-  - `userId`: `userId`
-  - `recipeId`: `recipe.id`
-  - `resultElementId`: `recipe.outputElementId`
-  - `inputElementIds`: `canonicalElementIds`
-  - `resultStatus`: `DiscoveryResultStatus.SUCCESS`
-  - `discoveredAt`: `new Date()`
-- Return mapped `CraftDiscoveryResult`.
-
-### 7. Concurrency Strategy (`@@unique([userId, elementId])`)
-- Problem: Two concurrent craft requests for the same output element race to create `UserElement`.
-- Strategy:
-  1. `CraftService` checks for existing `UserElement` inside `$transaction`.
-  2. If not found, attempts `tx.userElement.create(...)`.
-  3. If a concurrent request creates the `UserElement` simultaneously, `tx.userElement.create` triggers Prisma `P2002` (Unique constraint failed).
-  4. In PostgreSQL / Prisma interactive transactions, a `P2002` failure aborts the transaction block (`25P02`).
-  5. `CraftService.craft()` catches `P2002` on the outer `$transaction` call, recognizes a concurrency race on `UserElement`, and performs **1 service-level retry** of the `$transaction`.
-  6. On retry, the pre-check finds the `UserElement` row inserted by the winning request, sets `isNewDiscovery = false`, and successfully records the second `DiscoveryEvent` without surfacing a 500 error to the client.
+*Unrelated P2002 Errors*: Unrelated unique constraint failures (if any) are not retried and propagate directly as unexpected database failures (500).
 
 ---
 
@@ -167,9 +124,11 @@ All DB writes run inside `prisma.$transaction(async (tx) => ...)`:
 
 | File Path | Target Physical Lines | Purpose / Responsibility |
 |---|---|---|
-| `src/craft/craft.service.ts` | ~200 - 250 lines | Core business logic, status checks, recipe lookup, transaction management |
+| `src/craft/craft.service.ts` | ~200 - 250 lines | Core business logic, status checks, recipe lookup, transaction management & retry wrapper |
 | `src/craft/parsers/craft-sources.parser.ts` | ~30 - 45 lines | Pure runtime validator for `DiscoveryDetail.sources` Json |
 | `src/craft/mappers/craft-response.mapper.ts` | ~40 - 60 lines | Pure DTO transformation mapping Prisma entities to `CraftResult` |
+
+*Prohibited Patterns*: No repository layers, no CQRS, no generic base services, no event buses, and no new external dependencies.
 
 ---
 
@@ -191,30 +150,76 @@ All DB writes run inside `prisma.$transaction(async (tx) => ...)`:
 
 ---
 
-## 20-Scenario Acceptance Matrix
+## Project No-Spec Testing Policy Compliance
 
-| # | Test Scenario | Inputs | User State | Expected Result | UserElement Effect | DiscoveryEvent Effect | Verification Scope |
-|---|---|---|---|---|---|---|---|
-| 1 | New Discovery | 2 unlocked inputs, valid recipe | ACTIVE | 200 `DISCOVERY` (`isNewDiscovery: true`) | +1 row | +1 row (`SUCCESS`) | Service + E2E |
-| 2 | Rediscovery | 2 unlocked inputs, owned output | ACTIVE | 200 `DISCOVERY` (`isNewDiscovery: false`) | Unchanged | +1 row (`SUCCESS`) | Service + E2E |
-| 3 | Reverse Input Order | Inputs `[B, A]` | ACTIVE | 200 `DISCOVERY` (same result as `[A, B]`) | Same as `[A, B]` | +1 row (`SUCCESS`) | Service + E2E |
-| 4 | Valid Pair, No Recipe | 2 unlocked inputs, no recipe | ACTIVE | 200 `NO_RECIPE` | Unchanged | +1 row (`NO_RECIPE`) | Service + E2E |
-| 5 | Unknown Input ID | 1 fake UUID | ACTIVE | 404 Not Found | Unchanged | None | Service + E2E |
-| 6 | Inactive Input Element | 1 `INACTIVE` element | ACTIVE | 400 Bad Request | Unchanged | None | Service + E2E |
-| 7 | Non-Starter Unavailable | User lacks `UserElement` | ACTIVE | 403 Forbidden | Unchanged | None | Service + E2E |
-| 8 | INACTIVE User Account | 2 valid inputs | INACTIVE | 403 Forbidden | Unchanged | None | Service + E2E |
-| 9 | BANNED User Account | 2 valid inputs | BANNED | 403 Forbidden | Unchanged | None | Service + E2E |
-| 10 | Inactive Craft Recipe | Recipe `status: INACTIVE` | ACTIVE | 200 `NO_RECIPE` | Unchanged | +1 row (`NO_RECIPE`) | Service + E2E |
-| 11 | Inactive Output Element | Output `status: INACTIVE` | ACTIVE | 500 Internal Error | Rolled back | Rolled back | Service |
-| 12 | Starter Output Invariant | Output `isStarter: true` | ACTIVE | 500 Internal Error | Rolled back | Rolled back | Service |
-| 13 | Missing DiscoveryDetail | Detail `null` | ACTIVE | 500 Internal Error | Rolled back | Rolled back | Service |
-| 14 | Malformed Detail Sources | `sources` invalid JSON | ACTIVE | 500 Internal Error | Rolled back | Rolled back | Service |
-| 15 | Event Creation Failure | DB error on event log | ACTIVE | 500 Internal Error | Rolled back | Rolled back | Service |
-| 16 | UserElement Creation Fail | DB error on unlock | ACTIVE | 500 Internal Error | Rolled back | Rolled back | Service |
-| 17 | Concurrent Discovery Race | Concurrent requests | ACTIVE | Both 200 OK (1 true, 1 false) | Exactly +1 row | +2 rows (`SUCCESS`) | Service + E2E |
-| 18 | Existing UserElement Race | Pre-existing `UserElement` | ACTIVE | 200 OK (`isNewDiscovery: false`) | Unchanged | +1 row (`SUCCESS`) | Service |
-| 19 | Hash Helper Call Path | Valid inputs | ACTIVE | Hash verified via helper call | Standard | Standard | Service |
-| 20 | Response Field Leak Prev. | Any valid request | ACTIVE | No internal IDs/hashes exposed | Standard | Standard | Service + E2E |
+In strict compliance with project rules defined in `AGENTS.md` and `SKILL.md`:
+
+1. **No Spec File Creation**: No new `*.spec.ts` files may be generated or hand-created without explicit owner authorization. All Nest CLI generators must be executed with `--no-spec`.
+2. **No Automatic Spec Generation**: A general prompt directive for thorough testing does not authorize creating unit spec files.
+3. **Authorized Evidence Verification Methods**:
+   - **Temporary Untracked TypeScript Scripts**: Used for bounded service verification. Scripts must avoid unsafe type casts/suppressions, must be deleted before commit, and must remain untracked.
+   - **Existing E2E Test (`test/app.e2e-spec.ts`)**: Used for endpoint-level integration testing when authorized.
+   - **Postman Runtime Acceptance**: Used for HTTP API contract verification.
+   - **Read-Only Database Effect Verification**: Used for verifying database state changes (`UserElement` & `DiscoveryEvent` counts).
+   - **Bounded Parallel Verification Script**: Used specifically for simulating concurrent request races.
+
+---
+
+## Postman Runtime Acceptance Deliverable
+
+### Bounded Deliverable Task
+Future Task: `P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001`
+
+This task will execute only after:
+- Craft sources parser passes audit;
+- Craft mapper passes audit;
+- CraftService passes audit;
+- CraftModule and CraftController pass audit;
+- `POST /craft` passes post-commit audit.
+
+### Readiness Policy (`craftReady`)
+- `craftReady = false` in local environment prior to endpoint completion.
+- `craftReady = true` in local Postman Environment only after `POST /craft` passes all implementation audits.
+
+### Postman Artifacts
+The Postman task will update or verify:
+- `FinCraft_Lab_Postman_Collection_v1.json`
+- `FinCraft_Lab_Local.postman_environment.json`
+- `FinCraft_Lab_Postman_Test_Guide_v1.md`
+- `FinCraft_Lab_Postman_Setup_and_Test_Checklist.xlsx` (when maintained as project evidence).
+
+### Postman UUID & Security Policy
+- **UUID Policy**: Endpoint accepts UUIDs. Real Element UUIDs are populated dynamically in local Postman Environment via a read-only local script or future `GET /elements` endpoint. Committed Collection artifacts must contain zero real database UUIDs (only non-existent UUID fixtures like `"00000000-0000-0000-0000-000000000000"` for negative tests). Real UUIDs are never copied into frozen application source constants.
+- **Security Policy**: Committed Postman files must never contain `DATABASE_URL`, JWT secret keys, real user passwords, or production tokens. `accessToken` is acquired dynamically by Login requests in the local environment.
+
+### 20 Postman Runtime Acceptance Scenarios
+
+| # | Scenario | HTTP Status | Response Outcome | UserElement Effect | DiscoveryEvent Effect | Leak Prevention |
+|---|---|---|---|---|---|---|
+| 1 | First Discovery | 200 OK | `DISCOVERY` (`isNewDiscovery: true`) | +1 row | +1 row (`SUCCESS`) | Verified |
+| 2 | Rediscovery | 200 OK | `DISCOVERY` (`isNewDiscovery: false`) | Unchanged | +1 row (`SUCCESS`) | Verified |
+| 3 | Reverse Input Order | 200 OK | `DISCOVERY` (same as `[A, B]`) | Same as `[A, B]` | +1 row (`SUCCESS`) | Verified |
+| 4 | Valid Pair, No Recipe | 200 OK | `NO_RECIPE` | Unchanged | +1 row (`NO_RECIPE`) | Verified |
+| 5 | Duplicate Input IDs | 400 Bad Request | Error envelope | Unchanged | None | Verified |
+| 6 | Invalid UUID | 400 Bad Request | Error envelope | Unchanged | None | Verified |
+| 7 | Missing inputElementIds | 400 Bad Request | Error envelope | Unchanged | None | Verified |
+| 8 | Extra Internal Field | 400 Bad Request | Error envelope | Unchanged | None | Verified |
+| 9 | Missing Bearer Token | 401 Unauthorized | Error envelope | Unchanged | None | Verified |
+| 10 | Unknown Element ID | 404 Not Found | Error envelope | Unchanged | None | Verified |
+| 11 | Inactive Input Element | 400 Bad Request | Error envelope | Unchanged | None | Verified |
+| 12 | Unavailable Non-Starter | 403 Forbidden | Error envelope | Unchanged | None | Verified |
+| 13 | Inactive Craft Recipe | 200 OK | `NO_RECIPE` | Unchanged | +1 row (`NO_RECIPE`) | Verified |
+| 14 | INACTIVE User Account | 403 Forbidden | Error envelope | Unchanged | None | Verified |
+| 15 | BANNED User Account | 403 Forbidden | Error envelope | Unchanged | None | Verified |
+| 16 | Internal Field Leak Check | 200 OK | `DISCOVERY` / `NO_RECIPE` | Standard | Standard | Excludes recipeId, inputHash, userId, etc. |
+| 17 | UserElement Effect | 200 OK | `DISCOVERY` | Verified +1 row | Verified +1 row | Verified |
+| 18 | DiscoveryEvent Effect | 200 OK | `DISCOVERY` / `NO_RECIPE` | Verified | Verified event status & inputElementIds | Verified |
+| 19 | Transaction Rollback | 500 Internal Error | Error envelope | Rolled back (0 added) | Rolled back (0 added) | Verified |
+| 20 | Concurrent Discovery Race | Both 200 OK | 1 true, 1 false | Exactly +1 row | Exactly +2 rows (`SUCCESS`) | Verified |
+
+### Postman Concurrency & DB Effect Policies
+- **Concurrency Policy**: Standard sequential Collection Runner is insufficient to prove race conditions. Scenario 20 requires a parallel-capable runner or bounded parallel script executing simultaneous requests. Exactly 1 request receives `isNewDiscovery: true`, competing requests receive `isNewDiscovery: false`, exactly 1 `UserElement` row is created, and both log `DiscoveryEvent`.
+- **Database Effects Policy**: Post-test verification queries verify row counts, `resultStatus`, canonical `inputElementIds`, `recipeId`/`resultElementId` nullability for `NO_RECIPE`, absence of duplicate `UserElement` rows, and transaction rollback on error. Database rows are never manually mutated to force tests to pass; test fixtures for inactive/banned states are managed via approved test-data tasks or Admin APIs.
 
 ---
 

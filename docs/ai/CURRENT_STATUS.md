@@ -59,7 +59,9 @@ git status --short
 - **P6_CRAFT_API_2C checkpoint**: `4ac94ac` — "feat: add craft response types"
 - **P6_CRAFT_API_2D audit**: PASS_WITH_PROCESS_NOTE (Read-only post-commit audit of Craft response types commit)
 - **P6_CRAFT_API_2E checkpoint**: "chore: make lint checks non-mutating"
-- **P6_CRAFT_API_3A checkpoint**: "docs: freeze craft service implementation plan"
+- **P6_CRAFT_API_3A checkpoint**: `9f20fed` — "docs: freeze craft service implementation plan"
+- **P6_CRAFT_API_3B audit**: PASS_WITH_DOC_FIXES (Read-only independent audit of CraftService implementation plan)
+- **P6_CRAFT_API_3C checkpoint**: "docs: complete craft service verification plan"
 
 ### Backend (`fincraft-lab-api`) — Non-Mutating Lint Workflow Repaired (`pnpm lint` vs `pnpm lint:fix`)
 
@@ -68,8 +70,8 @@ git status --short
 - **Dirty Seed Reconciliation**: `prisma/seed.ts` formatting diff audited and safely reconciled to HEAD `4ac94ac`.
 - **Craft Response Types**: Implemented in `src/craft/types/craft-response.type.ts` (43 physical lines).
 - **Exported Types**: `CraftSourceResponse`, `CraftElementResponse`, `CraftDiscoveryDetailResponse`, `CraftDiscoveryResult`, `CraftNoRecipeResult`, and `CraftResult` (discriminated union on `outcome: 'DISCOVERY' | 'NO_RECIPE'`).
-- **Craft Service Implementation Plan**: Frozen in `docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md` (bounded service boundary, user status policy, input resolution, availability checks, hash recipe lookup, discovery event logging, runtime source parser, transaction boundary, concurrency strategy).
-- **Craft Module / Controller / Service Status**: Not implemented yet (Service plan audit is next bounded step).
+- **Craft Service Implementation Plan**: Updated & frozen in `docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md` with explicit No-Spec testing policy, concrete Postman deliverable (`P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001`), exact transaction boundary sequence, and narrow P2002 1-retry concurrency strategy.
+- **Craft Module / Controller / Service Status**: Not implemented yet (Post-fix plan audit is next bounded step).
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
@@ -95,7 +97,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P6_CRAFT_API_3B_AUDIT_CRAFT_SERVICE_IMPLEMENTATION_PLAN_001 — Audit CraftService implementation plan against schema and project constraints.
+P6_CRAFT_API_3D_POST_FIX_CRAFT_SERVICE_PLAN_AUDIT_001 — Audit CraftService implementation plan after documentation corrections.
 ```
 
 
