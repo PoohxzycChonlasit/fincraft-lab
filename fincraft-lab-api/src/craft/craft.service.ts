@@ -11,7 +11,6 @@ import {
   ContentStatus,
   CraftRuleType,
   DiscoveryResultStatus,
-  Prisma,
   UserStatus,
 } from '../database/generated/prisma/client';
 import { PrismaService } from '../database/prisma.service';
@@ -21,11 +20,15 @@ import {
   mapCraftDiscoveryResult,
   mapCraftNoRecipeResult,
 } from './mappers/craft-response.mapper';
+import {
+  ExpectedUserElementRaceError,
+  isUserElementUniqueConflict,
+} from './helpers/craft-prisma-error.helper';
 import type { CraftRequestDto } from './dto/craft-request.dto';
 import type {
-  CraftDiscoveryDetailMapperInput,
-  CraftDiscoveryMapperInput,
-} from './mappers/craft-response.mapper';
+  CraftDiscoveryDetailInput,
+  CraftDiscoveryTransactionResult,
+} from './types/craft-service.type';
 import type {
   CraftElementResponse,
   CraftResult,
@@ -47,7 +50,7 @@ export class CraftService {
    * 6. If DISCOVERY: validates Output Element & Detail invariants + sources before write.
    * 7. Executes DISCOVERY write transaction (find/create UserElement + SUCCESS Event).
    * 8. Handles expected UserElement P2002 race condition with 1 fresh retry.
-   * 9. Returns mapped public CraftResult.
+   * 9. Returns mapped public CraftResult after transaction commit.
    */
   async craft(userId: string, dto: CraftRequestDto): Promise<CraftResult> {
     // 1. Current User Lookup & Status Validation
@@ -135,15 +138,17 @@ export class CraftService {
       recipe.status !== ContentStatus.ACTIVE ||
       recipe.ruleType !== CraftRuleType.COMMUTATIVE
     ) {
-      // Execute NO_RECIPE transaction
-      await this.prisma.discoveryEvent.create({
-        data: {
-          userId,
-          recipeId: null,
-          resultElementId: null,
-          inputElementIds: canonicalElementIds,
-          resultStatus: DiscoveryResultStatus.NO_RECIPE,
-        },
+      // Execute NO_RECIPE write transaction
+      await this.prisma.$transaction(async (tx) => {
+        await tx.discoveryEvent.create({
+          data: {
+            userId,
+            recipeId: null,
+            resultElementId: null,
+            inputElementIds: canonicalElementIds,
+            resultStatus: DiscoveryResultStatus.NO_RECIPE,
+          },
+        });
       });
 
       return mapCraftNoRecipeResult();
@@ -211,7 +216,7 @@ export class CraftService {
       isStarter: outputElement.isStarter,
     };
 
-    const detailInput: CraftDiscoveryDetailMapperInput = {
+    const detailInput: CraftDiscoveryDetailInput = {
       shortDescription: discoveryDetail.shortDescription,
       realLesson: discoveryDetail.realLesson,
       example: discoveryDetail.example,
@@ -226,33 +231,40 @@ export class CraftService {
       sources: discoveryDetail.sources,
     };
 
-    // 7. Transactional Write & Concurrency Retry Execution
-    return await this.executeDiscoveryTransaction(
+    // 7. Transactional Write Execution (returns isNewDiscovery boolean only)
+    const { isNewDiscovery } = await this.executeDiscoveryTransaction(
       userId,
       recipe.id,
-      elementResponse,
-      detailInput,
+      outputElement.id,
       canonicalElementIds,
     );
+
+    // 8. Map and return public CraftDiscoveryResult ONLY AFTER transaction commit
+    return mapCraftDiscoveryResult({
+      isNewDiscovery,
+      element: elementResponse,
+      detail: detailInput,
+    });
   }
 
   /**
-   * Executes the DISCOVERY write transaction with 1 fresh retry for expected UserElement P2002 race condition.
+   * Executes the DISCOVERY write transaction.
+   * Catches and converts P2002 strictly on tx.userElement.create into ExpectedUserElementRaceError,
+   * enabling 1 fresh transaction retry if a race occurs.
    */
   private async executeDiscoveryTransaction(
     userId: string,
     recipeId: string,
-    outputElement: CraftElementResponse,
-    detailInput: CraftDiscoveryDetailMapperInput,
+    outputElementId: string,
     canonicalElementIds: [string, string],
-  ): Promise<CraftResult> {
-    const attempt = async (): Promise<CraftResult> => {
+  ): Promise<CraftDiscoveryTransactionResult> {
+    const attempt = async (): Promise<CraftDiscoveryTransactionResult> => {
       return await this.prisma.$transaction(async (tx) => {
         const existingUserElement = await tx.userElement.findUnique({
           where: {
             userId_elementId: {
               userId,
-              elementId: outputElement.id,
+              elementId: outputElementId,
             },
           },
         });
@@ -262,40 +274,41 @@ export class CraftService {
         if (existingUserElement) {
           isNewDiscovery = false;
         } else {
-          await tx.userElement.create({
-            data: {
-              userId,
-              elementId: outputElement.id,
-            },
-          });
-          isNewDiscovery = true;
+          try {
+            await tx.userElement.create({
+              data: {
+                userId,
+                elementId: outputElementId,
+              },
+            });
+            isNewDiscovery = true;
+          } catch (createError: unknown) {
+            if (isUserElementUniqueConflict(createError)) {
+              throw new ExpectedUserElementRaceError();
+            }
+            throw createError;
+          }
         }
 
         await tx.discoveryEvent.create({
           data: {
             userId,
             recipeId,
-            resultElementId: outputElement.id,
+            resultElementId: outputElementId,
             inputElementIds: canonicalElementIds,
             resultStatus: DiscoveryResultStatus.SUCCESS,
           },
         });
 
-        const discoveryMapperInput: CraftDiscoveryMapperInput = {
-          isNewDiscovery,
-          element: outputElement,
-          detail: detailInput,
-        };
-
-        return mapCraftDiscoveryResult(discoveryMapperInput);
+        return { isNewDiscovery };
       });
     };
 
     try {
       return await attempt();
     } catch (error: unknown) {
-      if (this.isExpectedUserElementP2002(error)) {
-        // Attempt fresh transaction retry (maximum 1 retry)
+      if (error instanceof ExpectedUserElementRaceError) {
+        // Retry once in a fresh transaction
         try {
           return await attempt();
         } catch (retryError: unknown) {
@@ -311,43 +324,5 @@ export class CraftService {
       }
       throw new InternalServerErrorException('Internal server error');
     }
-  }
-
-  /**
-   * Classifies whether a P2002 unique constraint error originates from the expected UserElement.create race.
-   */
-  private isExpectedUserElementP2002(error: unknown): boolean {
-    if (
-      !(error instanceof Prisma.PrismaClientKnownRequestError) ||
-      error.code !== 'P2002'
-    ) {
-      return false;
-    }
-
-    const meta = error.meta as { target?: unknown } | undefined;
-    if (!meta || !meta.target) {
-      return true;
-    }
-
-    if (Array.isArray(meta.target)) {
-      const targets = meta.target as string[];
-      if (
-        (targets.includes('user_id') && targets.includes('element_id')) ||
-        (targets.includes('userId') && targets.includes('elementId')) ||
-        targets.includes('user_elements_user_id_element_id_key')
-      ) {
-        return true;
-      }
-    } else if (typeof meta.target === 'string') {
-      if (
-        meta.target.includes('user_elements') ||
-        meta.target.includes('user_id') ||
-        meta.target.includes('element_id')
-      ) {
-        return true;
-      }
-    }
-
-    return true;
   }
 }
