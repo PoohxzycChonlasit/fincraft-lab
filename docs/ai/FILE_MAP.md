@@ -23,6 +23,7 @@ fincraft-lab/
 │   │   ├── CRAFT_SERVICE_IMPLEMENTATION_PLAN.md # Frozen CraftService implementation plan (No-Spec policy, Postman deliverable P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001, exact transaction boundary & 1-retry concurrency strategy)
 │   │   ├── AVAILABLE_ELEMENTS_API_PLAN.md # Available Elements API plan
 │   │   ├── WORKSPACE_CRUD_API_PLAN.md # Workspace Metadata CRUD API plan
+│   │   ├── CANVAS_SNAPSHOT_API_PLAN.md # Canvas Graph Snapshot API plan
 │   │   └── AUTH_FAKEBUCK_STYLE_REFACTOR_PLAN.md # Auth refactor plan
 │   └── evidence/              # Verification & acceptance evidence
 │       ├── CRAFT_API_RUNTIME_ACCEPTANCE.md # Runtime acceptance report for POST /craft against real PostgreSQL

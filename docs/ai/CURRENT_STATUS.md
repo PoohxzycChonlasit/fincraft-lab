@@ -93,6 +93,7 @@ git status --short
 - **P8_WORKSPACE_API_1A contract planning**: FROZEN & CORRECTED (`docs/ai/plans/WORKSPACE_CRUD_API_PLAN.md` — `FROZEN_WORKSPACE_METADATA_CRUD_API_CONTRACT_V1`)
 - **P8_WORKSPACE_API_1B implementation**: PASS (`POST/GET/PATCH/DELETE /workspaces` implemented end-to-end in `src/workspace/` and registered in `AppModule`. All 28 live HTTP/PostgreSQL scenarios passed)
 - **P8_WORKSPACE_API_1C reconciliation & audit**: PASS (Shared test-harness infrastructure files restored to baseline `2e5fa53f85a09a96cdc455dc372e86294ab15046`. Workspace CRUD metadata endpoints verified against compiled NestJS application with 28/28 scenarios passing)
+- **P9_WORKSPACE_GRAPH_API_1A contract planning**: FROZEN (`docs/ai/plans/CANVAS_SNAPSHOT_API_PLAN.md` — `FROZEN_CANVAS_SNAPSHOT_API_CONTRACT_V1`). Defines `GET /workspaces/:id/canvas` and `PUT /workspaces/:id/canvas` for loading and replacing complete Canvas graph snapshots atomically.
 
 ### Backend (`fincraft-lab-api`) — Non-Mutating Lint Workflow Repaired (`pnpm lint` vs `pnpm lint:fix`)
 
@@ -111,6 +112,7 @@ git status --short
 - **Craft API Runtime Acceptance**: Reconciled and finalized in `docs/ai/evidence/CRAFT_API_RUNTIME_ACCEPTANCE.md`. 22 live HTTP scenarios executed & passed (22/22 passed, 0 failed, C2 `DEFERRED_NOT_AVAILABLE` reported separately). Preserved PostgreSQL counts: 2 Users (User 1 `f74df612-a7d5-4541-ba6a-cde98c56bb7b` and User 2 `c4a51e82-d8b9-4a1e-8e3d-9f20e8b15a63`), 2 UserElements, 7 DiscoveryEvents (5 `SUCCESS`, 2 `NO_RECIPE`). Promise.all concurrency P2002 race condition handling verified. Postman collection execution `NOT_RUN` / `PENDING`.
 - **Available Elements Read API**: Implemented (`src/element/`) & documented in `docs/ai/evidence/AVAILABLE_ELEMENTS_API_RUNTIME_ACCEPTANCE.md`. `GET /elements` returns active Starter Elements + user-unlocked active non-Starter Elements in active Categories. All 12 live HTTP scenarios passed with 0 database writes, exact public shape, and deterministic category-first ordering (`category.sortOrder ASC`, `isStarter DESC`, `name ASC`).
 - **Workspace Metadata CRUD API**: Implemented (`src/workspace/`) & documented in `docs/ai/evidence/WORKSPACE_CRUD_API_RUNTIME_ACCEPTANCE.md`. 5 metadata endpoints (`POST/GET/PATCH/DELETE /workspaces`) with strict user ownership, privacy 404 responses for non-owned workspaces, safe string transform, ISO date serialization, and DB cascade deletion for dependent Nodes/Edges. Verified against compiled NestJS application (28/28 scenarios passed, 5 shared infra files restored to baseline `2e5fa53f85a09a96cdc455dc372e86294ab15046`).
+- **Canvas Graph Snapshot Contract**: Frozen in `docs/ai/plans/CANVAS_SNAPSHOT_API_PLAN.md` (`FROZEN_CANVAS_SNAPSHOT_API_CONTRACT_V1`). Defines `GET /workspaces/:id/canvas` (load full canvas graph) and `PUT /workspaces/:id/canvas` (replace complete graph atomically). Node/Edge UUIDs client-generated, 409 Conflict on archived workspace PUT, max 100 nodes / 200 edges, atomic Prisma `$transaction` replacement. Source implementation not started.
 - **Auth Architecture & Reflector**: Cleaned in `src/auth/auth.module.ts`. Redundant `Reflector` provider removed (Nest core provides `Reflector` globally). Global `AuthGuard` remains active and effective via `APP_GUARD`.
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
@@ -137,7 +139,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P9_WORKSPACE_GRAPH_API_1A_FREEZE_CANVAS_SNAPSHOT_CONTRACT_001 — Plan and freeze the authenticated Canvas graph snapshot replacement API contract for saving node layout and edge connections.
+P9_WORKSPACE_GRAPH_API_1B_IMPLEMENT_CANVAS_SNAPSHOT_001 — Implement authenticated Canvas Graph Snapshot API (GET/PUT /workspaces/:workspaceId/canvas) in src/workspace/ and verify via 40 live HTTP/PostgreSQL scenarios.
 ```
 
 ## Related documents
