@@ -1,1 +1,6 @@
 export const MAX_WORKSPACE_NAME_LENGTH = 100;
+export const MAX_CANVAS_NODES = 100;
+export const MAX_CANVAS_EDGES = 200;
+export const MAX_NODE_VALUE_DATA_BYTES = 4096;
+export const MAX_CANVAS_EDGE_LABEL_LENGTH = 100;
+export const MAX_CANVAS_SNAPSHOT_BYTES = 524288;
