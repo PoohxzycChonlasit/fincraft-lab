@@ -193,6 +193,13 @@ To ensure code matches the owner's teacher-led Fakebook/Fakebuck learning style,
 7. **Security Complexity Exception**: Files handling security, cryptography, JWT signing, guard evaluation, Prisma unique error mapping (`P2002`), seed validation, and transaction safety may remain more detailed when required for safety. Necessary safety checks must never be deleted to shorten code.
 8. **No Copying Another Repository File-for-File**: Do not copy teacher code blindly. Preserve FinCraft-specific models, routes, financial safety rules, response envelopes (`{ data: ... }`), and Craft/Simulation behaviors.
 
+## H. Non-Mutating Lint Policy
+
+1. `pnpm lint` is a **non-mutating verification gate** (runs `eslint "{src,apps,libs,test}/**/*.ts"` without `--fix`).
+2. `pnpm lint:fix` is the explicit, opt-in source-changing command (runs `eslint "{src,apps,libs,test}/**/*.ts" --fix`).
+3. Read-only audits and automated hard-gate checks must run `pnpm lint`, never `pnpm lint:fix`.
+4. Hard-gate verification runs must finish with zero unexpected tracked changes in the worktree.
+
 ## Related documents
 
 - Stepwise workflow → [`STEPWISE_WORKFLOW.md`](STEPWISE_WORKFLOW.md)

@@ -56,15 +56,18 @@ git status --short
 - **P6_CRAFT_API_1B audit**: PASS (Read-only post-commit audit of Craft API V1 contract)
 - **P6_CRAFT_API_2A checkpoint**: `b7f3a21` — "feat: add craft request dto"
 - **P6_CRAFT_API_2B audit**: PASS (Read-only post-commit audit of Craft request DTO commit)
-- **P6_CRAFT_API_2C checkpoint**: "feat: add craft response types"
+- **P6_CRAFT_API_2C checkpoint**: `4ac94ac` — "feat: add craft response types"
+- **P6_CRAFT_API_2D audit**: PASS_WITH_PROCESS_NOTE (Read-only post-commit audit of Craft response types commit)
+- **P6_CRAFT_API_2E checkpoint**: "chore: make lint checks non-mutating"
 
-### Backend (`fincraft-lab-api`) — Craft Response Types Implemented (`CraftResult`)
+### Backend (`fincraft-lab-api`) — Non-Mutating Lint Workflow Repaired (`pnpm lint` vs `pnpm lint:fix`)
 
+- **Non-Mutating Lint Verification**: `pnpm lint` in `package.json` changed to `eslint "{src,apps,libs,test}/**/*.ts"` (no `--fix`). Non-mutating proof verified (SHA256 of `prisma/seed.ts` unchanged before/after `pnpm lint`).
+- **Explicit Fix Command**: `pnpm lint:fix` added to `package.json` (`eslint "{src,apps,libs,test}/**/*.ts" --fix`) for explicit opt-in formatting.
+- **Dirty Seed Reconciliation**: `prisma/seed.ts` formatting diff audited and safely reconciled to HEAD `4ac94ac`.
 - **Craft Response Types**: Implemented in `src/craft/types/craft-response.type.ts` (43 physical lines).
 - **Exported Types**: `CraftSourceResponse`, `CraftElementResponse`, `CraftDiscoveryDetailResponse`, `CraftDiscoveryResult`, `CraftNoRecipeResult`, and `CraftResult` (discriminated union on `outcome: 'DISCOVERY' | 'NO_RECIPE'`).
-- **Narrowed Sources**: `CraftSourceResponse` strictly types `{ title: string, organization: string, url: string }` (no raw `JsonValue`).
-- **Public Enum Exports**: Imports `ElementType`, `RealityLevel`, `SafetyLabel` from public Prisma exports (`src/database/generated/prisma/client`).
-- **Craft Module / Controller / Service Status**: Not implemented yet (Types-only task; no controller, service, module, DB access, or schema changes occurred).
+- **Craft Module / Controller / Service Status**: Not implemented yet (Service planning is next bounded step).
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
@@ -76,7 +79,7 @@ git status --short
 ## Build/Lint/Test — run status
 
 - `pnpm build` — passed
-- `pnpm lint` — 0 errors, 1 pre-existing warning in `main.ts` (`@typescript-eslint/no-floating-promises`)
+- `pnpm lint` — passed (0 errors, 1 pre-existing warning in `main.ts` — non-mutating)
 - `pnpm test` — 3/3 unit tests passed
 - `pnpm test:e2e` — 2/2 e2e tests passed
 - `tsc --noEmit` — passed (0 errors)
@@ -90,8 +93,9 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P6_CRAFT_API_2D_POST_COMMIT_CRAFT_RESPONSE_TYPES_AUDIT_001 — Independent read-only audit of commit "feat: add craft response types".
+P6_CRAFT_API_3A_PLAN_CRAFT_SERVICE_IMPLEMENTATION_001 — Plan CraftService implementation (boundary, input verification, SHA-256 hash lookup, discovery event logging, and transaction boundary).
 ```
+
 
 
 
