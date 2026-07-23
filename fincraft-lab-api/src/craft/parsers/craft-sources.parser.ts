@@ -1,6 +1,13 @@
 import type { CraftSourceResponse } from '../types/craft-response.type';
 
 /**
+ * Type predicate guard checking if a value is a non-null, non-array object record.
+ */
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
  * Validates and safe-copies untrusted raw JSON sources into a typed CraftSourceResponse array.
  *
  * Rules:
@@ -22,27 +29,26 @@ export function parseCraftSources(rawSources: unknown): CraftSourceResponse[] {
   const sources: unknown[] = rawSources;
 
   for (const item of sources) {
-    if (typeof item !== 'object' || item === null || Array.isArray(item)) {
+    if (!isObjectRecord(item)) {
       throw new Error('Invalid craft sources configuration');
     }
 
-    const record: Record<string, unknown> = item;
-    const keys = Object.keys(record);
+    const keys = Object.keys(item);
     if (keys.length !== 3) {
       throw new Error('Invalid craft sources configuration');
     }
 
     if (
-      !Object.prototype.hasOwnProperty.call(record, 'title') ||
-      !Object.prototype.hasOwnProperty.call(record, 'organization') ||
-      !Object.prototype.hasOwnProperty.call(record, 'url')
+      !Object.prototype.hasOwnProperty.call(item, 'title') ||
+      !Object.prototype.hasOwnProperty.call(item, 'organization') ||
+      !Object.prototype.hasOwnProperty.call(item, 'url')
     ) {
       throw new Error('Invalid craft sources configuration');
     }
 
-    const title = record.title;
-    const organization = record.organization;
-    const url = record.url;
+    const title = item.title;
+    const organization = item.organization;
+    const url = item.url;
 
     if (
       typeof title !== 'string' ||
