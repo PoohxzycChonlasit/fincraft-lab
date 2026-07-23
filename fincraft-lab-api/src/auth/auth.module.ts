@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD, Reflector } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { HashModule } from '../infrastructure/hash/hash.module';
 import { AccessTokenModule } from '../infrastructure/jwt/access-token.module';
 import { UserModule } from '../user/user.module';
@@ -13,7 +13,6 @@ import { RolesGuard } from './guards/roles.guard';
   controllers: [AuthController],
   providers: [
     AuthService,
-    Reflector,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,

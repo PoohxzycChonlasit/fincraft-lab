@@ -77,8 +77,9 @@ git status --short
 - **P6_CRAFT_API_7C checkpoint**: `ff5ab3e` — "refactor: keep craft module internal"
 - **P6_CRAFT_API_7D audit**: PASS (Read-only post-fix audit of CraftModule boundary correction)
 - **P6_CRAFT_API_8A checkpoint**: `4f4b0db` — "feat: add craft controller"
-- **P6_CRAFT_API_8B audit**: PASS (Read-only post-commit audit of CraftController implementation)
-- **P6_CRAFT_API_8C checkpoint**: "feat: register craft module"
+- **P6_CRAFT_API_8C checkpoint**: `8d950ed` — "feat: register craft module"
+- **P6_CRAFT_API_8D audit**: PASS_WITH_FIXES (AppModule Craft integration audit identified redundant Reflector provider in AuthModule)
+- **P6_CRAFT_API_8E checkpoint**: "fix: remove redundant auth reflector provider"
 
 ### Backend (`fincraft-lab-api`) — Non-Mutating Lint Workflow Repaired (`pnpm lint` vs `pnpm lint:fix`)
 
@@ -94,6 +95,7 @@ git status --short
 - **Exported Types**: `CraftSourceResponse`, `CraftElementResponse`, `CraftDiscoveryDetailResponse`, `CraftDiscoveryResult`, `CraftNoRecipeResult`, and `CraftResult` (discriminated union on `outcome: 'DISCOVERY' | 'NO_RECIPE'`).
 - **Craft Service Implementation Plan**: Updated & frozen in `docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md` with explicit No-Spec testing policy, concrete Postman deliverable (`P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001`), exact transaction boundary sequence, and narrow P2002 1-retry concurrency strategy.
 - **AppModule Registration Status**: `CraftModule` is registered in `src/app.module.ts`. `POST /craft` is part of the full application graph and protected by global `AuthGuard` (returns `401 Unauthorized` when unauthenticated). Database-backed runtime execution pending Postman acceptance.
+- **Auth Architecture & Reflector**: Cleaned in `src/auth/auth.module.ts`. Redundant `Reflector` provider removed (Nest core provides `Reflector` globally). Global `AuthGuard` remains active and effective via `APP_GUARD`.
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
@@ -119,7 +121,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P6_CRAFT_API_8D_POST_COMMIT_CRAFT_APP_INTEGRATION_AUDIT_001 — Read-only post-commit audit of CraftModule integration in AppModule.
+P6_CRAFT_API_8F_POST_FIX_CRAFT_APP_INTEGRATION_AUDIT_001 — Read-only post-fix audit of AppModule Craft integration & Auth boundary correction.
 ```
 
 
