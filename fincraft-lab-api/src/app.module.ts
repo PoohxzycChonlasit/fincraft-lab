@@ -4,6 +4,7 @@ import { HealthModule } from './health/health.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { CraftModule } from './craft/craft.module';
+import { ElementModule } from './element/element.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { CraftModule } from './craft/craft.module';
     HealthModule,
     AuthModule,
     CraftModule,
+    ElementModule,
   ],
 })
 export class AppModule {}

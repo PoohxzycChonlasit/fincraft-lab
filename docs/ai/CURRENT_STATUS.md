@@ -88,6 +88,7 @@ git status --short
 - **P6_CRAFT_API_9E checkpoint**: `be2e8fa` — "docs: finalize craft runtime acceptance evidence"
 - **P6_CRAFT_API_9F checkpoint**: `1dba34a` — "docs: record craft concurrency runtime user id"
 - **P7_ELEMENT_API_1A contract planning**: FROZEN (`docs/ai/plans/AVAILABLE_ELEMENTS_API_PLAN.md` — `FROZEN_AVAILABLE_ELEMENTS_READ_API_CONTRACT_V1`)
+- **P7_ELEMENT_API_1B implementation**: PASS (`GET /elements` implemented end-to-end in `src/element/` and registered in `AppModule`. All 12 live HTTP/PostgreSQL scenarios passed with 0 DB writes)
 
 ### Backend (`fincraft-lab-api`) — Non-Mutating Lint Workflow Repaired (`pnpm lint` vs `pnpm lint:fix`)
 
@@ -102,9 +103,9 @@ git status --short
 - **CraftController**: Implemented in `src/craft/craft.controller.ts` (23 physical lines). Exposes `POST /craft` with `@HttpCode(HttpStatus.OK)`. Extracts authenticated User ID from `@CurrentUser() user: AccessTokenPayload` (`user.sub`), validates `CraftRequestDto`, delegates to `craftService.craft(user.sub, dto)`, and wraps result in `{ data: result }`. Protected by global `AuthGuard`.
 - **Exported Types**: `CraftSourceResponse`, `CraftElementResponse`, `CraftDiscoveryDetailResponse`, `CraftDiscoveryResult`, `CraftNoRecipeResult`, and `CraftResult` (discriminated union on `outcome: 'DISCOVERY' | 'NO_RECIPE'`).
 - **Craft Service Implementation Plan**: Updated & frozen in `docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md` with explicit No-Spec testing policy, concrete Postman deliverable (`P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001`), exact transaction boundary sequence, and narrow P2002 1-retry concurrency strategy.
-- **AppModule Registration Status**: `CraftModule` is registered in `src/app.module.ts`. `POST /craft` is part of the full application graph and protected by global `AuthGuard` (returns `401 Unauthorized` when unauthenticated).
+- **AppModule Registration Status**: `CraftModule` and `ElementModule` are registered in `src/app.module.ts`. `POST /craft` and `GET /elements` are part of the full application graph and protected by global `AuthGuard` (returns `401 Unauthorized` when unauthenticated).
 - **Craft API Runtime Acceptance**: Reconciled and finalized in `docs/ai/evidence/CRAFT_API_RUNTIME_ACCEPTANCE.md`. 22 live HTTP scenarios executed & passed (22/22 passed, 0 failed, C2 `DEFERRED_NOT_AVAILABLE` reported separately). Preserved PostgreSQL counts: 2 Users (User 1 `f74df612-a7d5-4541-ba6a-cde98c56bb7b` and User 2 `c4a51e82-d8b9-4a1e-8e3d-9f20e8b15a63`), 2 UserElements, 7 DiscoveryEvents (5 `SUCCESS`, 2 `NO_RECIPE`). Promise.all concurrency P2002 race condition handling verified. Postman collection execution `NOT_RUN` / `PENDING`.
-- **P7_ELEMENT_API_1A contract planning**: FROZEN & CORRECTED (`docs/ai/plans/AVAILABLE_ELEMENTS_API_PLAN.md` — `FROZEN_AVAILABLE_ELEMENTS_READ_API_CONTRACT_V1`). Corrected disabled user error message (`User account is disabled`), category status filter (`Element.category.status = ACTIVE`), category-first ordering semantics, seed facts (14 starters), zero DB writes, PostgreSQL endpoint acceptance `PLANNED / NOT_EXECUTED_IN_THIS_CONTRACT_TASK`.
+- **Available Elements Read API**: Implemented (`src/element/`) & documented in `docs/ai/evidence/AVAILABLE_ELEMENTS_API_RUNTIME_ACCEPTANCE.md`. `GET /elements` returns active Starter Elements + user-unlocked active non-Starter Elements in active Categories. All 12 live HTTP scenarios passed with 0 database writes, exact public shape, and deterministic category-first ordering (`category.sortOrder ASC`, `isStarter DESC`, `name ASC`).
 - **Auth Architecture & Reflector**: Cleaned in `src/auth/auth.module.ts`. Redundant `Reflector` provider removed (Nest core provides `Reflector` globally). Global `AuthGuard` remains active and effective via `APP_GUARD`.
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
@@ -131,7 +132,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P7_ELEMENT_API_1B_IMPLEMENT_AVAILABLE_ELEMENTS_ENDPOINT_001 — Implement thin Element feature module (GET /elements) and register in AppModule.
+P7_ELEMENT_API_1C_POST_COMMIT_AVAILABLE_ELEMENTS_AUDIT_001 — Independent read-only post-commit audit of Available Elements endpoint implementation and runtime evidence.
 ```
 
 
