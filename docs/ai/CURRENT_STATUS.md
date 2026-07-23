@@ -61,7 +61,9 @@ git status --short
 - **P6_CRAFT_API_2E checkpoint**: "chore: make lint checks non-mutating"
 - **P6_CRAFT_API_3A checkpoint**: `9f20fed` — "docs: freeze craft service implementation plan"
 - **P6_CRAFT_API_3B audit**: PASS_WITH_DOC_FIXES (Read-only independent audit of CraftService implementation plan)
-- **P6_CRAFT_API_3C checkpoint**: "docs: complete craft service verification plan"
+- **P6_CRAFT_API_3C checkpoint**: `23b52ca` — "docs: complete craft service verification plan"
+- **P6_CRAFT_API_3D audit**: PASS (Read-only post-fix audit of CraftService implementation plan)
+- **P6_CRAFT_API_4A checkpoint**: "feat: add craft sources parser"
 
 ### Backend (`fincraft-lab-api`) — Non-Mutating Lint Workflow Repaired (`pnpm lint` vs `pnpm lint:fix`)
 
@@ -69,9 +71,10 @@ git status --short
 - **Explicit Fix Command**: `pnpm lint:fix` added to `package.json` (`eslint "{src,apps,libs,test}/**/*.ts" --fix`) for explicit opt-in formatting.
 - **Dirty Seed Reconciliation**: `prisma/seed.ts` formatting diff audited and safely reconciled to HEAD `4ac94ac`.
 - **Craft Response Types**: Implemented in `src/craft/types/craft-response.type.ts` (43 physical lines).
+- **Craft Sources Parser**: Implemented in `src/craft/parsers/craft-sources.parser.ts` (69 physical lines). Pure, framework-independent runtime validator converting untrusted raw JSON sources into `CraftSourceResponse[]` with exact title/organization/url validation and reference independence. No `*.spec.ts` files created (verified via temporary untracked script).
 - **Exported Types**: `CraftSourceResponse`, `CraftElementResponse`, `CraftDiscoveryDetailResponse`, `CraftDiscoveryResult`, `CraftNoRecipeResult`, and `CraftResult` (discriminated union on `outcome: 'DISCOVERY' | 'NO_RECIPE'`).
 - **Craft Service Implementation Plan**: Updated & frozen in `docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md` with explicit No-Spec testing policy, concrete Postman deliverable (`P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001`), exact transaction boundary sequence, and narrow P2002 1-retry concurrency strategy.
-- **Craft Module / Controller / Service Status**: Not implemented yet (Post-fix plan audit is next bounded step).
+- **Craft Mapper / Service / Module / Controller Status**: Not implemented yet (Parser post-commit audit is next bounded step).
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
@@ -97,7 +100,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P6_CRAFT_API_3D_POST_FIX_CRAFT_SERVICE_PLAN_AUDIT_001 — Audit CraftService implementation plan after documentation corrections.
+P6_CRAFT_API_4B_POST_COMMIT_CRAFT_SOURCES_PARSER_AUDIT_001 — Audit Craft sources parser commit against schema and implementation plan constraints.
 ```
 
 

@@ -55,6 +55,8 @@ fincraft-lab/
 │   │   ├── craft/
 │   │   │   ├── dto/
 │   │   │   │   └── craft-request.dto.ts # Request DTO validating inputElementIds for POST /craft
+│   │   │   ├── parsers/
+│   │   │   │   └── craft-sources.parser.ts # Pure runtime validator for DiscoveryDetail.sources Json converting to CraftSourceResponse[]
 │   │   │   └── types/
 │   │   │       └── craft-response.type.ts # Public CraftService result contract types (CraftResult discriminated union)
 │   │   ├── prisma/            # Global Prisma module & service
