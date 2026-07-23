@@ -76,7 +76,9 @@ git status --short
 - **P6_CRAFT_API_7B audit**: PASS_WITH_FIXES (Read-only post-commit audit of CraftModule)
 - **P6_CRAFT_API_7C checkpoint**: `ff5ab3e` — "refactor: keep craft module internal"
 - **P6_CRAFT_API_7D audit**: PASS (Read-only post-fix audit of CraftModule boundary correction)
-- **P6_CRAFT_API_8A checkpoint**: "feat: add craft controller"
+- **P6_CRAFT_API_8A checkpoint**: `4f4b0db` — "feat: add craft controller"
+- **P6_CRAFT_API_8B audit**: PASS (Read-only post-commit audit of CraftController implementation)
+- **P6_CRAFT_API_8C checkpoint**: "feat: register craft module"
 
 ### Backend (`fincraft-lab-api`) — Non-Mutating Lint Workflow Repaired (`pnpm lint` vs `pnpm lint:fix`)
 
@@ -91,7 +93,7 @@ git status --short
 - **CraftController**: Implemented in `src/craft/craft.controller.ts` (23 physical lines). Exposes `POST /craft` with `@HttpCode(HttpStatus.OK)`. Extracts authenticated User ID from `@CurrentUser() user: AccessTokenPayload` (`user.sub`), validates `CraftRequestDto`, delegates to `craftService.craft(user.sub, dto)`, and wraps result in `{ data: result }`. Protected by global `AuthGuard`.
 - **Exported Types**: `CraftSourceResponse`, `CraftElementResponse`, `CraftDiscoveryDetailResponse`, `CraftDiscoveryResult`, `CraftNoRecipeResult`, and `CraftResult` (discriminated union on `outcome: 'DISCOVERY' | 'NO_RECIPE'`).
 - **Craft Service Implementation Plan**: Updated & frozen in `docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md` with explicit No-Spec testing policy, concrete Postman deliverable (`P6_CRAFT_API_POSTMAN_RUNTIME_ACCEPTANCE_001`), exact transaction boundary sequence, and narrow P2002 1-retry concurrency strategy.
-- **AppModule Registration Status**: `src/app.module.ts` remains unchanged; `POST /craft` remains non-operational in the full application until AppModule integration.
+- **AppModule Registration Status**: `CraftModule` is registered in `src/app.module.ts`. `POST /craft` is part of the full application graph and protected by global `AuthGuard` (returns `401 Unauthorized` when unauthenticated). Database-backed runtime execution pending Postman acceptance.
 - **Categories / Elements / Details / Recipes Seeded**: Intact in PostgreSQL (8 Categories, 36 Elements, 36 Details, 22 Recipes, 44 Recipe Inputs).
 - **Protected Tables Verified**: All protected table deltas equal 0 (`delta = 0`).
 - **Literal Fakebuck Auth Architecture**: Intact (`UserService`, `BcryptService`, `AccessTokenService`).
@@ -117,7 +119,7 @@ Unit spec files are not generated automatically (`--no-spec` for Nest CLI genera
 ## Next Bounded Step
 
 ```text
-P6_CRAFT_API_8B_POST_COMMIT_CRAFT_CONTROLLER_AUDIT_001 — Read-only post-commit audit of CraftController implementation.
+P6_CRAFT_API_8D_POST_COMMIT_CRAFT_APP_INTEGRATION_AUDIT_001 — Read-only post-commit audit of CraftModule integration in AppModule.
 ```
 
 
