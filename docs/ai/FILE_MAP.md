@@ -59,8 +59,9 @@ fincraft-lab/
 │   │   │   │   └── craft-response.mapper.ts # Pure mapping from selected Craft data to safe public CraftResult shapes
 │   │   │   ├── parsers/
 │   │   │   │   └── craft-sources.parser.ts # Pure runtime validator for DiscoveryDetail.sources Json converting to CraftSourceResponse[]
-│   │   │   └── types/
-│   │   │       └── craft-response.type.ts # Public CraftService result contract types (CraftResult discriminated union)
+│   │   │   ├── types/
+│   │   │   │   └── craft-response.type.ts # Public CraftService result contract types (CraftResult discriminated union)
+│   │   │   └── craft.service.ts # Core Craft business logic, User/Input/Recipe validation, transactions, & P2002 retry
 │   │   ├── prisma/            # Global Prisma module & service
 │   │   ├── auth/              # Auth module (register, login, me endpoints)
 │   │   ├── users/             # User persistence & management
