@@ -1,5 +1,4 @@
 import {
-  Inject,
   Injectable,
   Logger,
   OnModuleDestroy,
@@ -16,7 +15,7 @@ export class PrismaService
 {
   private readonly logger = new Logger(PrismaService.name);
 
-  constructor(@Inject(ConfigService) configService: ConfigService) {
+  constructor(configService: ConfigService) {
     const connectionString = configService.getOrThrow<string>('DATABASE_URL');
     super({ adapter: new PrismaPg({ connectionString }) });
   }

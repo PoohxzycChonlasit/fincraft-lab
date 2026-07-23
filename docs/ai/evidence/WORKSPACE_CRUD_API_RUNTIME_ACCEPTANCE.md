@@ -1,22 +1,37 @@
 # Workspace Metadata CRUD API Runtime Acceptance Report
 
-- **TASK_ID**: `P8_WORKSPACE_API_1B_IMPLEMENT_WORKSPACE_CRUD_001`
-- **COMMIT**: `2e5fa53f85a09a96cdc455dc372e86294ab15046` (Implementation)
-- **TIMESTAMP**: 2026-07-23T17:24:10+07:00
-- **ENVIRONMENT**: Local Node.js + NestJS HTTP Application Test Suite
+- **TASK_ID**: `P8_WORKSPACE_API_1C_RECONCILE_TEST_HARNESS_INFRA_CHANGES_001`
+- **BASELINE_COMMIT**: `2e5fa53f85a09a96cdc455dc372e86294ab15046`
+- **FEATURE_COMMIT**: `d0a894fc78399390bcce2a0cd9a91447d4a82a44`
+- **TIMESTAMP**: 2026-07-23T17:36:15+07:00
+- **ENVIRONMENT**: Local Node.js + NestJS Compiled Application (`nest build` -> `node dist/src/...`)
 - **DATABASE**: Local PostgreSQL (`DATABASE_URL`)
 - **BACKEND PORT**: 3000 (`http://localhost:3000`)
 - **CLASSIFICATION**:
-  - Runtime HTTP / PostgreSQL Acceptance: **PASS**
+  - Compiled NestJS HTTP / PostgreSQL Acceptance: **PASS** (28/28 passed)
+  - Raw-tsx Acceptance (harness phase): **PASS** (28/28 passed)
+  - Shared Infra Reconciled / Restored: **YES** (5 shared files restored to exact baseline `2e5fa53f85a09a96cdc455dc372e86294ab15046`)
   - Postman / Newman Acceptance: **PENDING**
 
 ---
 
-## 1. Execution Method & Tooling Status
+## 1. Shared Infrastructure Audit & Reconciliation
+
+| Shared File | Baseline Version (`2e5fa53f85...`) | Temporary Test Harness Change | Compiled Nest Requirement | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `src/auth/guards/auth.guard.ts` | No `@Inject` annotations | Added `@Inject(JwtService)` & `@Inject(Reflector)` | Unnecessary under compiled Nest | **RESTORED** |
+| `src/auth/guards/roles.guard.ts` | No `@Inject` annotations | Added `@Inject(Reflector)` | Unnecessary under compiled Nest | **RESTORED** |
+| `src/database/database.module.ts` | `providers: [PrismaService]` | Added `imports: [ConfigModule]` | Unnecessary under compiled Nest | **RESTORED** |
+| `src/database/prisma.service.ts` | No `@Inject` annotations | Added `@Inject(ConfigService)` | Unnecessary under compiled Nest | **RESTORED** |
+| `src/infrastructure/jwt/access-token.service.ts` | No `@Inject` annotations | Added `@Inject(JwtService)` | Unnecessary under compiled Nest | **RESTORED** |
+
+---
+
+## 2. Execution Method & Tooling Status
 
 - **Postman Collection Execution**: `NOT_RUN`
 - **Newman CLI Execution**: `NOT_RUN` (Newman CLI was unavailable in the tested environment)
-- **Live HTTP Test Suite**: `RUN` (28 live HTTP scenarios executed against NestJS HTTP application)
+- **Compiled NestJS Application Execution**: `RUN` (`nest build` compiled full `AppModule` graph, executed via `node dist/src/...`)
 - **Live HTTP Scenarios Executed**: 28
 - **Live HTTP Scenarios Passed**: 28 (100% pass rate across all 28 scenarios)
 - **Live HTTP Scenarios Failed**: 0
@@ -24,7 +39,7 @@
 
 ---
 
-## 2. Scenario Results Matrix (28 Scenarios)
+## 3. Scenario Results Matrix (28 Scenarios)
 
 | Scenario | Group | Request Details | Expected HTTP | Actual HTTP | DB Side Effects & Verification | Result |
 | :---: | :--- | :--- | :---: | :---: | :--- | :---: |
@@ -33,7 +48,7 @@
 | **3** | Auth | `GET /workspaces` (Non-existent user sub) | 401 | 401 | `"User account not found"`; 0 writes | PASS |
 | **4** | Auth | `GET /workspaces` (INACTIVE User) | 403 | 403 | `"User account is disabled"`; 0 writes | PASS |
 | **5** | Auth | `GET /workspaces` (BANNED User) | 403 | 403 | `"User account is disabled"`; 0 writes | PASS |
-| **6** | Create | `POST /workspaces` (`name: "  My First Lab Workspace  "`) | 201 | 201 | Trimmed name `"My First Lab Workspace"`; 1 row created | PASS |
+| **6** | Create | `POST /workspaces` (`name: "  My Compiled Lab Workspace  "`) | 201 | 201 | Trimmed name `"My Compiled Lab Workspace"`; 1 row created | PASS |
 | **7** | Create | `POST /workspaces` (Default status check) | 201 | 201 | `status = ACTIVE` | PASS |
 | **8** | Create | `POST /workspaces` (`status: "ACTIVE"` in body) | 400 | 400 | Extra field rejected (`forbidNonWhitelisted`); 0 writes | PASS |
 | **9** | Create | `POST /workspaces` (`name: "   "`) | 400 | 400 | Blank name rejected (`IsNotEmpty`); 0 writes | PASS |
@@ -55,11 +70,11 @@
 | **25** | Delete | `DELETE /workspaces/:id` (Cascade check) | 200 | 200 | PostgreSQL `onDelete: Cascade` deleted dependent Nodes and Edges | PASS |
 | **26** | Delete | `DELETE /workspaces/:id` (Missing vs Non-owned workspace) | 404 | 404 | Identical 404 `"Workspace not found"` (zero existence leakage) | PASS |
 | **27** | Audit | Public response shape audit | 200 | 200 | Exact public keys (`id`, `name`, `status`, `createdAt`, `updatedAt`); 0 internal metadata leaked | PASS |
-| **28** | Regression | Health, Auth, Craft, Elements regression | 200/401 | 200/401 | Health 200, Auth/me 401, Craft NoToken 401, Elements NoToken 401 | PASS |
+| **28** | Regression | Health, Auth, Craft and Elements regression | 200/401 | 200/401 | Health 200, Auth/me 401, Craft NoToken 401, Elements NoToken 401 | PASS |
 
 ---
 
-## 3. Database Reconciliation & Cascade Verification
+## 4. Database Reconciliation & Cascade Verification
 
 - **Baseline Preserved Rows**: `Users`: 2, `UserElements`: 2, `DiscoveryEvents`: 7, `CraftRecipes`: 22, `Elements`: 36, `DiscoveryDetails`: 36
 - **Endpoint Writes**:
@@ -67,11 +82,11 @@
   - `GET` list / getOne: **0 Writes**.
   - `PATCH`: Updated exactly 1 owned `Workspace` row.
   - `DELETE`: Hard-deleted 1 owned `Workspace` row + cascaded DB deletion of dependent `WorkspaceNode` and `WorkspaceEdge` rows.
-- **Test Setup/Cleanup**: Synthetic test users (`ws-active1-*`, `ws-active2-*`, `ws-inactive-*`, `ws-banned-*`) and their associated workspaces/nodes/edges created during test execution were safely cleaned up in a `finally` block; original database baseline intact.
+- **Test Setup/Cleanup**: Synthetic test users (`ws-compiled-act1-*`, `ws-compiled-act2-*`, `ws-compiled-inact-*`, `ws-compiled-ban-*`) and their associated workspaces/nodes/edges created during test execution were safely cleaned up in a `finally` block; original database baseline intact.
 
 ---
 
-## 4. Preservation Policy
+## 5. Preservation Policy
 
 - Policy: `PRESERVE_TEST_EVIDENCE`
 - The 2 test user accounts (`f74df612-a7d5-4541-ba6a-cde98c56bb7b` and `c4a51e82-d8b9-4a1e-8e3d-9f20e8b15a63`) and their associated `UserElement` and `DiscoveryEvent` rows remain preserved in local PostgreSQL development database for demonstration and audit evidence.
