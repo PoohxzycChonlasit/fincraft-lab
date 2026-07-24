@@ -17,7 +17,8 @@ docs/ai/
 │   └── PET_PROFILE_RUNTIME_ACCEPTANCE.md
 └── plans/
     ├── SURVIVAL_MONTHS_SIMULATION_API_CONTRACT.md
-    └── PET_PROFILE_API_CONTRACT.md
+    ├── PET_PROFILE_API_CONTRACT.md
+    └── ADMIN_CONTENT_API_CONTRACT.md
 ```
 
 ## Backend (`fincraft-lab-api/src`)
@@ -33,8 +34,12 @@ src/
 │   ├── auth.controller.ts
 │   ├── auth.service.ts
 │   ├── decorators/
+│   │   ├── current-user.decorator.ts
+│   │   └── roles.decorator.ts
 │   ├── dto/
 │   ├── guards/
+│   │   ├── auth.guard.ts
+│   │   └── roles.guard.ts
 │   └── types/
 ├── common/
 │   ├── constants/
