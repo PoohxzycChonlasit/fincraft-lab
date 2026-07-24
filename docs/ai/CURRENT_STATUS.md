@@ -4,10 +4,10 @@
 
 - **Date**: 2026-07-24
 - **Backend Stack**: NestJS + PostgreSQL + Prisma 7.8
-- **Latest Task**: `P12_ADMIN_CONTENT_API_1A_FREEZE_CONTRACT_001`
+- **Latest Task**: `P12_ADMIN_CONTENT_API_1A1_REPAIR_CONTRACT_001`
 - **Current Implemented API Surface**: 19 Operations / 14 Unique Paths / 7 Controllers
 - **Pet Profile Status**: Implemented, Audited, Repaired, Reconciled & Fully Closed
-- **Admin Content API Status**: Contract Frozen (`FROZEN_ADMIN_CONTENT_API_CONTRACT_V1`)
+- **Admin Content API Status**: Contract Reconciled & Frozen (`FROZEN_ADMIN_CONTENT_API_CONTRACT_V1`)
 - **Admin Scope**: Element master management, DiscoveryDetail educational content, Element activation/deactivation (`ContentStatus`)
 - **Admin Endpoints Planned**:
   1. `GET /admin/elements`
@@ -15,7 +15,11 @@
   3. `POST /admin/elements`
   4. `PATCH /admin/elements/:elementId`
   5. `PUT /admin/elements/:elementId/detail`
-- **Admin Role Authorization**: Protected by `AuthGuard` + `RolesGuard` (`ADMIN`, `SUPER_ADMIN` allowed; `USER` denied with 403 Forbidden)
+- **Role Authority**: `JWT_ROLE_CLAIM` (`RolesGuard` evaluates JWT payload role; `ADMIN` & `SUPER_ADMIN` permitted, `USER` denied with 403 Forbidden; `validateUser` checks DB for ACTIVE user status)
+- **Immutable Invariants**: `slug`, `elementType`, `isStarter` are **IMMUTABLE AFTER CREATE**
+- **Icon URL Strategy**: `STORED_HTTPS_ICON_URL_WITHOUT_REMOTE_FETCH` (HTTPS protocol required, max 2048 chars, no remote fetch)
+- **Detail PUT Semantics**: Idempotent Full Replacement (`200 OK` for create and replace)
+- **Runtime Matrix**: Reconciled exactly 50 scenarios (`8 + 5 + 5 + 9 + 9 + 9 + 2 + 3 = 50`)
 - **Prisma Schema Migration**: `NONE` (0 migrations executed; 0 schema changes required)
 - **Exact Schema-Fit Verdict**: `DIRECT_FIT` (all fields exist in `Element` and `DiscoveryDetail` models)
 - **Hard Delete Verdict**: `DEFERRED` (status deactivation used instead)
@@ -24,17 +28,17 @@
 
 ---
 
-## Admin Content API Contract Planning (`P12_ADMIN_CONTENT_API_1A`)
+## Admin Content API Contract Reconciliation (`P12_ADMIN_CONTENT_API_1A1`)
 
 - **Contract Artifact**: [`docs/ai/plans/ADMIN_CONTENT_API_CONTRACT.md`](file:///C:/devnest%20101/single-project/fincraft-lab/docs/ai/plans/ADMIN_CONTENT_API_CONTRACT.md)
 - **Frozen Contract Marker**: `FROZEN_ADMIN_CONTENT_API_CONTRACT_V1`
-- **Contract Planning Summary**:
-  1. **Schema Fit**: `DIRECT_FIT` — existing `Element` and `DiscoveryDetail` models support all 5 operations with zero Prisma schema changes or migrations.
-  2. **Role Security**: `RolesGuard` + `@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)` validates authenticated admin roles.
-  3. **Element Slug Identity**: `slug` is required, normalized (trimmed & lowercased) on create, and **IMMUTABLE AFTER CREATE**. Duplicate slug pre-check and Prisma P2002 target check return `HTTP 409 Conflict` (`"Element slug already exists"`).
-  4. **Element Activation**: Uses existing `Element.status` (`ContentStatus`: `PENDING`, `ACTIVE`, `INACTIVE`, `REJECTED`).
-  5. **DiscoveryDetail Upsert**: `PUT /admin/elements/:elementId/detail` idempotently creates or replaces DiscoveryDetail. Database `@unique` on `DiscoveryDetail.elementId` enforces 1-to-1 cardinality.
-  6. **Educational Safety**: Sources array enforces HTTPS URLs (max 2048 chars); backend performs zero remote requests or downloads.
+- **Reconciliation Summary**:
+  1. **Runtime Matrix Count**: Reconciled exact category sum (`8 + 5 + 5 + 9 + 9 + 9 + 2 + 3 = 50 scenarios`).
+  2. **Role Authority**: Defined `ROLE_AUTHORITY: JWT_ROLE_CLAIM` evaluated by `RolesGuard` against JWT payload `request.user.role`.
+  3. **Field Invariants**: `slug`, `elementType`, `isStarter` frozen as **IMMUTABLE AFTER CREATE**; attempts to PATCH them return `HTTP 400 Bad Request`.
+  4. **Icon URL Strategy**: `STORED_HTTPS_ICON_URL_WITHOUT_REMOTE_FETCH` (must be absolute HTTPS URL, max 2048 chars).
+  5. **DiscoveryDetail PUT Semantics**: Idempotent full replacement returning `200 OK` for both creation and update.
+  6. **Sources Array**: Array of 1 to 10 `{ title, organization, url }` items with HTTPS URL validation.
 
 ---
 

@@ -20,7 +20,7 @@ The Admin Content API empowers administrators (`ADMIN`, `SUPER_ADMIN`) to manage
 2. `GET /admin/elements/:elementId` — Retrieve one Element master record with category and DiscoveryDetail.
 3. `POST /admin/elements` — Create a new Element master record.
 4. `PATCH /admin/elements/:elementId` — Update editable fields of an Element master record (including status/activation).
-5. `PUT /admin/elements/:elementId/detail` — Create or replace (idempotent upsert) the 1-to-1 `DiscoveryDetail` educational content for an Element.
+5. `PUT /admin/elements/:elementId/detail` — Create or replace (idempotent full replacement) the 1-to-1 `DiscoveryDetail` educational content for an Element.
 
 ### 1.3 Out-of-Scope & Explicitly Deferred
 - Hard deletion (`DELETE /admin/elements/:elementId`) — DEFERRED due to foreign key restrictions (`producedRecipes`, `craftRecipeInputs`, `userElements`, `workspaceNodes`, `simulations`). Status deactivation (`status = INACTIVE`) is used instead.
@@ -33,16 +33,16 @@ The Admin Content API empowers administrators (`ADMIN`, `SUPER_ADMIN`) to manage
 
 ---
 
-## 2. Authorization & Security Contract
+## 2. Authorization & Role Security Contract
 
-### 2.1 Allowed Roles
-- `ADMIN`
-- `SUPER_ADMIN`
+### 2.1 Role Authority
+- **`ROLE_AUTHORITY`**: `JWT_ROLE_CLAIM`
+- Role source: `RolesGuard` evaluates `request.user.role` from the verified JWT payload (`AccessTokenPayload`).
+- Stale JWT behavior: If a user's role is modified in the database, existing 15-minute access tokens retain the role at issuance until expired. Database `UserStatus` is validated on every request by `AdminContentService` via `validateUser(userId)`.
+- Permitted Roles: `ADMIN`, `SUPER_ADMIN`.
+- Denied Role: `USER` (`HTTP 403 Forbidden` with message `"Insufficient permissions"`).
 
-### 2.2 Denied Role
-- `USER` (HTTP `403 Forbidden` with message `"Insufficient permissions"`)
-
-### 2.3 Auth Evaluation Order
+### 2.2 Auth Evaluation Order
 Every `/admin/elements` endpoint is protected by:
 ```ts
 @ApiTags('Admin Content')
@@ -71,7 +71,7 @@ Every `/admin/elements` endpoint is protected by:
 
 All requested features (Element creation, editing, activation/deactivation via `ContentStatus`, and DiscoveryDetail 1-to-1 upsert) map directly to existing Prisma models without schema or migration changes.
 
-### 3.2 Element Model Field Ownership Matrix
+### 3.2 Element Model Field Ownership & Invariants Matrix
 
 | Field | Database Type | Nullable | Default | Unique | Admin Create | Admin Update | System Managed | Public Response |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -81,51 +81,83 @@ All requested features (Element creation, editing, activation/deactivation via `
 | `slug` | String | No | None | Yes | Required | **IMMUTABLE** | No | Included |
 | `iconUrl` | String? | Yes | `null` | No | Optional | Optional | No | Included |
 | `emoji` | String | No | None | No | Required | Optional | No | Included |
-| `elementType` | `ElementType` | No | None | No | Required | Optional | No | Included |
-| `isStarter` | Boolean | No | `false` | No | Optional | Optional | No | Included |
+| `elementType` | `ElementType` | No | None | No | Required | **IMMUTABLE** | No | Included |
+| `isStarter` | Boolean | No | `false` | No | Optional | **IMMUTABLE** | No | Included |
 | `status` | `ContentStatus`| No | `PENDING`| No | Optional | Optional | No | Included |
 | `createdAt` | Timestamptz | No | `now()` | No | Rejected | Rejected | Yes | Included |
 | `updatedAt` | Timestamptz | No | `updatedAt`| No | Rejected | Rejected | Yes | Included |
 
-### 3.3 DiscoveryDetail Model Field Ownership Matrix
-
-| Field | Database Type | Nullable | Default | Unique | Admin PUT | System Managed | Public Response |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `id` | UUID v4 | No | `uuid()` | Yes (PK) | Rejected | Yes | Included |
-| `elementId` | UUID v4 | No | None | Yes (FK) | Route Param | Yes | Included |
-| `shortDescription` | String | No | None | No | Required | No | Included |
-| `realLesson` | String | No | None | No | Required | No | Included |
-| `example` | String? | Yes | `null` | No | Optional | No | Included |
-| `possibleBenefit` | String? | Yes | `null` | No | Optional | No | Included |
-| `possibleTradeoff` | String? | Yes | `null` | No | Optional | No | Included |
-| `hiddenRisk` | String? | Yes | `null` | No | Optional | No | Included |
-| `worksWhen` | String? | Yes | `null` | No | Optional | No | Included |
-| `becomesDifficultWhen` | String? | Yes | `null` | No | Optional | No | Included |
-| `whatChangesOutcome` | String? | Yes | `null` | No | Optional | No | Included |
-| `realityLevel` | `RealityLevel`| No | None | No | Required | No | Included |
-| `safetyLabel` | `SafetyLabel` | No | None | No | Required | No | Included |
-| `sources` | Json | No | None | No | Required (Array) | No | Included |
-| `createdAt` | Timestamptz | No | `now()` | No | Rejected | Yes | Included |
-| `updatedAt` | Timestamptz | No | `updatedAt`| No | Rejected | Yes | Included |
+### 3.3 Element Invariant Rules
+- `slug`: **IMMUTABLE AFTER CREATE**. Cannot be changed via `PATCH /admin/elements/:elementId`. Supplying `slug` in PATCH returns `HTTP 400 Bad Request` (`"slug cannot be updated"`).
+- `elementType`: **IMMUTABLE AFTER CREATE**. Cannot be changed via `PATCH /admin/elements/:elementId`. Supplying `elementType` in PATCH returns `HTTP 400 Bad Request` (`"elementType cannot be updated"`).
+- `isStarter`: **IMMUTABLE AFTER CREATE**. Cannot be changed via `PATCH /admin/elements/:elementId`. Supplying `isStarter` in PATCH returns `HTTP 400 Bad Request` (`"isStarter cannot be updated"`).
 
 ---
 
-## 4. Endpoint Specifications
+## 4. Specific Field Validation Rules
 
-### 4.1 `GET /admin/elements`
-- **Purpose**: Retrieve full list of Element master records for Admin management.
+### 4.1 Slug Formatting
+- Regex: `^[a-z0-9]+(?:-[a-z0-9]+)*$`
+- Length: 1 to 100 characters after trimming.
+- Normalization: Trimmed and lowercased before validation, lookup, and persistence.
+- Rejects: Spaces, uppercase letters, underscores, consecutive hyphens (`--`), and leading/trailing hyphens.
+- Duplicate Conflict: Duplicate slug pre-check and Prisma P2002 target check return `HTTP 409 Conflict` (`"Element slug already exists"`).
+
+### 4.2 Icon URL Specification
+- Strategy: `STORED_HTTPS_ICON_URL_WITHOUT_REMOTE_FETCH`
+- Optional / Nullable according to Prisma (`iconUrl String?`).
+- Trimmed before validation.
+- Must be a syntactically valid absolute HTTPS URL starting with `https://` (max 2048 characters).
+- Empty or whitespace-only string -> `HTTP 400 Bad Request`.
+- `http://`, `data:`, `file:`, `javascript:`, or malformed URL -> `HTTP 400 Bad Request`.
+- On `PATCH /admin/elements/:elementId`, omitted field preserves value; explicit `null` clears field to `null` in DB.
+- Backend performs NO remote fetch, download, or moderation.
+
+### 4.3 DiscoveryDetail PUT Semantics (Full Replacement)
+- Endpoint: `PUT /admin/elements/:elementId/detail`
+- Semantics: **Idempotent Full Replacement**.
+- Success Status: `200 OK` for both create and replace.
+- Creation: If `DiscoveryDetail` is absent for `elementId`, creates a new `DiscoveryDetail` row.
+- Replacement: If `DiscoveryDetail` exists for `elementId`, replaces all editable fields.
+- Required Fields: Must be supplied on every PUT payload (`shortDescription`, `realLesson`, `realityLevel`, `safetyLabel`, `sources`).
+- Nullable Fields (`example`, `possibleBenefit`, `possibleTradeoff`, `hiddenRisk`, `worksWhen`, `becomesDifficultWhen`, `whatChangesOutcome`):
+  - Omitted or explicit `null`: stores `null` in DB.
+  - Valid string: trimmed and stored.
+- Failure Atomicity: If validation fails, previous `DiscoveryDetail` row remains 100% unchanged in DB.
+
+### 4.4 Sources Array Specification
+- Shape: Array of `{ title: string, organization: string, url: string }`
+- Array Bounds: Minimum 1 item, maximum 10 items.
+- `title`: String, 1-200 characters, trimmed, required.
+- `organization`: String, 1-200 characters, trimmed, required.
+- `url`: String, syntactically valid absolute HTTPS URL, max 2048 characters, trimmed, required.
+- Empty or whitespace-only values rejected with `HTTP 400 Bad Request`.
+- Order preserved as submitted in JSON payload.
+- No remote fetch or AI text authority claims.
+
+### 4.5 Safety Label & Reality Level Enums
+- `safetyLabel`: Enum (`SafetyLabel`) — Single enum value stored (`EDUCATION_ONLY`, `SIMULATION_ONLY`, `NOT_FINANCIAL_ADVICE`, `HIGH_RISK_TOPIC`, `NEEDS_REVIEW`).
+- `realityLevel`: Enum (`RealityLevel`) — Single enum value stored (`GROUNDED`, `SIMPLIFIED_MODEL`, `SCENARIO`, `HYPOTHESIS`).
+
+---
+
+## 5. Endpoint Specifications & Admin Response Representations
+
+### 5.1 `GET /admin/elements`
+- **Purpose**: Retrieve summary list of Element master records for Admin.
 - **Query Parameters**:
-  - `status` (`ContentStatus`, optional) — Filter by status (`PENDING`, `ACTIVE`, `INACTIVE`, `REJECTED`).
-  - `elementType` (`ElementType`, optional) — Filter by type (`BASE`, `CONCEPT`, `BEHAVIOR`, `RISK`, `SCENARIO`, `TOOL`, `DISCOVERY`).
-  - `categoryId` (UUID v4, optional) — Filter by category UUID.
+  - `status` (`ContentStatus`, optional)
+  - `elementType` (`ElementType`, optional)
+  - `categoryId` (UUID v4, optional)
 - **Ordering**: Deterministic by `createdAt DESC`.
-- **Response**: `200 OK`
+- **Response (`200 OK`)**:
   ```json
   {
     "data": [
       {
         "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         "categoryId": "c1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "categoryName": "Money Flow",
         "name": "Earned Income",
         "slug": "income",
         "iconUrl": "https://example.com/icons/income.png",
@@ -133,6 +165,7 @@ All requested features (Element creation, editing, activation/deactivation via `
         "elementType": "BASE",
         "isStarter": true,
         "status": "ACTIVE",
+        "hasDiscoveryDetail": true,
         "createdAt": "2026-07-24T12:00:00.000Z",
         "updatedAt": "2026-07-24T12:00:00.000Z"
       }
@@ -140,10 +173,10 @@ All requested features (Element creation, editing, activation/deactivation via `
   }
   ```
 
-### 4.2 `GET /admin/elements/:elementId`
-- **Purpose**: Retrieve single Element master record with details for Admin.
+### 5.2 `GET /admin/elements/:elementId`
+- **Purpose**: Retrieve single Element master record with complete category and DiscoveryDetail.
 - **Route Parameter**: `elementId` (UUID v4) -> If malformed, `HTTP 400 Bad Request`.
-- **Response**: `200 OK`
+- **Response (`200 OK`)**:
   ```json
   {
     "data": {
@@ -188,67 +221,38 @@ All requested features (Element creation, editing, activation/deactivation via `
   ```
 - **Error**: `404 Not Found` (`"Element not found"`).
 
-### 4.3 `POST /admin/elements`
+### 5.3 `POST /admin/elements`
 - **Purpose**: Create a new Element master record.
 - **Request Body (`CreateElementDto`)**:
   - `name`: String, 1-100 chars, trimmed, required.
   - `slug`: String, 1-100 chars, trimmed, lowercase, kebab-case, required (**IMMUTABLE AFTER CREATE**).
-  - `categoryId`: String, UUID v4, required (must reference existing `ElementCategory`).
+  - `categoryId`: String, UUID v4, required.
   - `emoji`: String, 1-10 chars, trimmed, required.
-  - `elementType`: Enum (`ElementType`), required.
-  - `isStarter`: Boolean, optional (default `false`).
+  - `elementType`: Enum (`ElementType`), required (**IMMUTABLE AFTER CREATE**).
+  - `isStarter`: Boolean, optional (default `false`) (**IMMUTABLE AFTER CREATE**).
   - `status`: Enum (`ContentStatus`), optional (default `PENDING`).
   - `iconUrl`: String?, optional, HTTPS URL (max 2048 chars) or null.
-- **Slug Normalization**: Trimmed and lowercased before validation and persistence.
 - **Validation**:
   - Missing `categoryId` in DB -> `HTTP 404 Not Found` (`"Element category not found"`).
-  - Duplicate `slug` pre-check -> `HTTP 409 Conflict` (`"Element slug already exists"`).
-  - Database `@unique` constraint violation on `slug` (Prisma P2002 target `slug`) -> `HTTP 409 Conflict` (`"Element slug already exists"`).
+  - Duplicate `slug` pre-check or Prisma P2002 target check -> `HTTP 409 Conflict` (`"Element slug already exists"`).
 - **Response**: `201 Created`
 
-### 4.4 `PATCH /admin/elements/:elementId`
+### 5.4 `PATCH /admin/elements/:elementId`
 - **Purpose**: Update editable fields of an Element master record (including status activation/deactivation).
 - **Request Body (`UpdateElementDto`)**:
-  - All fields optional (`name`, `categoryId`, `emoji`, `elementType`, `isStarter`, `status`, `iconUrl`).
-  - `slug`: **IMMUTABLE** (Rejected if present with `HTTP 400 Bad Request` `"slug cannot be updated"`).
-- **Validation Rules**:
+  - Optional editable fields: `name`, `categoryId`, `emoji`, `status`, `iconUrl`.
+  - Immutable fields rejected: `slug`, `elementType`, `isStarter` -> `HTTP 400 Bad Request`.
+- **Validation**:
   - Empty body `{}` -> `HTTP 400 Bad Request` (`"At least one editable field must be provided"`).
-  - `name: null` or `name: ""` -> `HTTP 400 Bad Request` (`"Pet name cannot be null"` / `"Element name cannot be null"`).
-  - `categoryId` not found in DB -> `HTTP 404 Not Found` (`"Element category not found"`).
-  - `elementId` not found in DB -> `HTTP 404 Not Found` (`"Element not found"`).
+  - `name: null` or `name: ""` -> `HTTP 400 Bad Request` (`"Element name cannot be null"`).
+  - `elementId` missing -> `HTTP 404 Not Found` (`"Element not found"`).
+  - `categoryId` missing -> `HTTP 404 Not Found` (`"Element category not found"`).
 - **Response**: `200 OK`
 
-### 4.5 `PUT /admin/elements/:elementId/detail`
-- **Purpose**: Idempotent create or replace (upsert) of 1-to-1 `DiscoveryDetail` educational content for an Element.
-- **Request Body (`UpsertDiscoveryDetailDto`)**:
-  - `shortDescription`: String, 1-500 chars, trimmed, required.
-  - `realLesson`: String, 1-2000 chars, trimmed, required.
-  - `example`: String?, max 2000 chars, trimmed, optional/nullable.
-  - `possibleBenefit`: String?, max 2000 chars, trimmed, optional/nullable.
-  - `possibleTradeoff`: String?, max 2000 chars, trimmed, optional/nullable.
-  - `hiddenRisk`: String?, max 2000 chars, trimmed, optional/nullable.
-  - `worksWhen`: String?, max 2000 chars, trimmed, optional/nullable.
-  - `becomesDifficultWhen`: String?, max 2000 chars, trimmed, optional/nullable.
-  - `whatChangesOutcome`: String?, max 2000 chars, trimmed, optional/nullable.
-  - `realityLevel`: Enum (`RealityLevel`), required.
-  - `safetyLabel`: Enum (`SafetyLabel`), required.
-  - `sources`: Array of `{ title: string, organization: string, url: string }`, required. `url` must be syntactically valid absolute HTTPS URL (max 2048 chars).
-- **Validation & Execution**:
-  - Checks Element exists -> If absent, `HTTP 404 Not Found` (`"Element not found"`).
-  - Uses `prisma.discoveryDetail.upsert({ where: { elementId }, create: { ... }, update: { ... } })`.
+### 5.5 `PUT /admin/elements/:elementId/detail`
+- **Purpose**: Idempotent create or replace (upsert) of 1-to-1 `DiscoveryDetail` educational content.
+- **Request Body (`UpsertDiscoveryDetailDto`)**: See Section 4.3.
 - **Response**: `200 OK`
-
----
-
-## 5. Educational Safety & Source Validation
-
-1. **Educational Only Disclaimer**:
-   All educational detail responses enforce standard project disclaimers:
-   `SafetyLabel.EDUCATION_ONLY`, `SafetyLabel.SIMULATION_ONLY`, `SafetyLabel.NOT_FINANCIAL_ADVICE`.
-2. **HTTPS Source URL Validation**:
-   - `sources` array items must contain valid absolute URLs starting with `https://`.
-   - Rejects `http://`, `data:`, `file:`, `javascript:`, and malformed URLs with `HTTP 400 Bad Request`.
-   - Backend performs NO fetch, HTTP request, file download, or AI text moderation.
 
 ---
 
@@ -256,7 +260,7 @@ All requested features (Element creation, editing, activation/deactivation via `
 
 | Status Code | Reason / Condition | Error Message Payload |
 | :--- | :--- | :--- |
-| `400 Bad Request` | Missing required field / Invalid enum / Empty PATCH body `{}` / `slug` supplied in PATCH / Malformed HTTPS source URL | `{ "message": "At least one editable field must be provided" }` |
+| `400 Bad Request` | Missing required field / Invalid enum / Empty PATCH body `{}` / Immutable field supplied / Malformed HTTPS source URL | `{ "message": "At least one editable field must be provided" }` |
 | `401 Unauthorized` | Missing/invalid JWT or user not found | `{ "message": "Invalid or missing authentication token" }` |
 | `403 Forbidden` | User status INACTIVE/BANNED or role is `USER` | `{ "message": "Insufficient permissions" }` / `{ "message": "User account is disabled" }` |
 | `404 Not Found` | Element or Category not found | `{ "message": "Element not found" }` / `{ "message": "Element category not found" }` |
@@ -264,30 +268,7 @@ All requested features (Element creation, editing, activation/deactivation via `
 
 ---
 
-## 7. Future NestJS Directory Structure
-
-```text
-src/admin-content/
-  admin-content.module.ts
-  admin-content.controller.ts
-  admin-content.service.ts
-  dto/
-    create-element.dto.ts
-    update-element.dto.ts
-    upsert-discovery-detail.dto.ts
-    element-admin-response.dto.ts
-  mappers/
-    element-admin-response.mapper.ts
-  openapi/
-    admin-content-openapi.decorators.ts
-```
-
-- Primary files (`admin-content.module.ts`, `admin-content.controller.ts`, `admin-content.service.ts`) remain at feature root `src/admin-content/`.
-- No `controllers/` directory, no `services/` directory, no `index.ts` barrel files.
-
----
-
-## 8. Numbered Future Runtime Acceptance Matrix (50 Scenarios)
+## 7. Numbered Future Runtime Acceptance Matrix (Reconciled Exactly 50 Scenarios)
 
 ```text
 AUTHORIZATION (Scenarios 1-8):
@@ -301,7 +282,7 @@ AUTHORIZATION (Scenarios 1-8):
 8.  BANNED user account returns 403 Forbidden ("User account is disabled").
 
 LIST ELEMENTS (Scenarios 9-13):
-9.  GET /admin/elements returns 200 with full array of elements.
+9.  GET /admin/elements returns 200 with summary array of elements.
 10. GET /admin/elements includes PENDING, ACTIVE, INACTIVE, and REJECTED elements.
 11. GET /admin/elements filter by status=ACTIVE returns only active elements.
 12. GET /admin/elements filter by elementType=BASE returns only BASE elements.
@@ -330,7 +311,7 @@ UPDATE ELEMENT (Scenarios 28-36):
 29. PATCH /admin/elements/:elementId updating status to INACTIVE deactivates Element.
 30. PATCH /admin/elements/:elementId updating status to ACTIVE activates Element.
 31. PATCH /admin/elements/:elementId with empty body {} returns 400 Bad Request.
-32. PATCH /admin/elements/:elementId with slug in body returns 400 Bad Request.
+32. PATCH /admin/elements/:elementId with immutable slug in body returns 400 Bad Request.
 33. PATCH /admin/elements/:elementId with null name returns 400 Bad Request.
 34. PATCH /admin/elements/:elementId for non-existent elementId returns 404 Not Found.
 35. PATCH /admin/elements/:elementId with non-existent categoryId returns 404 Not Found.
@@ -347,17 +328,24 @@ PUT DISCOVERY DETAIL (Scenarios 37-45):
 44. Repeated PUT /admin/elements/:elementId/detail leaves exactly 1 DiscoveryDetail row in DB.
 45. Failed PUT /admin/elements/:elementId/detail leaves previous DiscoveryDetail 100% unchanged.
 
-NON-INTERFERENCE & REGRESSION (Scenarios 46-50):
+NON-INTERFERENCE (Scenarios 46-47):
 46. Admin operations create 0 UserElement, 0 WorkspaceNode, or 0 SimulationRun rows.
 47. Admin operations perform zero external HTTP requests, downloads, or AI calls.
-48. Swagger GET /docs returns 200 with Admin Content operations documented.
+
+SWAGGER & REGRESSION (Scenarios 48-50):
+48. Swagger GET /docs returns 200 with Admin Content operations documented under Admin Content tag.
 49. Swagger GET /docs-json returns valid OpenAPI JSON with 24 total operations across 17 paths.
 50. OpenAPI documentation excludes passwordHash and internal relations.
+
+==========================================
+RECONCILED CATEGORY SUM:
+8 (Auth) + 5 (List) + 5 (Detail) + 9 (Create) + 9 (Update) + 9 (Detail PUT) + 2 (Non-Interference) + 3 (Swagger) = 50 TOTAL
+==========================================
 ```
 
 ---
 
-## 9. Implementation Sequence for Future Task (`P12_1B`)
+## 8. Implementation Sequence for Future Task (`P12_1B`)
 
 1. Verify `RolesGuard` (`src/auth/guards/roles.guard.ts`) and `@Roles` decorator (`src/auth/decorators/roles.decorator.ts`).
 2. Create DTOs under `src/admin-content/dto/` (`create-element.dto.ts`, `update-element.dto.ts`, `upsert-discovery-detail.dto.ts`, `element-admin-response.dto.ts`).
