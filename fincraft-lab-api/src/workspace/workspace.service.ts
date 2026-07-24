@@ -10,14 +10,14 @@ import {
   UserStatus,
   Workspace,
   WorkspaceStatus,
-} from '../../database/generated/prisma/client';
-import { PrismaService } from '../../database/prisma.service';
-import type { CreateWorkspaceDto } from '../dto/create-workspace.dto';
-import type { UpdateWorkspaceDto } from '../dto/update-workspace.dto';
+} from '../database/generated/prisma/client';
+import { PrismaService } from '../database/prisma.service';
+import type { CreateWorkspaceDto } from './dto/create-workspace.dto';
+import type { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import type {
   DeleteWorkspaceResponse,
   WorkspaceResponse,
-} from '../types/workspace-response.type';
+} from './types/workspace-response.type';
 
 @Injectable()
 export class WorkspaceService {

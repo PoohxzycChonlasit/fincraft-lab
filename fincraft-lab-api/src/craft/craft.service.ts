@@ -7,6 +7,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { calculateCraftInputHash } from '../common/craft/calculate-craft-input-hash';
 import {
   ContentStatus,
   CraftRuleType,
@@ -14,17 +15,16 @@ import {
   UserStatus,
 } from '../database/generated/prisma/client';
 import { PrismaService } from '../database/prisma.service';
-import { calculateCraftInputHash } from '../common/craft/calculate-craft-input-hash';
-import { parseCraftSources } from './parsers/craft-sources.parser';
-import {
-  mapCraftDiscoveryResult,
-  mapCraftNoRecipeResult,
-} from './mappers/craft-response.mapper';
+import type { CraftRequestDto } from './dto/craft-request.dto';
 import {
   ExpectedUserElementRaceError,
   isUserElementUniqueConflict,
 } from './helpers/craft-prisma-error.helper';
-import type { CraftRequestDto } from './dto/craft-request.dto';
+import {
+  mapCraftDiscoveryResult,
+  mapCraftNoRecipeResult,
+} from './mappers/craft-response.mapper';
+import { parseCraftSources } from './parsers/craft-sources.parser';
 import type {
   CraftDiscoveryDetailInput,
   CraftDiscoveryTransactionResult,
@@ -40,20 +40,40 @@ export class CraftService {
 
   /**
    * Main entry point for processing a Crafting request.
-   *
-   * Flow:
-   * 1. Validates current User account & active status.
-   * 2. Resolves Input Elements and validates status & user unlocks.
-   * 3. Calculates canonical input hash.
-   * 4. Resolves active COMMUTATIVE Recipe.
-   * 5. If NO_RECIPE: records NO_RECIPE Event in transaction and returns mapped result.
-   * 6. If DISCOVERY: validates Output Element & Detail invariants + sources before write.
-   * 7. Executes DISCOVERY write transaction (find/create UserElement + SUCCESS Event).
-   * 8. Handles expected UserElement P2002 race condition with 1 fresh retry.
-   * 9. Returns mapped public CraftResult after transaction commit.
    */
   async craft(userId: string, dto: CraftRequestDto): Promise<CraftResult> {
-    // 1. Current User Lookup & Status Validation
+    await this.validateUserAccount(userId);
+    await this.resolveAndValidateInputElements(userId, dto.inputElementIds);
+
+    const recipeData = await this.resolveRecipeOrRecordNoRecipe(
+      userId,
+      dto.inputElementIds,
+    );
+
+    if (!recipeData) {
+      return mapCraftNoRecipeResult();
+    }
+
+    const { recipeId, canonicalElementIds, outputElementId } = recipeData;
+
+    const { elementResponse, detailInput } =
+      await this.resolveAndValidateOutputElement(outputElementId);
+
+    const { isNewDiscovery } = await this.executeDiscoveryTransaction(
+      userId,
+      recipeId,
+      outputElementId,
+      canonicalElementIds,
+    );
+
+    return mapCraftDiscoveryResult({
+      isNewDiscovery,
+      element: elementResponse,
+      detail: detailInput,
+    });
+  }
+
+  private async validateUserAccount(userId: string): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, status: true },
@@ -66,10 +86,14 @@ export class CraftService {
     if (user.status !== UserStatus.ACTIVE) {
       throw new ForbiddenException('User account is disabled');
     }
+  }
 
-    // 2. Input Element Resolution & Active Check
+  private async resolveAndValidateInputElements(
+    userId: string,
+    inputElementIds: string[],
+  ): Promise<void> {
     const inputElements = await this.prisma.element.findMany({
-      where: { id: { in: dto.inputElementIds } },
+      where: { id: { in: inputElementIds } },
       select: {
         id: true,
         status: true,
@@ -80,8 +104,8 @@ export class CraftService {
     const foundIds = new Set(inputElements.map((e) => e.id));
     if (
       foundIds.size !== 2 ||
-      !foundIds.has(dto.inputElementIds[0]) ||
-      !foundIds.has(dto.inputElementIds[1])
+      !foundIds.has(inputElementIds[0]) ||
+      !foundIds.has(inputElementIds[1])
     ) {
       throw new NotFoundException('Element not found');
     }
@@ -92,7 +116,6 @@ export class CraftService {
       }
     }
 
-    // 3. Availability Check for Non-Starter Inputs
     const nonStarterInputIds = inputElements
       .filter((e) => !e.isStarter)
       .map((e) => e.id);
@@ -115,14 +138,21 @@ export class CraftService {
         }
       }
     }
+  }
 
-    // 4. Calculate Canonical Input Hash & Ordered IDs
+  private async resolveRecipeOrRecordNoRecipe(
+    userId: string,
+    inputElementIds: string[],
+  ): Promise<{
+    recipeId: string;
+    canonicalElementIds: [string, string];
+    outputElementId: string;
+  } | null> {
     const { inputHash, canonicalElementIds } = calculateCraftInputHash(
-      dto.inputElementIds[0],
-      dto.inputElementIds[1],
+      inputElementIds[0],
+      inputElementIds[1],
     );
 
-    // 5. Active COMMUTATIVE Recipe Resolution
     const recipe = await this.prisma.craftRecipe.findUnique({
       where: { inputHash },
       select: {
@@ -138,7 +168,6 @@ export class CraftService {
       recipe.status !== ContentStatus.ACTIVE ||
       recipe.ruleType !== CraftRuleType.COMMUTATIVE
     ) {
-      // Execute NO_RECIPE write transaction
       await this.prisma.$transaction(async (tx) => {
         await tx.discoveryEvent.create({
           data: {
@@ -150,13 +179,24 @@ export class CraftService {
           },
         });
       });
-
-      return mapCraftNoRecipeResult();
+      return null;
     }
 
-    // 6. DISCOVERY Output Element & Detail Invariant Checks
+    return {
+      recipeId: recipe.id,
+      canonicalElementIds,
+      outputElementId: recipe.outputElementId,
+    };
+  }
+
+  private async resolveAndValidateOutputElement(
+    outputElementId: string,
+  ): Promise<{
+    elementResponse: CraftElementResponse;
+    detailInput: CraftDiscoveryDetailInput;
+  }> {
     const outputElement = await this.prisma.element.findUnique({
-      where: { id: recipe.outputElementId },
+      where: { id: outputElementId },
       select: {
         id: true,
         name: true,
@@ -178,7 +218,7 @@ export class CraftService {
     }
 
     const discoveryDetail = await this.prisma.discoveryDetail.findUnique({
-      where: { elementId: recipe.outputElementId },
+      where: { elementId: outputElementId },
       select: {
         shortDescription: true,
         realLesson: true,
@@ -199,59 +239,39 @@ export class CraftService {
       throw new InternalServerErrorException('Internal server error');
     }
 
-    // Pre-validate sources before starting write transaction
     try {
       parseCraftSources(discoveryDetail.sources);
     } catch {
       throw new InternalServerErrorException('Internal server error');
     }
 
-    const elementResponse: CraftElementResponse = {
-      id: outputElement.id,
-      name: outputElement.name,
-      slug: outputElement.slug,
-      iconUrl: outputElement.iconUrl,
-      emoji: outputElement.emoji,
-      elementType: outputElement.elementType,
-      isStarter: outputElement.isStarter,
+    return {
+      elementResponse: {
+        id: outputElement.id,
+        name: outputElement.name,
+        slug: outputElement.slug,
+        iconUrl: outputElement.iconUrl,
+        emoji: outputElement.emoji,
+        elementType: outputElement.elementType,
+        isStarter: outputElement.isStarter,
+      },
+      detailInput: {
+        shortDescription: discoveryDetail.shortDescription,
+        realLesson: discoveryDetail.realLesson,
+        example: discoveryDetail.example,
+        possibleBenefit: discoveryDetail.possibleBenefit,
+        possibleTradeoff: discoveryDetail.possibleTradeoff,
+        hiddenRisk: discoveryDetail.hiddenRisk,
+        worksWhen: discoveryDetail.worksWhen,
+        becomesDifficultWhen: discoveryDetail.becomesDifficultWhen,
+        whatChangesOutcome: discoveryDetail.whatChangesOutcome,
+        realityLevel: discoveryDetail.realityLevel,
+        safetyLabel: discoveryDetail.safetyLabel,
+        sources: discoveryDetail.sources,
+      },
     };
-
-    const detailInput: CraftDiscoveryDetailInput = {
-      shortDescription: discoveryDetail.shortDescription,
-      realLesson: discoveryDetail.realLesson,
-      example: discoveryDetail.example,
-      possibleBenefit: discoveryDetail.possibleBenefit,
-      possibleTradeoff: discoveryDetail.possibleTradeoff,
-      hiddenRisk: discoveryDetail.hiddenRisk,
-      worksWhen: discoveryDetail.worksWhen,
-      becomesDifficultWhen: discoveryDetail.becomesDifficultWhen,
-      whatChangesOutcome: discoveryDetail.whatChangesOutcome,
-      realityLevel: discoveryDetail.realityLevel,
-      safetyLabel: discoveryDetail.safetyLabel,
-      sources: discoveryDetail.sources,
-    };
-
-    // 7. Transactional Write Execution (returns isNewDiscovery boolean only)
-    const { isNewDiscovery } = await this.executeDiscoveryTransaction(
-      userId,
-      recipe.id,
-      outputElement.id,
-      canonicalElementIds,
-    );
-
-    // 8. Map and return public CraftDiscoveryResult ONLY AFTER transaction commit
-    return mapCraftDiscoveryResult({
-      isNewDiscovery,
-      element: elementResponse,
-      detail: detailInput,
-    });
   }
 
-  /**
-   * Executes the DISCOVERY write transaction.
-   * Catches and converts P2002 strictly on tx.userElement.create into ExpectedUserElementRaceError,
-   * enabling 1 fresh transaction retry if a race occurs.
-   */
   private async executeDiscoveryTransaction(
     userId: string,
     recipeId: string,
@@ -308,7 +328,6 @@ export class CraftService {
       return await attempt();
     } catch (error: unknown) {
       if (error instanceof ExpectedUserElementRaceError) {
-        // Retry once in a fresh transaction
         try {
           return await attempt();
         } catch (retryError: unknown) {

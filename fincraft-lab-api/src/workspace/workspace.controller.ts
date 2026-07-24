@@ -13,20 +13,20 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import { AuthGuard } from '../../auth/guards/auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import type { AccessTokenPayload } from '../../auth/types/access-token-payload.type';
-import { CreateWorkspaceDto } from '../dto/create-workspace.dto';
-import { SaveCanvasSnapshotDto } from '../dto/save-canvas-snapshot.dto';
-import { UpdateWorkspaceDto } from '../dto/update-workspace.dto';
-import { WorkspaceCanvasService } from '../services/workspace-canvas.service';
-import { WorkspaceService } from '../services/workspace.service';
-import type { CanvasSnapshotResponse } from '../types/canvas-snapshot-response.type';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import type { AccessTokenPayload } from '../auth/types/access-token-payload.type';
+import { CreateWorkspaceDto } from './dto/create-workspace.dto';
+import { SaveCanvasSnapshotDto } from './dto/save-canvas-snapshot.dto';
+import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
+import type { CanvasSnapshotResponse } from './types/canvas-snapshot-response.type';
 import type {
   DeleteWorkspaceResponse,
   WorkspaceResponse,
-} from '../types/workspace-response.type';
+} from './types/workspace-response.type';
+import { WorkspaceCanvasService } from './workspace-canvas.service';
+import { WorkspaceService } from './workspace.service';
 
 @Controller('workspaces')
 @UseGuards(AuthGuard, RolesGuard)

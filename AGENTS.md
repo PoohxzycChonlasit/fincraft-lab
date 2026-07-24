@@ -46,28 +46,38 @@ Full detail lives in [`docs/ai/CODING_RULES.md`](docs/ai/CODING_RULES.md).
 
 ### Primary Goal
 - The codebase must remain readable by a student learning the project.
-- Prefer small, cohesive, feature-local files over monolithic NestJS modules, controllers, or services.
+- Prefer small, cohesive, feature-local files.
 - Optimize for clear responsibility, discoverability, and predictable folder structure.
 
-### Feature Folder Structure
-For non-trivial NestJS features:
+### Root Module/Controller/Service Policy (Canonical)
+For every NestJS feature, **always keep these three primary files at the feature root**:
 ```text
 src/<feature>/
-  <feature>.module.ts (at feature root)
-  controllers/
-  services/
+  <feature>.module.ts
+  <feature>.controller.ts
+  <feature>.service.ts
+```
+Do **not** move these three files into `controllers/` or `services/`.
+
+Supporting folders may be created under `src/<feature>/` only when needed:
+```text
+src/<feature>/
   dto/
+  types/
   validators/
   mappers/
-  policies/
   constants/
-  types/
+  policies/
 ```
-- Create only required folders; no empty folders.
-- Do not use generic `utils/`, `helpers/`, `shared/` dumping grounds unless genuinely reused across multiple features.
-- No `index.ts` barrel files that hide implementation locations.
+Additional feature-specific services should also remain at the feature root by default, for example:
+- `workspace-canvas.service.ts`
+- `workspace-canvas-writer.service.ts`
 
-### File Targets
+Do not create a `services/` folder only to contain two or three service files.
+Do not create empty folders.
+Do not create `index.ts` barrel files.
+
+### File and Method Targets
 - Module preferred <= 60, hard <= 100
 - Controller preferred <= 150, hard <= 200
 - Service preferred <= 250
@@ -75,7 +85,7 @@ src/<feature>/
 - Mapper preferred <= 150
 - DTO / Type preferred <= 150
 - Review threshold: any maintained source above 250 lines; any method above 40–60 lines
-- Hard limit: every maintained source file must remain below 400 physical lines.
+- Hard limits: every maintained source file must remain below **400 physical lines**; every maintained method must remain below **100 physical lines**.
 
 ### Modern NestJS Rules
 - Use: strict TypeScript, constructor injection, private readonly dependencies, type-only imports, explicit public response types, class-validator DTOs, named domain constants, explicit Prisma select, async/await, composition over inheritance, small pure validators/mappers, thin controllers, focused orchestration services.
