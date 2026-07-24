@@ -127,3 +127,35 @@ MODE=COMPILED_NEST_APP_MODULE_REAL_POSTGRESQL
   - `jest unit`: PASSED (1 suite / 3 tests)
   - `jest e2e`: PASSED (1 suite / 2 tests)
 - **Database / Schema Status**: 0 schema changes, 0 migrations executed, 0 seed files modified. Task-owned test records cleaned up.
+
+---
+
+## 9. Fresh Post-Repair Regression & Evidence Reconciliation (`P11_PET_PROFILE_API_1C2_RECONCILE_REPAIR_EVIDENCE_001`)
+
+- **Execution Date**: 2026-07-24
+- **POST_REPAIR_RUNTIME_EXECUTION**: `FRESHLY_EXECUTED`
+- **POST_REPAIR_SWAGGER_EXECUTION**: `FRESHLY_EXECUTED`
+- **Full Acceptance Matrix Results**:
+  ```text
+  ==========================================
+  EXECUTED=50
+  PASSED=50
+  FAILED=0
+  DEFERRED=0
+  MODE=COMPILED_NEST_APP_MODULE_REAL_POSTGRESQL
+  ==========================================
+  ```
+- **Swagger Verification Results**:
+  - `GET /docs`: `200 OK` (Swagger UI HTML)
+  - `GET /docs-json`: `200 OK` (OpenAPI 3.0.0 JSON)
+  - **Controllers**: 7
+  - **Paths**: 14
+  - **Operations**: 19 (16 existing + 3 Pet operations)
+  - **Security**: `access-token` (Bearer JWT)
+  - **Public Routes**: `/auth/register`, `/auth/login` remain public
+  - **No Leakage**: `passwordHash` absent across all schemas
+- **Static Quality Checks**:
+  - `tsc`: PASSED (exit 0)
+  - `eslint`: PASSED (exit 0, 0 errors/warnings)
+  - `nest build`: PASSED (exit 0)
+- **Cleanup Status**: Temporary runner removed, dist rebuilt, task-owned PostgreSQL test records cleaned up.

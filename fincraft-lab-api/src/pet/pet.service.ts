@@ -105,10 +105,16 @@ export class PetService {
     const data: Prisma.PetUpdateInput = {};
 
     if (dto.name !== undefined) {
+      if (dto.name === null) {
+        throw new BadRequestException('Pet name cannot be null');
+      }
       data.name = dto.name;
     }
 
     if (dto.species !== undefined) {
+      if (dto.species === null) {
+        throw new BadRequestException('Pet species cannot be null');
+      }
       data.species = dto.species;
     }
 
