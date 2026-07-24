@@ -4,33 +4,33 @@
 
 - **Date**: 2026-07-24
 - **Backend Stack**: NestJS + PostgreSQL + Prisma 7.8
-- **Latest Task**: `P10_SIMULATION_API_1A_FREEZE_SURVIVAL_MONTHS_CONTRACT_001`
+- **Latest Task**: `P10_SIMULATION_API_1A1_REPAIR_SURVIVAL_MONTHS_CONTRACT_001`
 - **Swagger Status**: Closed & Fully Verified
-- **Simulation Status**: Survival Months (`survival-months`) Contract Frozen (`FROZEN_SURVIVAL_MONTHS_SIMULATION_API_CONTRACT_V1`)
-- **Simulation Source Implementation**: `NONE` (Plan & contract freeze only)
-- **Prisma Schema Migration**: `NONE` (0 migrations executed; DIRECT_FIT & JSON_FIT schema verdict)
+- **Simulation Status**: Survival Months (`survival-months`) Contract Fully Reconciled & Frozen (`FROZEN_SURVIVAL_MONTHS_SIMULATION_API_CONTRACT_V1`)
+- **Simulation Source Implementation**: `NONE` (Contract reconciliation only)
+- **Prisma Schema Migration**: `NONE` (0 migrations executed; 0 schema changes required)
 - **Seed Written**: `NONE` (Contract frozen for future seeding)
 - **Worktree**: Clean (Pending Local Checkpoint Commit)
 - **Next Recommended Task**: `P10_SIMULATION_API_1B_IMPLEMENT_SURVIVAL_MONTHS_001`
 
 ---
 
-## Survival Months Simulation API Contract (`P10_SIMULATION_API_1A`)
+## Survival Months Contract Reconciliation (`P10_SIMULATION_API_1A1`)
 
 - **Selected MVP Simulation**: `survival-months` (Survival Months / จำนวนเดือนที่เงินสำรองรองรับค่าใช้จ่าย)
-- **Concept**: Emergency Fund + Job Loss = Survival Months
 - **Contract Artifact**: [`docs/ai/plans/SURVIVAL_MONTHS_SIMULATION_API_CONTRACT.md`](file:///C:/devnest%20101/single-project/fincraft-lab/docs/ai/plans/SURVIVAL_MONTHS_SIMULATION_API_CONTRACT.md)
 - **Frozen Contract Marker**: `FROZEN_SURVIVAL_MONTHS_SIMULATION_API_CONTRACT_V1`
-- **Endpoints Frozen**:
-  - `GET /simulations` (List active simulation templates)
-  - `GET /simulations/:simulationId` (Get active simulation detail & educational metadata)
-  - `POST /simulations/:simulationId/runs` (Execute calculation & persist immutable run)
-- **Formula & Rounding**: `survivalMonths = emergencyFund / essentialMonthlyExpenses`, integer cent arithmetic, `ROUND_HALF_UP` 2-decimal mode.
-- **Safety & Wording**: 100% neutral educational statement; advice/judgmental terms prohibited.
-- **Prisma Schema Fit Verdict**:
-  - `Simulation` and `SimulationRun` models fully accommodate all requirements.
-  - Classification: `DIRECT_FIT` & `JSON_FIT`
-  - Schema Change Required: `NONE` (0 migrations)
+- **Reconciliation Highlights**:
+  1. **Master Metadata Storage**: `Simulation.description` is plain educational text (`DIRECT_FIT_AS_TEXT`). Structured metadata is owned by a typed code registry (`src/simulation/constants/survival-months.definition.ts` / `CODE_REGISTRY_FIT`). No JSON in `description` or new Prisma column.
+  2. **Database/Public Identity**: Database key `Simulation.simulationType = "survival-months"`, public response field `slug = simulationType`. No database `slug` column exists.
+  3. **Supported Registry & 404 Behavior**: Fail-closed pattern requiring both active DB record and code registry match. Missing/inactive/unsupported simulations return `HTTP 404` (`Simulation not found`).
+  4. **Exact HTTP Contract**: `GET /simulations` (200 OK, `name ASC, id ASC`), `GET /simulations/:simulationId` (200 OK), `POST /simulations/:simulationId/runs` (201 Created). Envelope `{ "data": ... }`. Malformed UUID v4 returns 400.
+  5. **User ID Security**: `userId` in request body is **REJECTED** with HTTP 400 (`property userId should not exist`) by ValidationPipe. Authenticated user ID comes strictly from JWT.
+  6. **Minor-Unit Arithmetic**: Calculated using minor units (1 unit = 100 minor units). Max input `100,000,000.00` (10 Billion minor units, safely below `MAX_SAFE_INTEGER`).
+  7. **Rounding Algorithm**: Executable `ROUND_HALF_UP` on minor-unit division for `survivalMonths`. Half-up boundary example verified (`1005.00 / 200.00 -> 5.03`).
+  8. **Immutable Snapshot**: `SimulationRun.inputs` and `outputs` store full historical snapshot. Future code definition edits do not alter past run snapshots.
+  9. **Authoritative Source**: Official CFPB emergency fund guide metadata.
+  10. **Acceptance Matrix**: Reconciled to exactly 44 numbered scenarios (7 List/Detail, 11 Calculation, 10 Validation, 9 Persistence, 7 Security).
 
 ---
 
