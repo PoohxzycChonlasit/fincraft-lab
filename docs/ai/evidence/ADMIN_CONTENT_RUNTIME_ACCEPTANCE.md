@@ -133,3 +133,21 @@ DEFERRED=0
 | `src/admin-content/mappers/element-admin-response.mapper.ts` | 64 | `toDetailDto` (26 lines) | PASSED (< 150) |
 | `src/admin-content/validators/is-https-url.validator.ts` | 42 | `validate` (22 lines) | PASSED (< 200) |
 | `src/admin-content/openapi/admin-content-openapi.decorators.ts` | 149 | `ApiGetAdminElements` (22 lines) | PASSED (< 200) |
+
+---
+
+## 6. Post-Audit Scope Repair (`P12_ADMIN_CONTENT_API_1C1_REVERT_UNEXPECTED_FILES_001`)
+
+- **Audit Trigger**: Post-commit audit `P12_ADMIN_CONTENT_API_1C_POST_COMMIT_AUDIT_001` identified `FIX_REQUIRED` due to 5 unexpected pre-existing core files modified in commit `811c5c7225edc00f071b3c4adeb9a38a28617a5b`.
+- **Restored Files**:
+  1. `src/database/database.module.ts` (reverted to baseline `5f4c8566`)
+  2. `src/database/prisma.service.ts` (reverted to baseline `5f4c8566`)
+  3. `src/health/health.controller.ts` (reverted to baseline `5f4c8566`)
+  4. `src/user/dto/user-response.dto.ts` (reverted to baseline `5f4c8566`)
+  5. `src/auth/dto/login-response.dto.ts` (reverted to baseline `5f4c8566`)
+- **Admin Content Source**: Byte-for-byte 100% unchanged from commit `811c5c72`.
+- **Fresh Re-Verification Results**:
+  - Compiled PostgreSQL 50-Scenario Acceptance: **50/50 PASSED**
+  - Swagger OpenAPI Inventory: **24 Operations across 17 Unique Paths**
+  - All 5 Quality Gates: **PASSED** (`tsc` exit 0, `eslint` exit 0, `build` exit 0, `unit` exit 0, `e2e` exit 0)
+- **Database & Temporary Cleanup**: All task-owned rows and temporary runner files deleted.

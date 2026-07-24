@@ -4,10 +4,11 @@
 
 - **Date**: 2026-07-24
 - **Backend Stack**: NestJS + PostgreSQL + Prisma 7.8
-- **Latest Task**: `P12_ADMIN_CONTENT_API_1B_IMPLEMENT_ADMIN_CONTENT_001`
+- **Latest Task**: `P12_ADMIN_CONTENT_API_1C1_REVERT_UNEXPECTED_FILES_001`
 - **Current Implemented API Surface**: 24 Operations / 17 Unique Paths / 8 Controllers
 - **Pet Profile Status**: Implemented, Audited, Repaired, Reconciled & Fully Closed
-- **Admin Content API Status**: Implemented, Verified & Fully Functional (5 Protected Operations)
+- **Admin Content API Status**: Implemented, Scope Repaired, Audited, Re-Verified & Fully Closed
+- **Admin Content Scope Repair Verdict**: Unrelated 5 pre-existing core files restored to contract baseline `5f4c8566`. Admin Content source remained byte-for-byte unchanged.
 - **Admin Endpoints Implemented**:
   1. `GET /admin/elements` — List all Element master records for Admin
   2. `GET /admin/elements/:elementId` — Retrieve single Element master record with category & DiscoveryDetail
@@ -23,8 +24,8 @@
 - **Prisma Schema Migration**: `NONE` (0 migrations executed; 0 schema changes required)
 - **Exact Schema-Fit Verdict**: `DIRECT_FIT` (all fields exist in `Element` and `DiscoveryDetail` models)
 - **Hard Delete Verdict**: `DEFERRED` (status deactivation used instead)
-- **Worktree**: Clean (Pending Local Implementation Checkpoint Commit)
-- **Next Recommended Task**: `P12_ADMIN_CONTENT_API_1C_POST_COMMIT_AUDIT_001`
+- **Worktree**: Clean (Pending Local Repair Checkpoint Commit)
+- **Next Recommended Task**: `P13_FRONTEND_FOUNDATION_1A_FREEZE_CONTRACT_001`
 
 ---
 

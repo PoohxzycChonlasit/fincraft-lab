@@ -10,22 +10,16 @@ import { HealthService } from './health.service';
 import type { HealthStatus } from './health.service';
 
 export class HealthResponseDto {
-  @ApiProperty({
-    type: String,
-    example: 'ok',
-    description: 'System health status indicator',
-  })
+  @ApiProperty({ example: 'ok', description: 'System health status indicator' })
   status!: string;
 
   @ApiProperty({
-    type: String,
     example: 'fincraft-lab-api',
     description: 'Application service identifier',
   })
   service!: string;
 
   @ApiProperty({
-    type: String,
     example: '2026-07-24T10:30:00.000Z',
     description: 'Current ISO-8601 server timestamp',
   })

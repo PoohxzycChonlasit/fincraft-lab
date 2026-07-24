@@ -9,7 +9,6 @@ export class LoginResponseDto {
   user!: UserResponseDto;
 
   @ApiProperty({
-    type: String,
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
     description: 'Signed JWT access token for Bearer authorization',
   })
