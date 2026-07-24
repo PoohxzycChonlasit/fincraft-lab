@@ -75,24 +75,62 @@ model Pet {
 ### Schema Fit & Uniqueness Verdict
 - **Prisma Schema Fit**: `DIRECT_FIT` for all fields.
 - **PRISMA_SCHEMA_CHANGE_REQUIRED**: `NO` (0 Prisma migrations required).
+- **MIGRATION_REQUIRED**: `NO`
 - **Cardinality**: `ONE_USER_ONE_PET`
-- **Pet Uniqueness**: `PET_USER_UNIQUENESS: DATABASE_ENFORCED` (`Pet.userId` has `@unique` in Prisma schema).
+- **Pet Uniqueness**: `PET_USER_UNIQUENESS: DATABASE_ENFORCED` (`Pet.userId` has `@unique` constraint in Prisma schema).
+- **Concurrent Duplicate Mapping**: `CONCURRENT_DUPLICATE_MAPPING: REQUIRED` (Prisma P2002 unique constraint violation mapped to HTTP 409 Conflict).
 
 ---
 
 ## 3. Avatar Strategy
 
-- **Strategy**: `STORED_AVATAR_URL_WITHOUT_REMOTE_FETCH`
-- **Behavior**:
-  - `avatarUrl` is stored as an optional string in the database (`String?`).
-  - Supports preset relative paths (e.g., `/assets/pets/cat-default.png`) or valid external image URLs.
-  - The backend strictly stores and returns the string provided by the user.
-  - **No Remote Fetch**: The backend MUST NOT initiate HTTP requests to fetch, download, or validate remote avatar URLs.
-  - **No Upload / AI**: File uploads (multipart/base64), cloud storage (S3/Cloudinary), and AI image generation are deferred.
+- **Strategy**: `STORED_HTTPS_AVATAR_URL_WITHOUT_REMOTE_FETCH`
+- **Validation Rules for `avatarUrl`**:
+  - Optional on Create (`POST /pets`); optional on Patch (`PATCH /pets/me`).
+  - Allowed types: `string` or `null` where permitted.
+  - String inputs are trimmed before validation.
+  - Maximum length: 2048 characters.
+  - Require a syntactically valid absolute URL starting with `https://` (`HTTPS` protocol only).
+  - Reject `http://` (HTTP).
+  - Reject `data:` (data URLs / base64 images).
+  - Reject `file:` (local file paths).
+  - Reject `javascript:` (script execution URLs).
+  - Reject empty or whitespace-only strings (returns `HTTP 400 Bad Request`).
+  - **No Remote Fetch**: Backend stores the string in DB (`avatarUrl` column) only. Backend performs NO remote HTTP request, NO file download, NO image-content inspection, and NO moderation or safety guarantee.
+  - On `PATCH /pets/me`: Passing explicit `null` (`"avatarUrl": null`) clears `avatarUrl` to `null` in DB.
+  - On `PATCH /pets/me`: Omitting `avatarUrl` preserves the existing `avatarUrl` value in DB.
 
 ---
 
-## 4. API Surface
+## 4. Nullable Field Semantics & Input Rules
+
+### `avatarUrl`, `personality`, `learningGoal`
+- **CREATE (`POST /pets`)**:
+  - Omitted: store `null`.
+  - Explicit `null`: store `null`.
+  - Valid non-empty string: store normalized trimmed value.
+  - Empty or whitespace-only string: `HTTP 400 Bad Request`.
+- **PATCH (`PATCH /pets/me`)**:
+  - Omitted: preserve existing DB value.
+  - Explicit `null`: clear field to `null` in DB.
+  - Valid non-empty string: replace with normalized trimmed value.
+  - Empty or whitespace-only string: `HTTP 400 Bad Request`.
+
+### `name`
+- Required on Create (`POST /pets`); optional on Patch (`PATCH /pets/me`).
+- Explicit `null` is REJECTED (`HTTP 400 Bad Request`).
+- Trimmed before validation.
+- Whitespace-only string is REJECTED (`HTTP 400 Bad Request`).
+- Length: 1 to 50 characters after trimming.
+
+### `species`
+- Required on Create (`POST /pets`); optional on Patch (`PATCH /pets/me`).
+- Explicit `null` is REJECTED (`HTTP 400 Bad Request`).
+- Must match `PetSpecies` enum exactly (`CAT`, `DOG`, `RABBIT`, `TURTLE`, `BIRD`).
+
+---
+
+## 5. API Surface
 
 | Method | Path | Auth Required | Success Status | Purpose |
 | :--- | :--- | :--- | :--- | :--- |
@@ -107,7 +145,7 @@ model Pet {
 
 ---
 
-## 5. DTO & Validation Specifications
+## 6. DTO & Validation Specifications
 
 ### CreatePetDto (`POST /pets`)
 
@@ -116,7 +154,7 @@ export class CreatePetDto {
   @ApiProperty({ example: 'Luna', description: 'Pet display name (1-50 chars)' })
   @IsDefined()
   @IsString()
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @MinLength(1)
   @MaxLength(50)
   name!: string;
@@ -126,25 +164,28 @@ export class CreatePetDto {
   @IsEnum(PetSpecies)
   species!: PetSpecies;
 
-  @ApiPropertyOptional({ example: '/assets/pets/cat-luna.png', description: 'Avatar URL or preset path' })
+  @ApiPropertyOptional({ example: 'https://example.com/pets/cat.png', description: 'HTTPS avatar URL' })
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @MaxLength(2048)
-  avatarUrl?: string;
+  @Matches(/^https:\/\//, { message: 'avatarUrl must be a valid HTTPS URL' })
+  @IsUrl({ protocols: ['https'], require_protocol: true })
+  avatarUrl?: string | null;
 
   @ApiPropertyOptional({ example: 'Curious and cautious with savings', description: 'Personality summary' })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @MaxLength(200)
-  personality?: string;
+  personality?: string | null;
 
   @ApiPropertyOptional({ example: 'Build a 6-month emergency fund', description: 'Financial learning objective' })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @MaxLength(200)
-  learningGoal?: string;
+  learningGoal?: string | null;
 }
 ```
 
@@ -157,7 +198,7 @@ export class UpdatePetDto {
   @ApiPropertyOptional({ example: 'Luna Star', description: 'Updated Pet display name (1-50 chars)' })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @MinLength(1)
   @MaxLength(50)
   name?: string;
@@ -167,25 +208,28 @@ export class UpdatePetDto {
   @IsEnum(PetSpecies)
   species?: PetSpecies;
 
-  @ApiPropertyOptional({ example: '/assets/pets/dog-luna.png', description: 'Updated avatar URL or preset path' })
+  @ApiPropertyOptional({ example: 'https://example.com/pets/dog.png', description: 'Updated HTTPS avatar URL or null to clear' })
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @MaxLength(2048)
-  avatarUrl?: string;
+  @Matches(/^https:\/\//, { message: 'avatarUrl must be a valid HTTPS URL' })
+  @IsUrl({ protocols: ['https'], require_protocol: true })
+  avatarUrl?: string | null;
 
-  @ApiPropertyOptional({ example: 'Energetic and focused on budgeting', description: 'Updated personality summary' })
+  @ApiPropertyOptional({ example: 'Energetic and focused on budgeting', description: 'Updated personality summary or null to clear' })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @MaxLength(200)
-  personality?: string;
+  personality?: string | null;
 
-  @ApiPropertyOptional({ example: 'Understand interest rates and debt payoff', description: 'Updated learning objective' })
+  @ApiPropertyOptional({ example: 'Understand interest rates and debt payoff', description: 'Updated learning objective or null to clear' })
   @IsOptional()
   @IsString()
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @MaxLength(200)
-  learningGoal?: string;
+  learningGoal?: string | null;
 }
 ```
 
@@ -202,13 +246,13 @@ export class PetResponseDto {
   @ApiProperty({ enum: PetSpecies, example: PetSpecies.CAT, description: 'Pet species' })
   species!: PetSpecies;
 
-  @ApiProperty({ example: '/assets/pets/cat-luna.png', nullable: true, description: 'Avatar URL or preset path' })
+  @ApiProperty({ example: 'https://example.com/pets/cat.png', nullable: true, description: 'HTTPS avatar URL or null' })
   avatarUrl!: string | null;
 
-  @ApiProperty({ example: 'Curious and cautious with savings', nullable: true, description: 'Personality summary' })
+  @ApiProperty({ example: 'Curious and cautious with savings', nullable: true, description: 'Personality summary or null' })
   personality!: string | null;
 
-  @ApiProperty({ example: 'Build a 6-month emergency fund', nullable: true, description: 'Financial learning objective' })
+  @ApiProperty({ example: 'Build a 6-month emergency fund', nullable: true, description: 'Financial learning objective or null' })
   learningGoal!: string | null;
 
   @ApiProperty({ example: '2026-07-24T12:00:00.000Z', description: 'ISO-8601 creation timestamp' })
@@ -226,13 +270,21 @@ export class PetEnvelopeDto {
 
 ---
 
-## 6. Security, Ownership & Error Matrix
+## 7. Security, Ownership & Error Matrix
 
 ### User Security & Ownership
 - All endpoints require an authenticated `ACTIVE` user via JWT Bearer access-token (`req.user.userId` / `user.sub`).
 - `userId` is strictly derived from JWT context and MUST NOT be accepted from Params, Query, or Body.
-- `forbidNonWhitelisted: true` in `ValidationPipe` rejects any attempt to supply `userId`, `id`, `createdAt`, or unexpected fields with `HTTP 400 Bad Request`.
+- `forbidNonWhitelisted: true` in `ValidationPipe` rejects any attempt to supply `userId`, `id`, `ownerId`, `createdAt`, `updatedAt`, or unexpected fields with `HTTP 400 Bad Request`.
 - Responses MUST NOT leak `userId`, `passwordHash`, or raw `User` relations.
+
+### Authentication & Authorization Source Behavior
+Reused directly from current project implementation (`AuthGuard` & `validateUser` pattern):
+- **Missing JWT**: `AuthGuard` throws `UnauthorizedException('Invalid or missing authentication token')` -> `HTTP 401 Unauthorized`.
+- **Invalid JWT**: `AuthGuard` throws `UnauthorizedException('Invalid or missing authentication token')` -> `HTTP 401 Unauthorized`.
+- **Missing User in DB**: `validateUser` throws `UnauthorizedException('User account not found')` -> `HTTP 401 Unauthorized`.
+- **INACTIVE User**: `validateUser` throws `ForbiddenException('User account is disabled')` -> `HTTP 403 Forbidden`.
+- **BANNED User**: `validateUser` throws `ForbiddenException('User account is disabled')` -> `HTTP 403 Forbidden`.
 
 ### HTTP Status Error Matrix
 
@@ -240,16 +292,26 @@ export class PetEnvelopeDto {
 | :--- | :--- | :--- |
 | `200 OK` | Successful `GET /pets/me` or `PATCH /pets/me` | Payload in `{ "data": ... }` |
 | `201 Created` | Successful `POST /pets` | Payload in `{ "data": ... }` |
-| `400 Bad Request` | Validation failure (missing name/species, min/max length, bad enum, extra properties, empty PATCH object) | Validation error details |
-| `401 Unauthorized` | Missing or invalid Bearer access token, or user account not found | `"User account not found"` / `"Unauthorized"` |
+| `400 Bad Request` | Validation failure (missing name/species, min/max length, non-HTTPS URL, bad enum, extra properties, empty PATCH object) | Validation error details or `"At least one editable field must be provided"` |
+| `401 Unauthorized` | Missing or invalid Bearer access token, or user account not found | `"Invalid or missing authentication token"` / `"User account not found"` |
 | `403 Forbidden` | User account status is `INACTIVE` or `BANNED` | `"User account is disabled"` |
 | `404 Not Found` | `GET /pets/me` or `PATCH /pets/me` when user has no Pet profile | `"Pet profile not found"` |
-| `409 Conflict` | `POST /pets` when user already has a Pet profile | `"Pet profile already exists"` |
+| `409 Conflict` | `POST /pets` when user already has a Pet profile (pre-check or DB race condition) | `"Pet profile already exists"` |
 | `500 Internal Error` | Unexpected database failure | `"Internal server error"` |
 
 ---
 
-## 7. Swagger OpenAPI Specification
+## 8. Duplicate & Concurrency Handling
+
+1. **Friendly Service Pre-check**:
+   `prisma.pet.findUnique({ where: { userId } })` -> If existing Pet is found, throw `ConflictException('Pet profile already exists')` -> `HTTP 409 Conflict`.
+2. **Concurrent Database Conflict Mapping**:
+   Catch Prisma unique constraint violation code `P2002` on `Pet.userId` -> map safely to `ConflictException('Pet profile already exists')` -> `HTTP 409 Conflict`.
+3. **No Database Leaks**: No raw Prisma error codes (`P2002`), constraint names (`pets_user_id_key`), database messages, or stack traces escape in public HTTP responses.
+
+---
+
+## 9. Swagger OpenAPI Specification
 
 - **Tag**: `Pets` ("User personal pet guide profile management")
 - **Security**: `access-token` (Bearer JWT)
@@ -264,7 +326,7 @@ export class PetEnvelopeDto {
 
 ---
 
-## 8. Future NestJS Architecture & File Structure
+## 10. Future NestJS Architecture & File Structure
 
 Feature Root Policy (`src/pet/`):
 ```text
@@ -288,91 +350,99 @@ src/pet/
 
 ---
 
-## 9. Future Runtime Acceptance Matrix (45 Scenarios)
+## 11. Reconciled Future Runtime Acceptance Matrix (50 Scenarios)
 
-### CREATE (`POST /pets`) — 8 Scenarios
+### CREATE (`POST /pets`) — 9 Scenarios
 1. Authenticated ACTIVE user creates a valid Pet (returns 201 Created with `{ "data": ... }`).
 2. `userId` is strictly derived from JWT token.
 3. Response excludes `userId` and `passwordHash`.
-4. `name` is required, trimmed, length 1–50.
+4. `name` is required, trimmed, length 1–50 (whitespace-only returns 400 Bad Request).
 5. `species` is required, must be valid `PetSpecies` enum (`CAT`, `DOG`, `RABBIT`, `TURTLE`, `BIRD`).
-6. Passing `id` or `userId` in body returns HTTP 400 Bad Request.
-7. Unknown property returns HTTP 400 Bad Request.
-8. Duplicate `POST /pets` when user already has a Pet returns HTTP 409 Conflict ("Pet profile already exists") without creating a duplicate row.
+6. `avatarUrl` accepts syntactically valid HTTPS URL (non-HTTPS, HTTP, file:, data:, or malformed URL returns 400 Bad Request).
+7. Passing `id` or `userId` in body returns HTTP 400 Bad Request.
+8. Unknown property returns HTTP 400 Bad Request.
+9. Duplicate `POST /pets` when user already has a Pet returns HTTP 409 Conflict ("Pet profile already exists") via pre-check or concurrent DB race mapping without creating a duplicate row.
 
 ### READ (`GET /pets/me`) — 6 Scenarios
-9. Authenticated owner retrieves own Pet profile (returns 200 OK).
-10. `GET /pets/me` returns HTTP 404 Not Found ("Pet profile not found") when user has no Pet.
-11. User can only read their own Pet profile (ownership strictly scoped to JWT payload).
-12. Timestamps (`createdAt`, `updatedAt`) are formatted as ISO-8601 strings.
-13. Response envelope matches `{ "data": { id, name, species, avatarUrl, personality, learningGoal, createdAt, updatedAt } }`.
-14. Raw User relation and passwordHash absent from response.
+10. Authenticated owner retrieves own Pet profile (returns 200 OK).
+11. `GET /pets/me` returns HTTP 404 Not Found ("Pet profile not found") when user has no Pet.
+12. User can only read their own Pet profile (ownership strictly scoped to JWT payload).
+13. Timestamps (`createdAt`, `updatedAt`) are formatted as ISO-8601 strings.
+14. Response envelope matches `{ "data": { id, name, species, avatarUrl, personality, learningGoal, createdAt, updatedAt } }`.
+15. Raw User relation and passwordHash absent from response.
 
-### UPDATE (`PATCH /pets/me`) — 10 Scenarios
-15. Owner updates single editable field (e.g. `name`).
-16. Owner updates multiple editable fields (e.g. `personality`, `learningGoal`).
-17. Successful update returns 200 OK with updated profile in `{ "data": ... }`.
-18. `PATCH /pets/me` returns HTTP 404 Not Found ("Pet profile not found") when no Pet profile exists.
-19. Attempting to update `userId` in body returns HTTP 400 Bad Request.
-20. Attempting to update `id` in body returns HTTP 400 Bad Request.
-21. Attempting to update system-managed fields returns HTTP 400 Bad Request.
-22. Unknown property returns HTTP 400 Bad Request.
-23. Empty PATCH body (`{}`) returns HTTP 400 Bad Request ("At least one editable field must be provided").
-24. Invalid property value creates zero database mutation.
+### UPDATE (`PATCH /pets/me`) — 13 Scenarios
+16. Owner updates single editable field (e.g. `name`).
+17. Owner updates multiple editable fields (e.g. `personality`, `learningGoal`).
+18. Explicit `null` on nullable field (`avatarUrl`, `personality`, `learningGoal`) clears field to `null` in DB.
+19. Omitted field on PATCH leaves existing DB value unchanged.
+20. Successful update returns 200 OK with updated profile in `{ "data": ... }`.
+21. `PATCH /pets/me` returns HTTP 404 Not Found ("Pet profile not found") when no Pet profile exists.
+22. Attempting to update `userId` in body returns HTTP 400 Bad Request.
+23. Attempting to update `id` in body returns HTTP 400 Bad Request.
+24. Attempting to update system-managed fields returns HTTP 400 Bad Request.
+25. Unknown property returns HTTP 400 Bad Request.
+26. Empty PATCH body (`{}`) returns HTTP 400 Bad Request ("At least one editable field must be provided").
+27. Non-HTTPS or whitespace-only avatarUrl on PATCH returns HTTP 400 Bad Request.
+28. Failed PATCH (e.g. validation error) leaves existing database row completely unchanged.
 
-### AUTH AND USER STATUS — 4 Scenarios
-25. Missing Bearer JWT access token returns HTTP 401 Unauthorized.
-26. Invalid/malformed Bearer JWT access token returns HTTP 401 Unauthorized.
-27. Inactive user (`UserStatus.INACTIVE`) returns HTTP 403 Forbidden ("User account is disabled").
-28. Banned user (`UserStatus.BANNED`) returns HTTP 403 Forbidden ("User account is disabled").
+### AUTH AND USER STATUS — 5 Scenarios
+29. Missing Bearer JWT access token returns HTTP 401 Unauthorized ("Invalid or missing authentication token").
+30. Invalid/malformed Bearer JWT access token returns HTTP 401 Unauthorized ("Invalid or missing authentication token").
+31. User no longer exists in DB returns HTTP 401 Unauthorized ("User account not found").
+32. Inactive user (`UserStatus.INACTIVE`) returns HTTP 403 Forbidden ("User account is disabled").
+33. Banned user (`UserStatus.BANNED`) returns HTTP 403 Forbidden ("User account is disabled").
 
 ### PERSISTENCE — 7 Scenarios
-29. Valid creation creates exactly 1 record in `pets` table.
-30. Repeated reads create 0 additional records.
-31. Valid update mutates only specified columns in `pets` table.
-32. Failed update leaves existing database row unchanged.
-33. `createdAt` remains unchanged after update.
-34. `updatedAt` is updated automatically by Prisma `@updatedAt`.
-35. `Pet.userId` uniqueness is enforced at database level.
+34. Valid creation creates exactly 1 record in `pets` table.
+35. Repeated reads create 0 additional records.
+36. Valid update mutates only specified columns in `pets` table.
+37. Failed update leaves existing database row unchanged.
+38. `createdAt` remains unchanged after update.
+39. `updatedAt` is updated automatically by Prisma `@updatedAt`.
+40. `Pet.userId` uniqueness is enforced at database level.
 
 ### NON-INTERFERENCE — 5 Scenarios
-36. No `Element` row created or mutated.
-37. No `UserElement` row created or mutated.
-38. No `DiscoveryEvent` row created or mutated.
-39. No `Workspace`, `WorkspaceNode`, or `WorkspaceEdge` row created or mutated.
-40. No `SimulationRun` row created or mutated.
+41. No `Element` row created or mutated.
+42. No `UserElement` row created or mutated.
+43. No `DiscoveryEvent` row created or mutated.
+44. No `Workspace`, `WorkspaceNode`, or `WorkspaceEdge` row created or mutated.
+45. No `SimulationRun` row created or mutated.
 
 ### SWAGGER AND REGRESSION — 5 Scenarios
-41. Swagger OpenAPI document contains 3 Pet operations under `Pets` tag.
-42. All 3 Pet operations require `access-token` Bearer security.
-43. All 16 existing OpenAPI operations remain functional.
-44. `/auth/register` and `/auth/login` remain public.
-45. `passwordHash` remains absent across all OpenAPI schemas.
+46. Swagger OpenAPI document contains 3 Pet operations under `Pets` tag.
+47. All 3 Pet operations require `access-token` Bearer security.
+48. All 16 existing OpenAPI operations remain functional.
+49. `/auth/register` and `/auth/login` remain public.
+50. `passwordHash` remains absent across all OpenAPI schemas.
 
-Total Scenarios: 45 (1 to 45 consecutively numbered without gaps or duplicates).
+Total Scenarios: 50 (1 to 50 consecutively numbered without gaps or duplicates).
 
 ---
 
-## 10. Implementation Sequence for Task P11_1B
+## 12. Implementation Sequence for Task P11_1B
 
 1. Create DTOs: `CreatePetDto`, `UpdatePetDto`, `PetResponseDto`, `PetEnvelopeDto` in `src/pet/dto/`.
 2. Create `pet-openapi.decorators.ts` in `src/pet/openapi/`.
-3. Create `PetService` in `src/pet/pet.service.ts` (validate ACTIVE user, CRUD logic, 404/409 checks).
+3. Create `PetService` in `src/pet/pet.service.ts` (validate ACTIVE user, CRUD logic, 404/409 checks, P2002 race mapping).
 4. Create `PetController` in `src/pet/pet.controller.ts` with route decorators.
 5. Create `PetModule` in `src/pet/pet.module.ts` and import into `AppModule`.
 6. Add `Pets` tag to `src/openapi/setup-swagger.ts`.
-7. Compile and run 45-scenario compiled PostgreSQL acceptance runner.
+7. Compile and run 50-scenario compiled PostgreSQL acceptance runner.
 8. Execute Quality Gates (`tsc`, `eslint`, `build`, `unit`, `e2e`).
-9. Update `SURVIVAL_MONTHS_SIMULATION_RUNTIME_ACCEPTANCE.md` / create `PET_PROFILE_RUNTIME_ACCEPTANCE.md`, `CURRENT_STATUS.md`, and `FILE_MAP.md`.
+9. Create `PET_PROFILE_RUNTIME_ACCEPTANCE.md`, update `CURRENT_STATUS.md` and `FILE_MAP.md`.
 10. Commit locally.
 
 ---
 
-## 11. Final Readiness Verdict
+## 13. Final Readiness Verdict
 
-- **Contract Completeness**: Complete (All 26 sections defined).
+- **Contract Completeness**: Complete (All 13 sections reconciled).
 - **Prisma Schema Fit**: `DIRECT_FIT` (0 migrations required).
 - **Cardinality**: `ONE_USER_ONE_PET` (Database enforced).
-- **Avatar Strategy**: `STORED_AVATAR_URL_WITHOUT_REMOTE_FETCH` (No remote fetch / upload).
+- **Avatar Strategy**: `STORED_HTTPS_AVATAR_URL_WITHOUT_REMOTE_FETCH`.
+- **Nullable Field Semantics**: Reconciled (omitted vs explicit null vs whitespace).
+- **Auth Behavior**: Reconciled with existing project source (`AuthGuard` & `validateUser`).
+- **Concurrent Duplicate Mapping**: Reconciled (pre-check + Prisma P2002 unique constraint mapping).
 - **API Surface**: `GET /pets/me`, `POST /pets`, `PATCH /pets/me`.
-- **Status**: FROZEN AND APPROVED FOR IMPLEMENTATION.
+- **Status**: FROZEN AND RECONCILED FOR IMPLEMENTATION.
