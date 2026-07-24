@@ -4,36 +4,46 @@
 
 - **Date**: 2026-07-24
 - **Backend Stack**: NestJS + PostgreSQL + Prisma 7.8
-- **Latest Task**: `P10_SIMULATION_API_1B_IMPLEMENT_SURVIVAL_MONTHS_001`
-- **Swagger Status**: Closed & Fully Verified (16 operations / 12 unique paths)
-- **Simulation Status**: Survival Months (`survival-months`) Implemented & Verified End-to-End
-- **Simulation Endpoints**:
-  1. `GET /simulations` (200 OK)
-  2. `GET /simulations/:simulationId` (200 OK)
-  3. `POST /simulations/:simulationId/runs` (201 Created)
+- **Latest Task**: `P11_PET_PROFILE_API_1A_FREEZE_CONTRACT_001`
+- **Swagger Status**: Closed & Fully Verified (16 current operations / 12 unique paths; 19 expected operations after Pet implementation)
+- **Simulation Status**: Survival Months (`survival-months`) Closed & Fully Verified
+- **Pet Profile Status**: Contract Reconciled & Frozen (`FROZEN_PET_PROFILE_API_CONTRACT_V1`)
+- **Pet Source Implementation**: `NONE` (Contract freeze task only)
+- **Pet Database Seed**: `NONE` (Pets are user-created via API)
 - **Prisma Schema Migration**: `NONE` (0 migrations executed; 0 schema changes required)
-- **Seed Present**: 1 Simulation master record (`survival-months`) linked to Element `emergency-fund`
-- **Runtime Acceptance**: `EXECUTED=44`, `PASSED=44`, `FAILED=0`, `DEFERRED=0` (`COMPILED_NEST_APP_MODULE_REAL_POSTGRESQL`)
-- **AI & Recommendation Safety**: No AI text generation, market data, or financial recommendations
+- **Exact Cardinality**: `ONE_USER_ONE_PET`
+- **Exact Schema-Fit Verdict**: `DIRECT_FIT` (all fields exist in `Pet` model)
+- **Exact Avatar Strategy**: `STORED_AVATAR_URL_WITHOUT_REMOTE_FETCH` (no remote fetch / no upload)
 - **Worktree**: Clean (Pending Local Checkpoint Commit)
-- **Next Recommended Task**: `P10_SIMULATION_API_1C_POST_COMMIT_AUDIT_001`
+- **Next Recommended Task**: `P11_PET_PROFILE_API_1B_IMPLEMENT_PET_PROFILE_001`
 
 ---
 
-## Survival Months Simulation Implementation (`P10_SIMULATION_API_1B`)
+## Pet Profile Contract Freeze (`P11_PET_PROFILE_API_1A`)
 
-- **Selected MVP Simulation**: `survival-months` (Survival Months / จำนวนเดือนที่เงินสำรองรองรับค่าใช้จ่าย)
-- **Contract Artifact**: [`docs/ai/plans/SURVIVAL_MONTHS_SIMULATION_API_CONTRACT.md`](file:///C:/devnest%20101/single-project/fincraft-lab/docs/ai/plans/SURVIVAL_MONTHS_SIMULATION_API_CONTRACT.md)
-- **Frozen Contract Marker**: `FROZEN_SURVIVAL_MONTHS_SIMULATION_API_CONTRACT_V1`
-- **Evidence Artifact**: [`docs/ai/evidence/SURVIVAL_MONTHS_SIMULATION_RUNTIME_ACCEPTANCE.md`](file:///C:/devnest%20101/single-project/fincraft-lab/docs/ai/evidence/SURVIVAL_MONTHS_SIMULATION_RUNTIME_ACCEPTANCE.md)
-- **Implementation Summary**:
-  1. **Typed Definition**: `src/simulation/constants/survival-months.definition.ts` contains immutable educational metadata, input definitions, formula, assumptions, limitations, source (CFPB), and disclaimer.
-  2. **Deterministic Calculator**: `SimulationCalculatorService` uses BigInt minor-unit arithmetic (1 unit = 100 minor units) with `ROUND_HALF_UP` rounding.
-  3. **Fail-Closed Service**: `SimulationService` validates ACTIVE user status, checks code registry, and persists complete historical snapshot in `SimulationRun`.
-  4. **Protected Controller**: `SimulationController` handles routes with `@CurrentUser()`, `ParseUUIDPipe`, `ValidationPipe` whitelist rejection of `userId` in body, and `{ data: result }` response envelope.
-  5. **Swagger Documentation**: Operations tagged under `Simulations` with Bearer security. Total OpenAPI inventory updated to 16 operations across 12 unique paths.
-  6. **Idempotent Seed**: `prisma/seed/steps/seed-simulations.ts` seeds `survival-months` linked to `emergency-fund`.
-  7. **Runtime Verification**: 44/44 frozen matrix scenarios verified against compiled `AppModule` on real local PostgreSQL.
+- **Contract Artifact**: [`docs/ai/plans/PET_PROFILE_API_CONTRACT.md`](file:///C:/devnest%20101/single-project/fincraft-lab/docs/ai/plans/PET_PROFILE_API_CONTRACT.md)
+- **Frozen Contract Marker**: `FROZEN_PET_PROFILE_API_CONTRACT_V1`
+- **Contract Highlights**:
+  1. **Product Role**: Personal profile guide & financial companion (1 Pet per User, persistent across sessions).
+  2. **Schema Fit**: `DIRECT_FIT` for all fields (`id`, `userId`, `name`, `species`, `avatarUrl`, `personality`, `learningGoal`, `createdAt`, `updatedAt`). 0 Prisma migrations required.
+  3. **Cardinality**: `ONE_USER_ONE_PET`. Enforced at database level via `Pet.userId` `@unique` constraint.
+  4. **Avatar Strategy**: `STORED_AVATAR_URL_WITHOUT_REMOTE_FETCH`. Stores optional avatar URL or preset string. No remote HTTP fetching, file uploads, or AI image generation.
+  5. **Endpoints**:
+     - `GET /pets/me` (200 OK / 404 Not Found)
+     - `POST /pets` (201 Created / 409 Conflict if Pet profile already exists)
+     - `PATCH /pets/me` (200 OK / 404 Not Found / 400 Bad Request on empty body `{}`)
+  6. **Security & Ownership**: All endpoints protected by Bearer JWT (`access-token`). `userId` derived strictly from JWT payload. Body `userId` or `id` injection rejected by `ValidationPipe`.
+  7. **Response Envelope**: Wrapped in `{ "data": { id, name, species, avatarUrl, personality, learningGoal, createdAt, updatedAt } }`. `userId` and `passwordHash` strictly excluded.
+  8. **Deferred Endpoints**: `DELETE /pets/me`, `GET /pets`, `GET /pets/:petId`, `PATCH /pets/:petId`, Admin CRUD, image uploads, AI features.
+  9. **Runtime Acceptance Matrix**: 45 numbered scenarios frozen for future execution.
+
+---
+
+## Survival Months Simulation Status (`P10_SIMULATION_API`)
+
+- **Status**: Closed (All audit checks passed with commit `d3ed8cbac67aa335997c0457c927ee366e84ae32`)
+- **Endpoints**: `GET /simulations`, `GET /simulations/:id`, `POST /simulations/:id/runs`
+- **Runtime Acceptance**: `EXECUTED=44`, `PASSED=44`, `FAILED=0`, `DEFERRED=0`
 
 ---
 
@@ -44,11 +54,3 @@
 - `nest build`: **PASSED (exit 0)**
 - `jest --runInBand`: **PASSED (1 suite / 3 tests)**
 - `jest --config ./test/jest-e2e.json`: **PASSED (1 suite / 2 tests)**
-
----
-
-## Architectural & File Size Ceilings
-
-- **Root-MCS Policy Enforced**: Primary `simulation.module.ts`, `simulation.controller.ts`, `simulation.service.ts`, `simulation-calculator.service.ts` remain strictly at feature root `src/simulation/`.
-- **Controller Line Ceilings**: `simulation.controller.ts` is 63 lines (preferred <= 150, hard <= 200).
-- **Service & Source Ceilings**: `simulation.service.ts` is 154 lines (preferred <= 250). All source files remain strictly below 400 physical lines. All methods remain below 100 physical lines.
