@@ -32,9 +32,15 @@ export class CraftController {
     description: 'Crafting operation executed successfully',
     type: CraftResultEnvelopeDto,
   })
-  @ApiBadRequestResponse({ description: 'Invalid input elements or duplicate IDs' })
-  @ApiUnauthorizedResponse({ description: 'Missing or invalid Bearer access token' })
-  @ApiForbiddenResponse({ description: 'User account disabled or input element not unlocked' })
+  @ApiBadRequestResponse({
+    description: 'Invalid input elements or duplicate IDs',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Missing or invalid Bearer access token',
+  })
+  @ApiForbiddenResponse({
+    description: 'User account disabled or input element not unlocked',
+  })
   @ApiNotFoundResponse({ description: 'Input element not found' })
   async craft(
     @CurrentUser() user: AccessTokenPayload,

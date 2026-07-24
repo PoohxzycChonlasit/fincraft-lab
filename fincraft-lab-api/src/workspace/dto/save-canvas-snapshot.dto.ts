@@ -16,7 +16,8 @@ export class SaveCanvasSnapshotDto {
 
   @ApiProperty({
     type: [WorkspaceEdgeInputDto],
-    description: 'Array of canvas edge connections (max 200 edges per workspace)',
+    description:
+      'Array of canvas edge connections (max 200 edges per workspace)',
   })
   @IsArray()
   @ValidateNested({ each: true })

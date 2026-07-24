@@ -18,7 +18,8 @@ export class WorkspaceEdgeInputDto {
 
   @ApiProperty({
     example: 'c3d4e5f6-a7b8-9012-cdef-34567890abcd',
-    description: 'Target node UUID v4 (must exist in node collection and differ from source)',
+    description:
+      'Target node UUID v4 (must exist in node collection and differ from source)',
   })
   @IsUUID('4')
   targetNodeId!: string;

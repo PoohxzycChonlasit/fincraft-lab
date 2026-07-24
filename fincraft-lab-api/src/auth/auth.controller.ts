@@ -35,7 +35,8 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Register a new user account',
-    description: 'Creates a new ACTIVE user account with email, password, and display name.',
+    description:
+      'Creates a new ACTIVE user account with email, password, and display name.',
   })
   @ApiCreatedResponse({
     description: 'User account created successfully',
@@ -52,13 +53,16 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Log in to an existing account',
-    description: 'Authenticates credentials and returns a signed JWT access token and user profile.',
+    description:
+      'Authenticates credentials and returns a signed JWT access token and user profile.',
   })
   @ApiOkResponse({
     description: 'User authenticated successfully',
     type: LoginEnvelopeDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Invalid email or password credentials' })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid email or password credentials',
+  })
   @ApiForbiddenResponse({ description: 'User account is disabled' })
   async login(@Body() dto: LoginDto) {
     const result = await this.authService.login(dto);
@@ -70,13 +74,16 @@ export class AuthController {
   @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: 'Get currently authenticated user profile',
-    description: 'Retrieves current user identity and profile details using Bearer JWT authorization.',
+    description:
+      'Retrieves current user identity and profile details using Bearer JWT authorization.',
   })
   @ApiOkResponse({
     description: 'Current user profile retrieved successfully',
     type: UserEnvelopeDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Missing or invalid Bearer access token' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing or invalid Bearer access token',
+  })
   @ApiForbiddenResponse({ description: 'User account is disabled' })
   async getMe(
     @CurrentUser() currentUser: AccessTokenPayload,

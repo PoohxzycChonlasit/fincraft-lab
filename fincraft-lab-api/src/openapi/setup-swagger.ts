@@ -16,16 +16,26 @@ export function setupSwagger(app: INestApplication): void {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        description: 'Enter JWT access token acquired from /auth/login or /auth/register',
+        description:
+          'Enter JWT access token acquired from /auth/login or /auth/register',
       },
       'access-token',
     )
     .addTag('Health', 'System health status and operational telemetry')
-    .addTag('Authentication', 'User registration, login, and identity endpoints')
+    .addTag(
+      'Authentication',
+      'User registration, login, and identity endpoints',
+    )
     .addTag('Elements', 'Financial element discovery and catalog endpoints')
-    .addTag('Craft', 'Financial element combination and concept discovery engine')
+    .addTag(
+      'Craft',
+      'Financial element combination and concept discovery engine',
+    )
     .addTag('Workspaces', 'User workspace lifecycle and metadata management')
-    .addTag('Canvas', 'Workspace graph canvas snapshot load and atomic save endpoints')
+    .addTag(
+      'Canvas',
+      'Workspace graph canvas snapshot load and atomic save endpoints',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

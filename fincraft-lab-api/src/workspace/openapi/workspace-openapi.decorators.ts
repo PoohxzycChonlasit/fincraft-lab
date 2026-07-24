@@ -113,8 +113,7 @@ export function ApiSaveCanvasOperation() {
     }),
     ApiNotFoundResponse({ description: 'Workspace or element not found' }),
     ApiConflictResponse({
-      description:
-        'Workspace is ARCHIVED or canvas identifier conflict exists',
+      description: 'Workspace is ARCHIVED or canvas identifier conflict exists',
     }),
     ApiPayloadTooLargeResponse({
       description: 'HTTP payload exceeds framework 1 MB limit',

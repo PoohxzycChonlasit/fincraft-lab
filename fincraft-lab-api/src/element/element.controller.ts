@@ -23,13 +23,16 @@ export class ElementController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get all available elements for current user',
-    description: 'Retrieves all active starter elements and user-unlocked discovered elements categorized.',
+    description:
+      'Retrieves all active starter elements and user-unlocked discovered elements categorized.',
   })
   @ApiOkResponse({
     description: 'Available elements list retrieved successfully',
     type: AvailableElementsEnvelopeDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Missing or invalid Bearer access token' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing or invalid Bearer access token',
+  })
   @ApiForbiddenResponse({ description: 'User account is disabled' })
   async getAvailableElements(
     @CurrentUser() user: AccessTokenPayload,
