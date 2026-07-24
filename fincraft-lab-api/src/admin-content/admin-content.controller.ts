@@ -15,7 +15,6 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { AccessTokenPayload } from '../auth/types/access-token-payload.type';
 import {
@@ -41,7 +40,7 @@ import {
 
 @ApiTags('Admin Content')
 @ApiBearerAuth('access-token')
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(RolesGuard)
 @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
 @Controller('admin/elements')
 export class AdminContentController {

@@ -11,12 +11,9 @@ import {
   Patch,
   Post,
   Put,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
 import type { AccessTokenPayload } from '../auth/types/access-token-payload.type';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { SaveCanvasSnapshotDto } from './dto/save-canvas-snapshot.dto';
@@ -41,7 +38,6 @@ import { WorkspaceService } from './workspace.service';
 @ApiTags('Workspaces')
 @ApiBearerAuth('access-token')
 @Controller('workspaces')
-@UseGuards(AuthGuard, RolesGuard)
 export class WorkspaceController {
   constructor(
     @Inject(WorkspaceService)

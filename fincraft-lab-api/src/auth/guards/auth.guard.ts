@@ -5,9 +5,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { UserRole } from '../../database/generated/prisma/client';
+import { AccessTokenService } from '../../infrastructure/jwt/access-token.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { AccessTokenPayload } from '../types/access-token-payload.type';
 
@@ -27,7 +27,7 @@ function isUserRole(value: unknown): value is UserRole {
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private readonly jwtService: JwtService,
+    private readonly accessTokenService: AccessTokenService,
     private readonly reflector: Reflector,
   ) {}
 
@@ -61,7 +61,7 @@ export class AuthGuard implements CanActivate {
     let rawPayload: unknown;
 
     try {
-      rawPayload = await this.jwtService.verifyAsync(token);
+      rawPayload = await this.accessTokenService.verify(token);
     } catch {
       throw new UnauthorizedException(
         'Invalid or missing authentication token',

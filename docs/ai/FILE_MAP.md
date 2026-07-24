@@ -15,7 +15,8 @@ docs/ai/
 │   ├── SWAGGER_OPENAPI_RUNTIME_ACCEPTANCE.md
 │   ├── SURVIVAL_MONTHS_SIMULATION_RUNTIME_ACCEPTANCE.md
 │   ├── PET_PROFILE_RUNTIME_ACCEPTANCE.md
-│   └── ADMIN_CONTENT_RUNTIME_ACCEPTANCE.md
+│   ├── ADMIN_CONTENT_RUNTIME_ACCEPTANCE.md
+│   └── GLOBAL_AUTH_TYPED_TOKEN_CONFIG_RUNTIME_ACCEPTANCE.md
 └── plans/
     ├── SURVIVAL_MONTHS_SIMULATION_API_CONTRACT.md
     ├── PET_PROFILE_API_CONTRACT.md
@@ -28,6 +29,8 @@ docs/ai/
 src/
 ├── app.module.ts
 ├── main.ts
+├── config/
+│   └── env.validation.ts
 ├── admin-content/
 │   ├── admin-content.module.ts
 │   ├── admin-content.controller.ts

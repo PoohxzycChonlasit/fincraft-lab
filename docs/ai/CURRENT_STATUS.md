@@ -4,28 +4,24 @@
 
 - **Date**: 2026-07-24
 - **Backend Stack**: NestJS + PostgreSQL + Prisma 7.8
-- **Latest Task**: `P12_ADMIN_CONTENT_API_1C1_REVERT_UNEXPECTED_FILES_001`
+- **Latest Task**: `P12A_GLOBAL_AUTH_AND_TYPED_TOKEN_CONFIG_001`
 - **Current Implemented API Surface**: 24 Operations / 17 Unique Paths / 8 Controllers
 - **Pet Profile Status**: Implemented, Audited, Repaired, Reconciled & Fully Closed
-- **Admin Content API Status**: Implemented, Scope Repaired, Audited, Re-Verified & Fully Closed
-- **Admin Content Scope Repair Verdict**: Unrelated 5 pre-existing core files restored to contract baseline `5f4c8566`. Admin Content source remained byte-for-byte unchanged.
-- **Admin Endpoints Implemented**:
-  1. `GET /admin/elements` — List all Element master records for Admin
-  2. `GET /admin/elements/:elementId` — Retrieve single Element master record with category & DiscoveryDetail
-  3. `POST /admin/elements` — Create new Element master record (normalized & immutable slug)
-  4. `PATCH /admin/elements/:elementId` — Update editable Element fields & activation status (`ContentStatus`)
-  5. `PUT /admin/elements/:elementId/detail` — Idempotent create or replace (full replacement) DiscoveryDetail
-- **Role Authority**: `JWT_ROLE_CLAIM` (`RolesGuard` evaluates JWT payload role; `ADMIN` & `SUPER_ADMIN` allowed, `USER` denied with 403 Forbidden; `validateUser` checks DB for ACTIVE user status)
-- **Field Invariants**: `slug`, `elementType`, `isStarter` are **IMMUTABLE AFTER CREATE**
-- **Icon URL Strategy**: `STORED_HTTPS_ICON_URL_WITHOUT_REMOTE_FETCH` (HTTPS protocol required, max 2048 chars, no remote fetch)
-- **Detail PUT Semantics**: Idempotent Full Replacement (`200 OK` for create and replace)
-- **Runtime Acceptance Results**: **50/50 PASSED (0 FAILED, 0 DEFERRED)**
+- **Admin Content API Status**: Implemented, Audited, Scope Repaired & Fully Closed
+- **Global Auth & Typed Token Config Status**: Refactored, Verified & Fully Implemented
+- **Global Security Policy**: Global `AuthGuard` registered via `APP_GUARD` in `AppModule`. Default policy is deny-by-default.
+- **Public Operations**: Exactly 3 operations decorated with `@Public()`:
+  1. `GET /health`
+  2. `POST /auth/register`
+  3. `POST /auth/login`
+- **Protected Operations**: Exactly 21 operations protected automatically by global `AuthGuard`. Production route-level `@UseGuards(AuthGuard)` count is 0.
+- **Roles Guard Policy**: `RolesGuard` remains route-level on `AdminContentController` for `ADMIN` and `SUPER_ADMIN`.
+- **Typed Configuration**: `src/config/env.validation.ts` enforces `ACCESS_TOKEN_SECRET` and `ACCESS_TOKEN_EXPIRES_IN`. `AccessTokenService` injects `ConfigService<EnvVariable, true>`.
+- **Runtime Acceptance Results**: **40/40 PASSED (0 FAILED, 0 DEFERRED)**
 - **Static Quality Gates**: All 5 Gates PASSED (tsc exit 0, eslint exit 0, build exit 0, unit exit 0, e2e exit 0)
 - **Prisma Schema Migration**: `NONE` (0 migrations executed; 0 schema changes required)
-- **Exact Schema-Fit Verdict**: `DIRECT_FIT` (all fields exist in `Element` and `DiscoveryDetail` models)
-- **Hard Delete Verdict**: `DEFERRED` (status deactivation used instead)
-- **Worktree**: Clean (Pending Local Repair Checkpoint Commit)
-- **Next Recommended Task**: `P13_FRONTEND_FOUNDATION_1A_FREEZE_CONTRACT_001`
+- **Worktree**: Clean (Pending Local Refactor Checkpoint Commit)
+- **Next Recommended Task**: `P12A_GLOBAL_AUTH_AND_TYPED_TOKEN_CONFIG_AUDIT_001`
 
 ---
 
@@ -41,5 +37,5 @@
 
 ## Architectural & File Size Ceilings
 
-- **Root-MCS Policy Enforced**: Primary feature module remains strictly at feature root `src/admin-content/`.
+- **Root-MCS Policy Enforced**: Module/Controller/Service files remain at feature root locations.
 - **Source Line Ceilings**: All maintained source files remain strictly below 400 physical lines. All methods remain strictly at or below 100 physical lines.
