@@ -33,12 +33,53 @@ Short summary — full detail in [`docs/ai/PROJECT_CONTEXT.md`](docs/ai/PROJECT_
 Full detail lives in [`docs/ai/CODING_RULES.md`](docs/ai/CODING_RULES.md). This section only summarizes the most important rules:
 
 1. **No hardcoding** of secrets, URLs, ports, credentials, or values that belong in configuration — see CODING_RULES.md for the allowed exceptions.
-2. **Manually maintained files must not exceed 500 physical lines.** Start considering a split once a file reaches roughly 400 lines.
+2. **Every maintained source file must remain below 400 physical lines.** Start considering a split once a file reaches roughly 250 lines.
 3. **Backend is organized by feature** — controllers stay thin, business logic and Prisma queries live in services, no repository layer.
 4. **Frontend uses the Next.js App Router** — Server Components by default, Client Components only where interactivity is required.
 5. **Work one function or endpoint at a time** — do not scaffold an entire module in a single step unless the owner explicitly requests it.
 6. **Every step must be explained before implementation, and verified with real evidence before it is considered done.**
 7. **No automatic unit spec generation.** Every NestJS generator that can create a `*.spec.ts` file must be run with `--no-spec`, and no `*.spec.ts` file should be hand-created unless the owner explicitly asks for a unit test in that step. This does not reduce verification — see [`docs/ai/CODING_RULES.md`](docs/ai/CODING_RULES.md) for the full policy and required evidence instead.
+
+## Modern NestJS Structure and Readability Policy
+
+Full detail lives in [`docs/ai/CODING_RULES.md`](docs/ai/CODING_RULES.md).
+
+### Primary Goal
+- The codebase must remain readable by a student learning the project.
+- Prefer small, cohesive, feature-local files over monolithic NestJS modules, controllers, or services.
+- Optimize for clear responsibility, discoverability, and predictable folder structure.
+
+### Feature Folder Structure
+For non-trivial NestJS features:
+```text
+src/<feature>/
+  <feature>.module.ts (at feature root)
+  controllers/
+  services/
+  dto/
+  validators/
+  mappers/
+  policies/
+  constants/
+  types/
+```
+- Create only required folders; no empty folders.
+- Do not use generic `utils/`, `helpers/`, `shared/` dumping grounds unless genuinely reused across multiple features.
+- No `index.ts` barrel files that hide implementation locations.
+
+### File Targets
+- Module preferred <= 60, hard <= 100
+- Controller preferred <= 150, hard <= 200
+- Service preferred <= 250
+- Validator preferred <= 200
+- Mapper preferred <= 150
+- DTO / Type preferred <= 150
+- Review threshold: any maintained source above 250 lines; any method above 40–60 lines
+- Hard limit: every maintained source file must remain below 400 physical lines.
+
+### Modern NestJS Rules
+- Use: strict TypeScript, constructor injection, private readonly dependencies, type-only imports, explicit public response types, class-validator DTOs, named domain constants, explicit Prisma select, async/await, composition over inheritance, small pure validators/mappers, thin controllers, focused orchestration services.
+- Do not use: `any`, `as any`, `@ts-ignore`, `BaseService`, `BaseController`, generic repositories without demonstrated reuse, unnecessary CQRS/event buses, generic `utils.ts`, raw Prisma models as HTTP responses, business logic in controllers, manual JWT parsing, `index.ts` barrels, `forwardRef` to conceal poor boundaries, mechanical one-method-per-file splitting.
 
 ## Stepwise Workflow (summary — full detail in docs/ai/STEPWISE_WORKFLOW.md and SKILL.md)
 

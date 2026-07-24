@@ -11,21 +11,25 @@ import {
   Patch,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import type { AccessTokenPayload } from '../auth/types/access-token-payload.type';
-import { CreateWorkspaceDto } from './dto/create-workspace.dto';
-import { SaveCanvasSnapshotDto } from './dto/save-canvas-snapshot.dto';
-import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
-import type { CanvasSnapshotResponse } from './types/canvas-snapshot-response.type';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { AuthGuard } from '../../auth/guards/auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import type { AccessTokenPayload } from '../../auth/types/access-token-payload.type';
+import { CreateWorkspaceDto } from '../dto/create-workspace.dto';
+import { SaveCanvasSnapshotDto } from '../dto/save-canvas-snapshot.dto';
+import { UpdateWorkspaceDto } from '../dto/update-workspace.dto';
+import { WorkspaceCanvasService } from '../services/workspace-canvas.service';
+import { WorkspaceService } from '../services/workspace.service';
+import type { CanvasSnapshotResponse } from '../types/canvas-snapshot-response.type';
 import type {
   DeleteWorkspaceResponse,
   WorkspaceResponse,
-} from './types/workspace-response.type';
-import { WorkspaceCanvasService } from './workspace-canvas.service';
-import { WorkspaceService } from './workspace.service';
+} from '../types/workspace-response.type';
 
 @Controller('workspaces')
+@UseGuards(AuthGuard, RolesGuard)
 export class WorkspaceController {
   constructor(
     @Inject(WorkspaceService)
@@ -45,7 +49,6 @@ export class WorkspaceController {
   }
 
   @Get()
-  @HttpCode(HttpStatus.OK)
   async getWorkspaces(
     @CurrentUser() user: AccessTokenPayload,
   ): Promise<{ data: WorkspaceResponse[] }> {
@@ -54,10 +57,10 @@ export class WorkspaceController {
   }
 
   @Get(':workspaceId/canvas')
-  @HttpCode(HttpStatus.OK)
   async getCanvasSnapshot(
     @CurrentUser() user: AccessTokenPayload,
-    @Param('workspaceId', ParseUUIDPipe) workspaceId: string,
+    @Param('workspaceId', new ParseUUIDPipe({ version: '4' }))
+    workspaceId: string,
   ): Promise<{ data: CanvasSnapshotResponse }> {
     const result = await this.workspaceCanvasService.getSnapshot(
       user.sub,
@@ -67,10 +70,10 @@ export class WorkspaceController {
   }
 
   @Put(':workspaceId/canvas')
-  @HttpCode(HttpStatus.OK)
   async saveCanvasSnapshot(
     @CurrentUser() user: AccessTokenPayload,
-    @Param('workspaceId', ParseUUIDPipe) workspaceId: string,
+    @Param('workspaceId', new ParseUUIDPipe({ version: '4' }))
+    workspaceId: string,
     @Body() dto: SaveCanvasSnapshotDto,
   ): Promise<{ data: CanvasSnapshotResponse }> {
     const result = await this.workspaceCanvasService.saveSnapshot(
@@ -82,10 +85,10 @@ export class WorkspaceController {
   }
 
   @Get(':workspaceId')
-  @HttpCode(HttpStatus.OK)
   async getWorkspace(
     @CurrentUser() user: AccessTokenPayload,
-    @Param('workspaceId', ParseUUIDPipe) workspaceId: string,
+    @Param('workspaceId', new ParseUUIDPipe({ version: '4' }))
+    workspaceId: string,
   ): Promise<{ data: WorkspaceResponse }> {
     const result = await this.workspaceService.getWorkspace(
       user.sub,
@@ -95,10 +98,10 @@ export class WorkspaceController {
   }
 
   @Patch(':workspaceId')
-  @HttpCode(HttpStatus.OK)
   async updateWorkspace(
     @CurrentUser() user: AccessTokenPayload,
-    @Param('workspaceId', ParseUUIDPipe) workspaceId: string,
+    @Param('workspaceId', new ParseUUIDPipe({ version: '4' }))
+    workspaceId: string,
     @Body() dto: UpdateWorkspaceDto,
   ): Promise<{ data: WorkspaceResponse }> {
     const result = await this.workspaceService.updateWorkspace(
@@ -110,10 +113,10 @@ export class WorkspaceController {
   }
 
   @Delete(':workspaceId')
-  @HttpCode(HttpStatus.OK)
   async deleteWorkspace(
     @CurrentUser() user: AccessTokenPayload,
-    @Param('workspaceId', ParseUUIDPipe) workspaceId: string,
+    @Param('workspaceId', new ParseUUIDPipe({ version: '4' }))
+    workspaceId: string,
   ): Promise<{ data: DeleteWorkspaceResponse }> {
     const result = await this.workspaceService.deleteWorkspace(
       user.sub,

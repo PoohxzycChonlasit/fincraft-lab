@@ -1,14 +1,14 @@
 import { BadRequestException } from '@nestjs/common';
-import type { SaveCanvasSnapshotDto } from './dto/save-canvas-snapshot.dto';
-import type { WorkspaceEdgeInputDto } from './dto/workspace-edge-input.dto';
-import type { WorkspaceNodeInputDto } from './dto/workspace-node-input.dto';
 import {
   MAX_CANVAS_EDGES,
   MAX_CANVAS_EDGE_LABEL_LENGTH,
   MAX_CANVAS_NODES,
   MAX_CANVAS_SNAPSHOT_BYTES,
   MAX_NODE_VALUE_DATA_BYTES,
-} from './workspace.constants';
+} from '../constants/workspace.constants';
+import type { SaveCanvasSnapshotDto } from '../dto/save-canvas-snapshot.dto';
+import type { WorkspaceEdgeInputDto } from '../dto/workspace-edge-input.dto';
+import type { WorkspaceNodeInputDto } from '../dto/workspace-node-input.dto';
 
 export interface NormalizedCanvasNodeInput {
   id: string;

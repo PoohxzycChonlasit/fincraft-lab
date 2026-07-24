@@ -1,72 +1,114 @@
-# CURRENT_STATUS.md — FinCraft Lab Verified Status
+# CURRENT_STATUS.md — Verified Repository State
 
-## Verified checkpoint history
+This document is updated **after every verified step**. It records what is done, what is verified, and what comes next.
 
-- **P1 seed foundation**: PASS (`a0ce8c6`)
-- **P2 starter detail seed**: PASS (`9434ca4`)
-- **P3 discovery detail seed batch a**: PASS (`ff6c1bc`)
-- **P4 discovery detail seed batch b**: PASS (`6d0c268`)
-- **P5 core craft recipe seed**: PASS (`1ce0cd9`)
-- **P6 craft api contract**: FROZEN & RECONCILED (`docs/ai/plans/CRAFT_API_PLAN.md`)
-- **P6 craft service implementation plan**: FROZEN (`docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md`)
-- **P6 craft api implementation & verification**: PASS (`src/craft/`, `docs/ai/evidence/CRAFT_API_RUNTIME_ACCEPTANCE.md`)
-- **P6 craft api postman runtime acceptance**: PASS (`CRAFT_API_RUNTIME_ACCEPTANCE.md` reconciled; 22 live scenarios passed, PostgreSQL state preserved)
-- **P7 available elements contract**: FROZEN & RECONCILED (`docs/ai/plans/AVAILABLE_ELEMENTS_API_PLAN.md`)
-- **P7 available elements api implementation & verification**: PASS (`src/element/`, `docs/ai/evidence/AVAILABLE_ELEMENTS_API_RUNTIME_ACCEPTANCE.md` — 12 live HTTP scenarios passed)
-- **P8 workspace metadata crud contract fix**: FROZEN & RECONCILED (`docs/ai/plans/WORKSPACE_CRUD_API_PLAN.md`)
-- **P8 workspace metadata crud implementation**: PASS (`src/workspace/`, `docs/ai/evidence/WORKSPACE_CRUD_API_RUNTIME_ACCEPTANCE.md` — 28 live scenarios passed against compiled NestJS output)
-- **P8 workspace compiled evidence reconciliation**: PASS (`docs/ai/evidence/WORKSPACE_CRUD_API_RUNTIME_ACCEPTANCE.md` finalized; 28 compiled scenarios verified, Jest unit inventory verified)
-- **P9 canvas snapshot api contract planning**: FROZEN & RECONCILED (`docs/ai/plans/CANVAS_SNAPSHOT_API_PLAN.md` — `FROZEN_CANVAS_SNAPSHOT_API_CONTRACT_V1`).
-- **P9 canvas snapshot api implementation**: PASS (`src/workspace/`, `docs/ai/evidence/CANVAS_SNAPSHOT_API_RUNTIME_ACCEPTANCE.md` — 53 live scenarios passed against compiled NestJS output).
-- **P9 canvas snapshot api post-commit audit**: PASS (`P9_WORKSPACE_GRAPH_API_1C_POST_COMMIT_CANVAS_AUDIT_001` — contract, atomicity, privacy, ordering, evidence, quality gates 100% verified).
-- **P9 canvas snapshot maintainability repair**: PASS (`P9_WORKSPACE_GRAPH_API_1D_FINAL_CANVAS_MAINTAINABILITY_REPAIR_001` — Canvas service split into focused service, validation & mapper helpers; untracked archive moved outside Git root; worktree clean).
+---
 
-### Backend (`fincraft-lab-api`) — Canvas Snapshot API Implemented & Refactored
+## Current Task Status
 
-- **Canvas Snapshot Service & Helpers**:
-  - `src/workspace/workspace-canvas.service.ts` (343 physical lines) — Owns Canvas Snapshot orchestration, `getSnapshot` database reads, and `saveSnapshot` transaction boundaries.
-  - `src/workspace/workspace-canvas.validation.ts` (183 physical lines) — Pure helper for aggregate payload size (512 KB), collection count limits, node valueData, self-edges, dangling nodes, and duplicate directed edge tuples.
-  - `src/workspace/workspace-canvas.mapper.ts` (62 physical lines) — Pure helper mapping database snapshot query results to safe public `CanvasSnapshotResponse` shapes.
-- **Canvas DTOs & Types**:
-  - `src/workspace/dto/workspace-node-input.dto.ts`
-  - `src/workspace/dto/workspace-edge-input.dto.ts`
-  - `src/workspace/dto/save-canvas-snapshot.dto.ts`
-  - `src/workspace/types/canvas-snapshot-response.type.ts`
-- **Controller & Module**: `src/workspace/workspace.controller.ts` exposes `GET /workspaces/:workspaceId/canvas` & `PUT /workspaces/:workspaceId/canvas`; `src/workspace/workspace.module.ts` registers `WorkspaceCanvasService`.
-- **Express Body Parser**: `app.useBodyParser('json', { limit: '1mb' })` configured in `src/main.ts`.
-- **Worktree Archive Cleanup**: `fincraft-lab.rar` archive moved outside Git root to `C:\devnest 101\single-project\_archives\fincraft-lab.rar`. Worktree is 100% clean.
+- **Task ID**: `P9_ARCHITECTURE_1A_ENFORCE_MODERN_NEST_STRUCTURE_001`
+- **Phase**: `COMPLETED_AND_VERIFIED`
+- **Starting Commit**: `0cb13118f53ae4de7adf644c89d4b8b9fb3d951d`
+- **Status**: **PASS**
 
-### Frontend (`fincraft-lab-web`)
+---
 
-- Empty, not yet initialized (out of scope).
+## Executive Summary
 
-## Build/Lint/Test — run status
+1. **Modern NestJS Policy Persisted**: Added canonical `Modern NestJS Structure and Readability Policy` to `AGENTS.md`, `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`, `docs/ai/CODING_RULES.md`, and `docs/ai/FILE_MAP.md`.
+2. **Workspace Feature Reorganized**: Reorganized `src/workspace/` into responsibility-based subfolders:
+   - `src/workspace/workspace.module.ts` (Feature module at root)
+   - `src/workspace/controllers/workspace.controller.ts` (118 lines)
+   - `src/workspace/services/workspace.service.ts` (145 lines)
+   - `src/workspace/services/workspace-canvas.service.ts` (306 lines)
+   - `src/workspace/validators/workspace-canvas.validator.ts` (156 lines)
+   - `src/workspace/mappers/workspace-canvas.mapper.ts` (72 lines)
+   - `src/workspace/constants/workspace.constants.ts` (6 lines)
+   - `src/workspace/dto/`
+   - `src/workspace/types/`
+3. **Service Responsibility Review**:
+   - `WorkspaceCanvasService` (306 lines): Reviewed and confirmed cohesive. Orchestrates Canvas GET snapshot and atomic PUT transaction workflow. Pure validation (156 lines) and mapping (72 lines) remain separated in pure helper files.
+   - `WorkspaceService` (145 lines): Reviewed and confirmed cohesive. Owns Workspace metadata CRUD operations.
+4. **File Size Inventory**:
+   - Total maintained source files in `src/`: 33 files
+   - Files meeting preferred limits: 31 files (`PREFERRED_PASS`)
+   - Files reviewed above preferred (250–399 lines): 2 files (`workspace-canvas.service.ts`: 306 lines, `craft.service.ts`: 298 lines — both `REVIEWED_ABOVE_PREFERRED`)
+   - Hard limit failures (> 400 lines): **0 files** (`HARD_LIMIT_FAIL = 0`)
+5. **Quality Gates & Regression**:
+   - `tsc`: PASSED (0 errors)
+   - `lint`: PASSED (0 errors, 1 pre-existing warning in `src/main.ts:20:1`)
+   - Exact warning: `src/main.ts:20:1` — `@typescript-eslint/no-floating-promises` (`Promises must be awaited...`)
+   - `build`: PASSED
+   - `unit`: PASSED (1 suite / 3 tests)
+   - `e2e`: PASSED (1 suite / 2 tests)
+   - Canvas compiled acceptance: `EXECUTED=53`, `PASSED=53`, `FAILED=0`, `DEFERRED=0` (`MODE=COMPILED_NEST_APP_MODULE`)
+6. **Worktree Status**: Clean 100%. No untracked files or temporary scripts remaining.
 
-- `pnpm build` — passed
-- `pnpm lint` — passed (0 errors, 1 pre-existing warning in `src/main.ts:20:1` — `@typescript-eslint/no-floating-promises` on `bootstrap()`)
-- `pnpm test` — passed (1/1 unit test suite passed, 3/3 tests)
-- `pnpm test:e2e` — passed (1/1 e2e test suite passed, 2/2 tests)
-- `tsc --noEmit` — passed (0 errors)
-- `prisma validate` — passed (schema valid)
-- Search for unsafe casts (`any`, `as any`, `as unknown`, `@ts-ignore`) in `src/` and `prisma/seed/` — 0 matches
+---
 
-## Active Project Rule: No Automatic Unit Spec Generation
+## File Line Inventory Summary
 
-Unit spec files are not generated automatically (`--no-spec` for Nest CLI generators, no hand-created unit specs without explicit instruction).
+| File | Physical Lines | Category | Status |
+|---|---|---|---|
+| `src/workspace/services/workspace-canvas.service.ts` | 306 | Service | REVIEWED_ABOVE_PREFERRED |
+| `src/craft/craft.service.ts` | 298 | Service | REVIEWED_ABOVE_PREFERRED |
+| `src/workspace/validators/workspace-canvas.validator.ts` | 156 | Validator | PREFERRED_PASS |
+| `src/workspace/services/workspace.service.ts` | 145 | Service | PREFERRED_PASS |
+| `src/workspace/controllers/workspace.controller.ts` | 118 | Controller | PREFERRED_PASS |
+| `src/auth/guards/auth.guard.ts` | 99 | Guard | PREFERRED_PASS |
+| `src/element/element.service.ts` | 85 | Service | PREFERRED_PASS |
+| `src/craft/mappers/craft-response.mapper.ts` | 74 | Mapper | PREFERRED_PASS |
+| `src/workspace/mappers/workspace-canvas.mapper.ts` | 72 | Mapper | PREFERRED_PASS |
+| `src/craft/parsers/craft-sources.parser.ts` | 66 | Parser | PREFERRED_PASS |
+| `src/auth/auth.service.ts` | 64 | Service | PREFERRED_PASS |
+| `src/user/user.service.ts` | 58 | Service | PREFERRED_PASS |
+| `src/common/craft/calculate-craft-input-hash.ts` | 46 | Helper | PREFERRED_PASS |
+| `src/craft/helpers/craft-prisma-error.helper.ts` | 44 | Helper | PREFERRED_PASS |
+| `src/craft/types/craft-response.type.ts` | 43 | Type | PREFERRED_PASS |
+| `src/auth/guards/roles.guard.ts` | 39 | Guard | PREFERRED_PASS |
+| `src/auth/auth.controller.ts` | 38 | Controller | PREFERRED_PASS |
+| `src/workspace/types/canvas-snapshot-response.type.ts` | 33 | Type | PREFERRED_PASS |
+| `src/infrastructure/jwt/access-token.module.ts` | 32 | Module | PREFERRED_PASS |
+| `src/auth/dto/register.dto.ts` | 31 | DTO | PREFERRED_PASS |
+| `src/database/prisma.service.ts` | 28 | Service | PREFERRED_PASS |
+| `src/auth/auth.module.ts` | 25 | Module | PREFERRED_PASS |
+| `src/app.module.ts` | 23 | Module | PREFERRED_PASS |
+| `src/auth/dto/login.dto.ts` | 23 | DTO | PREFERRED_PASS |
+| `src/workspace/dto/update-workspace.dto.ts` | 23 | DTO | PREFERRED_PASS |
+| `src/auth/decorators/current-user.decorator.ts` | 21 | Decorator | PREFERRED_PASS |
+| `src/craft/craft.controller.ts` | 20 | Controller | PREFERRED_PASS |
+| `src/main.ts` | 19 | Main | PREFERRED_PASS |
+| `src/craft/types/craft-service.type.ts` | 17 | Type | PREFERRED_PASS |
+| `src/element/element.controller.ts` | 17 | Controller | PREFERRED_PASS |
+| `src/health/health.service.ts` | 17 | Service | PREFERRED_PASS |
+| `src/element/types/available-element-response.type.ts` | 16 | Type | PREFERRED_PASS |
+| `src/craft/dto/craft-request.dto.ts` | 15 | DTO | PREFERRED_PASS |
+| `src/infrastructure/jwt/access-token.service.ts` | 15 | Service | PREFERRED_PASS |
+| `src/workspace/dto/save-canvas-snapshot.dto.ts` | 14 | DTO | PREFERRED_PASS |
+| `src/health/health.controller.ts` | 13 | Controller | PREFERRED_PASS |
+| `src/workspace/dto/workspace-node-input.dto.ts` | 13 | DTO | PREFERRED_PASS |
+| `src/infrastructure/hash/bcrypt.service.ts` | 12 | Service | PREFERRED_PASS |
+| `src/workspace/workspace.module.ts` | 12 | Module | PREFERRED_PASS |
+| `src/workspace/dto/create-workspace.dto.ts` | 12 | DTO | PREFERRED_PASS |
+| `src/user/dto/user-response.dto.ts` | 11 | DTO | PREFERRED_PASS |
+| `src/workspace/dto/workspace-edge-input.dto.ts` | 11 | DTO | PREFERRED_PASS |
+| `src/workspace/types/workspace-response.type.ts` | 11 | Type | PREFERRED_PASS |
+| `src/craft/craft.module.ts` | 10 | Module | PREFERRED_PASS |
+| `src/element/element.module.ts` | 10 | Module | PREFERRED_PASS |
+| `src/user/user.module.ts` | 10 | Module | PREFERRED_PASS |
+| `src/health/health.module.ts` | 8 | Module | PREFERRED_PASS |
+| `src/auth/types/access-token-payload.type.ts` | 8 | Type | PREFERRED_PASS |
+| `src/database/database.module.ts` | 7 | Module | PREFERRED_PASS |
+| `src/infrastructure/hash/hash.module.ts` | 7 | Module | PREFERRED_PASS |
+| `src/workspace/constants/workspace.constants.ts` | 6 | Constant | PREFERRED_PASS |
+| `src/auth/dto/login-response.dto.ts` | 5 | DTO | PREFERRED_PASS |
+| `src/user/types/user.type.ts` | 5 | Type | PREFERRED_PASS |
+| `src/auth/decorators/roles.decorator.ts` | 4 | Decorator | PREFERRED_PASS |
+| `src/auth/decorators/public.decorator.ts` | 3 | Decorator | PREFERRED_PASS |
 
-## Canvas Snapshot API Feature Status
+---
 
-**CANVAS_SNAPSHOT_CLOSED**: YES
+## Queued Next Step
 
-## Next Bounded Step
-
-```text
-P9_API_DOCS_1A_IMPLEMENT_SWAGGER_UI_001 — Implement OpenAPI/Swagger UI documentation for FinCraft Lab backend endpoints.
-```
-
-## Related documents
-
-- Full file map → [`FILE_MAP.md`](FILE_MAP.md)
-- Full coding rules → [`CODING_RULES.md`](CODING_RULES.md)
-- Frozen Canvas Snapshot API Contract Plan → [`plans/CANVAS_SNAPSHOT_API_PLAN.md`](plans/CANVAS_SNAPSHOT_API_PLAN.md)
-- Stepwise loop method → `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
+- **Task ID**: `P9_API_DOCS_1A_IMPLEMENT_SWAGGER_UI_001`
+- **Objective**: Implement OpenAPI / Swagger UI documentation for FinCraft Lab backend endpoints.

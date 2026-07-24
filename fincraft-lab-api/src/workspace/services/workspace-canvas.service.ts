@@ -13,17 +13,17 @@ import {
   Prisma,
   UserStatus,
   WorkspaceStatus,
-} from '../database/generated/prisma/client';
-import { PrismaService } from '../database/prisma.service';
-import type { SaveCanvasSnapshotDto } from './dto/save-canvas-snapshot.dto';
-import type { CanvasSnapshotResponse } from './types/canvas-snapshot-response.type';
-import { mapCanvasSnapshotResponse } from './workspace-canvas.mapper';
+} from '../../database/generated/prisma/client';
+import { PrismaService } from '../../database/prisma.service';
+import type { SaveCanvasSnapshotDto } from '../dto/save-canvas-snapshot.dto';
+import { mapCanvasSnapshotResponse } from '../mappers/workspace-canvas.mapper';
+import type { CanvasSnapshotResponse } from '../types/canvas-snapshot-response.type';
 import {
   validateAggregatePayloadSize,
   validateAndNormalizeEdges,
   validateAndNormalizeNodes,
   validateCollectionCountLimits,
-} from './workspace-canvas.validation';
+} from '../validators/workspace-canvas.validator';
 
 @Injectable()
 export class WorkspaceCanvasService {

@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsEnum,
   IsOptional,
@@ -5,9 +6,8 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
 import { WorkspaceStatus } from '../../database/generated/prisma/client';
-import { MAX_WORKSPACE_NAME_LENGTH } from '../workspace.constants';
+import { MAX_WORKSPACE_NAME_LENGTH } from '../constants/workspace.constants';
 
 export class UpdateWorkspaceDto {
   @IsOptional()

@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { MAX_WORKSPACE_NAME_LENGTH } from '../workspace.constants';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { MAX_WORKSPACE_NAME_LENGTH } from '../constants/workspace.constants';
 
 export class CreateWorkspaceDto {
   @IsString()

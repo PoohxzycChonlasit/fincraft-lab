@@ -39,45 +39,85 @@ Use instead, as appropriate:
 
 Do not create a configuration layer purely to avoid every literal value.
 
-## B. File Size Limit
+## B. File Size Limit & Modern NestJS Policy
 
-Manually maintained source files must remain at or below **500 physical lines**.
+Every maintained source file must remain below **400 physical lines**.
 
-This includes: `.ts`, `.tsx`, `.js`, `.jsx`, and manually maintained Prisma schema files.
+Preferred limits by file category:
+- `module`: <= 60 lines (hard <= 100 lines)
+- `controller`: <= 150 lines (hard <= 200 lines)
+- `service`: <= 250 lines
+- `validator`: <= 200 lines
+- `mapper`: <= 150 lines
+- `DTO / type`: <= 150 lines
 
-At approximately 400 lines:
+Review thresholds:
+- Any maintained source file above 250 physical lines.
+- Any method above 40–60 lines.
 
-- inspect whether responsibilities in the file are starting to mix;
-- propose a small extraction before the file exceeds 500 lines;
-- preserve behavior while splitting.
-
-Target length for maintained source files: **below 300 lines**.
+A service between 250–399 lines must be explicitly reviewed for responsibility separation (e.g. extracting validators, mappers, or policies). Passing the 400-line hard ceiling does not mean a file fully complies with preferred targets. Do not game line limits through compressed formatting or multi-statement lines.
 
 Exceptions (do not count toward the limit, and do not edit purely to shorten):
-
 - generated Prisma clients;
 - lockfiles;
 - generated framework files;
 - generated migration SQL;
 - third-party or vendor files.
 
-Tests should also stay below 500 lines where practical, and should be split by behavior when they become hard to read.
+Tests should also stay below 400 lines where practical, and should be split by behavior when they become hard to read.
 
-## C. Teacher-Style Backend
+## C. Modern NestJS Structure and Readability Policy
 
-Feature-based organization:
+### Primary Goal
+- The codebase must remain readable by a student learning the project.
+- Prefer small, cohesive, feature-local files over monolithic NestJS modules, controllers, or services.
+- Optimize for clear responsibility, discoverability, and predictable folder structure.
+
+### Feature Folder Structure
+For a non-trivial NestJS feature, use:
+```text
+src/<feature>/
+  <feature>.module.ts (at feature root)
+  controllers/
+  services/
+  dto/
+  validators/
+  mappers/
+  policies/
+  constants/
+  types/
+```
+Rules:
+- Feature module remains at feature root.
+- Create only folders actually used; do not create empty folders.
+- Do not use broad generic folders such as `utils/`, `helpers/`, `shared/` unless genuinely reused across multiple features.
+- Do not use `index.ts` barrel files that obscure the implementation location.
+
+### Responsibility Rules
+- **Controllers**: Receive HTTP input, use pipes/decorators, call feature services, return public response envelope (`{ data: result }`). Must not contain Prisma queries, transaction logic, business validation, manual JWT parsing, or database model mapping.
+- **Services**: Orchestrate access checks, database operations, transactions, and feature workflows.
+- **Pure Helpers**: Extract pure domain/payload validation to `validators/`, database response mapping to `mappers/`, authorization rules to `policies/`, domain constants to `constants/`, contracts to `types/`. Pure validators and mappers must normally be plain functions, not dependency-injected providers.
+
+### Modern TypeScript & NestJS Practices
+- Use: strict TypeScript, constructor injection, private readonly dependencies, type-only imports, explicit public response types, class-validator DTOs, named domain constants, explicit Prisma select, composition over inheritance, async/await, small domain-specific functions.
+- Do not use: `any`, `as any`, `as unknown`, `@ts-ignore`, `@ts-expect-error`, `BaseService` or `BaseController` abstractions, generic repositories without demonstrated reuse, unnecessary CQRS/event buses, raw Prisma models as HTTP responses, generic `utils.ts` or `helpers.ts` dumping grounds, `index.ts` barrel files, `forwardRef` to conceal poor boundaries, or one-method-per-file mechanical splitting.
+
+## D. Teacher-Style Backend
+
+Feature-based organization following the Modern NestJS Structure:
 
 ```text
 src/<feature>/
 ├── <feature>.module.ts
-├── <feature>.controller.ts
-├── <feature>.service.ts
+├── controllers/
+│   └── <feature>.controller.ts
+├── services/
+│   └── <feature>.service.ts
 ├── dto/
 └── types/
 ```
 
 Rules:
-
 - Controller receives HTTP input, delegates to the Service layer, and wraps results in `{ data: result }`.
 - Controller stays thin.
 - Business logic lives in the Service layer.
@@ -101,7 +141,7 @@ FinCraft-specific extensions that are allowed (because they are direct product r
 - simulation calculation service;
 - direct tests for critical behavior.
 
-## D. Teacher-Style Frontend
+## E. Teacher-Style Frontend
 
 Use the Next.js App Router.
 
@@ -133,7 +173,7 @@ Rules:
 - Never put business logic in page components.
 - Never do client-side fetching without a clear interactive reason.
 
-## E. Scope and Learning Rules
+## F. Scope and Learning Rules
 
 - One bounded step at a time.
 - One function or endpoint per step.
@@ -145,7 +185,7 @@ Rules:
 - Stop after the current function.
 - Wait for owner review before moving to the next step.
 
-## F. NestJS No-Spec Policy
+## G. NestJS No-Spec Policy
 
 The owner has decided that unit spec files are no longer generated automatically. This is a scope decision, not a reduction in verification.
 
@@ -171,27 +211,6 @@ The owner has decided that unit spec files are no longer generated automatically
    - existing E2E tests;
    - diff inspection.
 8. **This rule disables automatic unit-spec generation only — it never means "no verification is needed."** Never claim a step is done without real evidence.
-
-## G. Literal Teacher-Aligned Readability & Service Boundaries
-
-To ensure code matches the owner's teacher-led Fakebook/Fakebuck learning style, code must follow literal teacher-aligned service boundaries:
-
-1. **Auth Service Boundaries**:
-   - `AuthService` coordinates register, login, and current-user flows. It does not directly handle database access, bcrypt hashing, or JWT signing.
-   - `UserService` (`src/user/user.service.ts`) owns user database persistence, hashes passwords on create via `BcryptService`, and maps Prisma `P2002` duplicate email errors.
-   - `BcryptService` (`src/infrastructure/hash/bcrypt.service.ts`) owns password hashing (salt rounds 12) and comparison.
-   - `AccessTokenService` (`src/infrastructure/jwt/access-token.service.ts`) owns JWT token signing.
-2. **Simple, Direct Methods over Type Machinery**:
-   - Prefer direct, readable methods over advanced reusable type machinery (such as exported Prisma `select` constants, `satisfies Prisma.UserSelect`, or complex derived payload types).
-   - Use generated Prisma model types (`User`) and inline `omit: { passwordHash: true }`.
-3. **Ordinary Feature Services (CRUD)**:
-   - Feature services for standard CRUD operations (such as `ElementCategoriesService`) continue using `PrismaService` directly.
-   - Do NOT create repository layers, persistence adapter interfaces, or generic base services for normal CRUD features.
-4. **Thin Controllers**: Controllers validate HTTP inputs, delegate to the service layer, and wrap results in `{ data: result }`. Methods are typically 3–12 lines long.
-5. **Explicit Return Types**: All public controller methods and public service methods must declare explicit return types (e.g., `UserResponseDto`, `LoginResponseDto`).
-6. **Minimal Abstraction**: Create helper abstractions only when real logic is reused, file line limits (500 physical lines) are approached, or third-party APIs are isolated.
-7. **Security Complexity Exception**: Files handling security, cryptography, JWT signing, guard evaluation, Prisma unique error mapping (`P2002`), seed validation, and transaction safety may remain more detailed when required for safety. Necessary safety checks must never be deleted to shorten code.
-8. **No Copying Another Repository File-for-File**: Do not copy teacher code blindly. Preserve FinCraft-specific models, routes, financial safety rules, response envelopes (`{ data: ... }`), and Craft/Simulation behaviors.
 
 ## H. Non-Mutating Lint Policy
 

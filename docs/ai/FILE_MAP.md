@@ -41,22 +41,27 @@ fincraft-lab/
 │   │   ├── craft/             # Craft feature module (POST /craft)
 │   │   ├── element/           # Element read feature module (GET /elements)
 │   │   ├── workspace/         # Workspace feature module (CRUD & Canvas snapshot endpoints)
+│   │   │   ├── workspace.module.ts # Feature module at root
+│   │   │   ├── controllers/
+│   │   │   │   └── workspace.controller.ts # Workspace & Canvas snapshot controller
+│   │   │   ├── services/
+│   │   │   │   ├── workspace.service.ts # Workspace metadata CRUD service (145 lines)
+│   │   │   │   └── workspace-canvas.service.ts # Canvas snapshot GET & PUT orchestration service (306 lines)
+│   │   │   ├── validators/
+│   │   │   │   └── workspace-canvas.validator.ts # Pure Canvas graph & payload validator (156 lines)
+│   │   │   ├── mappers/
+│   │   │   │   └── workspace-canvas.mapper.ts # Pure Canvas snapshot response mapper (72 lines)
+│   │   │   ├── constants/
+│   │   │   │   └── workspace.constants.ts # Named domain constants & limits
 │   │   │   ├── dto/
 │   │   │   │   ├── create-workspace.dto.ts
 │   │   │   │   ├── update-workspace.dto.ts
 │   │   │   │   ├── workspace-node-input.dto.ts
 │   │   │   │   ├── workspace-edge-input.dto.ts
 │   │   │   │   └── save-canvas-snapshot.dto.ts
-│   │   │   ├── types/
-│   │   │   │   ├── workspace-response.type.ts
-│   │   │   │   └── canvas-snapshot-response.type.ts
-│   │   │   ├── workspace.constants.ts # Named canvas & workspace bounds
-│   │   │   ├── workspace.service.ts # Workspace metadata CRUD service
-│   │   │   ├── workspace-canvas.service.ts # Canvas snapshot GET & PUT orchestration service (343 lines)
-│   │   │   ├── workspace-canvas.validation.ts # Pure Canvas graph & payload validation helper (183 lines)
-│   │   │   ├── workspace-canvas.mapper.ts # Pure Canvas snapshot response mapper helper (62 lines)
-│   │   │   ├── workspace.controller.ts # Workspace & Canvas snapshot controller
-│   │   │   └── workspace.module.ts # Workspace module
+│   │   │   └── types/
+│   │   │       ├── workspace-response.type.ts
+│   │   │       └── canvas-snapshot-response.type.ts
 │   │   ├── database/          # Prisma database module & service
 │   │   ├── auth/              # Auth module (register, login, me endpoints)
 │   │   ├── user/              # User persistence service
@@ -70,9 +75,9 @@ fincraft-lab/
 ## Key file responsibilities
 
 - `AGENTS.md` — Single canonical source of truth for all AI tools.
-- `fincraft-lab-api/src/workspace/workspace-canvas.service.ts` — Owns Canvas Snapshot `getSnapshot` (read-only current master element display metadata join) and `saveSnapshot` (atomic Prisma `$transaction` graph replacement, status/ownership check, element availability check, global ID collision check).
-- `fincraft-lab-api/src/workspace/workspace-canvas.validation.ts` — Pure helper owning aggregate 512 KB payload size validation, node/edge collection count limit checks, node valueData structure/limit checks, self-edge checks, dangling node checks, and duplicate directed edge tuple checks.
-- `fincraft-lab-api/src/workspace/workspace-canvas.mapper.ts` — Pure helper owning response construction and element public display object mapping.
-- `fincraft-lab-api/src/workspace/workspace.service.ts` — Owns Workspace metadata CRUD (`createWorkspace`, `getWorkspaces`, `getWorkspace`, `updateWorkspace`, `deleteWorkspace`).
-- `fincraft-lab-api/src/workspace/workspace.controller.ts` — Thin authenticated HTTP controller exposing `/workspaces` CRUD and `/workspaces/:workspaceId/canvas` GET/PUT.
+- `fincraft-lab-api/src/workspace/services/workspace-canvas.service.ts` — Owns Canvas Snapshot `getSnapshot` (read-only current master element display metadata join) and `saveSnapshot` (atomic Prisma `$transaction` graph replacement, status/ownership check, element availability check, global ID collision check).
+- `fincraft-lab-api/src/workspace/validators/workspace-canvas.validator.ts` — Pure helper owning aggregate 512 KB payload size validation, node/edge collection count limit checks, node valueData structure/limit checks, self-edge checks, dangling node checks, and duplicate directed edge tuple checks.
+- `fincraft-lab-api/src/workspace/mappers/workspace-canvas.mapper.ts` — Pure helper owning response construction and element public display object mapping.
+- `fincraft-lab-api/src/workspace/services/workspace.service.ts` — Owns Workspace metadata CRUD (`createWorkspace`, `getWorkspaces`, `getWorkspace`, `updateWorkspace`, `deleteWorkspace`).
+- `fincraft-lab-api/src/workspace/controllers/workspace.controller.ts` — Thin authenticated HTTP controller exposing `/workspaces` CRUD and `/workspaces/:workspaceId/canvas` GET/PUT.
 - `docs/ai/evidence/CANVAS_SNAPSHOT_API_RUNTIME_ACCEPTANCE.md` — Compiled runtime acceptance report verifying 53 live scenarios against NestJS application output.

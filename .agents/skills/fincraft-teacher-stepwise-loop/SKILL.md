@@ -11,7 +11,8 @@ The skill exists to ensure that the project is developed:
 - with explanation before implementation;
 - with evidence after implementation;
 - without scaffolding entire modules in advance;
-- with explicit service boundaries and minimal unnecessary abstractions.
+- with explicit service boundaries and minimal unnecessary abstractions;
+- following the Modern NestJS Structure and Readability Policy.
 
 This skill applies to both workspace locations:
 
@@ -56,6 +57,36 @@ Do not implement an entire feature module in one loop unless the owner explicitl
 
 ---
 
+## Modern NestJS Structure and Readability Policy
+
+Full detail lives in [`docs/ai/CODING_RULES.md`](file:///C:/devnest%20101/single-project/fincraft-lab/docs/ai/CODING_RULES.md).
+
+### Feature Folder Structure
+```text
+src/<feature>/
+  <feature>.module.ts (at feature root)
+  controllers/
+  services/
+  dto/
+  validators/
+  mappers/
+  policies/
+  constants/
+  types/
+```
+
+### File Size Limits
+- Module preferred <= 60 lines (hard <= 100)
+- Controller preferred <= 150 lines (hard <= 200)
+- Service preferred <= 250 lines
+- Validator preferred <= 200 lines
+- Mapper preferred <= 150 lines
+- DTO / Type preferred <= 150 lines
+- Review threshold: > 250 physical lines for source files; > 40–60 lines for methods
+- Hard limit: every maintained source file must remain below 400 physical lines.
+
+---
+
 ## Permanent Skill v4 Rules — Literal Teacher Coding Style
 
 1. **Teacher Reference Code is Primary**: When the owner supplies or refers to teacher-written reference code (Fakebook/Fakebuck), its visible coding shape is the primary style reference.
@@ -66,7 +97,7 @@ Do not implement an entire feature module in one loop unless the owner explicitl
    - `BcryptService` (`src/infrastructure/hash/`) encapsulates password hashing (salt rounds 12) & comparison.
    - `AccessTokenService` (`src/infrastructure/jwt/`) encapsulates JWT signing.
 6. **Ordinary CRUD Feature Services**: Feature services for standard CRUD operations (such as `ElementCategoriesService`) continue using `PrismaService` directly.
-7. **Prohibited Layers**: Do NOT create custom repository interfaces, persistence adapter layers, generic base services, CQRS, or mapper services.
+7. **Prohibited Layers**: Do NOT create custom repository interfaces, persistence adapter layers, generic base services, CQRS, or mapper services unless extracted as a pure helper under a feature folder.
 8. **Envelope Convention**:
    - `Service` methods return feature data objects (`UserResponseDto`, `LoginResponseDto`, `User`).
    - `Controller` wraps service results in `{ data: result }`.
