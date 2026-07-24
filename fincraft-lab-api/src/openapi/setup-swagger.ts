@@ -36,6 +36,10 @@ export function setupSwagger(app: INestApplication): void {
       'Canvas',
       'Workspace graph canvas snapshot load and atomic save endpoints',
     )
+    .addTag(
+      'Simulations',
+      'Financial literacy simulation models and execution engine',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

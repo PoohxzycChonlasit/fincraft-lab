@@ -5,11 +5,13 @@ import { DISCOVERY_ELEMENT_DETAIL_BATCH_B_SEED_DATA } from './seed/content/disco
 import { DISCOVERY_ELEMENT_SEED_DATA } from './seed/content/discovery-elements';
 import { STARTER_ELEMENT_DETAIL_SEED_DATA } from './seed/content/starter-element-details';
 import { STARTER_ELEMENT_SEED_DATA } from './seed/content/starter-elements';
+import { SIMULATION_SEED_DATA } from './seed/content/simulations';
 import { createSeedPrismaClient } from './seed/seed-client';
 import { seedCategoriesStep } from './seed/steps/seed-categories';
 import { seedCraftRecipes } from './seed/steps/seed-craft-recipes';
 import { seedDiscoveryDetailsStep } from './seed/steps/seed-discovery-details';
 import { seedElementsStep } from './seed/steps/seed-elements';
+import { seedSimulationsStep } from './seed/steps/seed-simulations';
 import { validateCraftRecipeSeed } from './seed/validate-craft-recipe-seed';
 import {
   validateAllDetailContent,
@@ -212,8 +214,13 @@ async function main(): Promise<void> {
     await seedCraftRecipes(prisma);
     console.log('   Core Craft Recipe upserts complete.');
 
-    // 14. Run post-seed verifications
-    console.log('13. Verifying database state...');
+    // 14. Upsert Simulation Master Records
+    console.log('13. Upserting Simulation Master Record (survival-months)...');
+    await seedSimulationsStep(prisma, SIMULATION_SEED_DATA);
+    console.log('   Simulation master upsert complete.');
+
+    // 15. Run post-seed verifications
+    console.log('14. Verifying database state...');
     await verifyCategorySeed(prisma, CATEGORY_SEED_DATA);
     await verifyElementSeed(
       prisma,

@@ -62,3 +62,16 @@
   - ESLint: **PASSED (exit 0, 0 errors, 0 warnings)**
   - Runtime Suite: **PASSED (28/28 assertion checks passed, 0 failed)**
 
+---
+
+## Post-Simulation Reconciliation (`P10_SIMULATION_API_1B_IMPLEMENT_SURVIVAL_MONTHS_001`)
+
+- **New Operations Added**:
+  - `GET /simulations` (`Simulations` tag, List available simulations)
+  - `GET /simulations/:simulationId` (`Simulations` tag, Get simulation details)
+  - `POST /simulations/:simulationId/runs` (`Simulations` tag, Run a simulation)
+- **Updated OpenAPI Totals**:
+  - Controllers: **6** (`HealthController`, `AuthController`, `ElementController`, `CraftController`, `WorkspaceController`, `SimulationController`)
+  - Unique Paths: **12**
+  - Operations: **16** (13 pre-existing + 3 new `Simulations` operations)
+- **Reconciled Status**: All 16 OpenAPI operations fully functional and authenticated with `access-token` Bearer security where required.

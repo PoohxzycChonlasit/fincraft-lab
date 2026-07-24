@@ -12,7 +12,8 @@ docs/ai/
 ├── PROJECT_CONTEXT.md
 ├── STEPWISE_WORKFLOW.md
 ├── evidence/
-│   └── SWAGGER_OPENAPI_RUNTIME_ACCEPTANCE.md
+│   ├── SWAGGER_OPENAPI_RUNTIME_ACCEPTANCE.md
+│   └── SURVIVAL_MONTHS_SIMULATION_RUNTIME_ACCEPTANCE.md
 └── plans/
     └── SURVIVAL_MONTHS_SIMULATION_API_CONTRACT.md
 ```
@@ -31,9 +32,6 @@ src/
 │   ├── auth.service.ts
 │   ├── decorators/
 │   ├── dto/
-│   │   ├── register.dto.ts
-│   │   ├── login.dto.ts
-│   │   └── login-response.dto.ts
 │   ├── guards/
 │   └── types/
 ├── common/
@@ -44,8 +42,6 @@ src/
 │   ├── craft.controller.ts
 │   ├── craft.service.ts
 │   ├── dto/
-│   │   ├── craft-request.dto.ts
-│   │   └── craft-response.dto.ts
 │   ├── helpers/
 │   ├── mappers/
 │   ├── parsers/
@@ -59,7 +55,6 @@ src/
 │   ├── element.controller.ts
 │   ├── element.service.ts
 │   ├── dto/
-│   │   └── available-element-response.dto.ts
 │   └── types/
 ├── health/
 │   ├── health.module.ts
@@ -68,11 +63,22 @@ src/
 │   ├── config/
 │   ├── hash/
 │   └── jwt/
+├── simulation/
+│   ├── simulation.module.ts
+│   ├── simulation.controller.ts
+│   ├── simulation.service.ts
+│   ├── simulation-calculator.service.ts
+│   ├── constants/
+│   │   └── survival-months.definition.ts
+│   ├── dto/
+│   │   ├── survival-months-run-request.dto.ts
+│   │   └── simulation-response.dto.ts
+│   └── openapi/
+│       └── simulation-openapi.decorators.ts
 ├── user/
 │   ├── user.module.ts
 │   ├── user.service.ts
 │   └── dto/
-│       └── user-response.dto.ts
 └── workspace/
     ├── workspace.module.ts
     ├── workspace.controller.ts
@@ -80,22 +86,22 @@ src/
     ├── workspace-canvas.service.ts
     ├── workspace-canvas-writer.service.ts
     ├── openapi/
-    │   └── workspace-openapi.decorators.ts
     ├── constants/
-    │   └── workspace.constants.ts
     ├── dto/
-    │   ├── create-workspace.dto.ts
-    │   ├── update-workspace.dto.ts
-    │   ├── workspace-node-input.dto.ts
-    │   ├── workspace-edge-input.dto.ts
-    │   ├── save-canvas-snapshot.dto.ts
-    │   ├── workspace-response.dto.ts
-    │   └── canvas-snapshot-response.dto.ts
     ├── mappers/
-    │   └── workspace-canvas.mapper.ts
     ├── types/
-    │   ├── workspace-response.type.ts
-    │   └── canvas-snapshot-response.type.ts
     └── validators/
-        └── workspace-canvas.validator.ts
+```
+
+## Seed (`fincraft-lab-api/prisma/seed`)
+
+```text
+prisma/
+├── schema.prisma
+├── seed.ts
+└── seed/
+    ├── content/
+    │   └── simulations.ts
+    └── steps/
+        └── seed-simulations.ts
 ```

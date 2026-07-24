@@ -402,10 +402,10 @@ export async function verifyDetailSeed(
     recipes !== EXPECTED_CORE_CRAFT_RECIPE_COUNT ||
     recipeInputs !== EXPECTED_CORE_CRAFT_RECIPE_INPUT_COUNT ||
     relationships !== 0 ||
-    simulations !== 0
+    simulations !== 1
   ) {
     errors.push(
-      `Unexpected core task data counts: recipes=${recipes} (expected ${EXPECTED_CORE_CRAFT_RECIPE_COUNT}), recipeInputs=${recipeInputs} (expected ${EXPECTED_CORE_CRAFT_RECIPE_INPUT_COUNT}), relationships=${relationships} (expected 0), simulations=${simulations} (expected 0)`,
+      `Unexpected core task data counts: recipes=${recipes} (expected ${EXPECTED_CORE_CRAFT_RECIPE_COUNT}), recipeInputs=${recipeInputs} (expected ${EXPECTED_CORE_CRAFT_RECIPE_INPUT_COUNT}), relationships=${relationships} (expected 0), simulations=${simulations} (expected 1)`,
     );
   }
 
