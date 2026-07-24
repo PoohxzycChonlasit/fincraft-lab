@@ -14,7 +14,8 @@ docs/ai/
 ├── evidence/
 │   ├── SWAGGER_OPENAPI_RUNTIME_ACCEPTANCE.md
 │   ├── SURVIVAL_MONTHS_SIMULATION_RUNTIME_ACCEPTANCE.md
-│   └── PET_PROFILE_RUNTIME_ACCEPTANCE.md
+│   ├── PET_PROFILE_RUNTIME_ACCEPTANCE.md
+│   └── ADMIN_CONTENT_RUNTIME_ACCEPTANCE.md
 └── plans/
     ├── SURVIVAL_MONTHS_SIMULATION_API_CONTRACT.md
     ├── PET_PROFILE_API_CONTRACT.md
@@ -27,6 +28,21 @@ docs/ai/
 src/
 ├── app.module.ts
 ├── main.ts
+├── admin-content/
+│   ├── admin-content.module.ts
+│   ├── admin-content.controller.ts
+│   ├── admin-content.service.ts
+│   ├── dto/
+│   │   ├── create-element.dto.ts
+│   │   ├── update-element.dto.ts
+│   │   ├── upsert-discovery-detail.dto.ts
+│   │   └── element-admin-response.dto.ts
+│   ├── mappers/
+│   │   └── element-admin-response.mapper.ts
+│   ├── openapi/
+│   │   └── admin-content-openapi.decorators.ts
+│   └── validators/
+│       └── is-https-url.validator.ts
 ├── openapi/
 │   └── setup-swagger.ts
 ├── auth/

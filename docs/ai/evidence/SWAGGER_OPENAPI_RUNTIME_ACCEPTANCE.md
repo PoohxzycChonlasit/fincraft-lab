@@ -89,3 +89,19 @@
   - Unique Paths: **14**
   - Operations: **19** (16 pre-existing + 3 new `Pets` operations)
 - **Reconciled Status**: All 19 OpenAPI operations fully functional and authenticated with `access-token` Bearer security where required. Public auth routes `/auth/register` and `/auth/login` remain public. `passwordHash` remains absent across all OpenAPI schemas.
+
+---
+
+## Post-Admin Content Reconciliation (`P12_ADMIN_CONTENT_API_1B_IMPLEMENT_ADMIN_CONTENT_001`)
+
+- **New Operations Added**:
+  - `GET /admin/elements` (`Admin Content` tag, List all Elements for Admin)
+  - `GET /admin/elements/:elementId` (`Admin Content` tag, Get single Element admin detail)
+  - `POST /admin/elements` (`Admin Content` tag, Create Element master record)
+  - `PATCH /admin/elements/:elementId` (`Admin Content` tag, Update editable Element fields)
+  - `PUT /admin/elements/:elementId/detail` (`Admin Content` tag, Create or replace DiscoveryDetail)
+- **Updated OpenAPI Totals**:
+  - Controllers: **8** (`HealthController`, `AuthController`, `ElementController`, `CraftController`, `WorkspaceController`, `SimulationController`, `PetController`, `AdminContentController`)
+  - Unique Paths: **17**
+  - Operations: **24** (19 pre-existing + 5 new `Admin Content` operations)
+- **Reconciled Status**: All 24 OpenAPI operations fully functional. Admin operations are restricted to `ADMIN` and `SUPER_ADMIN` roles via `RolesGuard`. Public auth routes remain public. `passwordHash` remains 100% absent across all OpenAPI schemas.

@@ -41,6 +41,10 @@ export function setupSwagger(app: INestApplication): void {
       'Financial literacy simulation models and execution engine',
     )
     .addTag('Pets', 'User personal pet guide profile management')
+    .addTag(
+      'Admin Content',
+      'Element master content and educational DiscoveryDetail management (ADMIN and SUPER_ADMIN only)',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

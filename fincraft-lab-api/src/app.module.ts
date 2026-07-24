@@ -8,6 +8,7 @@ import { ElementModule } from './element/element.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { SimulationModule } from './simulation/simulation.module';
 import { PetModule } from './pet/pet.module';
+import { AdminContentModule } from './admin-content/admin-content.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { PetModule } from './pet/pet.module';
     WorkspaceModule,
     SimulationModule,
     PetModule,
+    AdminContentModule,
   ],
 })
 export class AppModule {}
