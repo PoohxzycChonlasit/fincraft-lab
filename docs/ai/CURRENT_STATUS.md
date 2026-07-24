@@ -1,84 +1,32 @@
-# CURRENT_STATUS.md — Latest Verified Status
+# CURRENT_STATUS.md — FinCraft Lab Verified Status
 
-This document records only what has been directly verified (evidence-based). Do not trust it blindly in a later task — re-verify with the commands below before starting any work.
+## Verified checkpoint history
 
-## How to re-verify
+- **P1 seed foundation**: PASS (`a0ce8c6`)
+- **P2 starter detail seed**: PASS (`9434ca4`)
+- **P3 discovery detail seed batch a**: PASS (`ff6c1bc`)
+- **P4 discovery detail seed batch b**: PASS (`6d0c268`)
+- **P5 core craft recipe seed**: PASS (`1ce0cd9`)
+- **P6 craft api contract**: FROZEN & RECONCILED (`docs/ai/plans/CRAFT_API_PLAN.md`)
+- **P6 craft service implementation plan**: FROZEN (`docs/ai/plans/CRAFT_SERVICE_IMPLEMENTATION_PLAN.md`)
+- **P6 craft api implementation & verification**: PASS (`src/craft/`, `docs/ai/evidence/CRAFT_API_RUNTIME_ACCEPTANCE.md`)
+- **P6 craft api postman runtime acceptance**: PASS (`CRAFT_API_RUNTIME_ACCEPTANCE.md` reconciled; 22 live scenarios passed, PostgreSQL state preserved)
+- **P7 available elements contract**: FROZEN & RECONCILED (`docs/ai/plans/AVAILABLE_ELEMENTS_API_PLAN.md`)
+- **P7 available elements api implementation & verification**: PASS (`src/element/`, `docs/ai/evidence/AVAILABLE_ELEMENTS_API_RUNTIME_ACCEPTANCE.md` — 12 live HTTP scenarios passed)
+- **P8 workspace metadata crud contract fix**: FROZEN & RECONCILED (`docs/ai/plans/WORKSPACE_CRUD_API_PLAN.md`)
+- **P8 workspace metadata crud implementation**: PASS (`src/workspace/`, `docs/ai/evidence/WORKSPACE_CRUD_API_RUNTIME_ACCEPTANCE.md` — 28 live scenarios passed against compiled NestJS output)
+- **P8 workspace compiled evidence reconciliation**: PASS (`docs/ai/evidence/WORKSPACE_CRUD_API_RUNTIME_ACCEPTANCE.md` finalized; 28 compiled scenarios verified, Jest unit inventory verified)
+- **P9 canvas snapshot api contract planning**: FROZEN & RECONCILED (`docs/ai/plans/CANVAS_SNAPSHOT_API_PLAN.md` — `FROZEN_CANVAS_SNAPSHOT_API_CONTRACT_V1`).
+- **P9 canvas snapshot api implementation**: PASS (`src/workspace/`, `docs/ai/evidence/CANVAS_SNAPSHOT_API_RUNTIME_ACCEPTANCE.md` — 53 live scenarios passed against compiled NestJS output).
+- **P9 canvas snapshot api post-commit audit**: PASS (`P9_WORKSPACE_GRAPH_API_1C_POST_COMMIT_CANVAS_AUDIT_001` — contract, atomicity, privacy, ordering, evidence, quality gates 100% verified).
+- **P9 canvas snapshot maintainability repair**: PASS (`P9_WORKSPACE_GRAPH_API_1D_FINAL_CANVAS_MAINTAINABILITY_REPAIR_001` — Canvas service split into focused service, validation & mapper helpers; untracked archive moved outside Git root; worktree clean).
 
-```powershell
-git rev-parse --show-toplevel
-git rev-parse HEAD
-git log -1 --oneline
-git status --short
-```
+### Backend (`fincraft-lab-api`) — Canvas Snapshot API Implemented & Refactored
 
-## Verified status (updated during P9_WORKSPACE_GRAPH_API_1B_IMPLEMENT_CANVAS_SNAPSHOT_001)
-
-- **Git root**: `C:/devnest 101/single-project/fincraft-lab` (no nested git repositories inside `fincraft-lab-api` or `fincraft-lab-web`)
-- **P0 starting checkpoint**: `34117a1` — "P0: scaffold NestJS backend foundation in fincraft-lab-api"
-- **Shared agent documentation checkpoint**: `8b2bb9a` / `4b403b1` — AI documentation added and standardized to English
-- **P1 checkpoint**: `a17d7f4` — "feat: add backend health endpoint"
-- **P2A checkpoint**: `22483f9` — "chore: add Prisma PostgreSQL dependencies"
-- **P3A checkpoint**: `9a1939f` — "feat: add FinCraft MVP Prisma foundation"
-- **P3B.1 checkpoint**: `809e4b5` — "chore: add initial FinCraft MVP migration"
-- **P3B.2 checkpoint**: `a49dff9` — "docs: record initial MVP migration application"
-- **P4A checkpoint**: `6193f03` — "docs: plan ElementCategory CRUD"
-- **P4_AUTH_1 checkpoint**: `bf46ed2` — "feat: add user registration endpoint"
-- **P4_AUTH_2 checkpoint**: `29de3de` — "feat: add user login endpoint"
-- **P4_AUTH_3 checkpoint**: `5c01639` — "feat: add global JWT auth guard"
-- **P4_AUTH_4 checkpoint**: `8661f8d` — "feat: add current user endpoint"
-- **P4_AUTH_5 checkpoint**: `cd910c6` — "feat: add role-based authorization guard"
-- **P5_PREP checkpoint**: `8451344` — "docs: align AI agents with teacher coding style"
-- **P5_SEED_1 checkpoint**: `66851c0` — "docs: plan core content seed"
-- **P5_SEED_2 checkpoint**: `d807255` — "feat: add core seed infrastructure and categories"
-- **P4_AUTH_6 checkpoint**: `709594a` — "docs: plan Fakebuck-aligned auth refactor"
-- **P4_AUTH_7 checkpoint**: `fe30daa` — "refactor: extract user persistence from auth"
-- **P4_AUTH_8 checkpoint**: `b611466` — "refactor: align auth code with Fakebuck style"
-- **P5_SEED_3 checkpoint**: `7b08d86` — "feat: seed starter financial elements"
-- **P5_SEED_4 checkpoint**: `6a682bc` — "feat: seed discovery financial elements"
-- **P5_SEED_5A checkpoint**: `0d0ff43` — "docs: freeze starter element detail content"
-- **P5_SEED_5A3 checkpoint**: `d5751bb` — "docs: repair starter detail sources"
-- **P5_SEED_5A3_WORDING checkpoint**: `ffaafb2` — "docs: adjust starter detail source verification wording"
-- **P5_SEED_5B checkpoint**: `66d2325` — "feat: seed starter element details"
-- **P5_SEED_6A checkpoint**: `337d066` — "docs: freeze discovery detail batch a content"
-- **P5_SEED_6B checkpoint**: `f6c944f` — "feat: seed discovery detail batch a"
-- **P5_SEED_6C checkpoint**: audit passed (Post-commit audit PASS)
-- **P5_SEED_7A checkpoint**: `b338b98` — "docs: freeze discovery detail batch b content"
-- **P5_SEED_7A2 audit**: PASS_WITH_DOC_FIXES (Single broken URL identified)
-- **P5_SEED_7A3 repair**: `157f788` — "docs: repair discovery detail batch b source"
-- **P5_SEED_7A4 audit**: PASS (Read-only verification of Batch B source repair)
-- **P5_SEED_7B checkpoint**: `6b223c1` — "feat: seed discovery detail batch b"
-- **P5_SEED_7C audit**: PASS (Read-only post-commit audit of Batch B seed commit)
-- **P5_SEED_8A checkpoint**: `b746d79` — "docs: freeze core craft recipe plan"
-- **P5_SEED_8B audit**: PASS (Read-only post-commit audit of Core Craft Recipe V1 plan)
-- **P5_SEED_8C checkpoint**: `761b672` — "feat: seed core craft recipes"
-- **P5_SEED_8D audit**: PASS (Read-only post-commit audit of Core Craft Recipe seed commit)
-- **P6_CRAFT_API_1A checkpoint**: `bc5182d` — "docs: freeze craft api contract v1"
-- **P6_CRAFT_API_1B audit**: PASS (Read-only post-commit audit of Craft API V1 contract)
-- **P6_CRAFT_API_2A checkpoint**: `b7f3a21` — "feat: add craft request dto"
-- **P6_CRAFT_API_2B audit**: PASS (Read-only post-commit audit of Craft request DTO commit)
-- **P6_CRAFT_API_2C checkpoint**: `4ac94ac` — "feat: add craft response types"
-- **P6_CRAFT_API_2D audit**: PASS_WITH_PROCESS_NOTE (Read-only post-commit audit of Craft response types commit)
-- **P6_CRAFT_API_2E checkpoint**: "chore: make lint checks non-mutating"
-- **P6_CRAFT_API_3A checkpoint**: `9f20fed` — "docs: freeze craft service implementation plan"
-- **P6_CRAFT_API_3B audit**: PASS_WITH_DOC_FIXES (Read-only independent audit of CraftService implementation plan)
-- **P6_CRAFT_API_3C checkpoint**: `23b52ca` — "docs: complete craft service verification plan"
-- **P6_CRAFT_API_3D audit**: PASS (Read-only post-fix audit of CraftService implementation plan)
-- **P6_CRAFT_API_4A checkpoint**: `eb6a8bc` — "feat: add craft sources parser"
-- **P6_CRAFT_API_4B audit**: FIX_REQUIRED (Read-only post-commit audit identified TS2322 in craft-sources.parser.ts)
-- **P6_CRAFT_API_4C checkpoint**: `5600958` — "fix: narrow craft source objects safely"
-- **P6_CRAFT_API_4D audit**: PASS (Read-only post-fix audit of Craft sources parser)
-- **P5_SEED_8A checkpoint**: `b746d79` — "docs: freeze core craft recipe plan"
-- **P7_ELEMENT_API_1A contract planning**: FROZEN & CORRECTED (`docs/ai/plans/AVAILABLE_ELEMENTS_API_PLAN.md` — `FROZEN_AVAILABLE_ELEMENTS_READ_API_CONTRACT_V1`)
-- **P7_ELEMENT_API_1B implementation**: PASS (`GET /elements` implemented end-to-end in `src/element/` and registered in `AppModule`. All 12 live HTTP/PostgreSQL scenarios passed with 0 DB writes)
-- **P8_WORKSPACE_API_1A contract planning**: FROZEN & CORRECTED (`docs/ai/plans/WORKSPACE_CRUD_API_PLAN.md` — `FROZEN_WORKSPACE_METADATA_CRUD_API_CONTRACT_V1`)
-- **P8_WORKSPACE_API_1B implementation**: PASS (`POST/GET/PATCH/DELETE /workspaces` implemented end-to-end in `src/workspace/` and registered in `AppModule`. All 28 live HTTP/PostgreSQL scenarios passed)
-- **P8_WORKSPACE_API_1C reconciliation & audit**: PASS (Shared test-harness infrastructure files restored to baseline `2e5fa53f85a09a96cdc455dc372e86294ab15046`)
-- **P9_WORKSPACE_GRAPH_API_1A contract planning**: FROZEN & RECONCILED (`docs/ai/plans/CANVAS_SNAPSHOT_API_PLAN.md` — `FROZEN_CANVAS_SNAPSHOT_API_CONTRACT_V1`).
-- **P9_WORKSPACE_GRAPH_API_1B implementation**: PASS (`GET /workspaces/:workspaceId/canvas` and `PUT /workspaces/:workspaceId/canvas` implemented end-to-end in `src/workspace/` and verified against 53 live HTTP/PostgreSQL scenarios through compiled NestJS output). Documented in `docs/ai/evidence/CANVAS_SNAPSHOT_API_RUNTIME_ACCEPTANCE.md`.
-
-### Backend (`fincraft-lab-api`) — Canvas Snapshot API Implemented
-
-- **Canvas Snapshot Service**: `src/workspace/workspace-canvas.service.ts` (530 physical lines). Implements `getSnapshot` (read-only with embedded Element display object) and `saveSnapshot` (atomic Prisma `$transaction` graph replacement, element availability check, ID collision check, aggregate 512 KB payload size check).
+- **Canvas Snapshot Service & Helpers**:
+  - `src/workspace/workspace-canvas.service.ts` (343 physical lines) — Owns Canvas Snapshot orchestration, `getSnapshot` database reads, and `saveSnapshot` transaction boundaries.
+  - `src/workspace/workspace-canvas.validation.ts` (183 physical lines) — Pure helper for aggregate payload size (512 KB), collection count limits, node valueData, self-edges, dangling nodes, and duplicate directed edge tuples.
+  - `src/workspace/workspace-canvas.mapper.ts` (62 physical lines) — Pure helper mapping database snapshot query results to safe public `CanvasSnapshotResponse` shapes.
 - **Canvas DTOs & Types**:
   - `src/workspace/dto/workspace-node-input.dto.ts`
   - `src/workspace/dto/workspace-edge-input.dto.ts`
@@ -86,6 +34,7 @@ git status --short
   - `src/workspace/types/canvas-snapshot-response.type.ts`
 - **Controller & Module**: `src/workspace/workspace.controller.ts` exposes `GET /workspaces/:workspaceId/canvas` & `PUT /workspaces/:workspaceId/canvas`; `src/workspace/workspace.module.ts` registers `WorkspaceCanvasService`.
 - **Express Body Parser**: `app.useBodyParser('json', { limit: '1mb' })` configured in `src/main.ts`.
+- **Worktree Archive Cleanup**: `fincraft-lab.rar` archive moved outside Git root to `C:\devnest 101\single-project\_archives\fincraft-lab.rar`. Worktree is 100% clean.
 
 ### Frontend (`fincraft-lab-web`)
 
@@ -94,7 +43,7 @@ git status --short
 ## Build/Lint/Test — run status
 
 - `pnpm build` — passed
-- `pnpm lint` — passed (0 errors, 1 pre-existing warning in `main.ts` — non-mutating)
+- `pnpm lint` — passed (0 errors, 1 pre-existing warning in `src/main.ts:20:1` — `@typescript-eslint/no-floating-promises` on `bootstrap()`)
 - `pnpm test` — passed (1/1 unit test suite passed, 3/3 tests)
 - `pnpm test:e2e` — passed (1/1 e2e test suite passed, 2/2 tests)
 - `tsc --noEmit` — passed (0 errors)
@@ -105,10 +54,14 @@ git status --short
 
 Unit spec files are not generated automatically (`--no-spec` for Nest CLI generators, no hand-created unit specs without explicit instruction).
 
+## Canvas Snapshot API Feature Status
+
+**CANVAS_SNAPSHOT_CLOSED**: YES
+
 ## Next Bounded Step
 
 ```text
-P9_WORKSPACE_GRAPH_API_1C_AUDIT_CANVAS_SNAPSHOT_IMPLEMENTATION_001 — Independent read-only audit of Canvas Snapshot API implementation and runtime evidence.
+P9_API_DOCS_1A_IMPLEMENT_SWAGGER_UI_001 — Implement OpenAPI/Swagger UI documentation for FinCraft Lab backend endpoints.
 ```
 
 ## Related documents

@@ -16,17 +16,14 @@ import {
 } from '../database/generated/prisma/client';
 import { PrismaService } from '../database/prisma.service';
 import type { SaveCanvasSnapshotDto } from './dto/save-canvas-snapshot.dto';
-import type {
-  CanvasSnapshotResponse,
-  JsonObject,
-} from './types/canvas-snapshot-response.type';
+import type { CanvasSnapshotResponse } from './types/canvas-snapshot-response.type';
+import { mapCanvasSnapshotResponse } from './workspace-canvas.mapper';
 import {
-  MAX_CANVAS_EDGES,
-  MAX_CANVAS_EDGE_LABEL_LENGTH,
-  MAX_CANVAS_NODES,
-  MAX_CANVAS_SNAPSHOT_BYTES,
-  MAX_NODE_VALUE_DATA_BYTES,
-} from './workspace.constants';
+  validateAggregatePayloadSize,
+  validateAndNormalizeEdges,
+  validateAndNormalizeNodes,
+  validateCollectionCountLimits,
+} from './workspace-canvas.validation';
 
 @Injectable()
 export class WorkspaceCanvasService {
@@ -36,16 +33,7 @@ export class WorkspaceCanvasService {
   ) {}
 
   /**
-   * Retrieves the current Canvas graph snapshot for an owned Workspace.
-   *
-   * Rules:
-   * 1. Validates User account and active status.
-   * 2. Validates owned Workspace existence.
-   * 3. Both ACTIVE and ARCHIVED workspaces are readable.
-   * 4. Returns Workspace.updatedAt as workspaceUpdatedAt.
-   * 5. Joins current public Element display metadata (does not filter inactive elements).
-   * 6. Orders Nodes by id ASC and Edges by id ASC.
-   * 7. Zero database writes.
+   * Retrieves current Canvas graph snapshot for an owned Workspace.
    */
   async getSnapshot(
     userId: string,
@@ -107,49 +95,16 @@ export class WorkspaceCanvasService {
       },
     });
 
-    return {
-      workspaceId: workspace.id,
-      workspaceUpdatedAt: workspace.updatedAt.toISOString(),
-      nodes: nodes.map((node) => ({
-        id: node.id,
-        elementId: node.elementId,
-        element: {
-          id: node.element.id,
-          name: node.element.name,
-          slug: node.element.slug,
-          emoji: node.element.emoji,
-          iconUrl: node.element.iconUrl,
-          elementType: node.element.elementType,
-          isStarter: node.element.isStarter,
-        },
-        positionX: node.positionX,
-        positionY: node.positionY,
-        valueData: (node.valueData as JsonObject) ?? {},
-      })),
-      edges: edges.map((edge) => ({
-        id: edge.id,
-        sourceNodeId: edge.sourceNodeId,
-        targetNodeId: edge.targetNodeId,
-        label: edge.label,
-      })),
-    };
+    return mapCanvasSnapshotResponse(
+      workspace.id,
+      workspace.updatedAt,
+      nodes,
+      edges,
+    );
   }
 
   /**
-   * Atomically replaces the entire Canvas graph for an owned ACTIVE Workspace.
-   *
-   * Pre-transaction checks:
-   * 1. Validates User account and active status.
-   * 2. Validates aggregate payload size (MAX_CANVAS_SNAPSHOT_BYTES = 512 KB).
-   * 3. Validates node/edge counts, DTO structure, valueData limits, and graph integrity.
-   *
-   * In-transaction sequence:
-   * 4. Claims active Workspace and locks updatedAt.
-   * 5. Validates Element availability (existence, active status, category status, starter/unlocks).
-   * 6. Validates global Node/Edge ID collisions against other workspaces.
-   * 7. Deletes existing Edges and Nodes.
-   * 8. Creates new Nodes and Edges.
-   * 9. Returns committed CanvasSnapshotResponse with updated workspaceUpdatedAt.
+   * Atomically replaces entire Canvas graph for an owned ACTIVE Workspace inside transaction.
    */
   async saveSnapshot(
     userId: string,
@@ -170,126 +125,20 @@ export class WorkspaceCanvasService {
       throw new ForbiddenException('User account is disabled');
     }
 
-    // 2. Aggregate Payload Size Check (512 KB domain ceiling)
-    const rawPayloadBytes = Buffer.byteLength(JSON.stringify(dto), 'utf8');
-    if (rawPayloadBytes > MAX_CANVAS_SNAPSHOT_BYTES) {
-      throw new BadRequestException('Canvas snapshot payload is too large');
-    }
+    // 2. Pre-transaction Payload & Structure Validation
+    validateAggregatePayloadSize(dto);
+    validateCollectionCountLimits(dto.nodes.length, dto.edges.length);
+    const { normalizedNodes, nodeIdsSet } = validateAndNormalizeNodes(
+      dto.nodes,
+    );
+    const { normalizedEdges, edgeIdsSet } = validateAndNormalizeEdges(
+      dto.edges,
+      nodeIdsSet,
+    );
 
-    // 3. Collection Count Limits
-    if (dto.nodes.length > MAX_CANVAS_NODES) {
-      throw new BadRequestException(
-        `Canvas exceeds maximum node limit (${MAX_CANVAS_NODES})`,
-      );
-    }
-
-    if (dto.edges.length > MAX_CANVAS_EDGES) {
-      throw new BadRequestException(
-        `Canvas exceeds maximum edge limit (${MAX_CANVAS_EDGES})`,
-      );
-    }
-
-    // 4. Pre-transaction Node & ValueData Validation
-    const nodeIdsSet = new Set<string>();
-    const normalizedNodes = dto.nodes.map((node) => {
-      if (nodeIdsSet.has(node.id)) {
-        throw new BadRequestException(
-          `Duplicate node ID '${node.id}' in snapshot`,
-        );
-      }
-      nodeIdsSet.add(node.id);
-
-      const rawValueData = node.valueData;
-      let valueData: Record<string, unknown> = {};
-
-      if (rawValueData !== undefined) {
-        if (
-          typeof rawValueData !== 'object' ||
-          rawValueData === null ||
-          Array.isArray(rawValueData)
-        ) {
-          throw new BadRequestException('valueData must be a plain object');
-        }
-        valueData = rawValueData;
-      }
-
-      const serializedValueData = JSON.stringify(valueData);
-      if (
-        Buffer.byteLength(serializedValueData, 'utf8') >
-        MAX_NODE_VALUE_DATA_BYTES
-      ) {
-        throw new BadRequestException(
-          `valueData exceeds maximum size limit (${MAX_NODE_VALUE_DATA_BYTES} bytes)`,
-        );
-      }
-
-      return {
-        id: node.id,
-        elementId: node.elementId,
-        positionX: node.positionX,
-        positionY: node.positionY,
-        valueData: JSON.parse(serializedValueData) as Record<string, unknown>,
-      };
-    });
-
-    // 5. Pre-transaction Edge & Graph Integrity Validation
-    const edgeIdsSet = new Set<string>();
-    const edgeTuplesSet = new Set<string>();
-
-    const normalizedEdges = dto.edges.map((edge) => {
-      if (edgeIdsSet.has(edge.id)) {
-        throw new BadRequestException(
-          `Duplicate edge ID '${edge.id}' in snapshot`,
-        );
-      }
-      edgeIdsSet.add(edge.id);
-
-      if (!nodeIdsSet.has(edge.sourceNodeId)) {
-        throw new BadRequestException(
-          `Source node '${edge.sourceNodeId}' does not exist in canvas snapshot`,
-        );
-      }
-
-      if (!nodeIdsSet.has(edge.targetNodeId)) {
-        throw new BadRequestException(
-          `Target node '${edge.targetNodeId}' does not exist in canvas snapshot`,
-        );
-      }
-
-      if (edge.sourceNodeId === edge.targetNodeId) {
-        throw new BadRequestException('Self-connecting edges are not allowed');
-      }
-
-      if (typeof edge.label !== 'string') {
-        throw new BadRequestException('label must be a string');
-      }
-
-      const trimmedLabel = edge.label.trim();
-      if (trimmedLabel.length > MAX_CANVAS_EDGE_LABEL_LENGTH) {
-        throw new BadRequestException(
-          `label exceeds maximum length (${MAX_CANVAS_EDGE_LABEL_LENGTH})`,
-        );
-      }
-
-      const tupleKey = `${edge.sourceNodeId}:${edge.targetNodeId}:${trimmedLabel}`;
-      if (edgeTuplesSet.has(tupleKey)) {
-        throw new BadRequestException(
-          'Duplicate edge connection in canvas snapshot',
-        );
-      }
-      edgeTuplesSet.add(tupleKey);
-
-      return {
-        id: edge.id,
-        sourceNodeId: edge.sourceNodeId,
-        targetNodeId: edge.targetNodeId,
-        label: trimmedLabel,
-      };
-    });
-
-    // 6. Interactive Database Transaction
+    // 3. Interactive Database Transaction
     return this.prisma.$transaction(async (tx) => {
-      // 6a. Find owned Workspace
+      // 3a. Find owned Workspace
       const workspace = await tx.workspace.findFirst({
         where: { id: workspaceId, userId },
         select: { id: true, status: true },
@@ -303,7 +152,7 @@ export class WorkspaceCanvasService {
         throw new ConflictException('Workspace is archived');
       }
 
-      // 6b. Atomic Workspace claim & updatedAt mutation
+      // 3b. Atomic Workspace claim & updatedAt mutation
       const updateCount = await tx.workspace.updateMany({
         where: { id: workspaceId, userId, status: WorkspaceStatus.ACTIVE },
         data: { updatedAt: new Date() },
@@ -324,7 +173,7 @@ export class WorkspaceCanvasService {
         throw new NotFoundException('Workspace not found');
       }
 
-      // 6c. Validate Element Availability inside Transaction
+      // 3c. Validate Element Availability inside Transaction
       const requestedElementIds = Array.from(
         new Set(normalizedNodes.map((n) => n.elementId)),
       );
@@ -384,7 +233,7 @@ export class WorkspaceCanvasService {
         }
       }
 
-      // 6d. Check Global Node/Edge ID Collisions Against Other Workspaces
+      // 3d. Check Global Node/Edge ID Collisions Against Other Workspaces
       const requestedNodeIds = Array.from(nodeIdsSet);
       if (requestedNodeIds.length > 0) {
         const otherNodeCollision = await tx.workspaceNode.findFirst({
@@ -415,7 +264,7 @@ export class WorkspaceCanvasService {
         }
       }
 
-      // 6e. Delete Current Graph & Create New Graph
+      // 3e. Delete Current Graph & Create New Graph
       await tx.workspaceEdge.deleteMany({ where: { workspaceId } });
       await tx.workspaceNode.deleteMany({ where: { workspaceId } });
 
@@ -444,7 +293,7 @@ export class WorkspaceCanvasService {
         });
       }
 
-      // 6f. Query Updated Workspace Timestamp & Committed Graph
+      // 3f. Query Updated Workspace Timestamp & Committed Graph
       const updatedWorkspace = await tx.workspace.findUniqueOrThrow({
         where: { id: workspaceId },
         select: { id: true, updatedAt: true },
@@ -484,32 +333,12 @@ export class WorkspaceCanvasService {
         },
       });
 
-      return {
-        workspaceId: updatedWorkspace.id,
-        workspaceUpdatedAt: updatedWorkspace.updatedAt.toISOString(),
-        nodes: committedNodes.map((node) => ({
-          id: node.id,
-          elementId: node.elementId,
-          element: {
-            id: node.element.id,
-            name: node.element.name,
-            slug: node.element.slug,
-            emoji: node.element.emoji,
-            iconUrl: node.element.iconUrl,
-            elementType: node.element.elementType,
-            isStarter: node.element.isStarter,
-          },
-          positionX: node.positionX,
-          positionY: node.positionY,
-          valueData: (node.valueData as JsonObject) ?? {},
-        })),
-        edges: committedEdges.map((edge) => ({
-          id: edge.id,
-          sourceNodeId: edge.sourceNodeId,
-          targetNodeId: edge.targetNodeId,
-          label: edge.label,
-        })),
-      };
+      return mapCanvasSnapshotResponse(
+        updatedWorkspace.id,
+        updatedWorkspace.updatedAt,
+        committedNodes,
+        committedEdges,
+      );
     });
   }
 }
