@@ -102,3 +102,28 @@ MODE=COMPILED_NEST_APP_MODULE_REAL_POSTGRESQL
 
 - `MANUAL_TRY_IT_OUT: NOT_PERFORMED`
 - `POSTMAN_NEWMAN: NOT_REQUIRED`
+
+---
+
+## 8. Post-Audit P2002 Target Check Repair (`P11_PET_PROFILE_API_1C1_REPAIR_P2002_TARGET_CHECK_001`)
+
+- **Date**: 2026-07-24
+- **Audit Defect**: `P11_PET_PROFILE_API_1C_POST_COMMIT_AUDIT_001` identified that `handleDuplicateError` mapped any Prisma `P2002` error without verifying `meta.target`.
+- **Repaired File**: `src/pet/pet.service.ts`
+- **Repaired Methods**: `handleDuplicateError`, `isPetUserIdConflict`
+- **Observed Prisma 7.8 `meta` Shape**:
+  `meta: { modelName: 'Pet', driverAdapterError: { cause: { constraint: { fields: ['user_id'] }, originalMessage: 'duplicate key value violates unique constraint "pets_user_id_key"' } } }`
+- **Accepted Exact Ownership Identifiers**: `'user_id'`, `'userId'`, `'pets_user_id_key'`, or `driverAdapterError.cause.constraint.fields` containing `'user_id'` / `'userId'`.
+- **Focused Verification Cases**:
+  1. Real duplicate `Pet.userId` conflict -> mapped to `HTTP 409 Conflict` ("Pet profile already exists") [PASSED]
+  2. Synthetic P2002 with unrelated target (`target: ['unrelated_field']`) -> original error rethrown, NOT mapped [PASSED]
+  3. P2002 with missing target metadata -> original error rethrown, NOT mapped [PASSED]
+  4. Non-P2002 error (e.g. `P2003`) -> original error rethrown, NOT mapped [PASSED]
+  5. Friendly pre-check -> returns `HTTP 409 Conflict` ("Pet profile already exists") [PASSED]
+- **Static Quality Gates**:
+  - `tsc`: PASSED (exit 0)
+  - `eslint`: PASSED (exit 0, 0 errors/warnings)
+  - `nest build`: PASSED (exit 0)
+  - `jest unit`: PASSED (1 suite / 3 tests)
+  - `jest e2e`: PASSED (1 suite / 2 tests)
+- **Database / Schema Status**: 0 schema changes, 0 migrations executed, 0 seed files modified. Task-owned test records cleaned up.

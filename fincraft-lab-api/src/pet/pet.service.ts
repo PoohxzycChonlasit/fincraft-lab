@@ -133,13 +133,68 @@ export class PetService {
   }
 
   private handleDuplicateError(error: unknown): void {
-    if (
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      (error as { code: string }).code === 'P2002'
-    ) {
+    if (this.isPetUserIdConflict(error)) {
       throw new ConflictException('Pet profile already exists');
     }
+  }
+
+  private isPetUserIdConflict(error: unknown): boolean {
+    if (
+      !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+      error.code !== 'P2002'
+    ) {
+      return false;
+    }
+
+    const meta = error.meta as
+      | {
+          modelName?: string;
+          target?: unknown;
+          driverAdapterError?: {
+            cause?: {
+              constraint?: {
+                fields?: unknown;
+              };
+              originalMessage?: string;
+            };
+          };
+        }
+      | undefined;
+
+    if (!meta) {
+      return false;
+    }
+
+    const target = meta.target;
+    if (Array.isArray(target)) {
+      if (target.includes('user_id') || target.includes('userId')) {
+        return true;
+      }
+    } else if (typeof target === 'string') {
+      if (
+        target === 'user_id' ||
+        target === 'userId' ||
+        target === 'pets_user_id_key'
+      ) {
+        return true;
+      }
+    }
+
+    const driverFields = meta.driverAdapterError?.cause?.constraint?.fields;
+    if (Array.isArray(driverFields)) {
+      if (driverFields.includes('user_id') || driverFields.includes('userId')) {
+        return true;
+      }
+    }
+
+    const originalMsg = meta.driverAdapterError?.cause?.originalMessage;
+    if (
+      typeof originalMsg === 'string' &&
+      originalMsg.includes('pets_user_id_key')
+    ) {
+      return true;
+    }
+
+    return false;
   }
 }
