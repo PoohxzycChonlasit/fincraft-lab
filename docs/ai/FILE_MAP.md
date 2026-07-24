@@ -1,5 +1,22 @@
 # FILE_MAP.md — Repository File Structure
 
+## Documentation & Plans (`docs/ai`)
+
+```text
+docs/ai/
+├── AGENTS.md (in root)
+├── GEMINI.md (in root)
+├── CODING_RULES.md
+├── CURRENT_STATUS.md
+├── FILE_MAP.md
+├── PROJECT_CONTEXT.md
+├── STEPWISE_WORKFLOW.md
+├── evidence/
+│   └── SWAGGER_OPENAPI_RUNTIME_ACCEPTANCE.md
+└── plans/
+    └── SURVIVAL_MONTHS_SIMULATION_API_CONTRACT.md
+```
+
 ## Backend (`fincraft-lab-api/src`)
 
 ```text
