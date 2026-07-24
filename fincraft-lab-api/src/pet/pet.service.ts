@@ -1,0 +1,145 @@
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { Prisma, UserStatus } from '../database/generated/prisma/client';
+import { PrismaService } from '../database/prisma.service';
+import { CreatePetDto } from './dto/create-pet.dto';
+import { PetResponseDto } from './dto/pet-response.dto';
+import { UpdatePetDto } from './dto/update-pet.dto';
+import { PetResponseMapper } from './mappers/pet-response.mapper';
+
+@Injectable()
+export class PetService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  private async validateUser(userId: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, status: true },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User account not found');
+    }
+
+    if (user.status !== UserStatus.ACTIVE) {
+      throw new ForbiddenException('User account is disabled');
+    }
+  }
+
+  async getMyPet(userId: string): Promise<PetResponseDto> {
+    await this.validateUser(userId);
+
+    const pet = await this.prisma.pet.findUnique({
+      where: { userId },
+    });
+
+    if (!pet) {
+      throw new NotFoundException('Pet profile not found');
+    }
+
+    return PetResponseMapper.toResponseDto(pet);
+  }
+
+  async createPet(userId: string, dto: CreatePetDto): Promise<PetResponseDto> {
+    await this.validateUser(userId);
+
+    const existing = await this.prisma.pet.findUnique({
+      where: { userId },
+    });
+
+    if (existing) {
+      throw new ConflictException('Pet profile already exists');
+    }
+
+    try {
+      const pet = await this.prisma.pet.create({
+        data: {
+          userId,
+          name: dto.name,
+          species: dto.species,
+          avatarUrl: dto.avatarUrl ?? null,
+          personality: dto.personality ?? null,
+          learningGoal: dto.learningGoal ?? null,
+        },
+      });
+
+      return PetResponseMapper.toResponseDto(pet);
+    } catch (error: unknown) {
+      this.handleDuplicateError(error);
+      throw error;
+    }
+  }
+
+  async updatePet(userId: string, dto: UpdatePetDto): Promise<PetResponseDto> {
+    await this.validateUser(userId);
+
+    const hasEditableField =
+      dto !== undefined &&
+      dto !== null &&
+      (dto.name !== undefined ||
+        dto.species !== undefined ||
+        dto.avatarUrl !== undefined ||
+        dto.personality !== undefined ||
+        dto.learningGoal !== undefined);
+
+    if (!hasEditableField) {
+      throw new BadRequestException(
+        'At least one editable field must be provided',
+      );
+    }
+
+    const existing = await this.prisma.pet.findUnique({
+      where: { userId },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Pet profile not found');
+    }
+
+    const data: Prisma.PetUpdateInput = {};
+
+    if (dto.name !== undefined) {
+      data.name = dto.name;
+    }
+
+    if (dto.species !== undefined) {
+      data.species = dto.species;
+    }
+
+    if (dto.avatarUrl !== undefined) {
+      data.avatarUrl = dto.avatarUrl;
+    }
+
+    if (dto.personality !== undefined) {
+      data.personality = dto.personality;
+    }
+
+    if (dto.learningGoal !== undefined) {
+      data.learningGoal = dto.learningGoal;
+    }
+
+    const updated = await this.prisma.pet.update({
+      where: { userId },
+      data,
+    });
+
+    return PetResponseMapper.toResponseDto(updated);
+  }
+
+  private handleDuplicateError(error: unknown): void {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as { code: string }).code === 'P2002'
+    ) {
+      throw new ConflictException('Pet profile already exists');
+    }
+  }
+}

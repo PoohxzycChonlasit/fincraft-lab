@@ -13,7 +13,8 @@ docs/ai/
 ├── STEPWISE_WORKFLOW.md
 ├── evidence/
 │   ├── SWAGGER_OPENAPI_RUNTIME_ACCEPTANCE.md
-│   └── SURVIVAL_MONTHS_SIMULATION_RUNTIME_ACCEPTANCE.md
+│   ├── SURVIVAL_MONTHS_SIMULATION_RUNTIME_ACCEPTANCE.md
+│   └── PET_PROFILE_RUNTIME_ACCEPTANCE.md
 └── plans/
     ├── SURVIVAL_MONTHS_SIMULATION_API_CONTRACT.md
     └── PET_PROFILE_API_CONTRACT.md
@@ -64,6 +65,20 @@ src/
 │   ├── config/
 │   ├── hash/
 │   └── jwt/
+├── pet/
+│   ├── pet.module.ts
+│   ├── pet.controller.ts
+│   ├── pet.service.ts
+│   ├── dto/
+│   │   ├── create-pet.dto.ts
+│   │   ├── update-pet.dto.ts
+│   │   └── pet-response.dto.ts
+│   ├── mappers/
+│   │   └── pet-response.mapper.ts
+│   ├── openapi/
+│   │   └── pet-openapi.decorators.ts
+│   └── validators/
+│       └── is-https-url.validator.ts
 ├── simulation/
 │   ├── simulation.module.ts
 │   ├── simulation.controller.ts

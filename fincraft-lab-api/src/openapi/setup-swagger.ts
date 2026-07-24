@@ -40,6 +40,7 @@ export function setupSwagger(app: INestApplication): void {
       'Simulations',
       'Financial literacy simulation models and execution engine',
     )
+    .addTag('Pets', 'User personal pet guide profile management')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

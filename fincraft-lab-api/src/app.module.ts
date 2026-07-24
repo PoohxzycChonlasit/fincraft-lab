@@ -7,6 +7,7 @@ import { CraftModule } from './craft/craft.module';
 import { ElementModule } from './element/element.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { SimulationModule } from './simulation/simulation.module';
+import { PetModule } from './pet/pet.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SimulationModule } from './simulation/simulation.module';
     ElementModule,
     WorkspaceModule,
     SimulationModule,
+    PetModule,
   ],
 })
 export class AppModule {}

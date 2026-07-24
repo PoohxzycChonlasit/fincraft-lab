@@ -75,3 +75,17 @@
   - Unique Paths: **12**
   - Operations: **16** (13 pre-existing + 3 new `Simulations` operations)
 - **Reconciled Status**: All 16 OpenAPI operations fully functional and authenticated with `access-token` Bearer security where required.
+
+---
+
+## Post-Pet Profile Reconciliation (`P11_PET_PROFILE_API_1B_IMPLEMENT_PET_PROFILE_001`)
+
+- **New Operations Added**:
+  - `GET /pets/me` (`Pets` tag, Get my Pet profile)
+  - `POST /pets` (`Pets` tag, Create my Pet profile)
+  - `PATCH /pets/me` (`Pets` tag, Update my Pet profile)
+- **Updated OpenAPI Totals**:
+  - Controllers: **7** (`HealthController`, `AuthController`, `ElementController`, `CraftController`, `WorkspaceController`, `SimulationController`, `PetController`)
+  - Unique Paths: **14**
+  - Operations: **19** (16 pre-existing + 3 new `Pets` operations)
+- **Reconciled Status**: All 19 OpenAPI operations fully functional and authenticated with `access-token` Bearer security where required. Public auth routes `/auth/register` and `/auth/login` remain public. `passwordHash` remains absent across all OpenAPI schemas.

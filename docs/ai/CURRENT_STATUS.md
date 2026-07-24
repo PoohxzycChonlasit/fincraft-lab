@@ -4,55 +4,40 @@
 
 - **Date**: 2026-07-24
 - **Backend Stack**: NestJS + PostgreSQL + Prisma 7.8
-- **Latest Task**: `P11_PET_PROFILE_API_1A1_REPAIR_CONTRACT_001`
-- **Swagger Status**: Closed & Fully Verified (16 current operations / 12 unique paths; 19 expected operations after Pet implementation)
+- **Latest Task**: `P11_PET_PROFILE_API_1B_IMPLEMENT_PET_PROFILE_001`
+- **Swagger Status**: Closed & Fully Verified (19 operations / 14 unique paths / 7 controllers)
 - **Simulation Status**: Survival Months (`survival-months`) Closed & Fully Verified
-- **Pet Profile Status**: Contract Reconciled & Frozen (`FROZEN_PET_PROFILE_API_CONTRACT_V1`)
-- **Pet Source Implementation**: `NONE` (Contract reconciliation task only)
-- **Pet Database Seed**: `NONE` (Pets are user-created via API)
+- **Pet Profile Status**: Implemented & Verified End-to-End
+- **Pet Profile Endpoints**:
+  1. `GET /pets/me` (200 OK / 404 Not Found)
+  2. `POST /pets` (201 Created / 409 Conflict)
+  3. `PATCH /pets/me` (200 OK / 404 Not Found / 400 Bad Request)
 - **Prisma Schema Migration**: `NONE` (0 migrations executed; 0 schema changes required)
 - **Exact Cardinality**: `ONE_USER_ONE_PET`
 - **Exact Schema-Fit Verdict**: `DIRECT_FIT` (all fields exist in `Pet` model)
 - **Exact Avatar Strategy**: `STORED_HTTPS_AVATAR_URL_WITHOUT_REMOTE_FETCH` (HTTPS protocol required, no remote fetch, no file upload)
-- **Exact Nullable-Field Semantics**: Omitted vs explicit `null` vs whitespace-only strings reconciled
-- **Exact Auth Behavior**: Reused directly from `AuthGuard` (401) and `validateUser` (401 for missing user, 403 for INACTIVE/BANNED)
+- **Pet Database Seed**: `NONE` (Pets are user-created via API)
+- **Runtime Acceptance**: `EXECUTED=50`, `PASSED=50`, `FAILED=0`, `DEFERRED=0` (`COMPILED_NEST_APP_MODULE_REAL_POSTGRESQL`)
+- **AI & Recommendation Safety**: No AI text generation, image upload, remote fetching, market data, or financial recommendations
 - **Worktree**: Clean (Pending Local Checkpoint Commit)
-- **Next Recommended Task**: `P11_PET_PROFILE_API_1B_IMPLEMENT_PET_PROFILE_001`
+- **Next Recommended Task**: `P11_PET_PROFILE_API_1C_POST_COMMIT_AUDIT_001`
 
 ---
 
-## Pet Profile Contract Reconciliation (`P11_PET_PROFILE_API_1A1`)
+## Pet Profile Implementation (`P11_PET_PROFILE_API_1B`)
 
 - **Contract Artifact**: [`docs/ai/plans/PET_PROFILE_API_CONTRACT.md`](file:///C:/devnest%20101/single-project/fincraft-lab/docs/ai/plans/PET_PROFILE_API_CONTRACT.md)
 - **Frozen Contract Marker**: `FROZEN_PET_PROFILE_API_CONTRACT_V1`
-- **Reconciliation Highlights**:
-  1. **Product Role**: Personal profile guide & financial companion (1 Pet per User, persistent across sessions).
-  2. **Schema Fit**: `DIRECT_FIT` for all fields (`id`, `userId`, `name`, `species`, `avatarUrl`, `personality`, `learningGoal`, `createdAt`, `updatedAt`). 0 Prisma migrations required.
-  3. **Cardinality & Concurrency**: `ONE_USER_ONE_PET`. Enforced at database level via `Pet.userId` `@unique` constraint. Friendly service pre-check + Prisma P2002 unique constraint mapping to `HTTP 409 Conflict` ("Pet profile already exists").
-  4. **Avatar Strategy**: `STORED_HTTPS_AVATAR_URL_WITHOUT_REMOTE_FETCH`. Requires absolute HTTPS URL format (max 2048 chars). Rejects HTTP, data:, file:, javascript:, and whitespace-only strings with `HTTP 400 Bad Request`. Backend stores string only, performing NO remote requests or file downloads. Explicit `null` on PATCH clears `avatarUrl`. Omitted `avatarUrl` on PATCH preserves existing DB value.
-  5. **Nullable Field Semantics**:
-     - `avatarUrl`, `personality`, `learningGoal`: On Create, omitted/null stores `null`; valid string stores trimmed value; whitespace-only returns 400. On Patch, omitted preserves existing value; explicit `null` clears to `null`; valid string replaces value; whitespace-only returns 400.
-     - `name`: Required on Create, optional on Patch; null/whitespace-only returns 400; trimmed length 1–50.
-     - `species`: Required on Create, optional on Patch; null returns 400; must match `PetSpecies` enum (`CAT`, `DOG`, `RABBIT`, `TURTLE`, `BIRD`).
-  6. **Auth Status Behavior**: Reused directly from project source:
-     - Missing / Invalid JWT: `AuthGuard` throws `UnauthorizedException('Invalid or missing authentication token')` (401).
-     - User missing in DB: Service throws `UnauthorizedException('User account not found')` (401).
-     - INACTIVE / BANNED User: Service throws `ForbiddenException('User account is disabled')` (403).
-  7. **Endpoints & Empty PATCH**:
-     - `GET /pets/me` (200 OK / 404 Not Found)
-     - `POST /pets` (201 Created / 409 Conflict)
-     - `PATCH /pets/me` (200 OK / 404 Not Found / 400 Bad Request on empty body `{}` with message "At least one editable field must be provided")
-  8. **Security & Ownership**: All endpoints protected by Bearer JWT (`access-token`). `userId` derived strictly from JWT payload. Body `userId` or `id` injection rejected by `ValidationPipe`.
-  9. **Response Envelope**: Wrapped in `{ "data": { id, name, species, avatarUrl, personality, learningGoal, createdAt, updatedAt } }`. `userId` and `passwordHash` strictly excluded.
-  10. **Reconciled Runtime Acceptance Matrix**: 50 numbered scenarios frozen for future execution.
-
----
-
-## Survival Months Simulation Status (`P10_SIMULATION_API`)
-
-- **Status**: Closed (All audit checks passed with commit `d3ed8cbac67aa335997c0457c927ee366e84ae32`)
-- **Endpoints**: `GET /simulations`, `GET /simulations/:id`, `POST /simulations/:id/runs`
-- **Runtime Acceptance**: `EXECUTED=44`, `PASSED=44`, `FAILED=0`, `DEFERRED=0`
+- **Evidence Artifact**: [`docs/ai/evidence/PET_PROFILE_RUNTIME_ACCEPTANCE.md`](file:///C:/devnest%20101/single-project/fincraft-lab/docs/ai/evidence/PET_PROFILE_RUNTIME_ACCEPTANCE.md)
+- **Implementation Summary**:
+  1. **Validators**: `src/pet/validators/is-https-url.validator.ts` validates syntactically valid absolute HTTPS URLs (max 2048 chars) and rejects HTTP, file:, data:, javascript:, and whitespace-only strings.
+  2. **DTOs**: `src/pet/dto/` contains `CreatePetDto`, `UpdatePetDto`, `PetResponseDto`, and `PetEnvelopeDto` with strict class-validator rules.
+  3. **Mapper**: `PetResponseMapper` formats ISO-8601 timestamps and excludes `userId`, `passwordHash`, and internal relations.
+  4. **OpenAPI Decorators**: `src/pet/openapi/pet-openapi.decorators.ts` documents routes under `Pets` tag with Bearer security. Total OpenAPI inventory updated to 19 operations across 14 unique paths.
+  5. **Fail-Closed Service**: `PetService` validates ACTIVE user status, handles 404/409 conditions, performs friendly pre-checks, and maps Prisma P2002 unique constraint violations safely to `HTTP 409 Conflict`.
+  6. **Protected Controller**: `PetController` handles routes with `@CurrentUser()`, `ValidationPipe` whitelist rejection of extra properties, and `{ data: result }` response envelope.
+  7. **Feature Module**: `PetModule` imports `DatabaseModule` and `AccessTokenModule`, registered in `AppModule`.
+  8. **Runtime Verification**: 50/50 frozen matrix scenarios verified against compiled `AppModule` on real local PostgreSQL.
 
 ---
 
@@ -63,3 +48,11 @@
 - `nest build`: **PASSED (exit 0)**
 - `jest --runInBand`: **PASSED (1 suite / 3 tests)**
 - `jest --config ./test/jest-e2e.json`: **PASSED (1 suite / 2 tests)**
+
+---
+
+## Architectural & File Size Ceilings
+
+- **Root-MCS Policy Enforced**: Primary `pet.module.ts`, `pet.controller.ts`, `pet.service.ts` remain strictly at feature root `src/pet/`.
+- **Controller Line Ceilings**: `pet.controller.ts` is 52 lines (preferred <= 150, hard <= 200).
+- **Service & Source Ceilings**: `pet.service.ts` is 149 lines (preferred <= 250). All source files remain strictly below 400 physical lines. All methods remain below 100 physical lines.
