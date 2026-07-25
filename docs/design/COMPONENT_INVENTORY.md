@@ -19,7 +19,7 @@ Components are categorized into four distinct layers to maintain separation of c
 | `Button` | Primary/secondary actions | Global | Default, Hover, Focus-visible, Active, Loading, Disabled | ARIA button, 44px min touch |
 | `Input` | Single-line text input | Forms | Default, Hover, Focus-visible, Error, Disabled | Label association, aria-invalid |
 | `Label` | Field label | Forms | Default, Disabled, Error | HTML `for` binding |
-| `Form` | React Hook Form wrapper | Forms | Valid, Invalid, Submitting | Field-level error messages |
+| `Field` | FieldLabel, FieldDescription, FieldError wrapper | Forms | Default, Invalid, Disabled | ARIA fieldset & error binding |
 | `Card` | Surface container | Layout | Default, Hover | Semantic sectioning |
 | `Badge` | Category / status indicator | Global | Category variants | High contrast text |
 | `Separator` | Visual divider | Layout | Horizontal, Vertical | `aria-orientation` |
