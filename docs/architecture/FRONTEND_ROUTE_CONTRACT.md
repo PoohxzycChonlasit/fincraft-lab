@@ -18,8 +18,8 @@ Define the canonical route contract, access levels, layout boundaries, backend e
 | `/pet` | Pet Profile | Protected (User) | App Layout | Implemented MVP |
 | `/workspaces` | Workspace List | Protected (User) | App Layout | Implemented MVP |
 | `/workspaces/[workspaceId]` | Craft Lab Workspace | Protected (User) | Fullscreen Lab Layout | Implemented MVP |
-| `/discovery/[elementId]` | Discovery Detail | Protected (User) | App Layout | Implemented MVP |
-| `/graph` | Knowledge Graph View | Protected (User) | Fullscreen Lab Layout | Implemented MVP |
+| `/discovery/[elementId]` | Discovery Detail | Protected (User) | App Layout | MVP route contract; read API pending |
+| `/graph` | My Discovery Web | Protected (User) | Fullscreen Lab Layout | MVP supporting feature; blocked by read API |
 | `/simulation` | Financial Simulation | Protected (User) | App Layout | Implemented MVP |
 | `/profile` | User Account Profile | Protected (User) | App Layout | Implemented MVP |
 | `/admin/elements` | Admin Elements Management | Protected (Admin) | Admin Layout | Implemented MVP |
@@ -148,29 +148,29 @@ Define the canonical route contract, access levels, layout boundaries, backend e
 - **Purpose**: Deep-dive educational view for unlocked financial elements showing real-world lessons, trade-offs, hidden risks, reality level, and safety disclaimers.
 - **Access Level**: Protected (User)
 - **Layout**: App Layout
-- **Backend Endpoints**: `GET /elements/[elementId]/detail`, `GET /elements/[elementId]`
-- **Data Dependencies**: DiscoveryDetail entity, Element relationships.
-- **Loading State**: Detail article skeleton loader.
-- **Empty State**: Locked state card with hint on how to discover this element.
-- **Error State**: HTTP 404 element not found card with link back to Knowledge Vault.
-- **Desktop Behavior**: 2-column layout (Left: Element badge, category, short desc, safety label; Right: Structured trade-offs, works when/difficult when, sources).
-- **Mobile Behavior**: Single-column scrolling article view with sticky table of contents header.
-- **MVP Status**: Implemented MVP
-- **Deferred Behavior**: Community user discussions, user ratings on difficulty.
+- **Backend Endpoints**: Supporting Element/detail/relationship read APIs are required but are not implemented in the inspected controllers.
+- **Data Dependencies**: Known active Element content, known-only relationships, recipe provenance permitted by spoiler policy, and current-user history/workspace references when their query APIs exist.
+- **Loading State**: Detail article skeleton followed by the relationship list; Orbit must not be the loading dependency.
+- **Empty State**: Current known content remains visible; relationship groups say that no known connection is available and do not reveal hidden names or counts.
+- **Error State**: Keep the article and a safe relationship-panel retry state; never expose hidden data through errors.
+- **Desktop Behavior**: 2-column layout (Left: Element badge, category, short desc, safety label; Right: editorial lesson, sources, trade-offs, and the primary text relationship panel with optional Concept Orbit).
+- **Mobile Behavior**: Single-column article view with the relationship list before optional Orbit; detail opens in a bottom sheet and filters use a separate sheet without stacking sheets.
+- **MVP Status**: MVP route contract; supporting read API pending.
+- **Deferred Behavior**: Concept Orbit integration until the supporting read API exists; community user discussions and user ratings on difficulty.
 
-### 10. Knowledge Graph View (`/graph`)
-- **Purpose**: Visualize interconnected relationships between unlocked financial concepts, base elements, and risks.
+### 10. My Discovery Web (`/graph`)
+- **Purpose**: Show a bounded, known-only personal map of discovered financial concepts and their approved connections.
 - **Access Level**: Protected (User)
 - **Layout**: Fullscreen Lab Layout
-- **Backend Endpoints**: `GET /elements/graph`, `GET /elements/unlocked`
-- **Data Dependencies**: Element relationships graph nodes and links.
-- **Loading State**: Force-directed graph physics initialization spinner.
-- **Empty State**: Graph empty state encouraging element discovery in Craft Lab.
-- **Error State**: Graph rendering fallback alert.
-- **Desktop Behavior**: Interactive React Flow graph with zoom/pan controls, category filter pills, node click detail preview.
-- **Mobile Behavior**: Touch-optimized graph canvas with bottom node summary sheet.
-- **MVP Status**: Implemented MVP
-- **Deferred Behavior**: 3D graph visualization, custom node color overrides.
+- **Backend Endpoints**: Supporting graph read API is not currently implemented in the inspected controllers; do not integrate the route before a bounded backend contract exists.
+- **Data Dependencies**: Starter and unlocked known Elements, spoiler-filtered canonical relationships, permitted recipe provenance, and explicit personal/workspace layers when their APIs are available.
+- **Loading State**: Static list-first skeleton and plain progress text; never use a force-simulation initialization state.
+- **Empty State**: Known starter state with a Craft Lab action; no silhouettes, unnamed mystery nodes, hidden topology, or fake graph records.
+- **Error State**: Preserve route navigation and the accessible known-concepts relationship list with retry.
+- **Desktop Behavior**: Bounded 2D graph/list view with compact filters, selected-node inspector, static positions, and a synchronized semantic list. React Flow is a future bounded Client Component island only after package authorization.
+- **Mobile Behavior**: Local depth-one view, graph/list toggle, 44px controls, filters in a separate sheet, and selected-node details in a bottom sheet.
+- **MVP Status**: `MVP_SUPPORTING_FEATURE`; `BLOCKED_BY_READ_API`.
+- **Deferred Behavior**: Explore Map, complete canonical graph, 3D/WebGL, continuous force simulation, animated edges, and custom node colour overrides.
 
 ### 11. Financial Simulation (`/simulation`)
 - **Purpose**: Run financial scenarios (e.g. Emergency Fund Survival Months) by adjusting input parameters and visualizing timeline outcomes, risks, and insights.

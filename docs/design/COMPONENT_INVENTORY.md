@@ -103,7 +103,30 @@ Components are categorized into four distinct layers to maintain separation of c
 
 ---
 
-## 4. Deferred Components (Post-MVP)
+## 4. Future Visual and Discovery Web Components
+
+These are inventory contracts only. Do not create or install them during the visual and Discovery Web contract freeze.
+
+| Component | Responsibility | Phase / readiness |
+|---|---|---|
+| `SpecimenElementTile` | Flat educational Element presentation with earned interaction states | Design system future |
+| `CraftBay` | Recessed input/drop region for Craft cause/effect | Craft Canvas future |
+| `DiscoveryStamp` | Orange success/discovery state marker | Craft and Discovery future |
+| `FinancialLearningTape` | Editorial source, lesson, or safety callout | Discovery Detail future |
+| `MochiLabNote` | Functional Mochi guidance or safety note | Guidance/empty/success states future |
+| `RelationshipPanel` | Primary text/list relationship representation | Before graph canvas; requires supporting read API |
+| `RelationshipGroup` | One labelled relationship family in the panel | With RelationshipPanel |
+| `ConceptOrbit` | Bounded depth-one visual relationship enhancement | After supporting backend read API |
+| `DiscoveryWebCanvas` | Bounded 2D My Discovery Web graph island | After API and Concept Orbit contract |
+| `DiscoveryWebInspector` | Selected known-node detail and navigation actions | With My Discovery Web |
+| `RelationshipList` | Synchronized accessible list for graph data | Before and alongside any graph canvas |
+| `GraphLayerLegend` | Canonical, recipe, personal, and workspace semantics | With graph/list views |
+| `CategoryHint` | Explicit spoiler-safe category-only hint | After hint contract and API validation |
+| `WorkspaceConnectionBadge` | Personal/My link marker for workspace relationships | Workspace Connections future |
+
+**My Discovery Web** is implemented only after its supporting API and Concept Orbit contract exist. **Explore Map** is post-MVP and is not an implementation target for the current component inventory step.
+
+## 5. Deferred Components (Post-MVP)
 - `CommunityPostCard`: Deferred (Social feed post).
 - `CommentThread`: Deferred (Post comments).
 - `CheckoutForm`: Out of Scope (Payment processing).

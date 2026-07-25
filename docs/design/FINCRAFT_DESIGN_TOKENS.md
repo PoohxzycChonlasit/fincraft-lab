@@ -162,3 +162,33 @@ md: 768px  (Tablet portrait / stacked lab layout)
 lg: 1024px (Laptop / 3-column lab layout)
 xl: 1280px (Desktop / full width canvas)
 ```
+
+## 7. Future Semantic Surface and Relationship Families
+
+The following semantic families are reserved for future component implementation. They are token names and meaning contracts, not implementation CSS. They must map to the existing colour semantics and must not introduce a second teal or orange meaning.
+
+### Surface and state families
+
+- `surface-flat`: normal reading content and calm document regions; no earned depth.
+- `surface-resting`: a stable resting surface for an interactive region.
+- `surface-inset`: an input well, drop area, or recessed craft region.
+- `surface-raised`: a pressed, selected, or otherwise actively dimensional control.
+- `surface-floating`: an overlay, sheet, popover, or inspector above the reading plane.
+- `border-subtle`: the existing quiet boundary for normal separation.
+- `border-interactive`: a boundary that responds to hover or focus-visible state.
+- `border-selected`: the stronger boundary for selected or active state.
+- `highlight-inner`: a restrained inner highlight used only when a surface earns tactile depth.
+- `shadow-resting`: the lightest static elevation for an interactive resting surface.
+- `shadow-raised`: the selected or pressed elevation step.
+- `shadow-floating`: the overlay elevation step for sheets, dialogs, and inspectors.
+
+### Relationship families
+
+- `relation-recipe`: orange Craft/Discovery semantics for recipe provenance; use direction and text as well as colour.
+- `relation-support`: teal trust/action semantics for sourced directional support.
+- `relation-reduce`: teal trust/action semantics with cautious “May reduce” language and a non-colour marker.
+- `relation-tradeoff`: warning-neutral, conditional trade-off semantics; use line pattern and text.
+- `relation-related`: neutral, sparingly used relatedness semantics.
+- `relation-personal`: neutral personal-workspace semantics with a Personal/My link marker; never present it as canonical truth.
+
+Canonical relationship labels, spoiler rules, and graph boundaries are defined in `docs/architecture/FRONTEND_VISUAL_AND_DISCOVERY_WEB_DECISION.md`. Existing motion durations remain canonical: 150ms fast, 250ms normal, and 350ms slow. Future discovery celebration may not exceed the research ceiling of 700ms, is finite, and is removed or made static under reduced motion. These ceilings do not replace the existing duration tokens.

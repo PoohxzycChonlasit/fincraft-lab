@@ -32,6 +32,25 @@ The Craft Canvas is the primary product.
 Mochi is a guide, not a Craft Recipe input.
 All financial content is educational and simulation-only.
 
+## 1A. Canonical visual and Discovery Web guardrails
+
+Every future visual or UI task must follow the approved contracts:
+
+- Use **FinCraft Tactile Discovery Lab** as the visual direction.
+- Keep normal reading surfaces flat. Earn dimensional treatment only for interactive, selected, pressed, drag, inset, and floating states.
+- Use editorial/detail borrowing for learning content and limited modular borrowing inside Craft/Canvas relationship encoding.
+- Treat Kigen as a reference for control anatomy and token discipline only; do not copy its layout, branding, navigation, content, or exact components.
+- Use the approved signature language: Specimen Element Tile, Recessed Craft Bay, Orange Discovery Stamp, Financial Learning Tape, Mochi Lab Note, and Discovery Web Connection Language.
+- Reject 3D, WebGL, particles, animated graph edges, continuous force simulation, perpetual layout, continuously animated gradients, large blur layers, video backgrounds, and decorative infinite motion.
+- Graph experiences must provide a synchronized semantic relationship list as the canonical accessible representation; graph canvas is an enhancement.
+- Keep canonical knowledge, recipe provenance, personal discovery, and workspace layers visibly and semantically distinct.
+- Filter undiscovered data server-side. Hidden names, relationships, outputs, ingredients, topology, counts, and identities must be absent from payload, DOM, accessibility text, search suggestions, URLs, filter counts, and errors.
+- Do not invent Graph DTOs, hardcode Graph records, create permanent Graph mocks, query Prisma, or derive recipes in client logic.
+- Do not install React Flow or another graph/layout package without a separately authorized bounded package task.
+- Treat initial graph budgets as unverified until future profiling proves real-content performance.
+
+Canonical details live in `docs/architecture/FRONTEND_VISUAL_AND_DISCOVERY_WEB_DECISION.md`, `docs/architecture/FRONTEND_ROUTE_CONTRACT.md`, `docs/architecture/FRONTEND_SYSTEM_DESIGN.md`, and `docs/design/FINCRAFT_DESIGN_DIRECTION.md`. Do not duplicate the full research documents in this Skill.
+
 ---
 
 ## 2. Canonical stack
@@ -45,7 +64,7 @@ Use:
 - React Hook Form + Zod
 - TanStack Query
 - Zustand for Canvas state
-- React Flow for Canvas and Graph
+- React Flow for future bounded Canvas and Graph Client islands, only after a separately authorized package task
 - Recharts for Simulation
 - typed native `fetch`
 - `next/image`

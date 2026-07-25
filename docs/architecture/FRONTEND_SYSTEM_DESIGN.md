@@ -20,11 +20,11 @@ The application enforces Server Components by default, restricting Client Compon
 | Form Validation | React Hook Form + Zod | Strict schema validation before API submission |
 | Server State | TanStack Query | Caching, invalidation, loading/error states |
 | Canvas State | Zustand | Local workspace canvas node/viewport state |
-| Interactive Canvas | React Flow (`@xyflow/react`) | Craft Canvas and Knowledge Graph rendering |
+| Interactive Canvas | React Flow (`@xyflow/react`) | Future bounded Client island for Craft/Discovery graph rendering; no package install in this contract task |
 | Data Visualization | Recharts | Simulation charts and financial projections |
 | HTTP Transport | Native `fetch` | Typed wrapper, no Axios |
 | Image Optimization | `next/image` | Configured domains, mandatory alt attributes |
-| Visual Review | TasteSkill | Supplemental visual guardrail |
+| Visual Review | TasteSkill | Supplemental future guardrail; not installed or used in this contract task |
 
 ### Package Version Policy
 
@@ -161,3 +161,61 @@ Every main app feature route defines:
 1. `loading.tsx`: Skeleton loader for initial Server Component streaming.
 2. `error.tsx`: React error boundary providing a friendly error message and reset action.
 3. `not-found.tsx`: 404 page when a resource (e.g. element or workspace ID) does not exist.
+
+## Discovery Web architecture contract
+
+The Discovery Web is a supporting feature. Craft remains the primary product interaction. The user-facing route `/graph` is **My Discovery Web**, classified as `MVP_SUPPORTING_FEATURE` and `BLOCKED_BY_READ_API` until a bounded graph read contract exists.
+
+### Data layers
+
+Keep these layers separate in API mapping, state, visual language, and accessibility text:
+
+1. **Canonical knowledge:** reviewed/admin-authored `ElementRelationship` content with source and explanation; never user-editable.
+2. **Recipe provenance:** `CraftRecipe` and `CraftRecipeInput`; input points to output and never means real-world causality.
+3. **Personal discovery:** `UserElement` and `DiscoveryEvent`; progress and history, not universal truth.
+4. **Workspace:** `WorkspaceNode` and `WorkspaceEdge`; user arrangement and My link data, labelled Personal and never merged into canonical truth.
+
+The existing 15-model ERD is sufficient for proposed MVP derivation. No new model or enum is introduced by this contract.
+
+### Route and rendering boundaries
+
+- `page.tsx` and route composition remain Server Components by default.
+- A future React Flow graph is a bounded Client Component island only after a separately authorized package task.
+- The text relationship panel and ordered relationship list are the canonical accessible representation; graph rendering is an enhancement.
+- Graph payloads must be spoiler-filtered server-side. Undiscovered names, relationships, outputs, ingredients, topology, counts, and identities must be absent from payload, DOM, accessibility text, search suggestions, URLs, filter counts, and error messages.
+- Canonical data remains Server Component/API or TanStack Query data. Viewport and selection are transient client state and must not become a second source of truth.
+- There are no permanent frontend Graph mocks, client-side recipe derivations, Prisma queries, or guessed Graph DTOs.
+- Workspace Connections stays inside the existing workspace route/domain and uses the existing canvas snapshot authority; it is not canonical relationship mutation.
+
+### Relationship and list contract
+
+The approved future relationship families are `CRAFTED_FROM` recipe provenance, `SUPPORTS`, `REDUCES`, `TRADE_OFF_WITH`, and `RELATED_TO` canonical relationships, plus `PERSONAL_LINK`. `CAUSES` is deferred. The UI uses “Crafts into”, “Made from”, and “May reduce” where those readings apply, with source/explanation and Personal markers where required.
+
+Discovery Detail is list-first and may contain Made From, Can Lead To, Related Concepts, Trade-offs, Appears In My Workspaces, and Discovery History. Concept Orbit is a bounded depth-one enhancement. On mobile, list precedes Orbit, details use a bottom sheet, filters use a separate sheet, and sheets are not stacked.
+
+### Performance and layout contract
+
+- Rendering is 2D only; no Three.js, WebGL, 3D, particles, animated edges, continuous force simulation, perpetual layout calculation, continuously animated gradients, large blur layers, video backgrounds, or decorative infinite loops.
+- Positions remain static between structural changes. Layout runs only after load, expand, collapse, filter, mode change, or explicit re-layout.
+- Nodes, edge types, options, and callbacks are memoized where stable; components subscribe to narrow state selectors.
+- Concept Orbit starts at depth one with deterministic radial placement and no new layout package.
+- Dagre is optional only after a separately authorized, evidence-based package task.
+- Initial unverified budgets are 24/36 desktop and 12/18 mobile for My Discovery Web, with maxima of 56/96 desktop and 28/44 mobile. Concept Orbit defaults to one focus plus up to eight desktop neighbours or five mobile neighbours. The Workspace backend limit remains 100 nodes/200 edges.
+- Budgets are product starting points, not measured guarantees. Future implementation must profile real content before treating them as proven.
+- Reduced-motion mode removes non-essential movement and leaves all graph/list meaning available in text.
+
+### Component and file decomposition
+
+Future graph code follows responsibility boundaries:
+
+```text
+features/graph/
+├── api/              # typed read adapters after backend contract exists
+├── components/       # list, canvas island, inspector, legend
+├── mappers/          # authorized DTO to view model mapping
+├── policies/         # spoiler and layer visibility rules
+├── types/            # feature-local graph contracts
+└── hooks/            # bounded client interaction state only
+```
+
+The route composes these pieces; it does not own fetching, spoiler filtering, graph layout, or a large presentation tree. The accessible list and graph share the same filtered view model.

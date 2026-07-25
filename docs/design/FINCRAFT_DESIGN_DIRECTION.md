@@ -42,6 +42,24 @@ Mochi is an educational guide and laboratory assistant.
 - Mochi must NOT appear in every card corner or header section.
 - Mochi must NOT block interactive controls or obscure canvas nodes.
 
+## Canonical visual freeze
+
+The approved direction is **FinCraft Tactile Discovery Lab**. FinCraft is not full neumorphism, a Kigen clone, or a generic SaaS dashboard.
+
+- **Editorial borrowing:** Use an editorial finance workshop hierarchy for Discovery Detail, learning content, sources, trade-offs, risks, safety language, and long-form explanation.
+- **Modular borrowing:** Use playful modular knowledge-canvas language only for Craft cause/effect, Element combination, graph relationship encoding, and visual modularity inside Canvas.
+- **Kigen boundary:** Borrow control anatomy, shallow stateful elevation, input wells, compact labels, separators, spacing rhythm, token discipline, and tool-like interaction. Do not borrow Kigen layout, logo, brand colours, navigation, page structure, content, exact components, or generator-strip presentation.
+- **Depth rule:** Normal reading content remains flat. Dimension is reserved for interactive, pressed, selected, drag, inset input/drop, and floating overlay states.
+- **Signature language:** Specimen Element Tile, Recessed Craft Bay, Orange Discovery Stamp, Financial Learning Tape, Mochi Lab Note, and Discovery Web Connection Language.
+
+These signatures are design contracts, not permission to create Product UI in this freeze task.
+
+## Canonical prohibitions
+
+The visual system must reject nested card walls, excessive pills, fake metrics or activity, decorative gradients, repeated oversized CTAs, mascot flooding, meaningless sparkle decoration, arbitrary shadows, and generic SaaS dashboard composition. Teal remains the trust/action family, orange remains the Craft/Discovery family, and category colours remain supporting identifiers.
+
+No 3D, WebGL, particles, video backgrounds, large full-screen blur layers, continuously animated gradients, animated graph edges, continuous force simulation, perpetual layout calculation, or decorative infinite motion is permitted. Motion must explain a state change, remain finite, support reduced motion, and never carry meaning that is unavailable in text.
+
 ---
 
 ## Anti-AI-Slop Rules (Strict Design Hygiene)
