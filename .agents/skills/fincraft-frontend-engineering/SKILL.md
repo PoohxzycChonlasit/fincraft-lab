@@ -56,6 +56,18 @@ Do not add Axios without explicit justification.
 Install only packages needed by the current bounded task.
 Do not run shadcn `add --all`.
 
+### Package version policy
+
+All packages must use the latest stable compatible version at install/update time (`latest` dist-tag on npm).
+
+- Prereleases (alpha, beta, rc, canary, next, experimental) are forbidden without explicit Owner authorization.
+- Before keeping a newer major, probe: install → `pnpm peers check` → typecheck → lint → source-limits → build → runtime.
+- If any gate fails due to the package, revert and report `BLOCKED_COMPATIBILITY_EXCEPTION_REQUIRED`.
+- Node runtime: use latest patch in the Active LTS channel. Do not switch to Current.
+- `@types/node` must match the actual runtime major (Node 24 → `@types/node@^24`).
+- Resolved versions must be recorded in `package.json` and `pnpm-lock.yaml`. No floating upgrades.
+- Upgrades occur only in authorized bounded tasks.
+
 ---
 
 ## 3. Core rule: Break by Responsibility

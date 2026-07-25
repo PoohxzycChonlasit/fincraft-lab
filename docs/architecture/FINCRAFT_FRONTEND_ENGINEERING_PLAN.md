@@ -14,7 +14,22 @@ Goals:
 
 ---
 
+## 0. Package Version Policy
+
+All frontend packages must use the latest stable compatible version at install/update time.
+
+- **Latest stable**: the `latest` dist-tag on npm at execution time.
+- **Prereleases forbidden**: alpha, beta, rc, canary, next, experimental are not permitted without explicit Owner authorization.
+- **Compatibility probe required for majors**: install → `pnpm peers check` → typecheck → lint → source-limits → Next.js build → production runtime. Revert and report `BLOCKED_COMPATIBILITY_EXCEPTION_REQUIRED` if any gate fails.
+- **Node runtime**: Active LTS channel only. Do not switch to Current.
+- **`@types/node`**: must align to actual runtime major (e.g. Node 24 LTS → `@types/node@^24`).
+- **Lockfile**: all resolved versions recorded in `package.json` and `pnpm-lock.yaml`. No floating upgrades.
+- **Upgrades only in bounded tasks**: every upgrade is authorized, probed, and committed independently.
+
+---
+
 ## 1. Core Rule: Break by Responsibility
+
 
 A frontend file must have one clear responsibility.
 

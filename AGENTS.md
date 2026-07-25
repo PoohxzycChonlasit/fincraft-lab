@@ -124,6 +124,19 @@ The detailed operational method for working one function at a time lives in:
 
 This file, its adapters, and `docs/ai/*` must be written in English. The owner may communicate in Thai. Respond in Thai when teaching or explaining directly to the owner, unless the current task explicitly requests English.
 
+## Frontend Package Version Policy
+
+All FinCraft Lab frontend packages must use the latest stable compatible version available at the time of installation or upgrade.
+
+- **Latest stable**: exact version under the `latest` dist-tag on the npm registry at execution time.
+- **Prerelease forbidden**: alpha, beta, rc, canary, next, experimental, nightly are not allowed unless the Owner explicitly authorizes the exact release.
+- **Compatibility required**: before keeping a newer major version, verify it passes official engine/peer ranges, clean install, TypeScript diagnostics, ESLint, source-limits, Next.js production build, and production runtime. If any gate fails due to the package, revert and report `BLOCKED_COMPATIBILITY_EXCEPTION_REQUIRED`.
+- **Node policy**: use the latest stable patch in the currently supported Active LTS channel. Do not switch to Node Current solely because its version number is higher.
+- **Node type definitions**: `@types/node` must match the actual Node runtime major (e.g. Node 24 runtime → `@types/node@^24`).
+- **Lockfile**: resolved versions must be recorded in `package.json` and `pnpm-lock.yaml`. No floating upgrades.
+- **Upgrades only in bounded tasks**: no unattended or automatic version bumps. Every upgrade must be authorized, probed, and committed in a dedicated bounded step.
+- **Compatibility exceptions require Owner approval**: do not silently keep an old version without a formal `BLOCKED_COMPATIBILITY_EXCEPTION_REQUIRED` report.
+
 ## Current status
 
 The latest verified status lives in [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) — **never trust a remembered status; check this file or the actual git state before starting any task.**

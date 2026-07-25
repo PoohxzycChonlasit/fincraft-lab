@@ -26,7 +26,18 @@ The application enforces Server Components by default, restricting Client Compon
 | Image Optimization | `next/image` | Configured domains, mandatory alt attributes |
 | Visual Review | TasteSkill | Supplemental visual guardrail |
 
+### Package Version Policy
+
+All packages use the latest stable compatible version at install/update time (`latest` dist-tag on npm).
+Prereleases are forbidden without explicit Owner authorization.
+Major-version upgrades require a compatibility probe (peers check → typecheck → lint → source-limits → build → runtime) before acceptance.
+Revert and report `BLOCKED_COMPATIBILITY_EXCEPTION_REQUIRED` if any gate fails.
+Node runtime: Active LTS channel only. `@types/node` must align to the actual runtime major.
+All resolved versions are recorded in `package.json` and `pnpm-lock.yaml`. No floating upgrades.
+Upgrades occur only in authorized bounded tasks.
+
 ---
+
 
 ## Folder Architecture & Import Boundaries
 
