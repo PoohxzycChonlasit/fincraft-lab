@@ -6,8 +6,7 @@ This file is a **thin adapter** for Claude Code only. It is not a source of rule
 
 1. Read [`AGENTS.md`](AGENTS.md) in full first — it is the true canonical rule file.
 2. Read [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) for the latest status.
-3. Follow the skill: `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`
-   (invoke it via Claude Code's Skill tool when working in a stepwise loop).
+3. Follow the skills: `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md` and (for frontend tasks) `.agents/skills/fincraft-frontend-engineering/SKILL.md`.
 
 ## Claude Code-specific rules
 

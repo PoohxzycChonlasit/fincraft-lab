@@ -15,7 +15,7 @@ Before starting any work in this repository, follow this order every time:
 1. Read this file (`AGENTS.md`) in full.
 2. Read [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) for the latest verified state.
 3. Read [`docs/ai/PROJECT_CONTEXT.md`](docs/ai/PROJECT_CONTEXT.md) to understand the product.
-4. Follow the Stepwise Loop described in `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md`.
+4. Follow the Stepwise Loop described in `.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md` (and for all frontend tasks, also follow `.agents/skills/fincraft-frontend-engineering/SKILL.md`).
 5. Never trust a remembered status — verify with git and the actual files before relying on any prior state.
 
 ## What this project is

@@ -7,7 +7,7 @@ This file is a **thin adapter** for Gemini only. It is not a source of rules.
 1. Read [`AGENTS.md`](AGENTS.md) in full first — it is the true canonical rule file.
 2. Read [`docs/ai/CURRENT_STATUS.md`](docs/ai/CURRENT_STATUS.md) for the latest verified status.
 3. Follow the skill: [FinCraft Lab — Literal Fakebuck-Aligned Stepwise Development Skill v4](.agents/skills/fincraft-teacher-stepwise-loop/SKILL.md)
-   (use it as the operational guide for the stepwise loop and literal teacher-aligned coding style).
+   (and for all frontend tasks, also follow [FinCraft Lab Frontend Engineering Skill](.agents/skills/fincraft-frontend-engineering/SKILL.md)).
 
 ## Gemini-specific operational directives
 
