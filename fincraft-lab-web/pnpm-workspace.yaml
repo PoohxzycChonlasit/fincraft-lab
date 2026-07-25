@@ -3,4 +3,3 @@ allowBuilds:
   unrs-resolver: true
 ignoredBuiltDependencies:
   - sharp
-
