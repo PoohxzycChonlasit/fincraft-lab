@@ -16,6 +16,12 @@ description: Use for every FinCraft Lab frontend planning, implementation, refac
 
 Do not modify the NestJS backend unless the task explicitly authorizes it.
 
+For authorized visual design, layout, styling, component appearance, or page
+composition work, also load `.agents/skills/fincraft-design-taste/SKILL.md`
+after this skill. Canonical FinCraft contracts always override TasteSkill. It
+is not required for backend, database, docs-only, dependency-only, or
+configuration-only tasks; it never authorizes package installation or Product UI.
+
 ---
 
 ## 1. Product direction
