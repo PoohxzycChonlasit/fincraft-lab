@@ -3,6 +3,7 @@ allowBuilds:
   unrs-resolver: true
 ignoredBuiltDependencies:
   - sharp
+minimumReleaseAge: 1440
 # minimumReleaseAgeExclude: entries below are required by pnpm supply-chain policy
 # for packages that were published within 24h of installation.
 # These are verified supply-chain packages from the official npm registry.
