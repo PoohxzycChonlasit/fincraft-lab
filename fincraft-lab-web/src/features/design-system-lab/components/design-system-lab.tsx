@@ -2,6 +2,7 @@ import { InteractionStateGrid } from "./interaction-state-grid";
 import { MotionAccessibilityNote } from "./motion-accessibility-note";
 import { RelationshipLanguage } from "./relationship-language";
 import { SemanticTokenGrid } from "./semantic-token-grid";
+import { SignatureComponentBench } from "./signature-component-bench";
 import { SurfaceLadder } from "./surface-ladder";
 import { TypographySpecimen } from "./typography-specimen";
 
@@ -38,6 +39,7 @@ export function DesignSystemLab() {
           <div className="xl:col-span-7"><InteractionStateGrid /></div>
           <div className="xl:col-span-5"><TypographySpecimen /></div>
           <div className="xl:col-span-12"><RelationshipLanguage /></div>
+          <div className="xl:col-span-12"><SignatureComponentBench /></div>
           <div className="xl:col-span-12"><MotionAccessibilityNote /></div>
         </div>
       </div>
