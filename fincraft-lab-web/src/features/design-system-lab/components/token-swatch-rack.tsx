@@ -1,48 +1,66 @@
-const colorSwatches = [
-  { name: "Teal 600", varName: "var(--color-teal-600)", role: "Trust / Primary action" },
-  { name: "Teal 700", varName: "var(--color-teal-700)", role: "Deep trust / Heading accent" },
-  { name: "Orange 600", varName: "var(--color-orange-600)", role: "Craft / Discovery highlight" },
-  { name: "Orange 700", varName: "var(--color-orange-700)", role: "Discovery accent label" },
+const brandSwatches = [
+  { name: "Teal 600", varName: "--color-teal-600", hex: "#0D9488", role: "Trust / Action" },
+  { name: "Teal 700", varName: "--color-teal-700", hex: "#0F766E", role: "Hover / Deep Trust" },
+  { name: "Orange 600", varName: "--color-orange-600", hex: "#EA580C", role: "Craft / Discovery" },
+  { name: "Orange 700", varName: "--color-orange-700", hex: "#C2410C", role: "Discovery Accent" },
 ] as const;
 
 const surfaceSwatches = [
-  { name: "surface-flat", varName: "var(--surface-flat)", label: "Flat field" },
-  { name: "surface-resting", varName: "var(--surface-resting)", label: "Resting plate" },
-  { name: "surface-inset", varName: "var(--surface-inset)", label: "Recessed well" },
-  { name: "surface-raised", varName: "var(--surface-raised)", label: "Raised card" },
-  { name: "surface-floating", varName: "var(--surface-floating)", label: "Floating overlay" },
+  { name: "surface-flat", cssClass: "surface-flat border", label: "Flat field" },
+  { name: "surface-resting", cssClass: "surface-resting border", label: "Resting plate" },
+  { name: "surface-inset", cssClass: "surface-inset border", label: "Recessed well" },
+  { name: "surface-raised", cssClass: "surface-raised border", label: "Raised card" },
+  { name: "surface-floating", cssClass: "surface-floating border", label: "Floating overlay" },
 ] as const;
 
 const borderSwatches = [
-  { name: "border-subtle", varName: "var(--border-subtle)", label: "Subtle divider" },
-  { name: "border-interactive", varName: "var(--border-interactive)", label: "Focus / Hover ring" },
-  { name: "border-selected", varName: "var(--border-selected)", label: "Selected border" },
+  { name: "border-subtle", varName: "--border-subtle", label: "Quiet boundary" },
+  { name: "border-interactive", varName: "--border-interactive", label: "Hover / Focus ring" },
+  { name: "border-selected", varName: "--border-selected", label: "Selected state" },
 ] as const;
 
-interface SwatchItem {
-  name: string;
-  varName: string;
-  label?: string;
-  role?: string;
+function BrandSwatchCard({ name, varName, hex, role }: (typeof brandSwatches)[number]) {
+  return (
+    <div className="overflow-hidden rounded-md border border-[var(--border-subtle)]" style={{ boxShadow: "var(--shadow-resting)" }}>
+      <div
+        className="h-20 w-full"
+        style={{ backgroundColor: `var(${varName})` }}
+        aria-label={`${name}: ${hex}`}
+      />
+      <div className="px-3 py-2.5 bg-[var(--surface-resting)] border-t border-[var(--border-subtle)]">
+        <p className="text-[11px] font-bold text-foreground">{name}</p>
+        <p className="font-mono text-[10px] text-muted-foreground">{hex}</p>
+        <p className="mt-0.5 text-[10px] text-muted-foreground">{role}</p>
+      </div>
+    </div>
+  );
 }
 
-function SwatchColumn({ title, items, isBorder = false }: { title: string; items: readonly SwatchItem[]; isBorder?: boolean }) {
+function SurfaceSpecimenCard({ name, cssClass, label }: (typeof surfaceSwatches)[number]) {
   return (
-    <div>
-      <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h4>
-      <div className="mt-2.5 space-y-2">
-        {items.map((s) => (
-          <div key={s.name} className="flex items-center gap-3 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-inset)] p-2">
-            <span
-              className={`size-8 shrink-0 rounded-md shadow-xs ${isBorder ? "border-2" : "border border-black/10"}`}
-              style={isBorder ? { borderColor: s.varName, backgroundColor: "var(--surface-flat)" } : { backgroundColor: s.varName }}
-            />
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-foreground">{s.name}</p>
-              <p className="truncate font-mono text-[10px] text-muted-foreground">{s.label || s.varName}</p>
-            </div>
-          </div>
-        ))}
+    <div className={`${cssClass} rounded-md px-3 py-3 flex items-center justify-between`}>
+      <div>
+        <p className="text-[11px] font-bold text-foreground">{name}</p>
+        <p className="text-[10px] text-muted-foreground">{label}</p>
+      </div>
+      <span className="font-mono text-[10px] text-muted-foreground opacity-60">
+        var(--{name})
+      </span>
+    </div>
+  );
+}
+
+function BorderStrokeCard({ name, varName, label }: (typeof borderSwatches)[number]) {
+  return (
+    <div className="rounded-md bg-[var(--surface-inset)] p-3 flex items-center gap-3">
+      <div
+        className="h-10 w-1.5 rounded-full flex-shrink-0"
+        style={{ backgroundColor: `var(${varName})` }}
+        aria-hidden
+      />
+      <div>
+        <p className="text-[11px] font-bold text-foreground">{name}</p>
+        <p className="text-[10px] text-muted-foreground">{label}</p>
       </div>
     </div>
   );
@@ -50,21 +68,47 @@ function SwatchColumn({ title, items, isBorder = false }: { title: string; items
 
 export function TokenSwatchRack() {
   return (
-    <div className="surface-resting border border-[var(--border-subtle)] p-4 sm:p-5">
-      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+    <div className="surface-resting border border-[var(--border-subtle)] p-5">
+      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3 mb-5">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-teal-700)]">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-teal-700)]">
             Token Swatch Rack
           </p>
           <h3 className="text-base font-semibold text-foreground">Canonical CSS Variables</h3>
         </div>
-        <span className="text-xs font-mono text-muted-foreground">REAL REPOSITORY TOKENS ONLY</span>
+        <span className="font-mono text-[10px] text-muted-foreground">REAL REPOSITORY TOKENS ONLY</span>
       </div>
 
-      <div className="mt-4 grid gap-5 md:grid-cols-3">
-        <SwatchColumn title="Brand Color Swatches" items={colorSwatches} />
-        <SwatchColumn title="Surface Role Swatches" items={surfaceSwatches} />
-        <SwatchColumn title="Border Role Swatches" items={borderSwatches} isBorder />
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Brand Colour Swatches */}
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Brand Colours</p>
+          <div className="grid grid-cols-2 gap-2.5">
+            {brandSwatches.map((s) => (
+              <BrandSwatchCard key={s.name} {...s} />
+            ))}
+          </div>
+        </div>
+
+        {/* Surface Role Specimens */}
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Surface Roles</p>
+          <div className="space-y-2">
+            {surfaceSwatches.map((s) => (
+              <SurfaceSpecimenCard key={s.name} {...s} />
+            ))}
+          </div>
+        </div>
+
+        {/* Border Stroke Specimens */}
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Border Roles</p>
+          <div className="space-y-2">
+            {borderSwatches.map((s) => (
+              <BorderStrokeCard key={s.name} {...s} />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
