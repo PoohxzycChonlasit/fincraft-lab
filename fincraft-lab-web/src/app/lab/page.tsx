@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ProductShell } from "@/components/brand/product-shell";
-import { MochiLabNote } from "@/components/fincraft/mochi-lab-note";
-import { RecessedCraftBay } from "@/components/fincraft/recessed-craft-bay";
-import { SpecimenElementTile } from "@/components/fincraft/specimen-element-tile";
+import { fetchAvailableElements } from "@/features/craft/api/fetch-elements";
+import { CraftLabClient } from "@/features/craft/components/craft-lab-client";
 import { getSessionUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
@@ -17,6 +16,15 @@ export default async function CraftLabPage() {
   if (!user) {
     redirect("/login");
   }
+
+  const result = await fetchAvailableElements();
+
+  if (!result.success && "redirectLogin" in result && result.redirectLogin) {
+    redirect("/login");
+  }
+
+  const elements = result.success ? result.elements : [];
+  const errorMessage = !result.success && "errorMessage" in result ? result.errorMessage : undefined;
 
   return (
     <ProductShell activeTab="lab" user={user}>
@@ -36,29 +44,9 @@ export default async function CraftLabPage() {
           </p>
         </header>
 
-        <section aria-label="Lab Preview Specimens" className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-          <div className="space-y-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Available Element Specimen</h2>
-            <SpecimenElementTile
-              name="Income"
-              category="Cash flow element"
-              visual={<span aria-hidden="true">💰</span>}
-              supportingLabel="Primary element specimen for learning cash flow dynamics."
-              state="resting"
-            />
-          </div>
-
-          <div className="space-y-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Craft Combination Bay</h2>
-            <RecessedCraftBay statusLabel="Craft bay ready" />
-          </div>
-        </section>
-
-        <footer aria-label="Craft Lab Status Note">
-          <MochiLabNote tone="guidance">
-            Interactive element crafting, drag-and-drop workspace, and recipe discovery logic will be enabled in the upcoming bounded Craft Canvas task.
-          </MochiLabNote>
-        </footer>
+        <main aria-label="Craft Lab Selection Area">
+          <CraftLabClient elements={elements} errorMessage={errorMessage} />
+        </main>
       </div>
     </ProductShell>
   );

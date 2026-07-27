@@ -6,6 +6,7 @@ export type SpecimenElementTileProps = {
   visual: ReactNode;
   supportingLabel?: string;
   state?: "resting" | "selected";
+  onClick?: () => void;
 };
 
 export function SpecimenElementTile({
@@ -14,18 +15,16 @@ export function SpecimenElementTile({
   visual,
   supportingLabel,
   state = "resting",
+  onClick,
 }: SpecimenElementTileProps) {
   const isSelected = state === "selected";
 
-  return (
-    <article
-      className={
-        isSelected
-          ? "surface-raised rounded-xl p-4 transition-all duration-150 motion-reduce:transition-none"
-          : "surface-resting rounded-xl p-4 transition-all duration-150 motion-reduce:transition-none hover:-translate-y-0.5"
-      }
-      aria-label={`${name} element specimen${isSelected ? ", selected" : ""}`}
-    >
+  const containerClasses = isSelected
+    ? "surface-raised rounded-xl p-4 transition-all duration-150 motion-reduce:transition-none text-left w-full ring-2 ring-[var(--color-craft-accent)]"
+    : "surface-resting rounded-xl p-4 transition-all duration-150 motion-reduce:transition-none hover:-translate-y-0.5 text-left w-full cursor-pointer hover:border-[var(--color-craft-accent)]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-craft-accent)]";
+
+  const content = (
+    <>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-craft-accent)]">
@@ -51,6 +50,25 @@ export function SpecimenElementTile({
       {supportingLabel ? (
         <p className="mt-2 text-xs leading-5 text-muted-foreground">{supportingLabel}</p>
       ) : null}
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={containerClasses}
+        aria-label={`${name} element specimen${isSelected ? ", selected" : ""}`}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <article className={containerClasses} aria-label={`${name} element specimen${isSelected ? ", selected" : ""}`}>
+      {content}
     </article>
   );
 }
