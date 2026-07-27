@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { UserProfile } from "@/lib/auth/session";
+import { HeaderThemeToggle } from "@/features/theme/components/header-theme-toggle";
 import { LogoutButton } from "./logout-button";
 
 export type ProductShellProps = {
@@ -37,12 +38,12 @@ function ProductNav({ activeTab, user }: { activeTab: string; user?: UserProfile
   const isAdminAuthorized = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
 
   const activeStyle =
-    "rounded-lg bg-[var(--surface-inset)] px-3 py-1.5 text-xs font-semibold text-foreground border border-[var(--border-subtle)]";
+    "rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-all style-active-gradient";
   const inactiveStyle =
     "rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-[var(--surface-inset)]/50 transition-colors";
 
   return (
-    <nav aria-label="Main Navigation" className="flex items-center gap-1.5 sm:gap-2">
+    <nav aria-label="Main Navigation" className="flex flex-wrap items-center gap-1.5 sm:gap-2">
       <Link href="/" aria-current={isHome ? "page" : undefined} className={isHome ? activeStyle : inactiveStyle}>
         Home
       </Link>
@@ -50,7 +51,7 @@ function ProductNav({ activeTab, user }: { activeTab: string; user?: UserProfile
         Craft Lab
       </Link>
       {user ? (
-        <Link href="/lab" aria-current={isWorkspace ? "page" : undefined} className={isWorkspace ? activeStyle : inactiveStyle}>
+        <Link href="/workspace" aria-current={isWorkspace ? "page" : undefined} className={isWorkspace ? activeStyle : inactiveStyle}>
           Workspace
         </Link>
       ) : null}
@@ -79,9 +80,12 @@ export function ProductShell({ children, activeTab = "home", user, contentMode =
   return (
     <div className="flex min-h-screen flex-col bg-[var(--surface-flat)] text-[var(--color-text-primary)]">
       <header className="border-b border-[var(--border-subtle)] bg-[var(--surface-resting)] shadow-xs">
-        <div className={`mx-auto flex w-full ${maxWClass} flex-wrap items-center justify-between gap-4 px-4 py-3.5 sm:px-6`}>
+        <div className={`mx-auto flex w-full ${maxWClass} flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6`}>
           <ProductBrand />
-          <ProductNav activeTab={activeTab} user={user} />
+          <div className="flex items-center gap-3">
+            <ProductNav activeTab={activeTab} user={user} />
+            <HeaderThemeToggle />
+          </div>
         </div>
       </header>
 

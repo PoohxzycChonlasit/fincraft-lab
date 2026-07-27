@@ -315,4 +315,8 @@ html[data-theme-preference="dark"],
       backdrop-filter: none !important;
     }
   }
+
+  .style-active-gradient {
+    background: linear-gradient(90deg, var(--color-craft-accent, #ea580c), var(--color-action-primary, #0f766e));
+  }
 }
