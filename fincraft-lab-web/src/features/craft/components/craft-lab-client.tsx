@@ -5,6 +5,8 @@ import { RecessedCraftBay } from "@/components/fincraft/recessed-craft-bay";
 import { MochiLabNote } from "@/components/fincraft/mochi-lab-note";
 import type { AvailableElement } from "../types/craft-element.type";
 import type { CraftElementResult } from "../types/craft-result.type";
+import { useCanvasNodes } from "@/features/canvas/hooks/use-canvas-nodes";
+import { FinCraftCanvas } from "@/features/canvas/components/fincraft-canvas";
 import { useCraftBaySelection } from "../hooks/use-craft-bay-selection";
 import { useCraft } from "../hooks/use-craft";
 import { ElementLibrary } from "./element-library";
@@ -50,6 +52,7 @@ function CraftErrorBanner({ message, onDismiss }: { message: string; onDismiss: 
 
 export function CraftLabClient({ elements: initialElements, errorMessage }: CraftLabClientProps) {
   const [localElements, setLocalElements] = useState<AvailableElement[]>(initialElements);
+  const { nodes, onNodesChange, addElementsToCanvas } = useCanvasNodes();
 
   const handleDiscovery = useCallback((el: CraftElementResult) => {
     setLocalElements((prev) => {
@@ -62,12 +65,22 @@ export function CraftLabClient({ elements: initialElements, errorMessage }: Craf
   const { activeSlot, setActiveSlot, leftElement, rightElement, handleSelectElement, handleClearSlot } = useCraftBaySelection();
   const { isSubmitting, craftError, craftResult, handleCraft, handleReset, dismissError } = useCraft({ onDiscovery: handleDiscovery });
 
+  const handlePlaceOnCanvas = useCallback(() => {
+    const selected: AvailableElement[] = [];
+    if (leftElement) selected.push(leftElement);
+    if (rightElement) selected.push(rightElement);
+    if (selected.length > 0) {
+      addElementsToCanvas(selected);
+    }
+  }, [leftElement, rightElement, addElementsToCanvas]);
+
   if (errorMessage) return <LoadErrorBanner message={errorMessage} />;
 
   if (craftResult) {
     return (
       <div className="space-y-8">
         <CraftResultPanel result={craftResult} leftElement={leftElement} rightElement={rightElement} onReset={handleReset} />
+        <FinCraftCanvas nodes={nodes} onNodesChange={onNodesChange} />
         <ElementLibrary elements={localElements} selectedLeftId={leftElement?.id ?? null} selectedRightId={rightElement?.id ?? null} onSelectElement={handleSelectElement} />
       </div>
     );
@@ -85,8 +98,15 @@ export function CraftLabClient({ elements: initialElements, errorMessage }: Craf
   return (
     <div className="space-y-8">
       <RecessedCraftBay left={leftItem} right={rightItem} statusLabel={statusLabel} activeSlot={activeSlot} onSelectSlot={setActiveSlot} onClearSlot={handleClearSlot} />
-      <CraftActionBar leftElement={leftElement} rightElement={rightElement} isSubmitting={isSubmitting} onCraft={() => handleCraft(leftElement, rightElement)} />
+      <CraftActionBar
+        leftElement={leftElement}
+        rightElement={rightElement}
+        isSubmitting={isSubmitting}
+        onCraft={() => handleCraft(leftElement, rightElement)}
+        onPlaceOnCanvas={handlePlaceOnCanvas}
+      />
       {craftError ? <CraftErrorBanner message={craftError} onDismiss={dismissError} /> : null}
+      <FinCraftCanvas nodes={nodes} onNodesChange={onNodesChange} />
       <ElementLibrary elements={localElements} selectedLeftId={leftElement?.id ?? null} selectedRightId={rightElement?.id ?? null} onSelectElement={handleSelectElement} />
       <footer aria-label="Craft Lab Status Note">
         <MochiLabNote tone="guidance">{mochiNote}</MochiLabNote>
