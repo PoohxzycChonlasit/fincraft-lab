@@ -1,45 +1,30 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { RecessedCraftBay } from "@/components/fincraft/recessed-craft-bay";
-import { MochiLabNote } from "@/components/fincraft/mochi-lab-note";
+import { useCallback, useMemo, useState } from "react";
 import {
-  useCraftBaySelection,
   useCraft,
-  ElementLibrary,
-  CraftActionBar,
-  CraftResultPanel,
+  useCraftBaySelection,
   type AvailableElement,
   type CraftElementResult,
 } from "@/features/craft/public";
-import {
-  useCanvasNodes,
-  FinCraftCanvas,
-  type SaveStatus,
-  type InitialNodeInput,
-  type PersistableCanvasNode,
-} from "@/features/canvas/public";
-import {
-  saveWorkspaceCanvasApi,
-  type CanvasSnapshot,
-} from "@/features/workspace/public.client";
+import { useCanvasNodes, type InitialNodeInput, type PersistableCanvasNode, type SaveStatus } from "@/features/canvas/public";
+import { saveWorkspaceCanvasApi, type CanvasSnapshot, type WorkspaceSummary } from "@/features/workspace/public.client";
+import { LabWorkspaceContent } from "./lab-workspace-content";
 
 export type FinCraftLabClientProps = {
   elements: AvailableElement[];
   errorMessage?: string;
-  initialWorkspace?: { workspaceId: string; snapshot: CanvasSnapshot };
+  workspaceErrorMessage?: string;
+  initialWorkspace?: {
+    workspaceId: string;
+    workspaces: WorkspaceSummary[];
+    selectedWorkspace: WorkspaceSummary;
+    snapshot: CanvasSnapshot;
+  };
 };
 
 function toAvailableElement(el: CraftElementResult): AvailableElement {
-  return {
-    id: el.id,
-    name: el.name,
-    slug: el.slug,
-    emoji: el.emoji,
-    iconUrl: el.iconUrl,
-    elementType: el.elementType,
-    isStarter: el.isStarter,
-  };
+  return { id: el.id, name: el.name, slug: el.slug, emoji: el.emoji, iconUrl: el.iconUrl, elementType: el.elementType, isStarter: el.isStarter };
 }
 
 function LoadErrorBanner({ message }: { message: string }) {
@@ -51,150 +36,56 @@ function LoadErrorBanner({ message }: { message: string }) {
   );
 }
 
-function CraftErrorBanner({ message, onDismiss }: { message: string; onDismiss: () => void }) {
-  return (
-    <div role="alert" className="rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-4 space-y-2">
-      <p className="text-xs font-semibold text-[var(--color-text-danger)]">{message}</p>
-      <button type="button" onClick={onDismiss} className="text-xs underline text-[var(--color-text-danger)] hover:no-underline">
-        Dismiss
-      </button>
-    </div>
-  );
-}
-
-function computeMochiNote(leftElement: AvailableElement | null, rightElement: AvailableElement | null, activeSlot: string): string {
-  if (leftElement && rightElement) {
-    return `Selected "${leftElement.name}" and "${rightElement.name}". Press Craft to discover a financial concept.`;
-  }
-  return `Active target slot: ${activeSlot === "left" ? "Left Input" : "Right Input"}. Select an element from the library to fill it.`;
-}
-
-type CraftLabBaySectionProps = {
-  leftElement: AvailableElement | null;
-  rightElement: AvailableElement | null;
-  activeSlot: "left" | "right";
-  isSubmitting: boolean;
-  craftError: string | null;
-  setActiveSlot: (slot: "left" | "right") => void;
-  handleClearSlot: (slot: "left" | "right") => void;
-  onCraft: () => void;
-  onPlaceOnCanvas: () => void;
-  dismissError: () => void;
-};
-
-function CraftLabBaySection({
-  leftElement,
-  rightElement,
-  activeSlot,
-  isSubmitting,
-  craftError,
-  setActiveSlot,
-  handleClearSlot,
-  onCraft,
-  onPlaceOnCanvas,
-  dismissError,
-}: CraftLabBaySectionProps) {
-  const leftItem = leftElement ? { name: leftElement.name, visual: <span aria-hidden="true">{leftElement.emoji || "📄"}</span> } : undefined;
-  const rightItem = rightElement ? { name: rightElement.name, visual: <span aria-hidden="true">{rightElement.emoji || "📄"}</span> } : undefined;
-  const statusLabel = leftElement && rightElement ? "Ready to Craft" : leftElement || rightElement ? "1 of 2 Slots Filled" : "Craft Bay Empty";
-
-  return (
-    <>
-      <RecessedCraftBay left={leftItem} right={rightItem} statusLabel={statusLabel} activeSlot={activeSlot} onSelectSlot={setActiveSlot} onClearSlot={handleClearSlot} />
-      <CraftActionBar leftElement={leftElement} rightElement={rightElement} isSubmitting={isSubmitting} onCraft={onCraft} onPlaceOnCanvas={onPlaceOnCanvas} />
-      {craftError ? <CraftErrorBanner message={craftError} onDismiss={dismissError} /> : null}
-    </>
-  );
-}
-
-function useLabWorkspaceSave(
-  workspaceId: string | undefined,
-  getPersistableNodes: () => PersistableCanvasNode[],
-  markSaved: () => void,
-) {
+function useLabWorkspaceSave(workspaceId: string | undefined, getPersistableNodes: () => PersistableCanvasNode[], markSaved: () => void) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
-
   const handleSave = useCallback(async () => {
     if (!workspaceId || saveStatus === "saving") return;
     setSaveStatus("saving");
     setSaveError(null);
-
-    const payload = getPersistableNodes();
-    const res = await saveWorkspaceCanvasApi(workspaceId, payload);
-    if (res.success) {
+    const result = await saveWorkspaceCanvasApi(workspaceId, getPersistableNodes());
+    if (result.success) {
       markSaved();
       setSaveStatus("saved");
-    } else {
-      setSaveStatus("error");
-      setSaveError(res.errorMessage);
+      return;
     }
+    setSaveStatus("error");
+    setSaveError(result.errorMessage);
   }, [workspaceId, saveStatus, getPersistableNodes, markSaved]);
-
   return { saveStatus, saveError, handleSave };
 }
 
-export function FinCraftLabClient({ elements: initialElements, errorMessage, initialWorkspace }: FinCraftLabClientProps) {
+export function FinCraftLabClient({
+  elements: initialElements,
+  errorMessage,
+  workspaceErrorMessage,
+  initialWorkspace,
+}: FinCraftLabClientProps) {
   const [localElements, setLocalElements] = useState<AvailableElement[]>(initialElements);
-
-  const initialCanvasNodes = useMemo<InitialNodeInput[] | undefined>(() => {
-    if (!initialWorkspace?.snapshot?.nodes) return undefined;
-    return initialWorkspace.snapshot.nodes.map((n) => ({
-      id: n.id,
-      elementId: n.elementId,
-      positionX: n.positionX,
-      positionY: n.positionY,
-      name: n.element?.name,
-      emoji: n.element?.emoji,
-      categoryName: n.element?.elementType,
-    }));
-  }, [initialWorkspace]);
-
-  const { nodes, onNodesChange, addElementsToCanvas, isDirty, getPersistableNodes, markSaved } = useCanvasNodes(initialCanvasNodes);
-  const workspaceId = initialWorkspace?.workspaceId;
-  const { saveStatus, saveError, handleSave } = useLabWorkspaceSave(workspaceId, getPersistableNodes, markSaved);
-
-  const handleDiscovery = useCallback((el: CraftElementResult) => {
-    setLocalElements((prev) => (prev.some((e) => e.id === el.id) ? prev : [...prev, toAvailableElement(el)]));
+  const initialCanvasNodes = useMemo<InitialNodeInput[] | undefined>(() => initialWorkspace?.snapshot.nodes.map((node) => ({
+    id: node.id,
+    elementId: node.elementId,
+    positionX: node.positionX,
+    positionY: node.positionY,
+    name: node.element?.name,
+    emoji: node.element?.emoji,
+    categoryName: node.element?.elementType,
+  })), [initialWorkspace]);
+  const canvas = useCanvasNodes(initialCanvasNodes);
+  const save = useLabWorkspaceSave(initialWorkspace?.workspaceId, canvas.getPersistableNodes, canvas.markSaved);
+  const handleDiscovery = useCallback((element: CraftElementResult) => {
+    setLocalElements((current) => current.some((item) => item.id === element.id) ? current : [...current, toAvailableElement(element)]);
   }, []);
-
   const { activeSlot, setActiveSlot, leftElement, rightElement, handleSelectElement, handleClearSlot } = useCraftBaySelection();
   const { isSubmitting, craftError, craftResult, handleCraft, handleReset, dismissError } = useCraft({ onDiscovery: handleDiscovery });
-
+  const { addElementsToCanvas } = canvas;
   const handlePlaceOnCanvas = useCallback(() => {
-    const selected = [leftElement, rightElement]
-      .filter((e): e is AvailableElement => Boolean(e))
-      .map((e) => ({ id: e.id, name: e.name, emoji: e.emoji, categoryName: e.elementType }));
+    const selected = [leftElement, rightElement].filter((element): element is AvailableElement => Boolean(element)).map((element) => ({ id: element.id, name: element.name, emoji: element.emoji, categoryName: element.elementType }));
     if (selected.length > 0) addElementsToCanvas(selected);
   }, [leftElement, rightElement, addElementsToCanvas]);
 
   if (errorMessage) return <LoadErrorBanner message={errorMessage} />;
+  if (workspaceErrorMessage || !initialWorkspace) return <LoadErrorBanner message={workspaceErrorMessage ?? "Workspace data is unavailable."} />;
 
-  return (
-    <div className="space-y-8">
-      {craftResult ? (
-        <CraftResultPanel result={craftResult} leftElement={leftElement} rightElement={rightElement} onReset={handleReset} />
-      ) : (
-        <CraftLabBaySection
-          leftElement={leftElement}
-          rightElement={rightElement}
-          activeSlot={activeSlot}
-          isSubmitting={isSubmitting}
-          craftError={craftError}
-          setActiveSlot={setActiveSlot}
-          handleClearSlot={handleClearSlot}
-          onCraft={() => handleCraft(leftElement, rightElement)}
-          onPlaceOnCanvas={handlePlaceOnCanvas}
-          dismissError={dismissError}
-        />
-      )}
-      <FinCraftCanvas nodes={nodes} onNodesChange={onNodesChange} workspaceId={workspaceId} isDirty={isDirty} saveStatus={saveStatus} saveError={saveError} onSave={handleSave} />
-      <ElementLibrary elements={localElements} selectedLeftId={leftElement?.id ?? null} selectedRightId={rightElement?.id ?? null} onSelectElement={handleSelectElement} />
-      {!craftResult && (
-        <footer aria-label="Craft Lab Status Note">
-          <MochiLabNote tone="guidance">{computeMochiNote(leftElement, rightElement, activeSlot)}</MochiLabNote>
-        </footer>
-      )}
-    </div>
-  );
+  return <LabWorkspaceContent initialWorkspace={initialWorkspace} canvas={canvas} save={save} localElements={localElements} leftElement={leftElement} rightElement={rightElement} activeSlot={activeSlot} isSubmitting={isSubmitting} craftError={craftError} craftResult={craftResult} handleReset={handleReset} handleSelectElement={handleSelectElement} handleClearSlot={handleClearSlot} setActiveSlot={setActiveSlot} handleCraft={() => void handleCraft(leftElement, rightElement)} handlePlaceOnCanvas={handlePlaceOnCanvas} dismissError={dismissError} />;
 }

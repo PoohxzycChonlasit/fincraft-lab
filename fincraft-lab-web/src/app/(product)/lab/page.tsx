@@ -9,18 +9,34 @@ export const metadata: Metadata = {
   description: "Financial Literacy Discovery Craft Lab host page.",
 };
 
-export default async function CraftLabPage() {
+type CraftLabPageProps = {
+  searchParams: Promise<{ workspaceId?: string | string[] }>;
+};
+
+export default async function CraftLabPage({ searchParams }: CraftLabPageProps) {
+  const params = await searchParams;
+  const requestedWorkspaceId = Array.isArray(params.workspaceId)
+    ? params.workspaceId[0]
+    : params.workspaceId;
+
   const [elementsResult, workspaceResult] = await Promise.all([
     fetchAvailableElements(),
-    fetchUserWorkspaceCanvas(),
+    fetchUserWorkspaceCanvas(requestedWorkspaceId),
   ]);
 
   if (!elementsResult.success && "redirectLogin" in elementsResult && elementsResult.redirectLogin) {
     redirect("/login");
   }
 
+  if (!workspaceResult.success && "redirectLogin" in workspaceResult && workspaceResult.redirectLogin) {
+    redirect("/login");
+  }
+
   const elements = elementsResult.success ? elementsResult.elements : [];
   const errorMessage = !elementsResult.success && "errorMessage" in elementsResult ? elementsResult.errorMessage : undefined;
+  const workspaceErrorMessage = !workspaceResult.success && "errorMessage" in workspaceResult
+    ? workspaceResult.errorMessage
+    : undefined;
   const initialWorkspace = workspaceResult.success ? workspaceResult : undefined;
 
   return (
@@ -36,7 +52,13 @@ export default async function CraftLabPage() {
       </header>
 
       <main aria-label="Craft Lab Selection Area">
-        <FinCraftLabClient elements={elements} errorMessage={errorMessage} initialWorkspace={initialWorkspace} />
+        <FinCraftLabClient
+          key={initialWorkspace?.workspaceId ?? "workspace-load-error"}
+          elements={elements}
+          errorMessage={errorMessage}
+          workspaceErrorMessage={workspaceErrorMessage}
+          initialWorkspace={initialWorkspace}
+        />
       </main>
     </div>
   );

@@ -1,4 +1,5 @@
 import type { SaveWorkspacePayloadNode } from "../types/workspace.type";
+import { readWorkspaceApiError } from "./workspace.client";
 
 export async function saveWorkspaceCanvasApi(
   workspaceId: string,
@@ -12,8 +13,8 @@ export async function saveWorkspaceCanvasApi(
     });
 
     if (!res.ok) {
-      const json = (await res.json().catch(() => ({}))) as { error?: string };
-      return { success: false, errorMessage: json.error || "Failed to save workspace." };
+      const body: unknown = await res.json().catch(() => null);
+      return { success: false, errorMessage: readWorkspaceApiError(body, "Failed to save workspace.") };
     }
 
     return { success: true };

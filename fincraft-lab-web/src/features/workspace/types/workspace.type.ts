@@ -6,6 +6,15 @@ export type WorkspaceSummary = {
   updatedAt: string;
 };
 
+export type CreateWorkspacePayload = {
+  name: string;
+};
+
+export type UpdateWorkspacePayload = {
+  name?: string;
+  status?: "ACTIVE" | "ARCHIVED";
+};
+
 export type CanvasNodeElementMetadata = {
   id: string;
   name: string;
