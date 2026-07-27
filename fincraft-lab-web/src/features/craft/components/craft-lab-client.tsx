@@ -13,9 +13,12 @@ import { ElementLibrary } from "./element-library";
 import { CraftActionBar } from "./craft-action-bar";
 import { CraftResultPanel } from "./craft-result-panel";
 
+import type { CanvasSnapshot } from "@/features/workspace/types/workspace.type";
+
 export type CraftLabClientProps = {
   elements: AvailableElement[];
   errorMessage?: string;
+  initialWorkspace?: { workspaceId: string; snapshot: CanvasSnapshot };
 };
 
 function toAvailableElement(el: CraftElementResult): AvailableElement {
@@ -50,67 +53,100 @@ function CraftErrorBanner({ message, onDismiss }: { message: string; onDismiss: 
   );
 }
 
-export function CraftLabClient({ elements: initialElements, errorMessage }: CraftLabClientProps) {
+function computeMochiNote(leftElement: AvailableElement | null, rightElement: AvailableElement | null, activeSlot: string): string {
+  if (leftElement && rightElement) {
+    return `Selected "${leftElement.name}" and "${rightElement.name}". Press Craft to discover a financial concept.`;
+  }
+  return `Active target slot: ${activeSlot === "left" ? "Left Input" : "Right Input"}. Select an element from the library to fill it.`;
+}
+
+type CraftLabBaySectionProps = {
+  leftElement: AvailableElement | null;
+  rightElement: AvailableElement | null;
+  activeSlot: "left" | "right";
+  isSubmitting: boolean;
+  craftError: string | null;
+  setActiveSlot: (slot: "left" | "right") => void;
+  handleClearSlot: (slot: "left" | "right") => void;
+  onCraft: () => void;
+  onPlaceOnCanvas: () => void;
+  dismissError: () => void;
+};
+
+function CraftLabBaySection({
+  leftElement,
+  rightElement,
+  activeSlot,
+  isSubmitting,
+  craftError,
+  setActiveSlot,
+  handleClearSlot,
+  onCraft,
+  onPlaceOnCanvas,
+  dismissError,
+}: CraftLabBaySectionProps) {
+  const leftItem = leftElement ? { name: leftElement.name, visual: <span aria-hidden="true">{leftElement.emoji || "📄"}</span> } : undefined;
+  const rightItem = rightElement ? { name: rightElement.name, visual: <span aria-hidden="true">{rightElement.emoji || "📄"}</span> } : undefined;
+  const statusLabel = leftElement && rightElement ? "Ready to Craft" : leftElement || rightElement ? "1 of 2 Slots Filled" : "Craft Bay Empty";
+
+  return (
+    <>
+      <RecessedCraftBay left={leftItem} right={rightItem} statusLabel={statusLabel} activeSlot={activeSlot} onSelectSlot={setActiveSlot} onClearSlot={handleClearSlot} />
+      <CraftActionBar leftElement={leftElement} rightElement={rightElement} isSubmitting={isSubmitting} onCraft={onCraft} onPlaceOnCanvas={onPlaceOnCanvas} />
+      {craftError ? <CraftErrorBanner message={craftError} onDismiss={dismissError} /> : null}
+    </>
+  );
+}
+
+export function CraftLabClient({ elements: initialElements, errorMessage, initialWorkspace }: CraftLabClientProps) {
   const [localElements, setLocalElements] = useState<AvailableElement[]>(initialElements);
-  const { nodes, onNodesChange, addElementsToCanvas } = useCanvasNodes();
+  const { nodes, onNodesChange, addElementsToCanvas, isDirty, saveStatus, saveError, handleSaveWorkspace } =
+    useCanvasNodes(initialWorkspace?.snapshot);
+
+  const workspaceId = initialWorkspace?.workspaceId;
+  const handleSave = useCallback(() => {
+    if (workspaceId) handleSaveWorkspace(workspaceId);
+  }, [workspaceId, handleSaveWorkspace]);
 
   const handleDiscovery = useCallback((el: CraftElementResult) => {
-    setLocalElements((prev) => {
-      const alreadyPresent = prev.some((e) => e.id === el.id);
-      if (alreadyPresent) return prev;
-      return [...prev, toAvailableElement(el)];
-    });
+    setLocalElements((prev) => (prev.some((e) => e.id === el.id) ? prev : [...prev, toAvailableElement(el)]));
   }, []);
 
   const { activeSlot, setActiveSlot, leftElement, rightElement, handleSelectElement, handleClearSlot } = useCraftBaySelection();
   const { isSubmitting, craftError, craftResult, handleCraft, handleReset, dismissError } = useCraft({ onDiscovery: handleDiscovery });
 
   const handlePlaceOnCanvas = useCallback(() => {
-    const selected: AvailableElement[] = [];
-    if (leftElement) selected.push(leftElement);
-    if (rightElement) selected.push(rightElement);
-    if (selected.length > 0) {
-      addElementsToCanvas(selected);
-    }
+    const selected = [leftElement, rightElement].filter((e): e is AvailableElement => Boolean(e));
+    if (selected.length > 0) addElementsToCanvas(selected);
   }, [leftElement, rightElement, addElementsToCanvas]);
 
   if (errorMessage) return <LoadErrorBanner message={errorMessage} />;
 
-  if (craftResult) {
-    return (
-      <div className="space-y-8">
-        <CraftResultPanel result={craftResult} leftElement={leftElement} rightElement={rightElement} onReset={handleReset} />
-        <FinCraftCanvas nodes={nodes} onNodesChange={onNodesChange} />
-        <ElementLibrary elements={localElements} selectedLeftId={leftElement?.id ?? null} selectedRightId={rightElement?.id ?? null} onSelectElement={handleSelectElement} />
-      </div>
-    );
-  }
-
-  const bothFilled = Boolean(leftElement && rightElement);
-  const statusLabel = bothFilled ? "Ready to Craft" : leftElement || rightElement ? "1 of 2 Slots Filled" : "Craft Bay Empty";
-  const mochiNote = bothFilled
-    ? `Selected "${leftElement!.name}" and "${rightElement!.name}". Press Craft to discover a financial concept.`
-    : `Active target slot: ${activeSlot === "left" ? "Left Input" : "Right Input"}. Select an element from the library to fill it.`;
-
-  const leftItem = leftElement ? { name: leftElement.name, visual: <span aria-hidden="true">{leftElement.emoji || "📄"}</span> } : undefined;
-  const rightItem = rightElement ? { name: rightElement.name, visual: <span aria-hidden="true">{rightElement.emoji || "📄"}</span> } : undefined;
-
   return (
     <div className="space-y-8">
-      <RecessedCraftBay left={leftItem} right={rightItem} statusLabel={statusLabel} activeSlot={activeSlot} onSelectSlot={setActiveSlot} onClearSlot={handleClearSlot} />
-      <CraftActionBar
-        leftElement={leftElement}
-        rightElement={rightElement}
-        isSubmitting={isSubmitting}
-        onCraft={() => handleCraft(leftElement, rightElement)}
-        onPlaceOnCanvas={handlePlaceOnCanvas}
-      />
-      {craftError ? <CraftErrorBanner message={craftError} onDismiss={dismissError} /> : null}
-      <FinCraftCanvas nodes={nodes} onNodesChange={onNodesChange} />
+      {craftResult ? (
+        <CraftResultPanel result={craftResult} leftElement={leftElement} rightElement={rightElement} onReset={handleReset} />
+      ) : (
+        <CraftLabBaySection
+          leftElement={leftElement}
+          rightElement={rightElement}
+          activeSlot={activeSlot}
+          isSubmitting={isSubmitting}
+          craftError={craftError}
+          setActiveSlot={setActiveSlot}
+          handleClearSlot={handleClearSlot}
+          onCraft={() => handleCraft(leftElement, rightElement)}
+          onPlaceOnCanvas={handlePlaceOnCanvas}
+          dismissError={dismissError}
+        />
+      )}
+      <FinCraftCanvas nodes={nodes} onNodesChange={onNodesChange} workspaceId={workspaceId} isDirty={isDirty} saveStatus={saveStatus} saveError={saveError} onSave={handleSave} />
       <ElementLibrary elements={localElements} selectedLeftId={leftElement?.id ?? null} selectedRightId={rightElement?.id ?? null} onSelectElement={handleSelectElement} />
-      <footer aria-label="Craft Lab Status Note">
-        <MochiLabNote tone="guidance">{mochiNote}</MochiLabNote>
-      </footer>
+      {!craftResult && (
+        <footer aria-label="Craft Lab Status Note">
+          <MochiLabNote tone="guidance">{computeMochiNote(leftElement, rightElement, activeSlot)}</MochiLabNote>
+        </footer>
+      )}
     </div>
   );
 }

@@ -5,6 +5,8 @@ import { fetchAvailableElements } from "@/features/craft/api/fetch-elements";
 import { CraftLabClient } from "@/features/craft/components/craft-lab-client";
 import { getSessionUser } from "@/lib/auth/session";
 
+import { fetchUserWorkspaceCanvas } from "@/features/workspace/api/fetch-workspace";
+
 export const metadata: Metadata = {
   title: "Craft Lab | FinCraft Lab",
   description: "Financial Literacy Discovery Craft Lab host page.",
@@ -17,14 +19,18 @@ export default async function CraftLabPage() {
     redirect("/login");
   }
 
-  const result = await fetchAvailableElements();
+  const [elementsResult, workspaceResult] = await Promise.all([
+    fetchAvailableElements(),
+    fetchUserWorkspaceCanvas(),
+  ]);
 
-  if (!result.success && "redirectLogin" in result && result.redirectLogin) {
+  if (!elementsResult.success && "redirectLogin" in elementsResult && elementsResult.redirectLogin) {
     redirect("/login");
   }
 
-  const elements = result.success ? result.elements : [];
-  const errorMessage = !result.success && "errorMessage" in result ? result.errorMessage : undefined;
+  const elements = elementsResult.success ? elementsResult.elements : [];
+  const errorMessage = !elementsResult.success && "errorMessage" in elementsResult ? elementsResult.errorMessage : undefined;
+  const initialWorkspace = workspaceResult.success ? workspaceResult : undefined;
 
   return (
     <ProductShell activeTab="lab" user={user}>
@@ -45,7 +51,7 @@ export default async function CraftLabPage() {
         </header>
 
         <main aria-label="Craft Lab Selection Area">
-          <CraftLabClient elements={elements} errorMessage={errorMessage} />
+          <CraftLabClient elements={elements} errorMessage={errorMessage} initialWorkspace={initialWorkspace} />
         </main>
       </div>
     </ProductShell>
