@@ -292,10 +292,11 @@ export async function verifyDetailSeed(
           continue;
         }
 
-        const keys = Object.keys(item).sort();
-        if (keys.join(',') !== 'organization,title,url') {
+        const requiredKeys = ['organization', 'title', 'url'];
+        const hasAllRequired = requiredKeys.every((k) => k in (item as Record<string, unknown>));
+        if (!hasAllRequired) {
           errors.push(
-            `Detail "${planned.elementSlug}" source ${i} has unexpected keys: ${keys.join(',')}`,
+            `Detail "${planned.elementSlug}" source ${i} missing required keys (organization, title, url)`,
           );
         }
 

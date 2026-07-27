@@ -1,25 +1,9 @@
 import type { CraftSourceResponse } from '../types/craft-response.type';
 
-/**
- * Type predicate guard checking if a value is a non-null, non-array object record.
- */
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-/**
- * Validates and safe-copies untrusted raw JSON sources into a typed CraftSourceResponse array.
- *
- * Rules:
- * 1. Accepts unknown input value.
- * 2. Rejects non-array input values.
- * 3. Returns a new empty array if input is an empty array.
- * 4. Rejects null, primitive, array, or non-object items.
- * 5. Requires exactly three own properties: 'title', 'organization', 'url'.
- * 6. Rejects missing fields, extra enumerable fields, or non-string values.
- * 7. Rejects empty or whitespace-only strings.
- * 8. Returns a new array of new plain objects with preserved string values.
- */
 export function parseCraftSources(rawSources: unknown): CraftSourceResponse[] {
   if (!Array.isArray(rawSources)) {
     throw new Error('Invalid craft sources configuration');
@@ -30,11 +14,6 @@ export function parseCraftSources(rawSources: unknown): CraftSourceResponse[] {
 
   for (const item of sources) {
     if (!isObjectRecord(item)) {
-      throw new Error('Invalid craft sources configuration');
-    }
-
-    const keys = Object.keys(item);
-    if (keys.length !== 3) {
       throw new Error('Invalid craft sources configuration');
     }
 
@@ -49,6 +28,10 @@ export function parseCraftSources(rawSources: unknown): CraftSourceResponse[] {
     const title = item.title;
     const organization = item.organization;
     const url = item.url;
+    const jurisdiction =
+      typeof item.jurisdiction === 'string' ? item.jurisdiction : undefined;
+    const sourceType =
+      typeof item.sourceType === 'string' ? item.sourceType : undefined;
 
     if (
       typeof title !== 'string' ||
@@ -70,6 +53,8 @@ export function parseCraftSources(rawSources: unknown): CraftSourceResponse[] {
       title,
       organization,
       url,
+      ...(jurisdiction ? { jurisdiction } : {}),
+      ...(sourceType ? { sourceType } : {}),
     });
   }
 

@@ -8,6 +8,8 @@ export interface CraftSourceResponse {
   title: string;
   organization: string;
   url: string;
+  jurisdiction?: string;
+  sourceType?: string;
 }
 
 export interface CraftElementResponse {

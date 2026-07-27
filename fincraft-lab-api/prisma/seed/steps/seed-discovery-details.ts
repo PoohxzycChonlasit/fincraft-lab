@@ -3,6 +3,7 @@ import {
   Prisma,
 } from '../../../src/database/generated/prisma/client';
 import { StarterElementDetailSeedInput } from '../content/starter-element-details';
+import { cleanCanonicalUrl, findTrustedAuthority } from '../trusted-source-registry';
 
 export async function seedDiscoveryDetailsStep(
   tx: Prisma.TransactionClient,
@@ -19,11 +20,22 @@ export async function seedDiscoveryDetailsStep(
       );
     }
 
-    const sourcesPayload = detail.sources.map((s) => ({
-      title: s.title,
-      organization: s.organization,
-      url: s.url,
-    }));
+    const sourcesPayload = detail.sources.map((s) => {
+      let hostname = '';
+      try {
+        hostname = new URL(s.url).hostname;
+      } catch {
+        hostname = '';
+      }
+      const authority = findTrustedAuthority(hostname);
+      return {
+        title: s.title,
+        organization: s.organization,
+        url: cleanCanonicalUrl(s.url),
+        jurisdiction: s.jurisdiction || authority?.jurisdiction || 'GLOBAL',
+        sourceType: s.sourceType || authority?.sourceType || 'International organisation',
+      };
+    });
 
     const result = await tx.discoveryDetail.upsert({
       where: { elementId },

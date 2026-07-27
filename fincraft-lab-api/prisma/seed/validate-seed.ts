@@ -13,6 +13,7 @@ import {
   EXPECTED_TOTAL_DETAIL_COUNT,
   EXPECTED_TOTAL_ELEMENT_COUNT,
 } from './seed-manifest';
+import { cleanCanonicalUrl, findTrustedAuthority } from './trusted-source-registry';
 
 export function validateCategoryContent(categories: CategorySeedInput[]): void {
   const errors: string[] = [];
@@ -200,80 +201,39 @@ export function validateAllDetailContent(
   const validRealityLevels = new Set(Object.values(RealityLevel));
   const validSafetyLabels = new Set(Object.values(SafetyLabel));
 
-  // Validate Starter Details
-  for (let i = 0; i < starterDetails.length; i++) {
-    const detail = starterDetails[i];
-
-    if (!detail.elementSlug || detail.elementSlug.trim().length === 0) {
-      errors.push(`Starter Detail index ${i} has empty elementSlug`);
-    } else {
-      const slug = detail.elementSlug.trim().toLowerCase();
-      if (seenSlugs.has(slug)) {
-        errors.push(`Duplicate detail elementSlug detected: "${detail.elementSlug}"`);
-      }
-      seenSlugs.add(slug);
-
-      if (!starterSlugSet.has(slug)) {
-        errors.push(`Starter Detail elementSlug "${detail.elementSlug}" is not a recognized Starter Element`);
-      }
+  for (const detail of starterDetails) {
+    const slug = detail.elementSlug.trim().toLowerCase();
+    if (seenSlugs.has(slug)) {
+      errors.push(`Duplicate detail elementSlug detected: "${detail.elementSlug}"`);
+    }
+    seenSlugs.add(slug);
+    if (!starterSlugSet.has(slug)) {
+      errors.push(`Starter Detail elementSlug "${detail.elementSlug}" is not a recognized Starter Element`);
     }
   }
 
-  // Validate Batch A Discovery Details
-  for (let i = 0; i < batchADetails.length; i++) {
-    const detail = batchADetails[i];
-
-    if (!detail.elementSlug || detail.elementSlug.trim().length === 0) {
-      errors.push(`Batch A Detail index ${i} has empty elementSlug`);
-    } else {
-      const slug = detail.elementSlug.trim().toLowerCase();
-      if (seenSlugs.has(slug)) {
-        errors.push(`Duplicate detail elementSlug detected across sets: "${detail.elementSlug}"`);
-      }
-      seenSlugs.add(slug);
-
-      if (starterSlugSet.has(slug)) {
-        errors.push(`Batch A Detail elementSlug "${detail.elementSlug}" targets a Starter Element, which is forbidden`);
-      }
-
-      if (batchBDiscoverySlugSet.has(slug)) {
-        errors.push(`Batch A Detail elementSlug "${detail.elementSlug}" targets a Batch B Discovery Element, which is forbidden`);
-      }
-
-      if (!batchADiscoverySlugSet.has(slug)) {
-        errors.push(`Batch A Detail elementSlug "${detail.elementSlug}" is not a recognized Batch A Discovery Element`);
-      }
+  for (const detail of batchADetails) {
+    const slug = detail.elementSlug.trim().toLowerCase();
+    if (seenSlugs.has(slug)) {
+      errors.push(`Duplicate detail elementSlug detected: "${detail.elementSlug}"`);
+    }
+    seenSlugs.add(slug);
+    if (!batchADiscoverySlugSet.has(slug)) {
+      errors.push(`Batch A Detail elementSlug "${detail.elementSlug}" is not a recognized Batch A Discovery Element`);
     }
   }
 
-  // Validate Batch B Discovery Details
-  for (let i = 0; i < batchBDetails.length; i++) {
-    const detail = batchBDetails[i];
-
-    if (!detail.elementSlug || detail.elementSlug.trim().length === 0) {
-      errors.push(`Batch B Detail index ${i} has empty elementSlug`);
-    } else {
-      const slug = detail.elementSlug.trim().toLowerCase();
-      if (seenSlugs.has(slug)) {
-        errors.push(`Duplicate detail elementSlug detected across sets: "${detail.elementSlug}"`);
-      }
-      seenSlugs.add(slug);
-
-      if (starterSlugSet.has(slug)) {
-        errors.push(`Batch B Detail elementSlug "${detail.elementSlug}" targets a Starter Element, which is forbidden`);
-      }
-
-      if (batchADiscoverySlugSet.has(slug)) {
-        errors.push(`Batch B Detail elementSlug "${detail.elementSlug}" targets a Batch A Discovery Element, which is forbidden`);
-      }
-
-      if (!batchBDiscoverySlugSet.has(slug)) {
-        errors.push(`Batch B Detail elementSlug "${detail.elementSlug}" is not a recognized Batch B Discovery Element`);
-      }
+  for (const detail of batchBDetails) {
+    const slug = detail.elementSlug.trim().toLowerCase();
+    if (seenSlugs.has(slug)) {
+      errors.push(`Duplicate detail elementSlug detected: "${detail.elementSlug}"`);
+    }
+    seenSlugs.add(slug);
+    if (!batchBDiscoverySlugSet.has(slug)) {
+      errors.push(`Batch B Detail elementSlug "${detail.elementSlug}" is not a recognized Batch B Discovery Element`);
     }
   }
 
-  // Validate shared content fields for all details
   for (const detail of combinedDetails) {
     const textFields: Array<{ name: keyof StarterElementDetailSeedInput; val: string | undefined }> = [
       { name: 'shortDescription', val: detail.shortDescription },
@@ -290,10 +250,8 @@ export function validateAllDetailContent(
     for (const field of textFields) {
       if (!field.val || field.val.trim().length === 0) {
         errors.push(`Detail "${detail.elementSlug}" has empty field: ${field.name}`);
-      } else {
-        if (field.val.includes('TODO') || field.val.includes('TBD')) {
-          errors.push(`Detail "${detail.elementSlug}" has placeholder text in field ${field.name}`);
-        }
+      } else if (field.val.includes('TODO') || field.val.includes('TBD')) {
+        errors.push(`Detail "${detail.elementSlug}" has placeholder text in field ${field.name}`);
       }
     }
 
@@ -308,25 +266,51 @@ export function validateAllDetailContent(
     if (!Array.isArray(detail.sources) || detail.sources.length === 0) {
       errors.push(`Detail "${detail.elementSlug}" must have at least one source object`);
     } else {
+      const itemCanonicalUrls = new Set<string>();
       for (let j = 0; j < detail.sources.length; j++) {
         const src = detail.sources[j];
         if (!src.title || src.title.trim().length === 0) {
           errors.push(`Detail "${detail.elementSlug}" source ${j} has empty title`);
+        } else if (/[\u0E00-\u0E7F]/.test(src.title)) {
+          errors.push(`Detail "${detail.elementSlug}" source ${j} title contains Thai characters: "${src.title}"`);
         }
+
         if (!src.organization || src.organization.trim().length === 0) {
           errors.push(`Detail "${detail.elementSlug}" source ${j} has empty organization`);
         }
+
         if (!src.url || src.url.trim().length === 0) {
           errors.push(`Detail "${detail.elementSlug}" source ${j} has empty url`);
         } else {
-          if (src.url.includes('example.com') || src.url.includes('placeholder')) {
-            errors.push(`Detail "${detail.elementSlug}" source ${j} has placeholder URL: "${src.url}"`);
-          }
           try {
             const parsedUrl = new URL(src.url);
             if (parsedUrl.protocol !== 'https:') {
               errors.push(`Detail "${detail.elementSlug}" source ${j} URL scheme must be https: (got ${parsedUrl.protocol})`);
             }
+            if (parsedUrl.hostname.endsWith('.th') || /[\u0E00-\u0E7F]/.test(parsedUrl.hostname)) {
+              errors.push(`Detail "${detail.elementSlug}" source ${j} has Thai domain: "${parsedUrl.hostname}"`);
+            }
+
+            const authority = findTrustedAuthority(parsedUrl.hostname);
+            if (!authority) {
+              errors.push(`Detail "${detail.elementSlug}" source ${j} host "${parsedUrl.hostname}" is not in trusted authority registry`);
+            } else {
+              if (src.organization !== authority.organization) {
+                errors.push(`Detail "${detail.elementSlug}" source ${j} organization "${src.organization}" does not match registry "${authority.organization}"`);
+              }
+              if (src.jurisdiction && src.jurisdiction !== authority.jurisdiction) {
+                errors.push(`Detail "${detail.elementSlug}" source ${j} jurisdiction "${src.jurisdiction}" does not match registry "${authority.jurisdiction}"`);
+              }
+              if (src.sourceType && src.sourceType !== authority.sourceType) {
+                errors.push(`Detail "${detail.elementSlug}" source ${j} sourceType "${src.sourceType}" does not match registry "${authority.sourceType}"`);
+              }
+            }
+
+            const cleaned = cleanCanonicalUrl(src.url);
+            if (itemCanonicalUrls.has(cleaned)) {
+              errors.push(`Detail "${detail.elementSlug}" source ${j} duplicate canonical URL: "${cleaned}"`);
+            }
+            itemCanonicalUrls.add(cleaned);
           } catch {
             errors.push(`Detail "${detail.elementSlug}" source ${j} has invalid URL syntax: "${src.url}"`);
           }
