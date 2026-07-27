@@ -1,57 +1,39 @@
-import { cookies } from "next/headers";
+import { backendFetch } from "@/lib/api/backend-fetch.server";
 import type { CanvasSnapshot, WorkspaceSummary } from "../types/workspace.type";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export type FetchWorkspaceResult =
   | { success: true; workspaceId: string; snapshot: CanvasSnapshot }
   | { success: false; redirectLogin: true }
   | { success: false; errorMessage: string };
 
-async function getOrCreateWorkspaceId(token: string): Promise<string | null> {
-  const getRes = await fetch(`${BACKEND_URL}/workspaces`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    cache: "no-store",
-  });
+type WorkspaceListEnvelope = { data?: WorkspaceSummary[] };
+type WorkspaceDetailEnvelope = { data?: WorkspaceSummary };
+type CanvasSnapshotEnvelope = { data?: CanvasSnapshot };
 
+async function getOrCreateWorkspaceId(): Promise<string | null> {
+  const getRes = await backendFetch("/workspaces", { method: "GET", requireAuth: true });
   if (!getRes.ok) return null;
 
-  const json = (await getRes.json()) as { data?: WorkspaceSummary[] };
-  const workspaces = json.data ?? [];
-
+  const workspaces = (getRes.data as WorkspaceListEnvelope).data ?? [];
   if (workspaces.length > 0) {
     return workspaces[0].id;
   }
 
-  const createRes = await fetch(`${BACKEND_URL}/workspaces`, {
+  const createRes = await backendFetch("/workspaces", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name: "Default Workspace" }),
+    body: { name: "Default Workspace" },
+    requireAuth: true,
   });
 
   if (!createRes.ok) return null;
 
-  const createJson = (await createRes.json()) as { data?: WorkspaceSummary };
+  const createJson = createRes.data as WorkspaceDetailEnvelope;
   return createJson.data?.id ?? null;
 }
 
 export async function fetchUserWorkspaceCanvas(): Promise<FetchWorkspaceResult> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("access_token")?.value;
-
-  if (!token) {
-    return { success: false, redirectLogin: true };
-  }
-
   try {
-    const workspaceId = await getOrCreateWorkspaceId(token);
+    const workspaceId = await getOrCreateWorkspaceId();
     if (!workspaceId) {
       return {
         success: false,
@@ -59,27 +41,22 @@ export async function fetchUserWorkspaceCanvas(): Promise<FetchWorkspaceResult> 
       };
     }
 
-    const canvasRes = await fetch(`${BACKEND_URL}/workspaces/${workspaceId}/canvas`, {
+    const canvasRes = await backendFetch(`/workspaces/${workspaceId}/canvas`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
+      requireAuth: true,
     });
 
-    if (canvasRes.status === 401) {
-      return { success: false, redirectLogin: true };
-    }
-
     if (!canvasRes.ok) {
+      if (canvasRes.status === 401) {
+        return { success: false, redirectLogin: true };
+      }
       return {
         success: false,
-        errorMessage: `Failed to load workspace canvas (HTTP ${canvasRes.status}).`,
+        errorMessage: canvasRes.error || `Failed to load workspace canvas (HTTP ${canvasRes.status}).`,
       };
     }
 
-    const canvasJson = (await canvasRes.json()) as { data?: CanvasSnapshot };
+    const canvasJson = canvasRes.data as CanvasSnapshotEnvelope;
     const snapshot = canvasJson.data ?? {
       workspaceId,
       workspaceUpdatedAt: new Date().toISOString(),
