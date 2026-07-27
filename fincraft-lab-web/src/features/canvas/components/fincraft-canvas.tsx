@@ -73,7 +73,7 @@ function CanvasEmptyOverlay() {
       <div className="surface-floating max-w-sm space-y-1.5 rounded-2xl border border-[var(--border-subtle)] p-5 shadow-xs">
         <p className="text-sm font-semibold text-foreground">Drag an element here to begin.</p>
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Select or drag elements from the left rack onto this infinite workspace.
+          Select or drag elements from the Element Library onto this infinite workspace.
         </p>
       </div>
     </div>
@@ -97,18 +97,18 @@ function CanvasHeader({ nodeCount, isDirty, saveStatus, canSave, isSaving, onSav
   onSave?: () => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-      <div className="flex items-center gap-3">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Workspace ({nodeCount})</h2>
+    <div className="lab-canvas-header flex min-w-0 items-center justify-between gap-2 px-1">
+      <div className="flex min-w-0 items-center gap-2">
+        <h2 className="truncate text-xs font-bold uppercase tracking-wider text-muted-foreground">Workspace ({nodeCount})</h2>
         <SaveStatusIndicator isDirty={isDirty} saveStatus={saveStatus} />
       </div>
-      <div className="flex items-center gap-3">
-        <span className="text-[11px] text-muted-foreground hidden md:inline">
+      <div className="flex shrink-0 items-center gap-2">
+        <span className="hidden text-[11px] text-muted-foreground min-[840px]:inline">
           Drag one element onto another to combine.
         </span>
         {onSave ? (
-          <button type="button" onClick={onSave} disabled={!canSave} aria-label="Save workspace" className="min-h-[38px] rounded-xl border border-[var(--border-subtle)] bg-[var(--color-action-primary)] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-action-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50">
-            {isSaving ? "Saving..." : "Save workspace"}
+          <button type="button" onClick={onSave} disabled={!canSave} aria-label="Save workspace" className="min-h-9 rounded-xl border border-[var(--border-subtle)] bg-[var(--color-action-primary)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-action-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50">
+            {isSaving ? "Saving..." : <><span className="min-[840px]:hidden">Save</span><span className="hidden min-[840px]:inline">Save workspace</span></>}
           </button>
         ) : null}
       </div>
@@ -168,7 +168,7 @@ function ReactFlowCanvasInner(props: CanvasInnerProps) {
   const handleNodeClick = useCallback((_: React.MouseEvent, node: ElementCanvasNode) => onNodeTap(node), [onNodeTap]);
 
   return (
-    <div className="relative h-full min-h-[440px] w-full overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] shadow-xs" onDragOver={handleDragOver} onDrop={handleDrop}>
+    <div className="lab-canvas-frame relative h-full min-h-0 w-full min-w-0 overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] shadow-xs" onDragOver={handleDragOver} onDrop={handleDrop}>
       {nodes.length === 0 ? <CanvasEmptyOverlay /> : null}
       <ReactFlow
         nodes={nodes}
@@ -185,6 +185,7 @@ function ReactFlowCanvasInner(props: CanvasInnerProps) {
         maxZoom={2}
         proOptions={{ hideAttribution: true }}
         aria-label="Craft Workspace Diagram"
+        style={{ width: "100%", height: "100%" }}
       >
         <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
         <Controls showInteractive={false} className="!rounded-xl !border-[var(--border-subtle)] !bg-[var(--surface-resting)] !shadow-[var(--shadow-resting)]" />
@@ -199,9 +200,9 @@ export function FinCraftCanvas(props: FinCraftCanvasProps) {
   const canSave = Boolean(workspaceId && isDirty && !isSaving && onSave);
 
   return (
-    <section aria-label="Infinite Craft Workspace" className="space-y-2 flex-1 flex flex-col min-w-0 h-full">
+    <section aria-label="Infinite Craft Workspace" className="lab-canvas-section flex h-full min-h-0 min-w-0 flex-1 flex-col gap-2">
       <CanvasHeader nodeCount={nodes.length} isDirty={isDirty} saveStatus={saveStatus} canSave={canSave} isSaving={isSaving} onSave={onSave} />
-      {saveError ? <div role="alert" className="rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-3 text-xs text-[var(--color-text-danger)]">{saveError}</div> : null}
+      {saveError ? <div role="alert" className="shrink-0 rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-2 text-xs text-[var(--color-text-danger)]">{saveError}</div> : null}
       <ReactFlowProvider>
         <ReactFlowCanvasInner {...props} />
       </ReactFlowProvider>

@@ -43,24 +43,26 @@ export default async function CraftLabPage({ searchParams }: CraftLabPageProps) 
   const initialWorkspace = user && workspaceResult?.success ? workspaceResult : undefined;
 
   return (
-    <div className="w-full space-y-3">
-      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2.5">
+    <div className="lab-page-frame">
+      <div className="lab-page-heading flex items-center justify-between border-b border-[var(--border-subtle)] pb-2.5">
         <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
           Craft Lab <span className="text-xs font-semibold text-[var(--color-craft-accent)] font-mono">Discovery Workspace</span>
         </h1>
-        <p className="text-xs text-muted-foreground hidden sm:block">
+        <p className="lab-page-description text-xs text-muted-foreground hidden sm:block">
           Drag elements onto the canvas to discover financial concepts.
         </p>
       </div>
 
-      <FinCraftLabClient
-        key={initialWorkspace?.workspaceId ?? "guest-lab"}
-        elements={elements}
-        errorMessage={errorMessage}
-        workspaceErrorMessage={workspaceErrorMessage}
-        initialWorkspace={initialWorkspace}
-        isAuthenticated={isAuthenticated}
-      />
+      <div className="lab-page-content">
+        <FinCraftLabClient
+          key={initialWorkspace?.workspaceId ?? "guest-lab"}
+          elements={elements}
+          errorMessage={errorMessage}
+          workspaceErrorMessage={workspaceErrorMessage}
+          initialWorkspace={initialWorkspace}
+          isAuthenticated={isAuthenticated}
+        />
+      </div>
     </div>
   );
 }

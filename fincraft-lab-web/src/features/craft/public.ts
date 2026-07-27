@@ -4,4 +4,5 @@ export type { ElementGuidance, SuggestedPartner } from "./types/element-guidance
 export { useCraft, type CraftInputElement } from "./hooks/use-craft";
 export { useElementGuidance } from "./hooks/use-element-guidance";
 export { ElementLibrary } from "./components/element-library";
+export { ElementInspector } from "./components/element-inspector";
 export { CraftResultPanel } from "./components/craft-result-panel";
