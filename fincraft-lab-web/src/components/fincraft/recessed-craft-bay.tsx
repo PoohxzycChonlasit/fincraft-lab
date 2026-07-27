@@ -28,7 +28,7 @@ function CraftBaySlot({ item, label }: { item?: CraftBayItem; label: string }) {
         <p className="mt-0.5 min-w-0 truncate text-sm font-semibold text-foreground">{item.name}</p>
       </div>
       {item.visual ? (
-        <span className="surface-inset flex size-8 shrink-0 items-center justify-center rounded-md border border-[var(--border-subtle)] text-xs font-semibold text-[var(--color-action-primary)]">
+        <span className="surface-inset flex size-9 shrink-0 items-center justify-center rounded-md border border-[var(--border-subtle)] text-lg sm:text-xl leading-none font-semibold text-[var(--color-action-primary)]">
           {item.visual}
         </span>
       ) : null}

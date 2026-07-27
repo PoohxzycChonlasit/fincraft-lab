@@ -33,7 +33,7 @@ export function SpecimenElementTile({
           </p>
           <h3 className="mt-1.5 text-base sm:text-lg font-semibold text-foreground truncate">{name}</h3>
         </div>
-        <div className="surface-inset flex size-11 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-sm font-semibold text-foreground">
+        <div className="surface-inset flex size-11 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-xl sm:text-2xl leading-none font-semibold text-foreground">
           {visual}
         </div>
       </div>
