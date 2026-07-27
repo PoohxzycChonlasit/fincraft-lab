@@ -25,7 +25,6 @@ function toAvailableElement(el: CraftElementResult): AvailableElement {
     iconUrl: el.iconUrl,
     elementType: el.elementType,
     isStarter: el.isStarter,
-    category: { id: "", name: el.elementType, sortOrder: 999 },
   };
 }
 

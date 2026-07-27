@@ -8,6 +8,12 @@ export type CraftElementResult = {
   isStarter: boolean;
 };
 
+export type CraftDiscoverySource = {
+  title: string;
+  organization: string;
+  url: string;
+};
+
 export type CraftDiscoveryDetail = {
   shortDescription: string;
   realLesson: string;
@@ -20,6 +26,7 @@ export type CraftDiscoveryDetail = {
   whatChangesOutcome: string | null;
   realityLevel: string;
   safetyLabel: string;
+  sources: CraftDiscoverySource[];
 };
 
 export type CraftDiscoveryResult = {

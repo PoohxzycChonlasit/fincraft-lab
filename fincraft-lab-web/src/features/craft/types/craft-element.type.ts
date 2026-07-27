@@ -12,7 +12,7 @@ export type AvailableElement = {
   iconUrl: string | null;
   elementType: string;
   isStarter: boolean;
-  category: AvailableElementCategory;
+  category?: AvailableElementCategory;
 };
 
 export type ActiveSlot = "left" | "right";
