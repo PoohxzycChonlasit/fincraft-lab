@@ -25,7 +25,7 @@ export function ElementCanvasNodeComponent({ data, selected }: NodeProps<Element
     >
       <div className="flex items-center gap-2">
         <span className="text-lg leading-none" aria-hidden="true">
-          {data.emoji || "📄"}
+          {data.emoji || "Element"}
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-xs font-bold text-foreground truncate">{data.name}</p>

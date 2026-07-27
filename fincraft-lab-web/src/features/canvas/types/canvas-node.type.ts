@@ -7,6 +7,14 @@ export type CanvasElementInput = {
   categoryName?: string;
 };
 
+export type CanvasCombineRequest = {
+  sourceNodeId: string;
+  targetNodeId: string;
+  sourceElementId: string;
+  targetElementId: string;
+  collisionPosition: { x: number; y: number };
+};
+
 export type ElementNodeData = {
   elementId: string;
   name: string;

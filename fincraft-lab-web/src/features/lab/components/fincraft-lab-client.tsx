@@ -2,13 +2,10 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
-import {
-  useCraftBaySelection,
-  type AvailableElement,
-  type CraftElementResult,
-} from "@/features/craft/public";
-import { useCanvasNodes, useCanvasCombine, type InitialNodeInput, type PersistableCanvasNode, type SaveStatus } from "@/features/canvas/public";
+import type { AvailableElement, CraftElementResult } from "@/features/craft/public";
+import { useCanvasNodes, type InitialNodeInput, type PersistableCanvasNode, type SaveStatus } from "@/features/canvas/public";
 import { saveWorkspaceCanvasApi, type CanvasSnapshot, type WorkspaceSummary } from "@/features/workspace/public.client";
+import { useLabCraftCombine } from "../hooks/use-lab-craft-combine";
 import { LabWorkspaceContent } from "./lab-workspace-content";
 
 type InitialWorkspace = {
@@ -47,11 +44,7 @@ function LoadErrorBanner({ message }: { message: string }) {
   );
 }
 
-function useLabWorkspaceSave(
-  workspaceId: string | undefined,
-  getPersistableNodes: () => PersistableCanvasNode[],
-  markSaved: () => void,
-) {
+function useLabWorkspaceSave(workspaceId: string | undefined, getPersistableNodes: () => PersistableCanvasNode[], markSaved: () => void) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -92,31 +85,28 @@ export function FinCraftLabClient({
   initialWorkspace,
 }: FinCraftLabClientProps) {
   const [localElements, setLocalElements] = useState<AvailableElement[]>(initialElements);
-
   const initialCanvasNodes = useMemo(() => buildInitialCanvasNodes(initialWorkspace), [initialWorkspace]);
   const canvas = useCanvasNodes(initialCanvasNodes);
   const save = useLabWorkspaceSave(initialWorkspace?.workspaceId, canvas.getPersistableNodes, canvas.markSaved);
-  const selection = useCraftBaySelection();
 
   const handleDiscovery = useCallback((element: CraftElementResult) => {
     toast.success(`Discovered: ${element.emoji} ${element.name}!`, { duration: 3500 });
-    setLocalElements((current) =>
-      current.some((item) => item.id === element.id) ? current : [...current, toAvailableElement(element)],
-    );
-  }, []);
+    if (!isAuthenticated) return;
+    setLocalElements((current) => current.some((item) => item.id === element.id)
+      ? current
+      : [...current, toAvailableElement(element)]);
+  }, [isAuthenticated]);
 
-  const combine = useCanvasCombine({
-    canvas,
-    isAuthenticated,
-    onDiscovery: handleDiscovery,
-  });
-
-  const handlePlaceOnCanvas = useCallback(() => {
-    const selected = [selection.leftElement, selection.rightElement]
-      .filter((el): el is AvailableElement => Boolean(el))
-      .map((el) => ({ id: el.id, name: el.name, emoji: el.emoji, categoryName: el.elementType }));
-    if (selected.length > 0) canvas.addElementsToCanvas(selected);
-  }, [selection.leftElement, selection.rightElement, canvas]);
+  const combine = useLabCraftCombine({ canvas, isAuthenticated, onDiscovery: handleDiscovery });
+  const { addElementsToCanvas } = canvas;
+  const handlePlaceElement = useCallback((element: AvailableElement) => {
+    addElementsToCanvas([{
+      id: element.id,
+      name: element.name,
+      emoji: element.emoji,
+      categoryName: element.elementType,
+    }]);
+  }, [addElementsToCanvas]);
 
   if (errorMessage) return <LoadErrorBanner message={errorMessage} />;
   if (isAuthenticated && (workspaceErrorMessage || !initialWorkspace)) {
@@ -131,13 +121,7 @@ export function FinCraftLabClient({
       save={save}
       combine={combine}
       localElements={localElements}
-      leftElement={selection.leftElement}
-      rightElement={selection.rightElement}
-      activeSlot={selection.activeSlot}
-      handleSelectElement={selection.handleSelectElement}
-      handleClearSlot={selection.handleClearSlot}
-      setActiveSlot={selection.setActiveSlot}
-      handlePlaceOnCanvas={handlePlaceOnCanvas}
+      handlePlaceElement={handlePlaceElement}
     />
   );
 }
