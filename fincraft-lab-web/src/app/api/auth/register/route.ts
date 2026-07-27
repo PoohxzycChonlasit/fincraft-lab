@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { backendFetch } from "@/lib/api/backend-fetch.server";
 
 type RegisterRequestBody = {
   displayName?: string;
@@ -9,12 +8,12 @@ type RegisterRequestBody = {
   password?: string;
 };
 
-function parseBackendError(errorData: { message?: string | string[] }): string {
-  if (Array.isArray(errorData.message)) {
-    return errorData.message.join(". ");
-  }
-  return typeof errorData.message === "string" ? errorData.message : "Registration failed";
-}
+type RegisterResponseBody = {
+  data?: {
+    user?: unknown;
+    accessToken?: string;
+  };
+};
 
 async function setSessionCookie(accessToken: string) {
   const cookieStore = await cookies();
@@ -40,21 +39,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Password must be at least 8 characters long" }, { status: 400 });
     }
 
-    const backendRes = await fetch(`${BACKEND_URL}/auth/register`, {
+    const res = await backendFetch("/auth/register", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName, email, password }),
+      body: { displayName, email, password },
+      requireAuth: false,
     });
 
-    if (!backendRes.ok) {
-      const errorData = (await backendRes.json().catch(() => ({}))) as { message?: string | string[] };
-      return NextResponse.json({ error: parseBackendError(errorData) }, { status: backendRes.status });
+    if (!res.ok) {
+      return NextResponse.json({ error: res.error || "Registration failed" }, { status: res.status });
     }
 
-    const data = (await backendRes.json()) as { data?: { user?: unknown; accessToken?: string } };
-    const user = data.data?.user ?? data.data;
-    if (data.data?.accessToken) {
-      await setSessionCookie(data.data.accessToken);
+    const json = res.data as RegisterResponseBody;
+    const user = json.data?.user ?? json.data;
+    if (json.data?.accessToken) {
+      await setSessionCookie(json.data.accessToken);
     }
 
     return NextResponse.json({ data: { user } }, { status: 201 });

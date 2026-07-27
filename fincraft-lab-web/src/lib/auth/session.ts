@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { backendFetch } from "@/lib/api/backend-fetch.server";
 
 export type UserProfile = {
   id: string;
@@ -11,33 +11,20 @@ export type UserProfile = {
   updatedAt: string;
 };
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+type MeResponseBody = {
+  data?: UserProfile;
+};
 
 export async function getSessionUser(): Promise<UserProfile | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("access_token")?.value;
+  const res = await backendFetch("/auth/me", {
+    method: "GET",
+    requireAuth: true,
+  });
 
-  if (!token) {
+  if (!res.ok) {
     return null;
   }
 
-  try {
-    const res = await fetch(`${BACKEND_URL}/auth/me`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      return null;
-    }
-
-    const data = (await res.json()) as { data?: UserProfile };
-    return data.data ?? null;
-  } catch {
-    return null;
-  }
+  const json = res.data as MeResponseBody;
+  return json.data ?? null;
 }

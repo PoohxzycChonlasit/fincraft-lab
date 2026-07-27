@@ -1,37 +1,41 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { backendFetch } from "@/lib/api/backend-fetch.server";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+type LoginRequestBody = {
+  email?: string;
+  password?: string;
+};
+
+type LoginResponseBody = {
+  data?: {
+    user: unknown;
+    accessToken: string;
+  };
+};
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { email?: string; password?: string };
+    const body = (await request.json()) as LoginRequestBody;
     const { email, password } = body;
 
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
 
-    const backendRes = await fetch(`${BACKEND_URL}/auth/login`, {
+    const res = await backendFetch("/auth/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: { email, password },
+      requireAuth: false,
     });
 
-    if (!backendRes.ok) {
-      const errorData = (await backendRes.json().catch(() => ({}))) as { message?: string };
-      return NextResponse.json(
-        { error: errorData.message || "Invalid email or password" },
-        { status: backendRes.status }
-      );
+    if (!res.ok) {
+      return NextResponse.json({ error: res.error || "Invalid email or password" }, { status: res.status });
     }
 
-    const data = (await backendRes.json()) as {
-      data?: { user: unknown; accessToken: string };
-    };
-
-    const accessToken = data.data?.accessToken;
-    const user = data.data?.user;
+    const json = res.data as LoginResponseBody;
+    const accessToken = json.data?.accessToken;
+    const user = json.data?.user;
 
     if (!accessToken) {
       return NextResponse.json({ error: "Invalid response from auth server" }, { status: 500 });
