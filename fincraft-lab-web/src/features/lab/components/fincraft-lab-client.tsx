@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { RecessedCraftBay } from "@/components/fincraft/recessed-craft-bay";
 import { MochiLabNote } from "@/components/fincraft/mochi-lab-note";
 import {
@@ -12,8 +12,17 @@ import {
   type AvailableElement,
   type CraftElementResult,
 } from "@/features/craft/public";
-import { useCanvasNodes, FinCraftCanvas } from "@/features/canvas/public";
-import type { CanvasSnapshot } from "@/features/workspace/public";
+import {
+  useCanvasNodes,
+  FinCraftCanvas,
+  type SaveStatus,
+  type InitialNodeInput,
+  type PersistableCanvasNode,
+} from "@/features/canvas/public";
+import {
+  saveWorkspaceCanvasApi,
+  type CanvasSnapshot,
+} from "@/features/workspace/public";
 
 export type FinCraftLabClientProps = {
   elements: AvailableElement[];
@@ -98,15 +107,52 @@ function CraftLabBaySection({
   );
 }
 
+function useLabWorkspaceSave(
+  workspaceId: string | undefined,
+  getPersistableNodes: () => PersistableCanvasNode[],
+  markSaved: () => void,
+) {
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const handleSave = useCallback(async () => {
+    if (!workspaceId || saveStatus === "saving") return;
+    setSaveStatus("saving");
+    setSaveError(null);
+
+    const payload = getPersistableNodes();
+    const res = await saveWorkspaceCanvasApi(workspaceId, payload);
+    if (res.success) {
+      markSaved();
+      setSaveStatus("saved");
+    } else {
+      setSaveStatus("error");
+      setSaveError(res.errorMessage);
+    }
+  }, [workspaceId, saveStatus, getPersistableNodes, markSaved]);
+
+  return { saveStatus, saveError, handleSave };
+}
+
 export function FinCraftLabClient({ elements: initialElements, errorMessage, initialWorkspace }: FinCraftLabClientProps) {
   const [localElements, setLocalElements] = useState<AvailableElement[]>(initialElements);
-  const { nodes, onNodesChange, addElementsToCanvas, isDirty, saveStatus, saveError, handleSaveWorkspace } =
-    useCanvasNodes(initialWorkspace?.snapshot);
 
+  const initialCanvasNodes = useMemo<InitialNodeInput[] | undefined>(() => {
+    if (!initialWorkspace?.snapshot?.nodes) return undefined;
+    return initialWorkspace.snapshot.nodes.map((n) => ({
+      id: n.id,
+      elementId: n.elementId,
+      positionX: n.positionX,
+      positionY: n.positionY,
+      name: n.element?.name,
+      emoji: n.element?.emoji,
+      categoryName: n.element?.elementType,
+    }));
+  }, [initialWorkspace]);
+
+  const { nodes, onNodesChange, addElementsToCanvas, isDirty, getPersistableNodes, markSaved } = useCanvasNodes(initialCanvasNodes);
   const workspaceId = initialWorkspace?.workspaceId;
-  const handleSave = useCallback(() => {
-    if (workspaceId) handleSaveWorkspace(workspaceId);
-  }, [workspaceId, handleSaveWorkspace]);
+  const { saveStatus, saveError, handleSave } = useLabWorkspaceSave(workspaceId, getPersistableNodes, markSaved);
 
   const handleDiscovery = useCallback((el: CraftElementResult) => {
     setLocalElements((prev) => (prev.some((e) => e.id === el.id) ? prev : [...prev, toAvailableElement(el)]));
@@ -116,7 +162,9 @@ export function FinCraftLabClient({ elements: initialElements, errorMessage, ini
   const { isSubmitting, craftError, craftResult, handleCraft, handleReset, dismissError } = useCraft({ onDiscovery: handleDiscovery });
 
   const handlePlaceOnCanvas = useCallback(() => {
-    const selected = [leftElement, rightElement].filter((e): e is AvailableElement => Boolean(e));
+    const selected = [leftElement, rightElement]
+      .filter((e): e is AvailableElement => Boolean(e))
+      .map((e) => ({ id: e.id, name: e.name, emoji: e.emoji, categoryName: e.elementType }));
     if (selected.length > 0) addElementsToCanvas(selected);
   }, [leftElement, rightElement, addElementsToCanvas]);
 

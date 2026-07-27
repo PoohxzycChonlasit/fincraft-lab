@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { fetchAvailableElements } from "@/features/craft/api/fetch-elements";
 import { FinCraftLabClient } from "@/features/lab/components/fincraft-lab-client";
-import { fetchUserWorkspaceCanvas } from "@/features/workspace/public";
+import { fetchUserWorkspaceCanvas } from "@/features/workspace/api/fetch-workspace";
 
 export const metadata: Metadata = {
   title: "Craft Lab | FinCraft Lab",

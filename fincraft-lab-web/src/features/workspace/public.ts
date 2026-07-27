@@ -1,2 +1,2 @@
 export type { CanvasSnapshot, SaveWorkspacePayloadNode, WorkspaceSummary } from "./types/workspace.type";
-export { fetchUserWorkspaceCanvas } from "./api/fetch-workspace";
+export { saveWorkspaceCanvasApi } from "./api/save-workspace.client";
