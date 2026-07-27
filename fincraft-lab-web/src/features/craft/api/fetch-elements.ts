@@ -10,14 +10,14 @@ type ElementsEnvelope = {
   data?: AvailableElement[];
 };
 
-export async function fetchAvailableElements(): Promise<FetchElementsResult> {
-  const res = await backendFetch("/elements", {
+export async function fetchAvailableElements(isAuthenticated: boolean): Promise<FetchElementsResult> {
+  const res = await backendFetch(isAuthenticated ? "/elements/available" : "/elements", {
     method: "GET",
-    requireAuth: true,
+    requireAuth: isAuthenticated,
   });
 
   if (!res.ok) {
-    if (res.status === 401) {
+    if (isAuthenticated && res.status === 401) {
       return { success: false, redirectLogin: true };
     }
     return {

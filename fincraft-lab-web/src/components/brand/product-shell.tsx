@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { UserProfile } from "@/lib/auth/session";
+import { LogoutButton } from "./logout-button";
 
 export type ProductShellProps = {
   children: ReactNode;
-  activeTab?: "home" | "lab" | "login" | "admin-elements";
+  activeTab?: "home" | "lab" | "workspace" | "login" | "admin-elements";
   user?: UserProfile | null;
 };
 
@@ -12,14 +13,14 @@ function ProductBrand() {
   return (
     <div className="flex items-center gap-3">
       <Link href="/" className="flex items-center gap-2.5">
-        <span className="surface-inset flex size-8 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-base font-bold text-[var(--color-craft-accent)]">
-          🧪
+        <span className="surface-inset flex size-8 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-xs font-bold text-[var(--color-craft-accent)]">
+          FC
         </span>
         <span className="text-lg font-bold tracking-tight text-foreground">
           FinCraft <span className="text-[var(--color-craft-accent)]">Lab</span>
         </span>
       </Link>
-      <span className="hidden sm:inline-block text-xs font-medium text-muted-foreground border-l border-[var(--border-subtle)] pl-3">
+      <span className="hidden border-l border-[var(--border-subtle)] pl-3 text-xs font-medium text-muted-foreground sm:inline-block">
         Financial Literacy Discovery Lab
       </span>
     </div>
@@ -29,6 +30,7 @@ function ProductBrand() {
 function ProductNav({ activeTab, user }: { activeTab: string; user?: UserProfile | null }) {
   const isHome = activeTab === "home";
   const isLab = activeTab === "lab";
+  const isWorkspace = activeTab === "workspace";
   const isLogin = activeTab === "login";
   const isAdmin = activeTab === "admin-elements";
   const isAdminAuthorized = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
@@ -46,23 +48,33 @@ function ProductNav({ activeTab, user }: { activeTab: string; user?: UserProfile
       <Link href="/lab" aria-current={isLab ? "page" : undefined} className={isLab ? activeStyle : inactiveStyle}>
         Craft Lab
       </Link>
+      {user ? (
+        <Link href="/lab" aria-current={isWorkspace ? "page" : undefined} className={isWorkspace ? activeStyle : inactiveStyle}>
+          Workspace
+        </Link>
+      ) : null}
       {isAdminAuthorized ? (
         <Link href="/admin/elements" aria-current={isAdmin ? "page" : undefined} className={isAdmin ? activeStyle : inactiveStyle}>
           Admin
         </Link>
       ) : null}
       {!user ? (
-        <Link href="/login" aria-current={isLogin ? "page" : undefined} className={isLogin ? activeStyle : inactiveStyle}>
-          Log In
-        </Link>
-      ) : null}
+        <>
+          <Link href="/login" aria-current={isLogin ? "page" : undefined} className={isLogin ? activeStyle : inactiveStyle}>
+            Log In
+          </Link>
+          <Link href="/register" className={inactiveStyle}>
+            Create Account
+          </Link>
+        </>
+      ) : <LogoutButton />}
     </nav>
   );
 }
 
 export function ProductShell({ children, activeTab = "home", user }: ProductShellProps) {
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--surface-flat)] text-[var(--color-text-primary)]">
+    <div className="flex min-h-screen flex-col bg-[var(--surface-flat)] text-[var(--color-text-primary)]">
       <header className="border-b border-[var(--border-subtle)] bg-[var(--surface-resting)] shadow-xs">
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
           <ProductBrand />
@@ -70,12 +82,12 @@ export function ProductShell({ children, activeTab = "home", user }: ProductShel
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:py-8">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:py-8">
         {children}
       </main>
 
       <footer className="border-t border-[var(--border-subtle)] bg-[var(--surface-resting)] py-4 text-center text-xs text-muted-foreground">
-        <p>Education Only • Simulation Only • Not Financial Advice</p>
+        <p>Education Only · Simulation Only · Not Financial Advice</p>
       </footer>
     </div>
   );

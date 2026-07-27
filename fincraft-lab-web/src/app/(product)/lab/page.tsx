@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { fetchAvailableElements } from "@/features/craft/api/fetch-elements";
 import { FinCraftLabClient } from "@/features/lab/components/fincraft-lab-client";
 import { fetchUserWorkspaceCanvas } from "@/features/workspace/public.server";
+import { getSessionUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Craft Lab | FinCraft Lab",
@@ -18,26 +19,28 @@ export default async function CraftLabPage({ searchParams }: CraftLabPageProps) 
   const requestedWorkspaceId = Array.isArray(params.workspaceId)
     ? params.workspaceId[0]
     : params.workspaceId;
+  const user = await getSessionUser();
+  const isAuthenticated = Boolean(user);
 
   const [elementsResult, workspaceResult] = await Promise.all([
-    fetchAvailableElements(),
-    fetchUserWorkspaceCanvas(requestedWorkspaceId),
+    fetchAvailableElements(isAuthenticated),
+    user ? fetchUserWorkspaceCanvas(requestedWorkspaceId) : Promise.resolve(undefined),
   ]);
 
   if (!elementsResult.success && "redirectLogin" in elementsResult && elementsResult.redirectLogin) {
     redirect("/login");
   }
 
-  if (!workspaceResult.success && "redirectLogin" in workspaceResult && workspaceResult.redirectLogin) {
+  if (user && workspaceResult && !workspaceResult.success && "redirectLogin" in workspaceResult && workspaceResult.redirectLogin) {
     redirect("/login");
   }
 
   const elements = elementsResult.success ? elementsResult.elements : [];
   const errorMessage = !elementsResult.success && "errorMessage" in elementsResult ? elementsResult.errorMessage : undefined;
-  const workspaceErrorMessage = !workspaceResult.success && "errorMessage" in workspaceResult
+  const workspaceErrorMessage = user && workspaceResult && !workspaceResult.success && "errorMessage" in workspaceResult
     ? workspaceResult.errorMessage
     : undefined;
-  const initialWorkspace = workspaceResult.success ? workspaceResult : undefined;
+  const initialWorkspace = user && workspaceResult?.success ? workspaceResult : undefined;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -53,11 +56,12 @@ export default async function CraftLabPage({ searchParams }: CraftLabPageProps) 
 
       <main aria-label="Craft Lab Selection Area">
         <FinCraftLabClient
-          key={initialWorkspace?.workspaceId ?? "workspace-load-error"}
+          key={initialWorkspace?.workspaceId ?? "guest-lab"}
           elements={elements}
           errorMessage={errorMessage}
           workspaceErrorMessage={workspaceErrorMessage}
           initialWorkspace={initialWorkspace}
+          isAuthenticated={isAuthenticated}
         />
       </main>
     </div>

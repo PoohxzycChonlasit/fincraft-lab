@@ -10,6 +10,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import type { AccessTokenPayload } from '../auth/types/access-token-payload.type';
 import { CraftService } from './craft.service';
 import { CraftResultEnvelopeDto } from './dto/craft-response.dto';
@@ -20,6 +21,26 @@ import { CraftRequestDto } from './dto/craft-request.dto';
 @Controller('craft')
 export class CraftController {
   constructor(private readonly craftService: CraftService) {}
+
+  @Public()
+  @Post('preview')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Preview a public crafting attempt',
+    description:
+      'Previews combinations of public starter elements without creating user-owned discovery records.',
+  })
+  @ApiOkResponse({
+    description: 'Craft preview completed successfully',
+    type: CraftResultEnvelopeDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Only two distinct active starter elements may be previewed',
+  })
+  async preview(@Body() dto: CraftRequestDto) {
+    const result = await this.craftService.preview(dto);
+    return { data: result };
+  }
 
   @Post()
   @HttpCode(HttpStatus.OK)

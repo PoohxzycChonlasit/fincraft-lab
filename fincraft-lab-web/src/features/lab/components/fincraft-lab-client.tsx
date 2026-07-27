@@ -11,34 +11,69 @@ import { useCanvasNodes, type InitialNodeInput, type PersistableCanvasNode, type
 import { saveWorkspaceCanvasApi, type CanvasSnapshot, type WorkspaceSummary } from "@/features/workspace/public.client";
 import { LabWorkspaceContent } from "./lab-workspace-content";
 
-export type FinCraftLabClientProps = {
-  elements: AvailableElement[];
-  errorMessage?: string;
-  workspaceErrorMessage?: string;
-  initialWorkspace?: {
-    workspaceId: string;
-    workspaces: WorkspaceSummary[];
-    selectedWorkspace: WorkspaceSummary;
-    snapshot: CanvasSnapshot;
-  };
+type InitialWorkspace = {
+  workspaceId: string;
+  workspaces: WorkspaceSummary[];
+  selectedWorkspace: WorkspaceSummary;
+  snapshot: CanvasSnapshot;
 };
 
-function toAvailableElement(el: CraftElementResult): AvailableElement {
-  return { id: el.id, name: el.name, slug: el.slug, emoji: el.emoji, iconUrl: el.iconUrl, elementType: el.elementType, isStarter: el.isStarter };
+export type FinCraftLabClientProps = {
+  elements: AvailableElement[];
+  isAuthenticated: boolean;
+  errorMessage?: string;
+  workspaceErrorMessage?: string;
+  initialWorkspace?: InitialWorkspace;
+};
+
+type LabCraftState = {
+  canvas: ReturnType<typeof useCanvasNodes>;
+  save: ReturnType<typeof useLabWorkspaceSave>;
+  localElements: AvailableElement[];
+  leftElement: AvailableElement | null;
+  rightElement: AvailableElement | null;
+  activeSlot: "left" | "right";
+  isSubmitting: boolean;
+  craftError: string | null;
+  craftResult: ReturnType<typeof useCraft>["craftResult"];
+  handleReset: () => void;
+  handleSelectElement: (element: AvailableElement) => void;
+  handleClearSlot: (slot: "left" | "right") => void;
+  setActiveSlot: (slot: "left" | "right") => void;
+  handleCraft: () => void;
+  handlePlaceOnCanvas: () => void;
+  dismissError: () => void;
+};
+
+function toAvailableElement(element: CraftElementResult): AvailableElement {
+  return {
+    id: element.id,
+    name: element.name,
+    slug: element.slug,
+    emoji: element.emoji,
+    iconUrl: element.iconUrl,
+    elementType: element.elementType,
+    isStarter: element.isStarter,
+  };
 }
 
 function LoadErrorBanner({ message }: { message: string }) {
   return (
-    <div className="surface-inset rounded-xl p-6 border border-destructive/30 bg-destructive/5 space-y-2">
+    <div className="surface-inset space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 p-6">
       <h2 className="text-base font-semibold text-destructive">Unable to Load Craft Lab</h2>
-      <p className="text-xs text-muted-foreground leading-relaxed">{message}</p>
+      <p className="text-xs leading-relaxed text-muted-foreground">{message}</p>
     </div>
   );
 }
 
-function useLabWorkspaceSave(workspaceId: string | undefined, getPersistableNodes: () => PersistableCanvasNode[], markSaved: () => void) {
+function useLabWorkspaceSave(
+  workspaceId: string | undefined,
+  getPersistableNodes: () => PersistableCanvasNode[],
+  markSaved: () => void,
+) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
+
   const handleSave = useCallback(async () => {
     if (!workspaceId || saveStatus === "saving") return;
     setSaveStatus("saving");
@@ -52,15 +87,11 @@ function useLabWorkspaceSave(workspaceId: string | undefined, getPersistableNode
     setSaveStatus("error");
     setSaveError(result.errorMessage);
   }, [workspaceId, saveStatus, getPersistableNodes, markSaved]);
+
   return { saveStatus, saveError, handleSave };
 }
 
-export function FinCraftLabClient({
-  elements: initialElements,
-  errorMessage,
-  workspaceErrorMessage,
-  initialWorkspace,
-}: FinCraftLabClientProps) {
+function useLabCraftState(initialElements: AvailableElement[], isAuthenticated: boolean, initialWorkspace?: InitialWorkspace): LabCraftState {
   const [localElements, setLocalElements] = useState<AvailableElement[]>(initialElements);
   const initialCanvasNodes = useMemo<InitialNodeInput[] | undefined>(() => initialWorkspace?.snapshot.nodes.map((node) => ({
     id: node.id,
@@ -74,18 +105,53 @@ export function FinCraftLabClient({
   const canvas = useCanvasNodes(initialCanvasNodes);
   const save = useLabWorkspaceSave(initialWorkspace?.workspaceId, canvas.getPersistableNodes, canvas.markSaved);
   const handleDiscovery = useCallback((element: CraftElementResult) => {
-    setLocalElements((current) => current.some((item) => item.id === element.id) ? current : [...current, toAvailableElement(element)]);
+    setLocalElements((current) => current.some((item) => item.id === element.id)
+      ? current
+      : [...current, toAvailableElement(element)]);
   }, []);
-  const { activeSlot, setActiveSlot, leftElement, rightElement, handleSelectElement, handleClearSlot } = useCraftBaySelection();
-  const { isSubmitting, craftError, craftResult, handleCraft, handleReset, dismissError } = useCraft({ onDiscovery: handleDiscovery });
+  const selection = useCraftBaySelection();
+  const craft = useCraft({ onDiscovery: isAuthenticated ? handleDiscovery : undefined, isAuthenticated });
   const { addElementsToCanvas } = canvas;
   const handlePlaceOnCanvas = useCallback(() => {
-    const selected = [leftElement, rightElement].filter((element): element is AvailableElement => Boolean(element)).map((element) => ({ id: element.id, name: element.name, emoji: element.emoji, categoryName: element.elementType }));
+    const selected = [selection.leftElement, selection.rightElement]
+      .filter((element): element is AvailableElement => Boolean(element))
+      .map((element) => ({ id: element.id, name: element.name, emoji: element.emoji, categoryName: element.elementType }));
     if (selected.length > 0) addElementsToCanvas(selected);
-  }, [leftElement, rightElement, addElementsToCanvas]);
+  }, [selection.leftElement, selection.rightElement, addElementsToCanvas]);
+
+  return {
+    canvas,
+    save,
+    localElements,
+    leftElement: selection.leftElement,
+    rightElement: selection.rightElement,
+    activeSlot: selection.activeSlot,
+    isSubmitting: craft.isSubmitting,
+    craftError: craft.craftError,
+    craftResult: craft.craftResult,
+    handleReset: craft.handleReset,
+    handleSelectElement: selection.handleSelectElement,
+    handleClearSlot: selection.handleClearSlot,
+    setActiveSlot: selection.setActiveSlot,
+    handleCraft: () => void craft.handleCraft(selection.leftElement, selection.rightElement),
+    handlePlaceOnCanvas,
+    dismissError: craft.dismissError,
+  };
+}
+
+export function FinCraftLabClient({
+  elements: initialElements,
+  isAuthenticated,
+  errorMessage,
+  workspaceErrorMessage,
+  initialWorkspace,
+}: FinCraftLabClientProps) {
+  const lab = useLabCraftState(initialElements, isAuthenticated, initialWorkspace);
 
   if (errorMessage) return <LoadErrorBanner message={errorMessage} />;
-  if (workspaceErrorMessage || !initialWorkspace) return <LoadErrorBanner message={workspaceErrorMessage ?? "Workspace data is unavailable."} />;
+  if (isAuthenticated && (workspaceErrorMessage || !initialWorkspace)) {
+    return <LoadErrorBanner message={workspaceErrorMessage ?? "Workspace data is unavailable."} />;
+  }
 
-  return <LabWorkspaceContent initialWorkspace={initialWorkspace} canvas={canvas} save={save} localElements={localElements} leftElement={leftElement} rightElement={rightElement} activeSlot={activeSlot} isSubmitting={isSubmitting} craftError={craftError} craftResult={craftResult} handleReset={handleReset} handleSelectElement={handleSelectElement} handleClearSlot={handleClearSlot} setActiveSlot={setActiveSlot} handleCraft={() => void handleCraft(leftElement, rightElement)} handlePlaceOnCanvas={handlePlaceOnCanvas} dismissError={dismissError} />;
+  return <LabWorkspaceContent isAuthenticated={isAuthenticated} initialWorkspace={initialWorkspace} {...lab} />;
 }

@@ -10,7 +10,7 @@ type FormFieldProps = {
   type: string;
   value: string;
   placeholder: string;
-  onChange: (val: string) => void;
+  onChange: (value: string) => void;
   autoComplete: string;
 };
 
@@ -25,10 +25,7 @@ function FormHeader() {
 
 function FormErrorMessage({ message }: { message: string }) {
   return (
-    <div
-      role="alert"
-      className="rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-3.5 text-xs font-semibold text-[var(--color-text-danger)]"
-    >
+    <div role="alert" className="rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-3.5 text-xs font-semibold text-[var(--color-text-danger)]">
       {message}
     </div>
   );
@@ -36,10 +33,7 @@ function FormErrorMessage({ message }: { message: string }) {
 
 function FormSuccessMessage({ message }: { message: string }) {
   return (
-    <div
-      role="alert"
-      className="rounded-xl border border-[var(--color-craft-accent)]/30 bg-[var(--color-craft-accent)]/10 p-3.5 text-xs font-semibold text-[var(--color-craft-accent)]"
-    >
+    <div role="status" className="rounded-xl border border-[var(--color-craft-accent)]/30 bg-[var(--color-craft-accent)]/10 p-3.5 text-xs font-semibold text-[var(--color-craft-accent)]">
       {message}
     </div>
   );
@@ -48,18 +42,16 @@ function FormSuccessMessage({ message }: { message: string }) {
 function FormField({ id, label, type, value, placeholder, onChange, autoComplete }: FormFieldProps) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={id} className="block text-xs font-semibold text-foreground">
-        {label}
-      </label>
+      <label htmlFor={id} className="block text-xs font-semibold text-foreground">{label}</label>
       <input
         id={id}
         type={type}
         required
         autoComplete={autoComplete}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--border-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]/20 min-h-[44px]"
+        className="min-h-[44px] w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--border-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]/20"
       />
     </div>
   );
@@ -70,7 +62,7 @@ function SubmitButton({ isSubmitting }: { isSubmitting: boolean }) {
     <button
       type="submit"
       disabled={isSubmitting}
-      className="w-full rounded-xl bg-[var(--color-action-primary)] px-4 py-3 text-xs font-semibold text-white shadow-xs hover:bg-[var(--color-action-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:opacity-50 transition-colors min-h-[44px] cursor-pointer"
+      className="min-h-[44px] w-full cursor-pointer rounded-xl bg-[var(--color-action-primary)] px-4 py-3 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[var(--color-action-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50"
     >
       {isSubmitting ? "Logging in..." : "Log In"}
     </button>
@@ -84,22 +76,24 @@ export function LoginForm({ isRegistered }: { isRegistered?: boolean }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setErrorMessage(null);
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+      const data: unknown = await response.json().catch(() => ({}));
+      const error = typeof data === "object" && data !== null && "error" in data && typeof data.error === "string"
+        ? data.error
+        : "Invalid email or password";
 
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
-
-      if (!res.ok) {
-        setErrorMessage(data.error || "Invalid email or password");
+      if (!response.ok) {
+        setErrorMessage(error);
         setIsSubmitting(false);
         return;
       }
@@ -113,17 +107,17 @@ export function LoginForm({ isRegistered }: { isRegistered?: boolean }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="surface-resting rounded-2xl p-6 sm:p-8 space-y-5 border border-[var(--border-subtle)] shadow-xs">
+    <form onSubmit={handleSubmit} className="surface-resting space-y-5 rounded-2xl border border-[var(--border-subtle)] p-6 shadow-xs sm:p-8">
       <FormHeader />
       {isRegistered ? <FormSuccessMessage message="Account created. Please sign in." /> : null}
       {errorMessage ? <FormErrorMessage message={errorMessage} /> : null}
       <FormField id="email-input" label="Email address" type="email" value={email} placeholder="user@example.com" onChange={setEmail} autoComplete="email" />
-      <FormField id="password-input" label="Password" type="password" value={password} placeholder="••••••••" onChange={setPassword} autoComplete="current-password" />
+      <FormField id="password-input" label="Password" type="password" value={password} placeholder="Enter your password" onChange={setPassword} autoComplete="current-password" />
       <SubmitButton isSubmitting={isSubmitting} />
-      <div className="text-center text-xs text-muted-foreground pt-1">
-        ยังไม่มีบัญชี?{" "}
+      <div className="pt-1 text-center text-xs text-muted-foreground">
+        New to FinCraft Lab?{" "}
         <Link href="/register" className="font-semibold text-[var(--color-action-primary)] hover:underline">
-          สมัครสมาชิก
+          Create an account
         </Link>
       </div>
     </form>

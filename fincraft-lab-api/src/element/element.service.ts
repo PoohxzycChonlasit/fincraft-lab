@@ -15,6 +15,33 @@ import type { AvailableElementResponse } from './types/available-element-respons
 export class ElementService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getPublicElements(): Promise<AvailableElementResponse[]> {
+    return this.prisma.element.findMany({
+      where: {
+        status: ContentStatus.ACTIVE,
+        isStarter: true,
+        category: { status: ActiveStatus.ACTIVE },
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        emoji: true,
+        iconUrl: true,
+        elementType: true,
+        isStarter: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            sortOrder: true,
+          },
+        },
+      },
+      orderBy: [{ category: { sortOrder: 'asc' } }, { name: 'asc' }],
+    });
+  }
+
   /**
    * Retrieves all active Elements available to the specified user.
    *

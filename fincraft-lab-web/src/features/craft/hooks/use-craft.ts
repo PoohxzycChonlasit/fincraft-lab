@@ -16,9 +16,10 @@ export type UseCraftReturn = {
 
 type UseCraftOptions = {
   onDiscovery?: (element: CraftElementResult, isNew: boolean) => void;
+  isAuthenticated?: boolean;
 };
 
-export function useCraft({ onDiscovery }: UseCraftOptions = {}): UseCraftReturn {
+export function useCraft({ onDiscovery, isAuthenticated = true }: UseCraftOptions = {}): UseCraftReturn {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [craftError, setCraftError] = useState<string | null>(null);
@@ -30,13 +31,13 @@ export function useCraft({ onDiscovery }: UseCraftOptions = {}): UseCraftReturn 
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/craft", {
+      const res = await fetch(isAuthenticated ? "/api/craft" : "/api/craft/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ inputElementIds: [left.id, right.id] }),
       });
 
-      if (res.status === 401) {
+      if (isAuthenticated && res.status === 401) {
         router.push("/login");
         return;
       }
@@ -52,7 +53,7 @@ export function useCraft({ onDiscovery }: UseCraftOptions = {}): UseCraftReturn 
         setCraftResult(json.data);
         if (json.data.outcome === "DISCOVERY") {
           onDiscovery?.(json.data.element, json.data.isNewDiscovery);
-          router.refresh();
+          if (isAuthenticated) router.refresh();
         }
       }
     } catch {
