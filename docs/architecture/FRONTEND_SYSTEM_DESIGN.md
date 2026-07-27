@@ -6,6 +6,8 @@ The FinCraft Lab frontend is built using Next.js App Router (React 19) with stri
 
 The application enforces Server Components by default, restricting Client Component boundaries (`"use client"`) to small, interactive islands.
 
+Visual design is governed by **FinCraft Design System V2 (Paper-and-Glass Hybrid)** (`docs/architecture/FRONTEND_DESIGN_SYSTEM_V2_DECISION.md`), combining 100% opaque reading surfaces with translucent floating tool islands and Cookie-authoritative Light/Dark/System theme resolution.
+
 ---
 
 ## Canonical Stack & Boundaries
@@ -24,6 +26,7 @@ The application enforces Server Components by default, restricting Client Compon
 | Data Visualization | Recharts | Simulation charts and financial projections |
 | HTTP Transport | Native `fetch` | Typed wrapper, no Axios |
 | Image Optimization | `next/image` | Configured domains, mandatory alt attributes |
+| Design System V2 | Paper-and-Glass Hybrid | 7 surface roles, Cookie-authoritative theme persistence, WCAG 2.2 AA target |
 | Visual Review | TasteSkill | Supplemental future guardrail; not installed or used in this contract task |
 
 ### Package Version Policy
@@ -37,7 +40,6 @@ All resolved versions are recorded in `package.json` and `pnpm-lock.yaml`. No fl
 Upgrades occur only in authorized bounded tasks.
 
 ---
-
 
 ## Folder Architecture & Import Boundaries
 
@@ -101,7 +103,7 @@ Infrastructure Layer: `app` / `features` → `lib`.
 | Modal & Sheet Open State | Local Component State (`useState`) | Component-scoped open/close boolean |
 | Active Filters & Tabs | URL Search Params (`useSearchParams`) | Shareable, bookmarkable URL state |
 | Auth Access Token | HttpOnly Cookie + Next Server Boundary | Secure cookie transport, no `localStorage` |
-| Design Theme Tokens | CSS Variables | Root CSS token definitions |
+| Active Theme Preference | Cookie (`fincraft_theme`) + CSS Variables | Cookie-authoritative for SSR, RootLayout server inspection, inline `<head>` script for system mode. No `localStorage` authority |
 
 ---
 

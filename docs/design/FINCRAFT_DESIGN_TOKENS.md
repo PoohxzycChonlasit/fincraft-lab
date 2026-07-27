@@ -4,6 +4,37 @@
 
 FinCraft Lab uses Tailwind CSS v4 CSS variables for design tokens. All UI components reference these tokens rather than arbitrary inline magic values.
 
+### 5-Layer Token Architecture (Design System V2)
+
+FinCraft V2 organizes tokens into 5 distinct layers (governed by `docs/architecture/FRONTEND_DESIGN_SYSTEM_V2_DECISION.md`):
+
+```text
+Layer 1: Primitive Tokens  (--color-teal-600: #0D9488, --color-stone-900: #1C1917)
+  │
+  ▼
+Layer 2: Semantic Tokens   (--color-action-primary, --color-text-primary)
+  │
+  ▼
+Layer 3: Material/Surface  (--surface-resting, --surface-floating, --border-subtle)
+  │
+  ▼
+Layer 4: Component Tokens  (--button-primary-bg, --card-background)
+  │
+  ▼
+Layer 5: Component State   (--button-primary-hover-bg, --card-border-selected)
+```
+
+**Token Usage Rule:** Components MUST NOT reference raw Layer 1 Primitive colors directly when an approved Layer 2 or Layer 3 Semantic Token exists.
+
+---
+
+## Theme & Persistence Architecture
+
+- **Supported Preference Modes:** `light | dark | system`
+- **Authoritative Persistence:** **Cookie (`fincraft_theme`)** is the sole authoritative persistence store. `localStorage` is NOT a second source of truth.
+- **Server-Side Hydration:** Next.js App Router inspects `fincraft_theme` cookie during SSR (`cookies()`) to apply `.dark` class to initial HTML, preventing FOUC white flashes.
+- **Dark Mode Candidate Values:** Dark Mode color pairs are explicitly designated as **Candidate Exploration Values**. Final dark hex values will be frozen only after contrast validation prototyping (`P13_FRONTEND_FOUNDATION_1D7`).
+
 ---
 
 ## 1. Color Tokens
@@ -27,7 +58,7 @@ FinCraft Lab uses Tailwind CSS v4 CSS variables for design tokens. All UI compon
 --color-orange-700: #C2410C;
 ```
 
-### Laboratory Surface Neutrals (Warm Neutrals)
+### Laboratory Surface Neutrals (Warm Neutrals - Light Mode Baseline)
 ```css
 --color-surface-base:    #FAFAF9; /* Main Laboratory Background */
 --color-surface-card:    #FFFFFF; /* Card Surface */
@@ -90,7 +121,7 @@ FinCraft Lab uses Tailwind CSS v4 CSS variables for design tokens. All UI compon
 
 ---
 
-## 3. Spacing & Layout Tokens
+## 3. Spacing, Layout & Touch Target Tokens
 
 ```css
 --space-1:  0.25rem;  (4px)
@@ -103,15 +134,16 @@ FinCraft Lab uses Tailwind CSS v4 CSS variables for design tokens. All UI compon
 --space-16: 4.00rem;  (64px)
 ```
 
-### Layout Widths
+### Layout Widths & Touch Standards
 - **Max Content Width**: `1280px` (`max-w-7xl`)
 - **Reading Width**: `768px` (`max-w-3xl`)
 - **Auth Card Width**: `440px` (`max-w-md`)
-- **Min Touch Target**: `44px x 44px`
+- **FinCraft Preferred Touch Target**: **44px x 44px** (Product preference standard)
+- **WCAG 2.2 AA Target Size Baseline**: 24px x 24px (SC 2.5.8 Level AA minimum)
 
 ---
 
-## 4. Radius, Shadows & Elevation
+## 4. Radius, Shadows & Material Elevation
 
 ### Border Radius
 ```css
@@ -126,6 +158,7 @@ FinCraft Lab uses Tailwind CSS v4 CSS variables for design tokens. All UI compon
 --shadow-sm:   0 1px 2px 0 rgba(0, 0, 0, 0.05);  /* Subtle cards */
 --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.1);/* Popovers, Dropdowns */
 --shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.1);/* Dialogs, Sheets */
+--highlight-inner: inset 0 1px 0 0 rgba(255, 255, 255, 0.3); /* Specular top edge highlight */
 ```
 
 ---
@@ -163,32 +196,33 @@ lg: 1024px (Laptop / 3-column lab layout)
 xl: 1280px (Desktop / full width canvas)
 ```
 
-## 7. Future Semantic Surface and Relationship Families
+---
 
-The following semantic families are reserved for future component implementation. They are token names and meaning contracts, not implementation CSS. They must map to the existing colour semantics and must not introduce a second teal or orange meaning.
+## 7. Canonical Surface Elevation & Edge Matrix
 
-### Surface and state families
+FinCraft Design System V2 freezes 7 Surface Elevation Roles and 6 Edge Roles:
 
-- `surface-flat`: normal reading content and calm document regions; no earned depth.
-- `surface-resting`: a stable resting surface for an interactive region.
-- `surface-inset`: an input well, drop area, or recessed craft region.
-- `surface-raised`: a pressed, selected, or otherwise actively dimensional control.
-- `surface-floating`: an overlay, sheet, popover, or inspector above the reading plane.
-- `border-subtle`: the existing quiet boundary for normal separation.
-- `border-interactive`: a boundary that responds to hover or focus-visible state.
-- `border-selected`: the stronger boundary for selected or active state.
-- `highlight-inner`: a restrained inner highlight used only when a surface earns tactile depth.
-- `shadow-resting`: the lightest static elevation for an interactive resting surface.
-- `shadow-raised`: the selected or pressed elevation step.
-- `shadow-floating`: the overlay elevation step for sheets, dialogs, and inspectors.
+### Surface Roles
+- `surface-flat`: Root canvas and background plane (100% solid opaque).
+- `surface-card`: Document reading card (100% solid opaque).
+- `surface-inset`: Recessed input well, code block, or drop zone (100% solid opaque).
+- `surface-resting`: Standard tactile interactive card (100% solid opaque + top specular highlight).
+- `surface-raised`: Active selected node or highlighted card (100% solid opaque + selected stroke).
+- `surface-floating`: Tool inspector, popover, or dropdown menu (bounded 92% translucency + 8px blur allowed).
+- `surface-overlay`: Modal dialog or sliding sheet drawer (bounded 96% translucency + 12px blur allowed).
 
-### Relationship families
+### Edge Roles
+- `border-subtle`: Quiet boundary for normal component separation.
+- `border-interactive`: Interactive hover and focus-visible boundary.
+- `border-selected`: Stronger boundary for selected or active states.
+- `border-discovery`: Orange discovery highlight boundary.
+- `border-floating`: Elevated boundary for popovers and floating panels.
+- `border-destructive`: Red warning and destructive state boundary.
 
-- `relation-recipe`: orange Craft/Discovery semantics for recipe provenance; use direction and text as well as colour.
-- `relation-support`: teal trust/action semantics for sourced directional support.
-- `relation-reduce`: teal trust/action semantics with cautious “May reduce” language and a non-colour marker.
-- `relation-tradeoff`: warning-neutral, conditional trade-off semantics; use line pattern and text.
-- `relation-related`: neutral, sparingly used relatedness semantics.
-- `relation-personal`: neutral personal-workspace semantics with a Personal/My link marker; never present it as canonical truth.
-
-Canonical relationship labels, spoiler rules, and graph boundaries are defined in `docs/architecture/FRONTEND_VISUAL_AND_DISCOVERY_WEB_DECISION.md`. Existing motion durations remain canonical: 150ms fast, 250ms normal, and 350ms slow. Future discovery celebration may not exceed the research ceiling of 700ms, is finite, and is removed or made static under reduced motion. These ceilings do not replace the existing duration tokens.
+### Relationship Families
+- `relation-recipe`: Orange Craft/Discovery semantics for recipe provenance.
+- `relation-support`: Teal trust/action semantics for directional support.
+- `relation-reduce`: Teal trust/action semantics with "May reduce" language.
+- `relation-tradeoff`: Warning-neutral trade-off semantics.
+- `relation-related`: Neutral relatedness semantics.
+- `relation-personal`: Neutral personal-workspace semantics marked Personal/My link.

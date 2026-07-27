@@ -4,9 +4,9 @@
 
 - **Status:** APPROVED
 - **Date:** 2026-07-25 (Asia/Bangkok)
-- **Task ID:** `P13_FRONTEND_FOUNDATION_1C1_OWNER_VISUAL_AND_DISCOVERY_WEB_DECISION_001`
+- **Task ID:** `P13_FRONTEND_FOUNDATION_1C1_OWNER_VISUAL_AND_DISCOVERY_WEB_DECISION_001` (Updated in `P13_FRONTEND_FOUNDATION_1D4_OWNER_DESIGN_SYSTEM_V2_DECISION_001`)
 - **Decision type:** Owner-approved canonical contract freeze
-- **Research basis:** The preceding visual-reference and Discovery Web research task was completed in commit `90f7894741736103e34567b46c4c8cc93980f723`.
+- **Research basis:** The preceding visual-reference and Discovery Web research task was completed in commit `90f7894741736103e34567b46c4c8cc93980f723`, refined in Design System V2 decision `docs/architecture/FRONTEND_DESIGN_SYSTEM_V2_DECISION.md`.
 
 This document freezes the approved visual direction and Discovery Web boundaries for future implementation. It does not authorize Product UI, package installation, backend work, database changes, or research-history edits.
 
@@ -14,11 +14,11 @@ This document freezes the approved visual direction and Discovery Web boundaries
 
 ### Visual direction
 
-The canonical direction is **FinCraft Tactile Discovery Lab**.
+The canonical direction is **FinCraft Paper-and-Glass Hybrid** (Design System V2, frozen in `docs/architecture/FRONTEND_DESIGN_SYSTEM_V2_DECISION.md`).
 
-FinCraft is not full neumorphism, a Kigen clone, or a generic SaaS dashboard. It is a light-first financial literacy product that combines a trustworthy educational reading experience with a precise, tactile tool experience.
+FinCraft is not full neumorphism, an Apple Liquid Glass clone, a Kigen clone, or a generic SaaS dashboard. It is a light-first financial literacy discovery product that combines a trustworthy, 100% opaque educational paper reading experience (90% of UI) with precise, lifted tactile glass tool controls (10% of UI).
 
-Normal reading content stays flat. Depth is earned by interactive controls, pressed or selected states, drag states, inset input/drop areas, and floating overlays. A container must not become dimensional merely because it is a container.
+Normal reading content stays flat and opaque. Depth is earned by interactive controls, pressed or selected states, drag states, inset input/drop areas, and floating overlays. A container must not become dimensional merely because it is a container.
 
 Approved signature language:
 
