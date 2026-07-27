@@ -43,7 +43,7 @@ export default async function CraftLabPage({ searchParams }: CraftLabPageProps) 
   const initialWorkspace = user && workspaceResult?.success ? workspaceResult : undefined;
 
   return (
-    <div className="lab-page-frame">
+    <div className="lab-page-frame min-w-0 overflow-hidden">
       <div className="lab-page-heading flex items-center justify-between border-b border-[var(--border-subtle)] pb-2.5">
         <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
           Craft Lab <span className="text-xs font-semibold text-[var(--color-craft-accent)] font-mono">Discovery Workspace</span>
@@ -53,7 +53,7 @@ export default async function CraftLabPage({ searchParams }: CraftLabPageProps) 
         </p>
       </div>
 
-      <div className="lab-page-content">
+      <div className="lab-page-content min-w-0 overflow-hidden">
         <FinCraftLabClient
           key={initialWorkspace?.workspaceId ?? "guest-lab"}
           elements={elements}

@@ -168,7 +168,7 @@ function ReactFlowCanvasInner(props: CanvasInnerProps) {
   const handleNodeClick = useCallback((_: React.MouseEvent, node: ElementCanvasNode) => onNodeTap(node), [onNodeTap]);
 
   return (
-    <div className="lab-canvas-frame relative h-full min-h-0 w-full min-w-0 overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] shadow-xs" onDragOver={handleDragOver} onDrop={handleDrop}>
+    <div className="lab-canvas-frame relative flex h-full min-h-0 min-w-0 w-full flex-1 basis-0 flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] shadow-xs" onDragOver={handleDragOver} onDrop={handleDrop}>
       {nodes.length === 0 ? <CanvasEmptyOverlay /> : null}
       <ReactFlow
         nodes={nodes}

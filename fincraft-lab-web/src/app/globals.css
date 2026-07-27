@@ -331,6 +331,8 @@ html[data-theme-preference="dark"],
 .lab-page-frame {
   display: flex;
   height: 100%;
+  min-width: 0;
+  overflow: hidden;
   flex-direction: column;
   gap: 0.75rem;
 }
@@ -342,6 +344,8 @@ main:has(.lab-page-frame) {
 .lab-page-content {
   flex: 1 1 0%;
   height: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .lab-workspace-shell {
@@ -402,11 +406,14 @@ main:has(.lab-page-frame) {
 .lab-workspace-stage {
   position: relative;
   display: grid;
+  width: 100%;
   min-width: 0;
   min-height: 0;
   height: 100%;
   overflow: hidden;
+  grid-template-rows: minmax(0, 1fr);
   grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "canvas";
 }
 
 .lab-canvas-slot,
