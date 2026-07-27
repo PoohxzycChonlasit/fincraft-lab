@@ -25,22 +25,34 @@ function DetailSection({ heading, id, text }: SectionProps) {
 function SourcesList({ sources }: { sources: CraftDiscoverySource[] }) {
   if (sources.length === 0) return null;
   return (
-    <div className="space-y-1 pt-1 border-t border-[var(--border-subtle)]">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        Reference Sources
-      </p>
-      <ul className="space-y-1">
+    <div className="space-y-2 pt-2 border-t border-[var(--border-subtle)]">
+      <div className="flex flex-col space-y-0.5">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Reference Sources
+        </p>
+        <span className="text-[10px] text-muted-foreground italic">
+          Educational reference sources. Rules may vary by jurisdiction.
+        </span>
+      </div>
+      <ul className="space-y-2">
         {sources.map((src) => (
-          <li key={src.url} className="text-[11px] text-muted-foreground">
-            <span className="font-medium text-foreground">{src.organization}</span>
-            {" — "}
+          <li key={src.url} className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-resting)] p-2.5 text-xs space-y-1">
+            <div className="flex items-center justify-between gap-2 text-[10px] font-semibold text-[var(--color-craft-accent)]">
+              <span>{src.organization}</span>
+              {src.jurisdiction ? (
+                <span className="rounded bg-[var(--surface-inset)] px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground border border-[var(--border-subtle)]">
+                  {src.jurisdiction.replace(/_/g, " ")}
+                </span>
+              ) : null}
+            </div>
             <a
               href={src.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--ring)] rounded"
+              className="font-medium text-foreground underline hover:text-[var(--color-action-primary)] transition-colors inline-flex items-center gap-1 leading-snug"
             >
-              {src.title}
+              <span>{src.title}</span>
+              <span className="text-[10px] shrink-0" aria-hidden="true">↗</span>
             </a>
           </li>
         ))}
@@ -64,7 +76,7 @@ const OPTIONAL_FIELDS: Omit<OptionalField, "value">[] = [
 const OPTIONAL_KEYS: (keyof Pick<
   CraftDiscoveryDetail,
   "example" | "possibleBenefit" | "possibleTradeoff" | "worksWhen" | "becomesDifficultWhen" | "hiddenRisk" | "whatChangesOutcome"
->)[] = [
+>)[ ] = [
   "example", "possibleBenefit", "possibleTradeoff",
   "worksWhen", "becomesDifficultWhen", "hiddenRisk", "whatChangesOutcome",
 ];

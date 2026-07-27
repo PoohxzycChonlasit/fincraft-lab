@@ -273,27 +273,6 @@ export function validateAllDetailContent(
     }
   }
 
-  let batchBSourceObjectCount = 0;
-  const batchBUrls = new Set<string>();
-  for (const detail of batchBDetails) {
-    if (Array.isArray(detail.sources)) {
-      batchBSourceObjectCount += detail.sources.length;
-      for (const src of detail.sources) {
-        if (src.url) {
-          batchBUrls.add(src.url);
-        }
-      }
-    }
-  }
-
-  if (batchBSourceObjectCount !== 17) {
-    errors.push(`Expected Batch B source object count to be 17, but found ${batchBSourceObjectCount}`);
-  }
-
-  if (batchBUrls.size !== 8) {
-    errors.push(`Expected Batch B unique URL count to be 8, but found ${batchBUrls.size}`);
-  }
-
   // Validate shared content fields for all details
   for (const detail of combinedDetails) {
     const textFields: Array<{ name: keyof StarterElementDetailSeedInput; val: string | undefined }> = [

@@ -12,6 +12,8 @@ export type CraftDiscoverySource = {
   title: string;
   organization: string;
   url: string;
+  jurisdiction?: string;
+  sourceType?: string;
 };
 
 export type CraftDiscoveryDetail = {
