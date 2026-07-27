@@ -1,38 +1,67 @@
 "use client";
 
+import { useState } from "react";
 import type { AvailableElement } from "../types/craft-element.type";
+import type { ElementGuidance } from "../types/element-guidance.type";
+import { fetchElementGuidanceApi } from "../api/fetch-element-guidance";
+import { ElementLearningPanel } from "./element-learning-panel";
 
 export type ElementLibraryProps = {
   elements: AvailableElement[];
   onPlaceElement: (element: AvailableElement) => void;
 };
 
-function CompactElementTile({ element, onPlaceElement }: { element: AvailableElement; onPlaceElement: () => void }) {
-  const handleDragStart = (event: React.DragEvent) => {
-    event.dataTransfer.setData(
-      "application/fincraft-element",
-      JSON.stringify({
-        id: element.id,
-        name: element.name,
-        emoji: element.emoji,
-        categoryName: element.elementType,
-      }),
-    );
-    event.dataTransfer.effectAllowed = "copy";
-  };
+type CompactTileProps = {
+  element: AvailableElement;
+  isHighlighted: boolean;
+  isInspecting: boolean;
+  onPlaceElement: () => void;
+  onToggleInspect: (e: React.MouseEvent) => void;
+};
 
+function buildTileDragData(element: AvailableElement): string {
+  return JSON.stringify({
+    id: element.id,
+    name: element.name,
+    emoji: element.emoji,
+    categoryName: element.elementType,
+  });
+}
+
+function CompactElementTile({
+  element,
+  isHighlighted,
+  isInspecting,
+  onPlaceElement,
+  onToggleInspect,
+}: CompactTileProps) {
   const categoryName = element.category?.name || element.elementType;
+  const highlightClass = isHighlighted
+    ? "ring-2 ring-[var(--color-craft-accent)] border-[var(--color-craft-accent)] bg-[var(--color-craft-accent)]/10"
+    : isInspecting
+      ? "ring-2 ring-[var(--color-action-primary)] border-[var(--color-action-primary)]"
+      : "border-[var(--border-subtle)] hover:border-[var(--color-craft-accent)]/60";
 
   return (
-    <button
-      type="button"
+    <div
       draggable
-      onDragStart={handleDragStart}
+      onDragStart={(e) => {
+        e.dataTransfer.setData("application/fincraft-element", buildTileDragData(element));
+        e.dataTransfer.effectAllowed = "copy";
+      }}
       onClick={onPlaceElement}
-      className="group w-full min-h-[64px] rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-resting)] p-2.5 text-left transition-all duration-150 hover:-translate-y-0.5 hover:border-[var(--color-craft-accent)]/60 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-craft-accent)] active:cursor-grabbing cursor-grab"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onPlaceElement();
+        }
+      }}
+      className={`group relative w-full min-h-[64px] rounded-xl border bg-[var(--surface-resting)] p-2.5 text-left transition-all duration-150 hover:-translate-y-0.5 cursor-grab active:cursor-grabbing ${highlightClass}`}
       aria-label={`Place ${element.name} on canvas`}
     >
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2.5 pr-6">
         <div className="surface-inset flex size-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-lg leading-none font-semibold text-foreground group-hover:scale-105 transition-transform">
           <span aria-hidden="true">{element.emoji || "📄"}</span>
         </div>
@@ -45,36 +74,81 @@ function CompactElementTile({ element, onPlaceElement }: { element: AvailableEle
           </h3>
         </div>
       </div>
-    </button>
+      <button
+        type="button"
+        onClick={onToggleInspect}
+        aria-label={`About ${element.name}`}
+        className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-md text-xs font-bold text-muted-foreground hover:bg-[var(--surface-inset)] hover:text-foreground transition-colors"
+      >
+        ℹ️
+      </button>
+    </div>
+  );
+}
+
+function LibraryHeader({ count }: { count: number }) {
+  return (
+    <div className="flex items-center justify-between px-1">
+      <div className="flex items-center gap-2">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Elements</h2>
+        <span className="rounded-full bg-[var(--surface-inset)] px-2 py-0.5 text-[10px] font-semibold text-muted-foreground border border-[var(--border-subtle)]">
+          {count}
+        </span>
+      </div>
+      <span className="text-[10px] text-muted-foreground">Drag, tap or ℹ️ for info</span>
+    </div>
   );
 }
 
 export function ElementLibrary({ elements, onPlaceElement }: ElementLibraryProps) {
-  if (elements.length === 0) {
-    return (
-      <div className="surface-inset rounded-xl border border-[var(--border-subtle)] p-4 text-center">
-        <p className="text-xs font-semibold text-foreground">No Elements</p>
-        <p className="mt-1 text-[11px] text-muted-foreground">No starter elements found.</p>
-      </div>
-    );
-  }
+  const [inspectingElement, setInspectingElement] = useState<AvailableElement | null>(null);
+  const [guidance, setGuidance] = useState<ElementGuidance | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleToggleInspect = async (element: AvailableElement, event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (inspectingElement?.id === element.id) {
+      setInspectingElement(null);
+      setGuidance(null);
+      return;
+    }
+    setInspectingElement(element);
+    setIsLoading(true);
+    const result = await fetchElementGuidanceApi(element.id);
+    setGuidance(result);
+    setIsLoading(false);
+  };
+
+  const highlightedIds = new Set(guidance?.suggestedPartners?.map((p) => p.id) || []);
 
   return (
     <section aria-label="Element Library" className="flex flex-col h-full space-y-2">
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Elements</h2>
-          <span className="rounded-full bg-[var(--surface-inset)] px-2 py-0.5 text-[10px] font-semibold text-muted-foreground border border-[var(--border-subtle)]">
-            {elements.length}
-          </span>
-        </div>
-        <span className="text-[10px] text-muted-foreground">Drag or tap to place</span>
-      </div>
+      <LibraryHeader count={elements.length} />
+
+      {inspectingElement ? (
+        <ElementLearningPanel
+          element={inspectingElement}
+          guidance={guidance}
+          isLoading={isLoading}
+          onClose={() => {
+            setInspectingElement(null);
+            setGuidance(null);
+          }}
+          onPlaceElement={onPlaceElement}
+        />
+      ) : null}
 
       <div className="flex-1 overflow-y-auto max-h-[460px] sm:max-h-[66vh] pr-1 space-y-2">
         <div className="grid grid-cols-1 gap-2">
           {elements.map((element) => (
-            <CompactElementTile key={element.id} element={element} onPlaceElement={() => onPlaceElement(element)} />
+            <CompactElementTile
+              key={element.id}
+              element={element}
+              isHighlighted={highlightedIds.has(element.id)}
+              isInspecting={inspectingElement?.id === element.id}
+              onPlaceElement={() => onPlaceElement(element)}
+              onToggleInspect={(e) => handleToggleInspect(element, e)}
+            />
           ))}
         </div>
       </div>

@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
@@ -10,6 +11,10 @@ import {
 } from '../database/generated/prisma/client';
 import { PrismaService } from '../database/prisma.service';
 import type { AvailableElementResponse } from './types/available-element-response.type';
+import type {
+  ElementGuidanceResponse,
+  SuggestedPartnerSummary,
+} from './types/element-guidance-response.type';
 
 @Injectable()
 export class ElementService {
@@ -42,24 +47,9 @@ export class ElementService {
     });
   }
 
-  /**
-   * Retrieves all active Elements available to the specified user.
-   *
-   * Available Elements consist of:
-   * 1. Active Starter Elements in active Categories.
-   * 2. Active non-Starter Elements in active Categories unlocked by the user.
-   *
-   * Ordered by:
-   * 1. category.sortOrder ASC
-   * 2. isStarter DESC
-   * 3. name ASC
-   *
-   * Zero DB writes performed.
-   */
   async getAvailableElements(
     userId: string,
   ): Promise<AvailableElementResponse[]> {
-    // 1. Verify User account and active status
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, status: true },
@@ -73,8 +63,7 @@ export class ElementService {
       throw new ForbiddenException('User account is disabled');
     }
 
-    // 2. Query available elements
-    const elements = await this.prisma.element.findMany({
+    return this.prisma.element.findMany({
       where: {
         status: ContentStatus.ACTIVE,
         category: {
@@ -112,7 +101,121 @@ export class ElementService {
         { name: 'asc' },
       ],
     });
+  }
 
-    return elements;
+  async getElementGuidance(
+    elementId: string,
+  ): Promise<ElementGuidanceResponse> {
+    const element = await this.prisma.element.findFirst({
+      where: {
+        id: elementId,
+        status: ContentStatus.ACTIVE,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        emoji: true,
+        iconUrl: true,
+        elementType: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        discoveryDetail: {
+          select: {
+            shortDescription: true,
+          },
+        },
+      },
+    });
+
+    if (!element) {
+      throw new NotFoundException('Element not found');
+    }
+
+    // Find active recipes where this element is an input
+    const recipeInputs = await this.prisma.craftRecipeInput.findMany({
+      where: {
+        elementId: elementId,
+        recipe: {
+          status: ContentStatus.ACTIVE,
+        },
+      },
+      select: {
+        recipeId: true,
+      },
+    });
+
+    const recipeIds = recipeInputs.map((ri) => ri.recipeId);
+
+    // Find other input elements in those same recipes (excluding source elementId)
+    const partnerInputs = await this.prisma.craftRecipeInput.findMany({
+      where: {
+        recipeId: { in: recipeIds },
+        elementId: { not: elementId },
+        element: {
+          status: ContentStatus.ACTIVE,
+          category: { status: ActiveStatus.ACTIVE },
+        },
+      },
+      select: {
+        element: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            emoji: true,
+            iconUrl: true,
+            elementType: true,
+            category: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        element: { name: 'asc' },
+      },
+    });
+
+    // Deduplicate partners
+    const partnerMap = new Map<string, SuggestedPartnerSummary>();
+    for (const item of partnerInputs) {
+      const p = item.element;
+      if (!partnerMap.has(p.id)) {
+        partnerMap.set(p.id, {
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          emoji: p.emoji,
+          iconUrl: p.iconUrl,
+          elementType: p.elementType,
+          categoryName: p.category.name,
+        });
+      }
+    }
+
+    const suggestedPartners = Array.from(partnerMap.values()).slice(0, 4);
+
+    return {
+      element: {
+        id: element.id,
+        name: element.name,
+        slug: element.slug,
+        emoji: element.emoji,
+        iconUrl: element.iconUrl,
+        elementType: element.elementType,
+        category: element.category,
+        description:
+          element.discoveryDetail?.shortDescription ||
+          `Financial element: ${element.name}. Combine with other elements on the canvas to discover financial concepts.`,
+      },
+      suggestedPartners,
+    };
   }
 }

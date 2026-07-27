@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -11,8 +11,10 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import type { AccessTokenPayload } from '../auth/types/access-token-payload.type';
 import { AvailableElementsEnvelopeDto } from './dto/available-element-response.dto';
+import { ElementGuidanceEnvelopeDto } from './dto/element-guidance-response.dto';
 import { ElementService } from './element.service';
 import type { AvailableElementResponse } from './types/available-element-response.type';
+import type { ElementGuidanceResponse } from './types/element-guidance-response.type';
 
 @ApiTags('Elements')
 @ApiBearerAuth('access-token')
@@ -56,6 +58,25 @@ export class ElementController {
     @CurrentUser() user: AccessTokenPayload,
   ): Promise<{ data: AvailableElementResponse[] }> {
     const result = await this.elementService.getAvailableElements(user.sub);
+    return { data: result };
+  }
+
+  @Public()
+  @Get(':elementId/guidance')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get element learning guidance and suggested partners',
+    description:
+      'Retrieves grounded short description and safe suggested partner elements for an element.',
+  })
+  @ApiOkResponse({
+    description: 'Element learning guidance retrieved successfully',
+    type: ElementGuidanceEnvelopeDto,
+  })
+  async getElementGuidance(
+    @Param('elementId') elementId: string,
+  ): Promise<{ data: ElementGuidanceResponse }> {
+    const result = await this.elementService.getElementGuidance(elementId);
     return { data: result };
   }
 }

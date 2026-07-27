@@ -43,9 +43,12 @@ function LabToolbar({ isAuthenticated, initialWorkspace }: { isAuthenticated: bo
 
 function CompactNoRecipeNotice({ onDismiss }: { onDismiss: () => void }) {
   return (
-    <div role="status" className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-4 py-2 text-xs text-muted-foreground animate-in fade-in duration-150">
-      <span>No discovery yet. Try another combination.</span>
-      <button type="button" onClick={onDismiss} className="font-semibold text-foreground hover:underline">
+    <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-4 py-2.5 text-xs text-muted-foreground animate-in fade-in duration-150">
+      <div className="flex items-center gap-2">
+        <span className="font-bold text-[var(--color-craft-accent)]">No discovery yet:</span>
+        <span>These elements do not have an approved discovery recipe in the current lab. Try another combination or click ℹ️ on elements to view suggested connections.</span>
+      </div>
+      <button type="button" onClick={onDismiss} className="font-semibold text-foreground hover:underline shrink-0">
         Dismiss
       </button>
     </div>
