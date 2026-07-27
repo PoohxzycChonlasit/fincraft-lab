@@ -213,6 +213,34 @@ export class AdminContentService {
     return ElementAdminResponseMapper.toDetailDto(updated);
   }
 
+  async archiveElement(
+    userId: string,
+    elementId: string,
+  ): Promise<AdminElementDetailDto> {
+    await this.validateUser(userId);
+
+    const existingElement = await this.prisma.element.findUnique({
+      where: { id: elementId },
+    });
+
+    if (!existingElement) {
+      throw new NotFoundException('Element not found');
+    }
+
+    const updated = await this.prisma.element.update({
+      where: { id: elementId },
+      data: {
+        status: ContentStatus.INACTIVE,
+      },
+      include: {
+        category: true,
+        discoveryDetail: true,
+      },
+    });
+
+    return ElementAdminResponseMapper.toDetailDto(updated);
+  }
+
   async upsertDiscoveryDetail(
     userId: string,
     elementId: string,

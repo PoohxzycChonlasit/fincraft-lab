@@ -5,6 +5,7 @@ import type { AdminElementSummary, ContentStatusEnum } from "../types/admin-elem
 type ListProps = {
   elements: AdminElementSummary[];
   onEdit: (element: AdminElementSummary) => void;
+  onArchive: (elementId: string, name: string) => void;
   onQuickStatusChange: (elementId: string, status: ContentStatusEnum) => void;
 };
 
@@ -23,7 +24,56 @@ function StatusBadge({ status }: { status: ContentStatusEnum }) {
   );
 }
 
-export function AdminElementList({ elements, onEdit, onQuickStatusChange }: ListProps) {
+function AdminElementCard({
+  el,
+  onEdit,
+  onArchive,
+  onQuickStatusChange,
+}: {
+  el: AdminElementSummary;
+  onEdit: (element: AdminElementSummary) => void;
+  onArchive: (elementId: string, name: string) => void;
+  onQuickStatusChange: (elementId: string, status: ContentStatusEnum) => void;
+}) {
+  return (
+    <article className="surface-resting rounded-2xl border border-[var(--border-subtle)] p-4 space-y-3 flex flex-col justify-between">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xl leading-none" aria-hidden="true">{el.emoji}</span>
+          <StatusBadge status={el.status} />
+        </div>
+        <div>
+          <h4 className="text-sm font-bold text-foreground">{el.name}</h4>
+          <p className="text-[11px] font-medium text-[var(--color-craft-accent)]">
+            {el.categoryName} • <span className="text-muted-foreground">{el.elementType}</span>
+          </p>
+          <p className="text-[10px] font-mono text-muted-foreground">/{el.slug}</p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-2 border-t border-[var(--border-subtle)] gap-2">
+        <select
+          value={el.status}
+          onChange={(e) => onQuickStatusChange(el.id, e.target.value as ContentStatusEnum)}
+          aria-label={`Change status for ${el.name}`}
+          className="text-[11px] font-semibold rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-2 py-1 focus:ring-2 focus:ring-[var(--ring)]"
+        >
+          <option value="ACTIVE">ACTIVE</option>
+          <option value="PENDING">PENDING</option>
+          <option value="INACTIVE">INACTIVE</option>
+          <option value="ARCHIVED">ARCHIVED</option>
+        </select>
+
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => onEdit(el)} className="text-xs font-semibold text-[var(--color-action-primary)] hover:underline">Edit</button>
+          <button type="button" onClick={() => onArchive(el.id, el.name)} className="text-xs font-semibold text-destructive hover:underline">Archive</button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export function AdminElementList({ elements, onEdit, onArchive, onQuickStatusChange }: ListProps) {
   if (elements.length === 0) {
     return (
       <div className="surface-inset rounded-2xl p-8 text-center border border-[var(--border-subtle)] space-y-1">
@@ -37,48 +87,7 @@ export function AdminElementList({ elements, onEdit, onQuickStatusChange }: List
     <div className="space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {elements.map((el) => (
-          <article
-            key={el.id}
-            className="surface-resting rounded-2xl border border-[var(--border-subtle)] p-4 space-y-3 flex flex-col justify-between"
-          >
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xl leading-none" aria-hidden="true">
-                  {el.emoji}
-                </span>
-                <StatusBadge status={el.status} />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-foreground">{el.name}</h4>
-                <p className="text-[11px] font-medium text-[var(--color-craft-accent)]">
-                  {el.categoryName} • <span className="text-muted-foreground">{el.elementType}</span>
-                </p>
-                <p className="text-[10px] font-mono text-muted-foreground">/{el.slug}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 border-t border-[var(--border-subtle)]">
-              <select
-                value={el.status}
-                onChange={(e) => onQuickStatusChange(el.id, e.target.value as ContentStatusEnum)}
-                aria-label={`Change status for ${el.name}`}
-                className="text-[11px] font-semibold rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-2 py-1 focus:ring-2 focus:ring-[var(--ring)]"
-              >
-                <option value="ACTIVE">ACTIVE</option>
-                <option value="PENDING">PENDING</option>
-                <option value="INACTIVE">INACTIVE</option>
-                <option value="ARCHIVED">ARCHIVED</option>
-              </select>
-
-              <button
-                type="button"
-                onClick={() => onEdit(el)}
-                className="text-xs font-semibold text-[var(--color-action-primary)] hover:underline"
-              >
-                Edit
-              </button>
-            </div>
-          </article>
+          <AdminElementCard key={el.id} el={el} onEdit={onEdit} onArchive={onArchive} onQuickStatusChange={onQuickStatusChange} />
         ))}
       </div>
     </div>

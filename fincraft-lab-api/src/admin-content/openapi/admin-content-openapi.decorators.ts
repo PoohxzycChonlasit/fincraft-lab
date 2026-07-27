@@ -124,6 +124,34 @@ export function ApiUpdateAdminElement() {
   );
 }
 
+export function ApiDeleteAdminElement() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Archive Element master record',
+      description:
+        'Soft delete/archive an Element master record by setting its status to INACTIVE (ADMIN and SUPER_ADMIN only). Idempotent.',
+    }),
+    ApiOkResponse({
+      description: 'Element archived successfully',
+      type: AdminElementDetailEnvelopeDto,
+    }),
+    ApiBadRequestResponse({
+      description: 'Invalid UUID v4 elementId format',
+    }),
+    ApiUnauthorizedResponse({
+      description:
+        'Missing/invalid authentication token or user account not found',
+    }),
+    ApiForbiddenResponse({
+      description:
+        'User account is disabled or user does not have ADMIN or SUPER_ADMIN role',
+    }),
+    ApiNotFoundResponse({
+      description: 'Element not found',
+    }),
+  );
+}
+
 export function ApiUpsertDiscoveryDetail() {
   return applyDecorators(
     ApiOperation({

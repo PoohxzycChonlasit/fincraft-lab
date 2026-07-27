@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -32,6 +33,7 @@ import { UpdateElementDto } from './dto/update-element.dto';
 import { UpsertDiscoveryDetailDto } from './dto/upsert-discovery-detail.dto';
 import {
   ApiCreateAdminElement,
+  ApiDeleteAdminElement,
   ApiGetAdminElementDetail,
   ApiGetAdminElements,
   ApiUpdateAdminElement,
@@ -100,6 +102,20 @@ export class AdminContentController {
       user.sub,
       elementId,
       dto,
+    );
+    return { data };
+  }
+
+  @Delete(':elementId')
+  @HttpCode(HttpStatus.OK)
+  @ApiDeleteAdminElement()
+  async deleteAdminElement(
+    @CurrentUser() user: AccessTokenPayload,
+    @Param('elementId', new ParseUUIDPipe({ version: '4' })) elementId: string,
+  ): Promise<AdminElementDetailEnvelopeDto> {
+    const data = await this.adminContentService.archiveElement(
+      user.sub,
+      elementId,
     );
     return { data };
   }

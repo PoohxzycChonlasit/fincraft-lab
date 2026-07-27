@@ -12,7 +12,7 @@ type ManagerProps = {
 export function AdminElementManager({ initialElements }: ManagerProps) {
   const {
     elements, categories, editingElement, isFormOpen, isSubmitting, feedback, error,
-    handleOpenCreate, handleOpenEdit, handleCancelForm, handleCreateSubmit, handleUpdateSubmit, handleQuickStatusChange,
+    handleOpenCreate, handleOpenEdit, handleCancelForm, handleCreateSubmit, handleUpdateSubmit, handleArchiveElement, handleQuickStatusChange,
   } = useAdminElementManager(initialElements);
 
   return (
@@ -35,7 +35,7 @@ export function AdminElementManager({ initialElements }: ManagerProps) {
         <AdminElementForm initialElement={editingElement} categories={categories} isSubmitting={isSubmitting} onCancel={handleCancelForm} onSubmitCreate={handleCreateSubmit} onSubmitUpdate={handleUpdateSubmit} />
       )}
 
-      <AdminElementList elements={elements} onEdit={handleOpenEdit} onQuickStatusChange={handleQuickStatusChange} />
+      <AdminElementList elements={elements} onEdit={handleOpenEdit} onArchive={handleArchiveElement} onQuickStatusChange={handleQuickStatusChange} />
     </div>
   );
 }
