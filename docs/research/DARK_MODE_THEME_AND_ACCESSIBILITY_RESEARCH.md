@@ -2,11 +2,11 @@
 
 ## Executive Summary
 
-- **Task ID:** `P13_FRONTEND_FOUNDATION_1D3_DESIGN_SYSTEM_V2_LIQUID_MATERIAL_DARK_MODE_AND_COMPONENT_RESEARCH_001`
+- **Task ID:** `P13_FRONTEND_FOUNDATION_1D3B_DESIGN_SYSTEM_V2_RESEARCH_ACCURACY_AND_DECISION_READINESS_REPAIR_001`
 - **Status:** RESEARCH AND THEME ARCHITECTURE PROPOSAL ONLY
 - **Date:** 2026-07-27 (Asia/Bangkok)
-- **Baseline HEAD:** `4069223d65024968f1df7c39546e0130759efc2b`
-- **Scope:** Zero source code changes; zero package installations; zero Product UI work.
+- **Baseline HEAD:** `f9434d5391cc829a9358fcd36863675fbd8d8507`
+- **Scope:** Bounded research document repair only. Zero source code changes; zero package installations; zero Product UI work.
 
 This document defines the architecture for complete **Light, Dark, and System theme management** and accessibility compliance for FinCraft Design System V2. 
 
@@ -16,19 +16,20 @@ FinCraft is a light-first educational product, but modern UI standards and user 
 
 ## Theme Architecture & Resolution Pipeline
 
-### 1. Theme Modes Definition
+### 1. Theme Preference Values
 - `light`: Explicit Light mode override.
 - `dark`: Explicit Dark mode override.
-- `system`: Tracks the operating system preference (`prefers-color-scheme: dark | light`).
+- `system`: Tracks operating system preference via `@media (prefers-color-scheme: dark | light)`.
 
-### 2. Resolution & Precedence Order
+### 2. Single Authoritative Persistence (Cookie-Authoritative)
+To eliminate dual-authority bugs and competing state values, **Cookie (`fincraft_theme`) is established as the SINGLE AUTHORITATIVE PERSISTENCE STORE**.
 
 ```text
 +-----------------------------------------------------------------------------------+
 | RESOLUTION STEP  | SOURCE                       | RESULTING THEME MODE            |
 +------------------+------------------------------+---------------------------------+
-| Step 1           | User Explicit Preference     | If 'light' or 'dark' -> Apply   |
-|                  | (stored in Cookie/Storage)   | If 'system' or NULL -> Go to 2  |
+| Step 1           | Cookie ('fincraft_theme')    | If 'light' or 'dark' -> Apply   |
+|                  | (Inspected on Next.js Server)| If 'system' or NULL -> Go to 2  |
 +------------------+------------------------------+---------------------------------+
 | Step 2           | Browser OS Preference        | If matches 'dark' -> Apply Dark |
 |                  | (prefers-color-scheme)       | If matches 'light' -> Apply Light|
@@ -37,35 +38,38 @@ FinCraft is a light-first educational product, but modern UI standards and user 
 +-----------------------------------------------------------------------------------+
 ```
 
-### 3. Safe Next.js SSR & Anti-FOUC (No-Flash) Strategy
+- **Why LocalStorage is Excluded:** `localStorage` cannot be read on the server during Next.js SSR. Relying on `localStorage` alongside cookies introduces competing sources of truth, leading to hydration mismatches and FOUC. Using Cookie as the sole store guarantees both server and client agree on theme state.
 
-To prevent a white flash when a dark-mode user reloads a page rendered by Next.js SSR, FinCraft proposes a **2-Tier Hydration Pattern**:
+---
 
-1. **Server Boundary Cookie Inspection:** Next.js `RootLayout` reads an HttpOnly `fincraft_theme` cookie (if set) and injects the corresponding `.dark` class directly into `<html>` on the server response.
-2. **Inline Anti-FOUC Blocking Script:** In `RootLayout` `<head>`, a tiny inline script runs before DOM rendering to read `localStorage`/`cookie` or check `window.matchMedia('(prefers-color-scheme: dark)')`, immediately toggling `.dark` on `document.documentElement`.
+## Safe Next.js SSR & Anti-FOUC (No-Flash) Hydration Architecture
 
-```html
-<!-- Anti-FOUC Inline Script Pattern (Target for future Theme Task) -->
-<script>
-  (function() {
-    try {
-      var stored = localStorage.getItem('fincraft_theme');
-      var supportDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (stored === 'dark' || (!stored && supportDark)) {
-        document.documentElement.classList.add('dark');
-        document.documentElement.style.colorScheme = 'dark';
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.style.colorScheme = 'light';
-      }
-    } catch (e) {}
-  })();
-</script>
+To prevent a white flash when a dark-mode user reloads a page rendered by Next.js App Router, FinCraft proposes a **Coherent 2-Tier Hydration Pattern**:
+
+```text
++-----------------------------------------------------------------------------------+
+| TIER 1: SERVER RENDERING (Next.js RootLayout)                                     |
+| - Reads 'fincraft_theme' cookie via next/headers cookies().                       |
+| - If cookie is 'dark', injects class="dark" and style="color-scheme: dark"        |
+|   directly into initial <html> server response.                                  |
+| - If cookie is 'system' or NULL, server renders baseline HTML WITHOUT forcing     |
+|   an incorrect server guess. System awareness is handled by Tier 2.               |
++-----------------------------------------------------------------------------------+
+| TIER 2: CLIENT HYDRATION & INLINE HEAD SCRIPT                                     |
+| - When preference is 'system', an inline blocking script in <head> evaluates       |
+|   window.matchMedia('(prefers-color-scheme: dark)') before DOM paint, toggling     |
+|   the .dark class synchronously.                                                  |
+| - Client theme switcher updates the document <html> class and sets the            |
+|   'fincraft_theme' Cookie simultaneously.                                         |
++-----------------------------------------------------------------------------------+
 ```
 
-4. **No-JS Fallback:** Standard CSS provides `@media (prefers-color-scheme: dark)` overrides so that if JavaScript is disabled, the browser automatically applies Dark Mode CSS variables.
-5. **Native Form Control Adaptation:** Setting `color-scheme: light dark` on `html` ensures browser scrollbars, form inputs, native selects, and date pickers automatically render dark chrome matching the app theme.
-6. **Browser Chrome Hints:** `<meta name="theme-color" content="#FAFAF9" media="(prefers-color-scheme: light)">` and `<meta name="theme-color" content="#0C0A09" media="(prefers-color-scheme: dark)">` keep mobile browser header bars synchronized with the active theme.
+### Key Hydration Rules
+1. **Initial HTML Integrity:** Server HTML must NOT claim a resolved system appearance that the server cannot know.
+2. **Inline Script Boundary:** An inline blocking script is recommended strictly when preference is `system` or cookie is absent, applying `.dark` before first paint. `suppressHydrationWarning` is NOT used as a primary solution; hydration structure must match.
+3. **No-JS Fallback:** Native CSS uses `@media (prefers-color-scheme: dark)` overrides so that if JavaScript is disabled, the browser automatically applies Dark Mode CSS variables.
+4. **Native Form Control Adaptation:** Setting `color-scheme: light dark` on `html` ensures browser scrollbars, form inputs, native selects, and date pickers automatically render dark chrome matching the app theme.
+5. **Browser Chrome Hints:** `<meta name="theme-color" content="#FAFAF9" media="(prefers-color-scheme: light)">` and `<meta name="theme-color" content="#0C0A09" media="(prefers-color-scheme: dark)">` keep mobile browser header bars synchronized.
 
 ---
 
@@ -89,40 +93,44 @@ Layer 4: Component Tokens  (--button-primary-bg, --card-background)
 Layer 5: Component State   (--button-primary-hover-bg, --card-border-selected)
 ```
 
-### Layer Rules
-- **Layer 1 (Primitives):** Immutable color values (Hex, OKLCH). Raw palette definitions.
-- **Layer 2 (Semantics):** Contextual intent (`primary-action`, `text-primary`, `bg-flat`). Changes value based on active `.dark` theme class.
-- **Layer 3 (Materials/Surfaces):** Tactical elevation and edge definitions (`surface-raised`, `border-interactive`).
-- **Layer 4 (Components):** Component-specific bindings (`button-bg`, `nav-header-bg`).
-- **Layer 5 (Component States):** Hover, focus, active, disabled, selected variations.
-
 ---
 
-## Canonical Light & Dark Token Color Pairs
+## Candidate Dark Mode Values & Required Contrast Matrix
 
-All proposed color pairs below are paired with calculated WCAG 2.2 AA contrast measurements.
+The proposed Dark Mode hex values (e.g. `#0C0A09`, `#1C1917`) are explicitly designated as **CANDIDATE EXPLORATION VALUES ONLY**. They are NOT canonical and NOT implementation-ready. They require empirical contrast measurement on an active prototype before freezing.
+
+### Required Pre-Freeze Contrast Validation Matrix
+
+Before freezing Dark Mode tokens, a contrast prototype must measure and verify WCAG 2.2 AA compliance across all 11 critical pairs:
 
 ```text
 +-------------------------------------------------------------------------------------------------------------------+
-| TOKEN NAME           | LIGHT VALUE (HEX/OKLCH)    | DARK VALUE (HEX/OKLCH)     | WCAG CONTRAST RATIO | STATUS      |
-+----------------------+----------------------------+----------------------------+---------------------+-------------+
-| --surface-flat       | #FAFAF9 (Warm Off-white)   | #0C0A09 (Rich Dark Slate)  | N/A (Base Canvas)   | AA Pass     |
-| --surface-card       | #FFFFFF (Pure White)       | #1C1917 (Stone Dark 900)   | N/A (Card Fill)     | AA Pass     |
-| --surface-inset      | #F5F5F4 (Warm Neutral 100) | #141210 (Deep Well Dark)   | N/A (Well Fill)     | AA Pass     |
-| --surface-resting    | #FFFFFF (White Plate)      | #262320 (Stone Dark 800)   | N/A (Resting Card)  | AA Pass     |
-| --surface-raised     | #FFFFFF (Raised Card)      | #2E2A26 (Stone Dark 750)   | N/A (Raised Card)   | AA Pass     |
-| --surface-floating   | #FFFFFF/92% + 8px blur     | #1C1917/92% + 8px blur     | N/A (Inspector)     | AA Pass     |
-| --text-primary       | #1C1917 (Stone Dark 900)   | #F5F5F4 (Warm Neutral 100) | 16.2:1 (L) / 15.8:1 | AAA Pass    |
-| --text-secondary     | #44403C (Stone Dark 700)   | #D6D3D1 (Stone Light 300)  | 9.4:1 (L) / 8.6:1   | AAA Pass    |
-| --text-tertiary      | #78716C (Stone Medium 500) | #A8A29E (Stone Light 400)  | 4.6:1 (L) / 4.8:1   | AA Pass     |
-| --color-teal-brand   | #0D9488 (Teal 600)         | #14B8A6 (Teal 500)         | 4.6:1 on #FFF / Dark| AA Pass     |
-| --color-orange-brand | #EA580C (Orange 600)       | #F97316 (Orange 500)       | 4.5:1 on #FFF / Dark| AA Pass     |
-| --border-subtle      | oklch(0.922 0 0)           | oklch(1 0 0 / 12%)         | 3.1:1 Non-text      | AA Pass     |
-| --border-interactive | #0D9488 (Teal 600)         | #14B8A6 (Teal 500)         | 3.4:1 Non-text      | AA Pass     |
-| --border-selected    | #EA580C (Orange 600)       | #F97316 (Orange 500)       | 3.2:1 Non-text      | AA Pass     |
-| --destructive        | #DC2626 (Red 600)          | #EF4444 (Red 500)          | 4.8:1 Text Contrast | AA Pass     |
+| #  | CONTRAST PAIR COVERAGE | CANDIDATE LIGHT VALUE    | CANDIDATE DARK VALUE     | REQ. CONTRAST | TARGET STATUS   |
++----+------------------------+--------------------------+--------------------------+---------------+-----------------+
+| 1  | Primary Text           | #1C1917 on #FFFFFF       | #F5F5F4 on #1C1917       | 4.5:1 (AA)    | Candidate Pair  |
+| 2  | Secondary & Muted Text | #44403C on #FFFFFF       | #D6D3D1 on #1C1917       | 4.5:1 (AA)    | Candidate Pair  |
+| 3  | Teal Interactive Content| #0D9488 on #FFFFFF      | #14B8A6 on #1C1917       | 4.5:1 (AA)    | Candidate Pair  |
+| 4  | Orange Discovery Content| #EA580C on #FFFFFF      | #F97316 on #1C1917       | 4.5:1 (AA)    | Candidate Pair  |
+| 5  | Danger / Error Content | #DC2626 on #FEF2F2       | #EF4444 on #2A1212       | 4.5:1 (AA)    | Candidate Pair  |
+| 6  | Focus Ring vs Surface  | #0D9488 outline          | #14B8A6 outline          | 3.0:1 Non-txt | Candidate Pair  |
+| 7  | Control Boundaries     | oklch(0.922 0 0)         | oklch(1 0 0 / 12%)       | 3.0:1 Non-txt | Candidate Pair  |
+| 8  | Disabled Content       | #A8A29E on #F5F5F4       | #78716C on #262320       | 3.0:1 (Excep) | Candidate Pair  |
+| 9  | Selected State Edge    | #EA580C on #FFFFFF       | #F97316 on #2E2A26       | 3.0:1 Non-txt | Candidate Pair  |
+| 10 | Graph Relationship Line| #0D9488 stroke           | #14B8A6 stroke           | 3.0:1 Non-txt | Candidate Pair  |
+| 11 | Chart & Data Colors    | Teal/Orange/Red lines    | Adjusted Dark line values| 3.0:1 Non-txt | Candidate Pair  |
 +-------------------------------------------------------------------------------------------------------------------+
 ```
+
+---
+
+## Target Size & Accessibility Conformance Target
+
+- **WCAG 2.2 Target Size Distinction:**
+  - **WCAG 2.2 SC 2.5.8 (Level AA Minimum):** 24×24 CSS px minimum for pointer targets.
+  - **WCAG 2.2 SC 2.5.5 (Level AAA Enhanced):** 44×44 CSS px minimum.
+  - **FinCraft Standard:** 44×44 CSS px is a **FinCraft product preference**, NOT the WCAG AA threshold.
+- **ACCESSIBILITY TARGET:** Designed toward **W3C WCAG 2.2 Level AA**.
+- **CONFORMANCE STATUS:** Conformance is **NOT YET EVALUATED** or verified. Conformance can only be evaluated after implementation on active rendered components.
 
 ---
 
@@ -130,40 +138,49 @@ All proposed color pairs below are paired with calculated WCAG 2.2 AA contrast m
 
 FinCraft V2 defines explicit CSS handling for four special operating system modes:
 
-### 1. Reduced Motion (`@media (prefers-reduced-motion: reduce)`)
-- Removes all CSS `transition-duration` and `animation` Keyframes.
-- Slide-over sheets and modal dialogs appear instantly without sliding/scaling.
-- Graph layout changes snap directly to target positions without animation.
-- Discovery unlocking celebrations render as static success banners.
-
-### 2. Reduced Transparency (`@media (prefers-reduced-transparency: reduce)`)
-- All `backdrop-filter: blur(...)` properties are disabled (`backdrop-filter: none !important`).
-- Semi-opaque surfaces (`var(--surface-floating)`) convert to 100% solid color fills (`var(--surface-card)`).
-
-### 3. High Contrast / Forced Colors (`@media (forced-colors: active)`)
-- All custom box-shadows, background gradients, and inner highlights are disabled by the browser.
-- Components use system colors (`CanvasText`, `Canvas`, `Highlight`, `ButtonText`).
-- Borders are explicitly forced to `1px solid CanvasText` so interactive bounds remain clear.
-
-### 4. Print Mode (`@media print`)
-- Force light background (`#FFFFFF`) and dark text (`#000000`) for all educational content, disclaimers, and simulation summaries.
-- Hide navigation bars, interactive sliders, floating tool inspectors, and action buttons.
+1. **Reduced Motion (`@media (prefers-reduced-motion: reduce)`):**
+   - Removes CSS `transition-duration` and `animation` keyframes.
+   - Slide-over sheets and modal dialogs appear instantly without sliding/scaling.
+   - Graph layout changes snap directly to target positions.
+2. **Reduced Transparency (`@media (prefers-reduced-transparency: reduce)`):**
+   - All `backdrop-filter` properties are disabled (`backdrop-filter: none !important`).
+   - Semi-opaque surfaces convert to 100% solid color fills (`var(--surface-card)`).
+3. **High Contrast / Forced Colors (`@media (forced-colors: active)`):**
+   - Custom box-shadows and gradients are disabled by browser. Components use system colors (`CanvasText`, `Canvas`). Borders are forced to `1px solid CanvasText`.
+4. **Print Mode (`@media print`):**
+   - Forces light background (`#FFFFFF`) and dark text (`#000000`) for educational content. Hides navigation bars, sliders, and action buttons.
 
 ---
 
 ## Domain-Specific Dark Mode Rules
 
-Financial educational UI requires specific dark mode considerations to avoid visual confusion or cognitive overload:
-
 1. **Recharts & Financial Simulation Charts:**
-   - Chart gridlines must use low-contrast dark strokes (`oklch(1 0 0 / 10%)`).
-   - Projection lines (Teal for asset growth, Red/Amber for deficit risks) must use adjusted dark-mode values (`Teal 400` `#2DD4BF`, `Red 400` `#F87171`) to prevent blinding brightness.
-   - Tooltip popovers in dark mode must use `surface-floating` dark cards with solid `#1C1917` background and 3.0:1 border separation.
-
+   - Gridlines use low-contrast dark strokes (`oklch(1 0 0 / 10%)`).
+   - Line projections use adjusted dark-mode values (`Teal 400` `#2DD4BF`, `Red 400` `#F87171`).
 2. **Graph Nodes & Discovery Web Edges:**
-   - **No Neon Glow:** Graph edges in dark mode must NOT use heavy neon neon/glow effects. Edges use clean, solid `oklch(1 0 0 / 25%)` lines.
+   - **No Neon Glow:** Graph edges in dark mode do NOT use neon glow effects. Edges use clean, solid `oklch(1 0 0 / 25%)` lines.
    - Selected nodes use a 2px `Orange 500` stroke without blur artifacts.
-   - Spoiler-hidden nodes remain absent from the DOM in dark mode, exactly as in light mode.
-
 3. **Disclaimers & Trade-off Warnings:**
-   - High-risk warnings and "Education Only" banners in dark mode use dark warm amber backgrounds (`#291E09`) with high-contrast text (`#FDE68A`) and amber borders (`#78350F`).
+   - High-risk warnings in dark mode use dark warm amber backgrounds (`#291E09`) with high-contrast text (`#FDE68A`) and amber borders (`#78350F`).
+
+---
+
+## Authoritative Research Sources
+
+1. **Next.js App Router Documentation — Building Your Application (Rendering):**
+   - Publisher: Vercel / Next.js Team
+   - URL: `https://nextjs.org/docs/app/building-your-application/rendering`
+   - Access Date: 2026-07-27
+   - Supports: Server Component rendering boundaries, hydration safety, and cookie inspection patterns.
+
+2. **MDN Web Docs — prefers-color-scheme & HTTP Cookies:**
+   - Publisher: Mozilla Developer Network
+   - URL: `https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme`
+   - Access Date: 2026-07-27
+   - Supports: `@media (prefers-color-scheme)` media query resolution and cookie-based theme persistence.
+
+3. **W3C WCAG 2.2 Guidelines:**
+   - Publisher: World Wide Web Consortium (W3C)
+   - URL: `https://www.w3.org/TR/WCAG22/`
+   - Access Date: 2026-07-27
+   - Supports: Contrast Ratio SC 1.4.3 (4.5:1), Non-Text Contrast SC 1.4.11 (3.0:1), Target Size SC 2.5.8 (24px AA) and SC 2.5.5 (44px AAA).
