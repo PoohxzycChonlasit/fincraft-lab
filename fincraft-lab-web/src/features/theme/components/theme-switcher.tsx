@@ -14,14 +14,14 @@ interface ThemeSwitcherProps {
 }
 
 export function ThemeSwitcher({ initialPreference = "system" }: ThemeSwitcherProps) {
-  const [preference, setPreference] = useState<ThemePreference>(initialPreference);
+  const [preference, setPreference] = useState<ThemePreference>(() => {
+    if (typeof window !== "undefined") {
+      return getClientThemeCookie();
+    }
+    return initialPreference;
+  });
   const [resolved, setResolved] = useState<ResolvedAppearance>("light");
   const [, startTransition] = useTransition();
-
-  useEffect(() => {
-    const cookiePref = getClientThemeCookie();
-    setPreference(cookiePref);
-  }, []);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -105,7 +105,7 @@ function SwitcherButtons({
             onClick={() => onSelect(option)}
             className={`min-h-[44px] min-w-[44px] px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive)] focus-visible:ring-offset-2 ${
               isSelected
-                ? "bg-[var(--color-action-primary,#0d9488)] text-white font-semibold shadow-sm"
+                ? "bg-[var(--color-action-primary,#0f766e)] text-[var(--color-text-inverse,#ffffff)] font-semibold shadow-sm"
                 : "bg-[var(--surface-inset)] hover:bg-[var(--color-surface-subtle,#e7e5e4)] text-[var(--color-text-primary)] border border-[var(--border-subtle)]"
             }`}
           >

@@ -2,7 +2,20 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(
+      html[data-theme-preference="system"],
+      html[data-theme-preference="system"] *
+    ) {
+      @slot;
+    }
+  }
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -56,6 +69,7 @@
   --primitive-teal-500: #14b8a6;
   --primitive-teal-600: #0d9488;
   --primitive-teal-700: #0f766e;
+  --primitive-teal-800: #0c5e58;
   --primitive-orange-500: #f97316;
   --primitive-orange-600: #ea580c;
   --primitive-stone-50: #fafaf9;
@@ -66,8 +80,8 @@
   --primitive-stone-900: #1c1917;
 
   /* Layer 2: Semantic Tokens (Light Baseline) */
-  --color-action-primary: var(--primitive-teal-600);
-  --color-action-hover: var(--primitive-teal-700);
+  --color-action-primary: var(--primitive-teal-700);
+  --color-action-hover: var(--primitive-teal-800);
   --color-craft-accent: var(--primitive-orange-600);
   --color-text-primary: #1c1917;
   --color-text-secondary: #44403c;
@@ -86,9 +100,9 @@
 
   /* Edges & Highlights */
   --border-subtle: #e7e5e4;
-  --border-interactive: var(--primitive-teal-600);
+  --border-interactive: var(--primitive-teal-700);
   --border-selected: var(--primitive-orange-600);
-  --border-floating: rgba(13, 148, 136, 0.35);
+  --border-floating: rgba(15, 118, 110, 0.35);
   --highlight-inner: inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
 
   /* Shadows */
@@ -100,7 +114,7 @@
   /* Semantic Relationships */
   --relation-recipe: var(--primitive-orange-600);
   --relation-support: var(--primitive-teal-700);
-  --relation-reduce: var(--primitive-teal-600);
+  --relation-reduce: var(--primitive-teal-700);
   --relation-tradeoff: #d97706;
   --relation-related: var(--color-text-primary);
   --relation-personal: var(--color-text-muted);
@@ -112,7 +126,7 @@
   --card-foreground: #1c1917;
   --popover: #ffffff;
   --popover-foreground: #1c1917;
-  --primary: #0d9488;
+  --primary: #0f766e;
   --primary-foreground: #ffffff;
   --secondary: #f5f5f4;
   --secondary-foreground: #1c1917;
@@ -120,12 +134,12 @@
   --muted-foreground: #78716c;
   --border: #e7e5e4;
   --input: #e7e5e4;
-  --ring: #0d9488;
+  --ring: #0f766e;
   --destructive: #dc2626;
   --radius: 0.625rem;
 }
 
-/* Prototype Candidate Tokens: Dark Mode values are candidate exploration targets pending empirical contrast validation */
+/* Prototype Candidate Tokens: Dark Mode values */
 .dark,
 html[data-theme-preference="system"] {
   @media (prefers-color-scheme: dark) {
@@ -148,7 +162,7 @@ html[data-theme-preference="system"] {
     --surface-overlay: rgba(28, 25, 23, 0.96);
 
     --border-subtle: rgba(255, 255, 255, 0.12);
-    --border-interactive: var(--primitive-teal-500);
+    --border-interactive: #2dd4bf;
     --border-selected: var(--primitive-orange-500);
     --border-floating: rgba(45, 212, 191, 0.35);
     --highlight-inner: inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
@@ -171,7 +185,7 @@ html[data-theme-preference="system"] {
     --muted-foreground: #a8a29e;
     --border: rgba(255, 255, 255, 0.12);
     --input: rgba(255, 255, 255, 0.15);
-    --ring: #14b8a6;
+    --ring: #2dd4bf;
     --destructive: #ef4444;
   }
 }
@@ -197,7 +211,7 @@ html[data-theme-preference="dark"],
   --surface-overlay: rgba(28, 25, 23, 0.96);
 
   --border-subtle: rgba(255, 255, 255, 0.12);
-  --border-interactive: var(--primitive-teal-500);
+  --border-interactive: #2dd4bf;
   --border-selected: var(--primitive-orange-500);
   --border-floating: rgba(45, 212, 191, 0.35);
   --highlight-inner: inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
@@ -220,13 +234,13 @@ html[data-theme-preference="dark"],
   --muted-foreground: #a8a29e;
   --border: rgba(255, 255, 255, 0.12);
   --input: rgba(255, 255, 255, 0.15);
-  --ring: #14b8a6;
+  --ring: #2dd4bf;
   --destructive: #ef4444;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
   body {
     background-color: var(--surface-flat);
