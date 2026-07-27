@@ -3,19 +3,19 @@
 import { useState, useCallback } from "react";
 import { RecessedCraftBay } from "@/components/fincraft/recessed-craft-bay";
 import { MochiLabNote } from "@/components/fincraft/mochi-lab-note";
-import type { AvailableElement } from "../types/craft-element.type";
-import type { CraftElementResult } from "../types/craft-result.type";
-import { useCanvasNodes } from "@/features/canvas/hooks/use-canvas-nodes";
-import { FinCraftCanvas } from "@/features/canvas/components/fincraft-canvas";
-import { useCraftBaySelection } from "../hooks/use-craft-bay-selection";
-import { useCraft } from "../hooks/use-craft";
-import { ElementLibrary } from "./element-library";
-import { CraftActionBar } from "./craft-action-bar";
-import { CraftResultPanel } from "./craft-result-panel";
+import {
+  useCraftBaySelection,
+  useCraft,
+  ElementLibrary,
+  CraftActionBar,
+  CraftResultPanel,
+  type AvailableElement,
+  type CraftElementResult,
+} from "@/features/craft/public";
+import { useCanvasNodes, FinCraftCanvas } from "@/features/canvas/public";
+import type { CanvasSnapshot } from "@/features/workspace/public";
 
-import type { CanvasSnapshot } from "@/features/workspace/types/workspace.type";
-
-export type CraftLabClientProps = {
+export type FinCraftLabClientProps = {
   elements: AvailableElement[];
   errorMessage?: string;
   initialWorkspace?: { workspaceId: string; snapshot: CanvasSnapshot };
@@ -98,7 +98,7 @@ function CraftLabBaySection({
   );
 }
 
-export function CraftLabClient({ elements: initialElements, errorMessage, initialWorkspace }: CraftLabClientProps) {
+export function FinCraftLabClient({ elements: initialElements, errorMessage, initialWorkspace }: FinCraftLabClientProps) {
   const [localElements, setLocalElements] = useState<AvailableElement[]>(initialElements);
   const { nodes, onNodesChange, addElementsToCanvas, isDirty, saveStatus, saveError, handleSaveWorkspace } =
     useCanvasNodes(initialWorkspace?.snapshot);

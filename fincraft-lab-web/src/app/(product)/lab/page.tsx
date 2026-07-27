@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { fetchAvailableElements } from "@/features/craft/api/fetch-elements";
-import { CraftLabClient } from "@/features/craft/components/craft-lab-client";
-import { fetchUserWorkspaceCanvas } from "@/features/workspace/api/fetch-workspace";
+import { FinCraftLabClient } from "@/features/lab/components/fincraft-lab-client";
+import { fetchUserWorkspaceCanvas } from "@/features/workspace/public";
 
 export const metadata: Metadata = {
   title: "Craft Lab | FinCraft Lab",
@@ -36,7 +36,7 @@ export default async function CraftLabPage() {
       </header>
 
       <main aria-label="Craft Lab Selection Area">
-        <CraftLabClient elements={elements} errorMessage={errorMessage} initialWorkspace={initialWorkspace} />
+        <FinCraftLabClient elements={elements} errorMessage={errorMessage} initialWorkspace={initialWorkspace} />
       </main>
     </div>
   );
