@@ -50,6 +50,8 @@
    ========================================================================== */
 
 :root {
+  color-scheme: light;
+
   /* Layer 1: Primitive Color Swatches */
   --primitive-teal-500: #14b8a6;
   --primitive-teal-600: #0d9488;
@@ -127,6 +129,7 @@
 .dark,
 html[data-theme-preference="system"] {
   @media (prefers-color-scheme: dark) {
+    color-scheme: dark;
     --color-action-primary: var(--primitive-teal-500);
     --color-action-hover: #2dd4bf;
     --color-craft-accent: var(--primitive-orange-500);
@@ -173,7 +176,9 @@ html[data-theme-preference="system"] {
   }
 }
 
+html[data-theme-preference="dark"],
 .dark {
+  color-scheme: dark;
   --color-action-primary: var(--primitive-teal-500);
   --color-action-hover: #2dd4bf;
   --color-craft-accent: var(--primitive-orange-500);

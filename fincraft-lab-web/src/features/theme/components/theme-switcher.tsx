@@ -14,14 +14,14 @@ interface ThemeSwitcherProps {
 }
 
 export function ThemeSwitcher({ initialPreference = "system" }: ThemeSwitcherProps) {
-  const [preference, setPreference] = useState<ThemePreference>(() => {
-    if (typeof window !== "undefined") {
-      return getClientThemeCookie();
-    }
-    return initialPreference;
-  });
+  const [preference, setPreference] = useState<ThemePreference>(initialPreference);
   const [resolved, setResolved] = useState<ResolvedAppearance>("light");
   const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    const cookiePref = getClientThemeCookie();
+    setPreference(cookiePref);
+  }, []);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -30,25 +30,25 @@ export function ThemeSwitcher({ initialPreference = "system" }: ThemeSwitcherPro
       const root = document.documentElement;
       root.dataset.themePreference = pref;
 
-      let isDark = false;
       if (pref === "dark") {
-        isDark = true;
-      } else if (pref === "system") {
-        isDark = mediaQuery.matches;
+        root.classList.add("dark");
+        root.style.colorScheme = "dark";
+        setResolved("dark");
+      } else if (pref === "light") {
+        root.classList.remove("dark");
+        root.style.colorScheme = "light";
+        setResolved("light");
+      } else {
+        root.classList.remove("dark");
+        root.style.removeProperty("color-scheme");
+        setResolved(mediaQuery.matches ? "dark" : "light");
       }
-
-      root.classList.toggle("dark", isDark);
-      root.style.colorScheme = isDark ? "dark" : "light";
-      setResolved(isDark ? "dark" : "light");
     }
 
     updateTheme(preference);
 
     const handleSystemChange = (e: MediaQueryListEvent) => {
       if (preference === "system") {
-        const root = document.documentElement;
-        root.classList.toggle("dark", e.matches);
-        root.style.colorScheme = e.matches ? "dark" : "light";
         setResolved(e.matches ? "dark" : "light");
       }
     };
