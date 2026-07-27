@@ -1,3 +1,7 @@
+import {
+  cleanCanonicalUrl,
+  findTrustedAuthority,
+} from '../../reference/trusted-source-registry';
 import type { CraftSourceResponse } from '../types/craft-response.type';
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
@@ -10,51 +14,47 @@ export function parseCraftSources(rawSources: unknown): CraftSourceResponse[] {
   }
 
   const result: CraftSourceResponse[] = [];
-  const sources: unknown[] = rawSources;
-
-  for (const item of sources) {
-    if (!isObjectRecord(item)) {
-      throw new Error('Invalid craft sources configuration');
-    }
-
+  for (const item of rawSources) {
     if (
-      !Object.prototype.hasOwnProperty.call(item, 'title') ||
-      !Object.prototype.hasOwnProperty.call(item, 'organization') ||
-      !Object.prototype.hasOwnProperty.call(item, 'url')
+      !isObjectRecord(item) ||
+      typeof item.title !== 'string' ||
+      typeof item.organization !== 'string' ||
+      typeof item.url !== 'string'
     ) {
       throw new Error('Invalid craft sources configuration');
     }
 
-    const title = item.title;
-    const organization = item.organization;
-    const url = item.url;
+    if (
+      item.title.trim().length === 0 ||
+      item.organization.trim().length === 0 ||
+      item.url.trim().length === 0
+    ) {
+      throw new Error('Invalid craft sources configuration');
+    }
+
+    let hostname = '';
+    try {
+      hostname = new URL(item.url).hostname;
+    } catch {
+      throw new Error('Invalid craft source URL syntax');
+    }
+
+    const authority = findTrustedAuthority(hostname);
     const jurisdiction =
-      typeof item.jurisdiction === 'string' ? item.jurisdiction : undefined;
+      (typeof item.jurisdiction === 'string' ? item.jurisdiction : undefined) ||
+      authority?.jurisdiction ||
+      'GLOBAL';
     const sourceType =
-      typeof item.sourceType === 'string' ? item.sourceType : undefined;
-
-    if (
-      typeof title !== 'string' ||
-      typeof organization !== 'string' ||
-      typeof url !== 'string'
-    ) {
-      throw new Error('Invalid craft sources configuration');
-    }
-
-    if (
-      title.trim().length === 0 ||
-      organization.trim().length === 0 ||
-      url.trim().length === 0
-    ) {
-      throw new Error('Invalid craft sources configuration');
-    }
+      (typeof item.sourceType === 'string' ? item.sourceType : undefined) ||
+      authority?.sourceType ||
+      'International organisation';
 
     result.push({
-      title,
-      organization,
-      url,
-      ...(jurisdiction ? { jurisdiction } : {}),
-      ...(sourceType ? { sourceType } : {}),
+      title: item.title,
+      organization: item.organization,
+      url: cleanCanonicalUrl(item.url),
+      jurisdiction,
+      sourceType,
     });
   }
 

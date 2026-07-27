@@ -3,7 +3,7 @@ import {
   Prisma,
 } from '../../../src/database/generated/prisma/client';
 import { StarterElementDetailSeedInput } from '../content/starter-element-details';
-import { cleanCanonicalUrl, findTrustedAuthority } from '../trusted-source-registry';
+import { cleanCanonicalUrl, findTrustedAuthority } from '../../../src/reference/trusted-source-registry';
 
 export async function seedDiscoveryDetailsStep(
   tx: Prisma.TransactionClient,

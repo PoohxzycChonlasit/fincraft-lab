@@ -72,10 +72,17 @@ export const TRUSTED_AUTHORITIES: Record<string, TrustedAuthority> = {
   },
 };
 
-export function findTrustedAuthority(hostname: string): TrustedAuthority | undefined {
+export function findTrustedAuthority(
+  hostname: string,
+): TrustedAuthority | undefined {
   const normalizedHost = hostname.toLowerCase().replace(/^www\./, '');
-  for (const [registeredHost, authority] of Object.entries(TRUSTED_AUTHORITIES)) {
-    if (normalizedHost === registeredHost || normalizedHost.endsWith('.' + registeredHost)) {
+  for (const [registeredHost, authority] of Object.entries(
+    TRUSTED_AUTHORITIES,
+  )) {
+    if (
+      normalizedHost === registeredHost ||
+      normalizedHost.endsWith('.' + registeredHost)
+    ) {
       return authority;
     }
   }
@@ -95,7 +102,9 @@ export function cleanCanonicalUrl(rawUrl: string): string {
       }
     });
     keysToDelete.forEach((key) => searchParams.delete(key));
-    parsed.search = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    parsed.search = searchParams.toString()
+      ? `?${searchParams.toString()}`
+      : '';
     return parsed.toString();
   } catch {
     return rawUrl;

@@ -13,7 +13,7 @@ import {
   EXPECTED_TOTAL_DETAIL_COUNT,
   EXPECTED_TOTAL_ELEMENT_COUNT,
 } from './seed-manifest';
-import { cleanCanonicalUrl, findTrustedAuthority } from './trusted-source-registry';
+import { cleanCanonicalUrl, findTrustedAuthority } from '../../src/reference/trusted-source-registry';
 
 export function validateCategoryContent(categories: CategorySeedInput[]): void {
   const errors: string[] = [];
