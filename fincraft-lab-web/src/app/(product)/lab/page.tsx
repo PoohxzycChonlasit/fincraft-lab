@@ -43,17 +43,14 @@ export default async function CraftLabPage({ searchParams }: CraftLabPageProps) 
   const initialWorkspace = user && workspaceResult?.success ? workspaceResult : undefined;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-4">
-      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Craft Lab</h1>
-          <p className="text-xs text-muted-foreground hidden sm:block">
-            Combine financial elements on the workspace canvas to discover financial concepts.
-          </p>
-        </div>
-        <span className="text-[11px] font-semibold text-[var(--color-craft-accent)] uppercase tracking-wider">
-          Infinite Craft
-        </span>
+    <div className="w-full space-y-3">
+      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2.5">
+        <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          Craft Lab <span className="text-xs font-semibold text-[var(--color-craft-accent)] font-mono">Discovery Workspace</span>
+        </h1>
+        <p className="text-xs text-muted-foreground hidden sm:block">
+          Drag elements onto the canvas to discover financial concepts.
+        </p>
       </div>
 
       <FinCraftLabClient

@@ -7,6 +7,7 @@ export type ProductShellProps = {
   children: ReactNode;
   activeTab?: "home" | "lab" | "workspace" | "login" | "admin-elements";
   user?: UserProfile | null;
+  contentMode?: "standard" | "wide";
 };
 
 function ProductBrand() {
@@ -72,21 +73,23 @@ function ProductNav({ activeTab, user }: { activeTab: string; user?: UserProfile
   );
 }
 
-export function ProductShell({ children, activeTab = "home", user }: ProductShellProps) {
+export function ProductShell({ children, activeTab = "home", user, contentMode = "standard" }: ProductShellProps) {
+  const maxWClass = contentMode === "wide" ? "max-w-[1560px]" : "max-w-7xl";
+
   return (
     <div className="flex min-h-screen flex-col bg-[var(--surface-flat)] text-[var(--color-text-primary)]">
       <header className="border-b border-[var(--border-subtle)] bg-[var(--surface-resting)] shadow-xs">
-        <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
+        <div className={`mx-auto flex w-full ${maxWClass} flex-wrap items-center justify-between gap-4 px-4 py-3.5 sm:px-6`}>
           <ProductBrand />
           <ProductNav activeTab={activeTab} user={user} />
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:py-8">
+      <main className={`mx-auto w-full ${maxWClass} flex-1 px-4 py-4 sm:px-6 sm:py-6`}>
         {children}
       </main>
 
-      <footer className="border-t border-[var(--border-subtle)] bg-[var(--surface-resting)] py-4 text-center text-xs text-muted-foreground">
+      <footer className="border-t border-[var(--border-subtle)] bg-[var(--surface-resting)] py-3.5 text-center text-xs text-muted-foreground">
         <p>Education Only · Simulation Only · Not Financial Advice</p>
       </footer>
     </div>

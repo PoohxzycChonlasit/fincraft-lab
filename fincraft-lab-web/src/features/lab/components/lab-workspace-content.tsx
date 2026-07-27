@@ -32,47 +32,52 @@ function LabToolbar({ isAuthenticated, initialWorkspace }: { isAuthenticated: bo
     return <WorkspaceManager workspaces={initialWorkspace.workspaces} selectedWorkspace={initialWorkspace.selectedWorkspace} />;
   }
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-4 py-2.5">
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-4 py-2">
       <p role="note" className="text-xs text-muted-foreground">
         Guest mode — <Link href="/login" className="font-semibold text-[var(--color-action-primary)] underline hover:no-underline">Sign in to save your workspace.</Link>
       </p>
-      <span className="text-[10px] uppercase font-semibold text-[var(--color-craft-accent)]">Guest Session</span>
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-craft-accent)]">Guest Session</span>
+    </div>
+  );
+}
+
+function CompactNoRecipeNotice({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div role="status" className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-4 py-2 text-xs text-muted-foreground animate-in fade-in duration-150">
+      <span>No discovery yet. Try another combination.</span>
+      <button type="button" onClick={onDismiss} className="font-semibold text-foreground hover:underline">
+        Dismiss
+      </button>
     </div>
   );
 }
 
 function InlineCraftError({ message, onDismiss }: { message: string; onDismiss: () => void }) {
   return (
-    <div role="alert" className="space-y-2 rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-3">
-      <p className="text-xs font-semibold text-[var(--color-text-danger)]">{message}</p>
-      <button type="button" onClick={onDismiss} className="text-xs text-[var(--color-text-danger)] underline hover:no-underline">Dismiss</button>
+    <div role="alert" className="flex items-center justify-between gap-3 rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 px-4 py-2 text-xs text-[var(--color-text-danger)]">
+      <span>{message}</span>
+      <button type="button" onClick={onDismiss} className="font-semibold underline">Dismiss</button>
     </div>
   );
 }
 
-function DiscoverySidePanel({ combine }: { combine: CombineController }) {
-  if (combine.craftError) return <InlineCraftError message={combine.craftError} onDismiss={combine.dismissError} />;
-  if (combine.craftResult?.outcome === "NO_RECIPE") {
-    return (
-      <div role="status" className="surface-inset rounded-2xl border border-[var(--border-subtle)] p-4 space-y-2">
-        <p className="text-xs font-bold text-foreground">No Discovery Yet</p>
-        <p className="text-xs text-muted-foreground leading-relaxed">These elements don&apos;t produce a known concept. Try another pair.</p>
-        <button type="button" onClick={combine.handleReset} className="text-xs font-semibold text-[var(--color-action-primary)] underline hover:no-underline">Dismiss</button>
-      </div>
-    );
-  }
-  if (combine.craftResult?.outcome === "DISCOVERY") {
-    return (
+function DiscoveryPanel({ combine }: { combine: CombineController }) {
+  const result = combine.craftResult;
+  if (!result || result.outcome !== "DISCOVERY") return null;
+
+  return (
+    <aside className="w-full lg:w-80 xl:w-96 shrink-0 max-h-[70vh] overflow-y-auto">
       <div className="surface-card rounded-2xl border border-[var(--border-subtle)] p-4 space-y-3 shadow-xs">
         <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2">
           <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-craft-accent)]">Discovery Result</h3>
-          <button type="button" onClick={combine.handleReset} className="text-xs font-medium text-muted-foreground hover:text-foreground">Close</button>
+          <button type="button" onClick={combine.handleReset} className="text-xs font-medium text-muted-foreground hover:text-foreground">
+            Close
+          </button>
         </div>
-        <CraftResultPanel result={combine.craftResult} leftElement={null} rightElement={null} onReset={combine.handleReset} />
+        <CraftResultPanel result={result} leftElement={null} rightElement={null} onReset={combine.handleReset} />
       </div>
-    );
-  }
-  return null;
+    </aside>
+  );
 }
 
 export function LabWorkspaceContent({
@@ -84,19 +89,22 @@ export function LabWorkspaceContent({
   localElements,
   handlePlaceElement,
 }: LabWorkspaceContentProps) {
-  const hasDiscovery = Boolean(combine.craftResult || combine.craftError);
+  const isDiscoveryOpen = combine.craftResult?.outcome === "DISCOVERY";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <LabToolbar isAuthenticated={isAuthenticated} initialWorkspace={initialWorkspace} />
+
+      {combine.craftError ? <InlineCraftError message={combine.craftError} onDismiss={combine.dismissError} /> : null}
+      {combine.craftResult?.outcome === "NO_RECIPE" ? <CompactNoRecipeNotice onDismiss={combine.handleReset} /> : null}
 
       <div className="flex flex-col lg:flex-row items-start gap-4">
         {/* Left Rail: Element Library */}
-        <aside className="w-full lg:w-64 xl:w-72 shrink-0">
+        <aside className="w-full lg:w-60 xl:w-64 shrink-0">
           <ElementLibrary elements={localElements} onPlaceElement={handlePlaceElement} />
         </aside>
 
-        {/* Center: Infinite Canvas */}
+        {/* Center: Infinite Canvas - Expands when no Discovery panel */}
         <main aria-label="Infinite Craft Canvas" className="w-full flex-1 min-w-0">
           <FinCraftCanvas
             nodes={canvas.nodes}
@@ -114,12 +122,8 @@ export function LabWorkspaceContent({
           />
         </main>
 
-        {/* Right Rail: Discovery Details (if active) */}
-        {hasDiscovery ? (
-          <aside className="w-full lg:w-80 xl:w-96 shrink-0 max-h-[70vh] overflow-y-auto">
-            <DiscoverySidePanel combine={combine} />
-          </aside>
-        ) : null}
+        {/* Right Rail: Discovery Details (ONLY shown for actual DISCOVERY) */}
+        {isDiscoveryOpen ? <DiscoveryPanel combine={combine} /> : null}
       </div>
     </div>
   );
