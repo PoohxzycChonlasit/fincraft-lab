@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { WorkspaceManager, type CanvasSnapshot, type WorkspaceSummary } from "@/features/workspace/public.client";
 import { FinCraftCanvas, useCanvasNodes, type SaveStatus } from "@/features/canvas/public";
-import { CraftResultPanel, ElementLibrary, type AvailableElement } from "@/features/craft/public";
+import { CraftResultPanel, ElementLibrary, useElementGuidance, type AvailableElement, type SuggestedPartner } from "@/features/craft/public";
+import { mergeAndFilterSuggestions } from "@/features/craft/utils/merge-suggestions";
 import type { useLabCraftCombine } from "../hooks/use-lab-craft-combine";
 
 type InitialWorkspace = {
@@ -41,16 +42,84 @@ function LabToolbar({ isAuthenticated, initialWorkspace }: { isAuthenticated: bo
   );
 }
 
-function CompactNoRecipeNotice({ onDismiss }: { onDismiss: () => void }) {
+function SuggestionButtonList({
+  suggestions,
+  onPlaceElement,
+}: {
+  suggestions: SuggestedPartner[];
+  onPlaceElement: (element: AvailableElement) => void;
+}) {
+  if (suggestions.length === 0) {
+    return (
+      <p className="text-[11px] text-muted-foreground italic">
+        Try combining starter elements from the Library or inspect ℹ️ info for connection hints.
+      </p>
+    );
+  }
+
   return (
-    <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-4 py-2.5 text-xs text-muted-foreground animate-in fade-in duration-150">
-      <div className="flex items-center gap-2">
-        <span className="font-bold text-[var(--color-craft-accent)]">No discovery yet:</span>
-        <span>These elements do not have an approved discovery recipe in the current lab. Try another combination or click ℹ️ on elements to view suggested connections.</span>
+    <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[var(--border-subtle)]">
+      <span className="text-[11px] font-semibold text-foreground">Try one of these suggested connections:</span>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {suggestions.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() =>
+              onPlaceElement({
+                id: p.id,
+                name: p.name,
+                slug: p.slug,
+                emoji: p.emoji,
+                iconUrl: p.iconUrl,
+                elementType: p.elementType,
+                isStarter: false,
+                category: { id: "", name: p.categoryName, sortOrder: 0 },
+              })
+            }
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-resting)] px-2.5 py-1 text-[11px] font-medium text-foreground hover:border-[var(--color-craft-accent)] transition-colors"
+          >
+            <span>{p.emoji || "📄"}</span>
+            <span>{p.name}</span>
+            <span className="text-[10px] font-bold text-[var(--color-action-primary)]">+ Place</span>
+          </button>
+        ))}
       </div>
-      <button type="button" onClick={onDismiss} className="font-semibold text-foreground hover:underline shrink-0">
-        Dismiss
-      </button>
+    </div>
+  );
+}
+
+function CompactNoRecipeNotice({
+  failedPair,
+  onDismiss,
+  onPlaceElement,
+}: {
+  failedPair: { sourceId: string; targetId: string } | null;
+  onDismiss: () => void;
+  onPlaceElement: (element: AvailableElement) => void;
+}) {
+  const { data: sourceGuidance } = useElementGuidance(failedPair?.sourceId || null);
+  const { data: targetGuidance } = useElementGuidance(failedPair?.targetId || null);
+
+  const suggestions = mergeAndFilterSuggestions(
+    sourceGuidance?.suggestedPartners,
+    targetGuidance?.suggestedPartners,
+    failedPair || undefined,
+  );
+
+  return (
+    <div role="status" className="flex flex-col gap-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] p-3.5 text-xs text-muted-foreground animate-in fade-in duration-150">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <span className="font-bold text-[var(--color-craft-accent)]">No discovery yet: </span>
+          <span>These elements do not have an approved discovery recipe in the current lab.</span>
+        </div>
+        <button type="button" onClick={onDismiss} className="font-semibold text-foreground hover:underline shrink-0">
+          Dismiss
+        </button>
+      </div>
+
+      <SuggestionButtonList suggestions={suggestions} onPlaceElement={onPlaceElement} />
     </div>
   );
 }
@@ -99,7 +168,13 @@ export function LabWorkspaceContent({
       <LabToolbar isAuthenticated={isAuthenticated} initialWorkspace={initialWorkspace} />
 
       {combine.craftError ? <InlineCraftError message={combine.craftError} onDismiss={combine.dismissError} /> : null}
-      {combine.craftResult?.outcome === "NO_RECIPE" ? <CompactNoRecipeNotice onDismiss={combine.handleReset} /> : null}
+      {combine.craftResult?.outcome === "NO_RECIPE" ? (
+        <CompactNoRecipeNotice
+          failedPair={combine.lastFailedPair}
+          onDismiss={combine.handleReset}
+          onPlaceElement={handlePlaceElement}
+        />
+      ) : null}
 
       <div className="flex flex-col lg:flex-row items-start gap-4">
         {/* Left Rail: Element Library */}

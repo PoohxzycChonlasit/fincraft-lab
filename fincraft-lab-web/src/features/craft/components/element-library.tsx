@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import type { AvailableElement } from "../types/craft-element.type";
-import type { ElementGuidance } from "../types/element-guidance.type";
-import { fetchElementGuidanceApi } from "../api/fetch-element-guidance";
+import { useElementGuidance } from "../hooks/use-element-guidance";
 import { ElementLearningPanel } from "./element-learning-panel";
 
 export type ElementLibraryProps = {
@@ -101,22 +100,14 @@ function LibraryHeader({ count }: { count: number }) {
 }
 
 export function ElementLibrary({ elements, onPlaceElement }: ElementLibraryProps) {
-  const [inspectingElement, setInspectingElement] = useState<AvailableElement | null>(null);
-  const [guidance, setGuidance] = useState<ElementGuidance | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [inspectingId, setInspectingId] = useState<string | null>(null);
+  const { data: guidance, isLoading } = useElementGuidance(inspectingId);
 
-  const handleToggleInspect = async (element: AvailableElement, event: React.MouseEvent) => {
+  const inspectingElement = elements.find((e) => e.id === inspectingId) || null;
+
+  const handleToggleInspect = (elementId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    if (inspectingElement?.id === element.id) {
-      setInspectingElement(null);
-      setGuidance(null);
-      return;
-    }
-    setInspectingElement(element);
-    setIsLoading(true);
-    const result = await fetchElementGuidanceApi(element.id);
-    setGuidance(result);
-    setIsLoading(false);
+    setInspectingId((prev) => (prev === elementId ? null : elementId));
   };
 
   const highlightedIds = new Set(guidance?.suggestedPartners?.map((p) => p.id) || []);
@@ -128,12 +119,9 @@ export function ElementLibrary({ elements, onPlaceElement }: ElementLibraryProps
       {inspectingElement ? (
         <ElementLearningPanel
           element={inspectingElement}
-          guidance={guidance}
+          guidance={guidance || null}
           isLoading={isLoading}
-          onClose={() => {
-            setInspectingElement(null);
-            setGuidance(null);
-          }}
+          onClose={() => setInspectingId(null)}
           onPlaceElement={onPlaceElement}
         />
       ) : null}
@@ -145,9 +133,9 @@ export function ElementLibrary({ elements, onPlaceElement }: ElementLibraryProps
               key={element.id}
               element={element}
               isHighlighted={highlightedIds.has(element.id)}
-              isInspecting={inspectingElement?.id === element.id}
+              isInspecting={inspectingId === element.id}
               onPlaceElement={() => onPlaceElement(element)}
-              onToggleInspect={(e) => handleToggleInspect(element, e)}
+              onToggleInspect={(e) => handleToggleInspect(element.id, e)}
             />
           ))}
         </div>
