@@ -8,6 +8,8 @@ import {
   Controls,
   BackgroundVariant,
   useReactFlow,
+  type Edge,
+  type OnEdgesChange,
   type OnNodeDrag,
   type OnNodesChange,
 } from "@xyflow/react";
@@ -22,7 +24,9 @@ const COLLISION_THRESHOLD = 1200;
 
 type FinCraftCanvasProps = {
   nodes: ElementCanvasNode[];
+  edges?: Edge[];
   onNodesChange: OnNodesChange<ElementCanvasNode>;
+  onEdgesChange?: OnEdgesChange<Edge>;
   onDropLibraryElement: (element: CanvasElementInput, position: { x: number; y: number }) => void;
   onTargetHighlight: (targetId: string | null) => void;
   onCombineNodes: (sourceNode: ElementCanvasNode, targetNode: ElementCanvasNode, collisionPosition: { x: number; y: number }) => void;
@@ -159,16 +163,18 @@ function useCanvasDragHandlers({ nodes, onDropLibraryElement, onTargetHighlight,
 }
 
 function ReactFlowCanvasInner(props: CanvasInnerProps) {
-  const { nodes, onNodesChange, onNodeTap, onClearTapSelection } = props;
+  const { nodes, edges = [], onNodesChange, onEdgesChange, onNodeTap, onClearTapSelection } = props;
   const { handleDragOver, handleDrop, handleNodeDrag, handleNodeDragStop } = useCanvasDragHandlers(props);
   const handleNodeClick = useCallback((_: React.MouseEvent, node: ElementCanvasNode) => onNodeTap(node), [onNodeTap]);
 
   return (
-    <div className="relative h-[440px] sm:h-[68vh] sm:min-h-[560px] w-full overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] shadow-xs" onDragOver={handleDragOver} onDrop={handleDrop}>
+    <div className="relative h-full min-h-[440px] w-full overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] shadow-xs" onDragOver={handleDragOver} onDrop={handleDrop}>
       {nodes.length === 0 ? <CanvasEmptyOverlay /> : null}
       <ReactFlow
         nodes={nodes}
+        edges={edges}
         onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         onNodeDrag={handleNodeDrag}
         onNodeDragStop={handleNodeDragStop}
         onNodeClick={handleNodeClick}
@@ -193,7 +199,7 @@ export function FinCraftCanvas(props: FinCraftCanvasProps) {
   const canSave = Boolean(workspaceId && isDirty && !isSaving && onSave);
 
   return (
-    <section aria-label="Infinite Craft Workspace" className="space-y-2 flex-1 flex flex-col min-w-0">
+    <section aria-label="Infinite Craft Workspace" className="space-y-2 flex-1 flex flex-col min-w-0 h-full">
       <CanvasHeader nodeCount={nodes.length} isDirty={isDirty} saveStatus={saveStatus} canSave={canSave} isSaving={isSaving} onSave={onSave} />
       {saveError ? <div role="alert" className="rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-3 text-xs text-[var(--color-text-danger)]">{saveError}</div> : null}
       <ReactFlowProvider>

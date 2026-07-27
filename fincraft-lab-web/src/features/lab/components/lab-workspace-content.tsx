@@ -138,7 +138,7 @@ function DiscoveryPanel({ combine }: { combine: CombineController }) {
   if (!result || result.outcome !== "DISCOVERY") return null;
 
   return (
-    <aside className="w-full lg:w-80 xl:w-96 shrink-0 max-h-[70vh] overflow-y-auto">
+    <aside className="w-full lg:w-80 xl:w-96 shrink-0 h-full max-h-[70vh] lg:max-h-full overflow-y-auto">
       <div className="surface-card rounded-2xl border border-[var(--border-subtle)] p-4 space-y-3 shadow-xs">
         <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2">
           <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-craft-accent)]">Discovery Result</h3>
@@ -164,7 +164,7 @@ export function LabWorkspaceContent({
   const isDiscoveryOpen = combine.craftResult?.outcome === "DISCOVERY";
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 flex flex-col min-h-0">
       <LabToolbar isAuthenticated={isAuthenticated} initialWorkspace={initialWorkspace} />
 
       {combine.craftError ? <InlineCraftError message={combine.craftError} onDismiss={combine.dismissError} /> : null}
@@ -176,17 +176,19 @@ export function LabWorkspaceContent({
         />
       ) : null}
 
-      <div className="flex flex-col lg:flex-row items-start gap-4">
+      <div className="flex flex-col lg:flex-row items-stretch gap-4 relative min-h-[500px] lg:h-[calc(100vh-170px)]">
         {/* Left Rail: Element Library */}
-        <aside className="w-full lg:w-60 xl:w-64 shrink-0">
+        <aside className="w-full lg:w-60 xl:w-64 shrink-0 h-full flex flex-col min-h-0">
           <ElementLibrary elements={localElements} onPlaceElement={handlePlaceElement} />
         </aside>
 
         {/* Center: Infinite Canvas - Expands when no Discovery panel */}
-        <main aria-label="Infinite Craft Canvas" className="w-full flex-1 min-w-0">
+        <main aria-label="Infinite Craft Canvas" className="w-full flex-1 min-w-0 h-full flex flex-col">
           <FinCraftCanvas
             nodes={canvas.nodes}
+            edges={canvas.edges}
             onNodesChange={canvas.onNodesChange}
+            onEdgesChange={canvas.onEdgesChange}
             onDropLibraryElement={combine.handleDropOnCanvas}
             onTargetHighlight={combine.handleTargetHighlight}
             onCombineNodes={combine.handleCombineNodes}

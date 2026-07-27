@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { AvailableElement, CraftElementResult } from "@/features/craft/public";
-import { useCanvasNodes, type InitialNodeInput, type PersistableCanvasNode, type SaveStatus } from "@/features/canvas/public";
+import { useCanvasNodes, type InitialEdgeInput, type InitialNodeInput, type PersistableCanvasNode, type SaveStatus } from "@/features/canvas/public";
 import { saveWorkspaceCanvasApi, type CanvasSnapshot, type WorkspaceSummary } from "@/features/workspace/public.client";
 import { useLabCraftCombine } from "../hooks/use-lab-craft-combine";
 import { LabWorkspaceContent } from "./lab-workspace-content";
@@ -44,7 +44,12 @@ function LoadErrorBanner({ message }: { message: string }) {
   );
 }
 
-function useLabWorkspaceSave(workspaceId: string | undefined, getPersistableNodes: () => PersistableCanvasNode[], markSaved: () => void) {
+function useLabWorkspaceSave(
+  workspaceId: string | undefined,
+  getPersistableNodes: () => PersistableCanvasNode[],
+  getPersistableEdges: () => Array<{ id: string; sourceNodeId: string; targetNodeId: string; label?: string }>,
+  markSaved: () => void,
+) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -52,7 +57,7 @@ function useLabWorkspaceSave(workspaceId: string | undefined, getPersistableNode
     if (!workspaceId || saveStatus === "saving") return;
     setSaveStatus("saving");
     setSaveError(null);
-    const result = await saveWorkspaceCanvasApi(workspaceId, getPersistableNodes());
+    const result = await saveWorkspaceCanvasApi(workspaceId, getPersistableNodes(), getPersistableEdges());
     if (result.success) {
       markSaved();
       setSaveStatus("saved");
@@ -60,7 +65,7 @@ function useLabWorkspaceSave(workspaceId: string | undefined, getPersistableNode
     }
     setSaveStatus("error");
     setSaveError(result.errorMessage);
-  }, [workspaceId, saveStatus, getPersistableNodes, markSaved]);
+  }, [workspaceId, saveStatus, getPersistableNodes, getPersistableEdges, markSaved]);
 
   return { saveStatus, saveError, handleSave };
 }
@@ -77,6 +82,15 @@ function buildInitialCanvasNodes(initialWorkspace?: InitialWorkspace): InitialNo
   }));
 }
 
+function buildInitialCanvasEdges(initialWorkspace?: InitialWorkspace): InitialEdgeInput[] | undefined {
+  return initialWorkspace?.snapshot.edges?.map((edge) => ({
+    id: edge.id,
+    sourceNodeId: edge.sourceNodeId,
+    targetNodeId: edge.targetNodeId,
+    label: edge.label,
+  }));
+}
+
 export function FinCraftLabClient({
   elements: initialElements,
   isAuthenticated,
@@ -86,8 +100,15 @@ export function FinCraftLabClient({
 }: FinCraftLabClientProps) {
   const [localElements, setLocalElements] = useState<AvailableElement[]>(initialElements);
   const initialCanvasNodes = useMemo(() => buildInitialCanvasNodes(initialWorkspace), [initialWorkspace]);
-  const canvas = useCanvasNodes(initialCanvasNodes);
-  const save = useLabWorkspaceSave(initialWorkspace?.workspaceId, canvas.getPersistableNodes, canvas.markSaved);
+  const initialCanvasEdges = useMemo(() => buildInitialCanvasEdges(initialWorkspace), [initialWorkspace]);
+
+  const canvas = useCanvasNodes(initialCanvasNodes, initialCanvasEdges);
+  const save = useLabWorkspaceSave(
+    initialWorkspace?.workspaceId,
+    canvas.getPersistableNodes,
+    canvas.getPersistableEdges,
+    canvas.markSaved,
+  );
 
   const handleDiscovery = useCallback((element: CraftElementResult) => {
     toast.success(`Discovered: ${element.emoji} ${element.name}!`, { duration: 3500 });

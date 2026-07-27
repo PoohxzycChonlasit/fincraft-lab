@@ -25,12 +25,17 @@ export function useLabCraftCombine({ canvas, isAuthenticated, onDiscovery }: Lab
     );
     if (result?.outcome === "DISCOVERY") {
       setLastFailedPair(null);
-      addResultNode({
-        id: result.element.id,
-        name: result.element.name,
-        emoji: result.element.emoji,
-        categoryName: result.element.elementType,
-      }, request.collisionPosition);
+      addResultNode(
+        {
+          id: result.element.id,
+          name: result.element.name,
+          emoji: result.element.emoji,
+          categoryName: result.element.elementType,
+        },
+        request.collisionPosition,
+        request.sourceNodeId,
+        request.targetNodeId,
+      );
       return;
     }
     if (result?.outcome === "NO_RECIPE") {

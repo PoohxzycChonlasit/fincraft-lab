@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useMemo, useState, type Dispatch, type SetStateAction } from "react";
-import { useNodesState, type OnNodesChange } from "@xyflow/react";
-import type { ElementCanvasNode, CanvasElementInput, PersistableCanvasNode } from "../types/canvas-node.type";
+import { useEdgesState, useNodesState, type Edge, type OnEdgesChange, type OnNodesChange } from "@xyflow/react";
+import type { ElementCanvasNode, CanvasElementInput } from "../types/canvas-node.type";
 
 export type InitialNodeInput = {
   id: string;
@@ -12,6 +12,13 @@ export type InitialNodeInput = {
   name?: string;
   emoji?: string;
   categoryName?: string;
+};
+
+export type InitialEdgeInput = {
+  id: string;
+  sourceNodeId: string;
+  targetNodeId: string;
+  label?: string;
 };
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
@@ -34,6 +41,17 @@ function mapInitialNodes(inputs?: InitialNodeInput[] | null): ElementCanvasNode[
   }));
 }
 
+function mapInitialEdges(inputs?: InitialEdgeInput[] | null): Edge[] {
+  if (!inputs || inputs.length === 0) return [];
+  return inputs.map((e) => ({
+    id: e.id,
+    source: e.sourceNodeId,
+    target: e.targetNodeId,
+    type: "smoothstep",
+    style: { stroke: "var(--color-craft-accent,#ea580c)", strokeWidth: 2 },
+  }));
+}
+
 function buildNode(element: CanvasElementInput, position: { x: number; y: number }): ElementCanvasNode {
   return {
     id: crypto.randomUUID(),
@@ -48,12 +66,27 @@ function buildNode(element: CanvasElementInput, position: { x: number; y: number
   };
 }
 
-function patchData(node: ElementCanvasNode, patch: Partial<ElementCanvasNode["data"]>): ElementCanvasNode {
-  return { ...node, data: { ...node.data, ...patch } };
+function buildLineageEdges(sourceNodeId: string, targetNodeId: string, resultNodeId: string): [Edge, Edge] {
+  return [
+    {
+      id: `craft-edge:${sourceNodeId}:${resultNodeId}`,
+      source: sourceNodeId,
+      target: resultNodeId,
+      type: "smoothstep",
+      style: { stroke: "var(--color-craft-accent,#ea580c)", strokeWidth: 2 },
+    },
+    {
+      id: `craft-edge:${targetNodeId}:${resultNodeId}`,
+      source: targetNodeId,
+      target: resultNodeId,
+      type: "smoothstep",
+      style: { stroke: "var(--color-action-primary,#0f766e)", strokeWidth: 2 },
+    },
+  ];
 }
 
-function libraryPosition(nodeCount: number): { x: number; y: number } {
-  return { x: 60 + (nodeCount % 3) * 180, y: 60 + Math.floor(nodeCount / 3) * 110 };
+function patchData(node: ElementCanvasNode, patch: Partial<ElementCanvasNode["data"]>): ElementCanvasNode {
+  return { ...node, data: { ...node.data, ...patch } };
 }
 
 function useNodeCreation(
@@ -70,7 +103,7 @@ function useNodeCreation(
       const next = [...current];
       for (const element of elements) {
         if (next.some((node) => node.data.elementId === element.id)) continue;
-        next.push(buildNode(element, libraryPosition(next.length)));
+        next.push(buildNode(element, { x: 60 + (next.length % 3) * 180, y: 60 + Math.floor(next.length / 3) * 110 }));
       }
       return next;
     });
@@ -80,29 +113,21 @@ function useNodeCreation(
   return { addNodeAtPosition, addElementsToCanvas };
 }
 
-function useNodeInteraction(
-  setNodes: Dispatch<SetStateAction<ElementCanvasNode[]>>,
-) {
+function useNodeInteraction(setNodes: Dispatch<SetStateAction<ElementCanvasNode[]>>) {
   const setCombineTarget = useCallback((id: string | null) => {
-    setNodes((current) => current.map((node) => patchData(node, { isCombineTarget: node.id === id })));
+    setNodes((current) => current.map((n) => patchData(n, { isCombineTarget: n.id === id })));
   }, [setNodes]);
 
   const setCombiningState = useCallback((ids: string[], isCombining: boolean) => {
-    setNodes((current) => current.map((node) => ids.includes(node.id)
-      ? patchData(node, { isCombining, isCombineTarget: false })
-      : node));
+    setNodes((current) => current.map((n) => ids.includes(n.id) ? patchData(n, { isCombining, isCombineTarget: false }) : n));
   }, [setNodes]);
 
   const setSelectedForCombine = useCallback((selectedId: string | null) => {
-    setNodes((current) => current.map((node) => patchData(node, { isSelectedForCombine: node.id === selectedId })));
+    setNodes((current) => current.map((n) => patchData(n, { isSelectedForCombine: n.id === selectedId })));
   }, [setNodes]);
 
   const clearInteractionState = useCallback(() => {
-    setNodes((current) => current.map((node) => patchData(node, {
-      isCombineTarget: false,
-      isCombining: false,
-      isSelectedForCombine: false,
-    })));
+    setNodes((current) => current.map((n) => patchData(n, { isCombineTarget: false, isCombining: false, isSelectedForCombine: false })));
   }, [setNodes]);
 
   return { setCombineTarget, setCombiningState, setSelectedForCombine, clearInteractionState };
@@ -111,16 +136,39 @@ function useNodeInteraction(
 function useNodeCombineMutations(
   nodes: ElementCanvasNode[],
   setNodes: Dispatch<SetStateAction<ElementCanvasNode[]>>,
+  setEdges: Dispatch<SetStateAction<Edge[]>>,
   setIsDirty: (value: boolean) => void,
 ) {
-  const addResultNode = useCallback((element: CanvasElementInput, collisionPosition: { x: number; y: number }) => {
-    if (nodes.some((node) => node.data.elementId === element.id)) return;
-    setNodes((current) => [...current, buildNode(element, {
+  const addResultNode = useCallback((
+    element: CanvasElementInput,
+    collisionPosition: { x: number; y: number },
+    sourceNodeId?: string,
+    targetNodeId?: string,
+  ) => {
+    const existing = nodes.find((node) => node.data.elementId === element.id);
+    if (existing) return existing.id;
+
+    const newNode = buildNode(element, {
       x: collisionPosition.x + RESULT_NODE_OFFSET.x,
       y: collisionPosition.y + RESULT_NODE_OFFSET.y,
-    })]);
+    });
+
+    setNodes((current) => [...current, newNode]);
+
+    if (sourceNodeId && targetNodeId) {
+      const [e1, e2] = buildLineageEdges(sourceNodeId, targetNodeId, newNode.id);
+      setEdges((currEdges) => {
+        const set = new Set(currEdges.map((e) => e.id));
+        const next = [...currEdges];
+        if (!set.has(e1.id)) next.push(e1);
+        if (!set.has(e2.id)) next.push(e2);
+        return next;
+      });
+    }
+
     setIsDirty(true);
-  }, [nodes, setNodes, setIsDirty]);
+    return newNode.id;
+  }, [nodes, setNodes, setEdges, setIsDirty]);
 
   const recoverCombine = useCallback((sourceNodeId: string, targetNodeId: string) => {
     setNodes((current) => {
@@ -143,38 +191,58 @@ function useNodeCombineMutations(
   return { addResultNode, recoverCombine };
 }
 
-export function useCanvasNodes(initialNodesInput?: InitialNodeInput[] | null) {
+export function useCanvasNodes(
+  initialNodesInput?: InitialNodeInput[] | null,
+  initialEdgesInput?: InitialEdgeInput[] | null,
+) {
   const initialNodes = useMemo(() => mapInitialNodes(initialNodesInput), [initialNodesInput]);
+  const initialEdges = useMemo(() => mapInitialEdges(initialEdgesInput), [initialEdgesInput]);
+
   const [nodes, setNodes, onNodesChangeBase] = useNodesState<ElementCanvasNode>(initialNodes);
+  const [edges, setEdges, onEdgesChangeBase] = useEdgesState<Edge>(initialEdges);
   const [isDirty, setIsDirty] = useState(false);
+
   const creation = useNodeCreation(setNodes, setIsDirty);
   const interaction = useNodeInteraction(setNodes);
-  const combine = useNodeCombineMutations(nodes, setNodes, setIsDirty);
+  const combine = useNodeCombineMutations(nodes, setNodes, setEdges, setIsDirty);
 
   const onNodesChange: OnNodesChange<ElementCanvasNode> = useCallback((changes) => {
     onNodesChangeBase(changes);
-    if (changes.some((change) => change.type === "position" || change.type === "remove" || change.type === "add")) {
-      setIsDirty(true);
-    }
+    if (changes.some((c) => c.type === "position" || c.type === "remove" || c.type === "add")) setIsDirty(true);
   }, [onNodesChangeBase]);
 
-  const getPersistableNodes = useCallback((): PersistableCanvasNode[] => nodes.map((node) => ({
-    id: node.id,
-    elementId: node.data.elementId,
-    positionX: Math.round(node.position.x),
-    positionY: Math.round(node.position.y),
+  const onEdgesChange: OnEdgesChange<Edge> = useCallback((changes) => {
+    onEdgesChangeBase(changes);
+    if (changes.some((c) => c.type === "remove" || c.type === "add")) setIsDirty(true);
+  }, [onEdgesChangeBase]);
+
+  const getPersistableNodes = useCallback(() => nodes.map((n) => ({
+    id: n.id,
+    elementId: n.data.elementId,
+    positionX: Math.round(n.position.x),
+    positionY: Math.round(n.position.y),
   })), [nodes]);
+
+  const getPersistableEdges = useCallback(() => edges.map((e) => ({
+    id: e.id,
+    sourceNodeId: e.source,
+    targetNodeId: e.target,
+    label: "",
+  })), [edges]);
 
   const markSaved = useCallback(() => setIsDirty(false), []);
 
   return {
     nodes,
+    edges,
     onNodesChange,
+    onEdgesChange,
     ...creation,
     ...interaction,
     ...combine,
     isDirty,
     getPersistableNodes,
+    getPersistableEdges,
     markSaved,
   };
 }

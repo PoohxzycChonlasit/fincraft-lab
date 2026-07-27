@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import type { AvailableElement } from "../types/craft-element.type";
 import type { ElementGuidance, SuggestedPartner } from "../types/element-guidance.type";
 
@@ -59,7 +60,7 @@ function SuggestedPartnerList({
       <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-craft-accent)]">
         Try combining with
       </h4>
-      <div className="grid grid-cols-1 gap-1.5">
+      <div className="grid grid-cols-1 gap-1.5 max-h-36 overflow-y-auto">
         {partners.map((p) => (
           <button
             key={p.id}
@@ -97,22 +98,33 @@ export function ElementLearningPanel({
   onClose,
   onPlaceElement,
 }: ElementLearningPanelProps) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   const categoryName = element.category?.name || element.elementType;
-  const description = guidance?.element?.description || "Financial concept specimen. Combine with other elements on the canvas to explore real-world relationships.";
-  const partners = guidance?.suggestedPartners || [];
+  const isMatchingGuidance = guidance?.element?.id === element.id;
+  const description = isMatchingGuidance && guidance?.element?.description
+    ? guidance.element.description
+    : "Financial concept specimen. Combine with other elements on the canvas to explore real-world relationships.";
+  const partners = isMatchingGuidance ? guidance?.suggestedPartners || [] : [];
 
   return (
     <div
       role="region"
       aria-label={`About ${element.name}`}
-      className="surface-card rounded-2xl border border-[var(--color-craft-accent)]/40 p-4 space-y-3 shadow-md animate-in fade-in zoom-in-95 duration-150"
+      className="surface-card rounded-2xl border border-[var(--color-craft-accent)]/40 p-4 space-y-3 shadow-xl max-h-[500px] overflow-y-auto animate-in fade-in zoom-in-95 duration-150"
     >
       <LearningHeader element={element} categoryName={categoryName} onClose={onClose} />
 
       <div className="space-y-2">
         <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">What it means</h4>
         <p className="text-xs text-foreground leading-relaxed">
-          {isLoading ? "Loading explanation..." : description}
+          {isLoading || !isMatchingGuidance ? "Loading explanation..." : description}
         </p>
       </div>
 

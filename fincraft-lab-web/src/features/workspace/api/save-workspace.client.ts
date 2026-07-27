@@ -1,15 +1,23 @@
 import type { SaveWorkspacePayloadNode } from "../types/workspace.type";
 import { readWorkspaceApiError } from "./workspace.client";
 
+export type SaveWorkspacePayloadEdge = {
+  id: string;
+  sourceNodeId: string;
+  targetNodeId: string;
+  label?: string;
+};
+
 export async function saveWorkspaceCanvasApi(
   workspaceId: string,
   nodes: SaveWorkspacePayloadNode[],
+  edges: SaveWorkspacePayloadEdge[] = [],
 ): Promise<{ success: true } | { success: false; errorMessage: string }> {
   try {
     const res = await fetch(`/api/workspaces/${workspaceId}/canvas`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nodes, edges: [] }),
+      body: JSON.stringify({ nodes, edges }),
     });
 
     if (!res.ok) {

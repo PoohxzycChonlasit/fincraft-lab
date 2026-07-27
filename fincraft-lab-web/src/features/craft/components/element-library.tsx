@@ -113,20 +113,22 @@ export function ElementLibrary({ elements, onPlaceElement }: ElementLibraryProps
   const highlightedIds = new Set(guidance?.suggestedPartners?.map((p) => p.id) || []);
 
   return (
-    <section aria-label="Element Library" className="flex flex-col h-full space-y-2">
+    <section aria-label="Element Library" className="relative flex flex-col h-full space-y-2 min-h-0">
       <LibraryHeader count={elements.length} />
 
       {inspectingElement ? (
-        <ElementLearningPanel
-          element={inspectingElement}
-          guidance={guidance || null}
-          isLoading={isLoading}
-          onClose={() => setInspectingId(null)}
-          onPlaceElement={onPlaceElement}
-        />
+        <div className="fixed inset-x-3 bottom-3 z-50 lg:absolute lg:left-[calc(100%+12px)] lg:top-0 lg:inset-auto lg:z-40 lg:w-80 shadow-2xl">
+          <ElementLearningPanel
+            element={inspectingElement}
+            guidance={guidance || null}
+            isLoading={isLoading}
+            onClose={() => setInspectingId(null)}
+            onPlaceElement={onPlaceElement}
+          />
+        </div>
       ) : null}
 
-      <div className="flex-1 overflow-y-auto max-h-[460px] sm:max-h-[66vh] pr-1 space-y-2">
+      <div className="flex-1 overflow-y-auto min-h-0 pr-1 space-y-2">
         <div className="grid grid-cols-1 gap-2">
           {elements.map((element) => (
             <CompactElementTile
