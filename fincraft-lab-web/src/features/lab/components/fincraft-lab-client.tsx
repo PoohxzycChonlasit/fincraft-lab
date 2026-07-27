@@ -22,7 +22,7 @@ import {
 import {
   saveWorkspaceCanvasApi,
   type CanvasSnapshot,
-} from "@/features/workspace/public";
+} from "@/features/workspace/public.client";
 
 export type FinCraftLabClientProps = {
   elements: AvailableElement[];

@@ -1,3 +1,5 @@
+import "server-only";
+
 import { backendFetch } from "@/lib/api/backend-fetch.server";
 import type { CanvasSnapshot, WorkspaceSummary } from "../types/workspace.type";
 
