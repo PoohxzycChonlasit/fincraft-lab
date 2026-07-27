@@ -12,15 +12,26 @@ export function OrangeDiscoveryStamp({
   statusLabel = "Discovery specimen",
 }: OrangeDiscoveryStampProps) {
   return (
-    <article className="border border-[var(--color-orange-600)] bg-[color-mix(in_oklch,var(--surface-resting),var(--color-orange-600)_6%)] p-5">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-orange-700)]">
-        {statusLabel}
-      </p>
-      <div className="mt-6 border-y border-[var(--color-orange-600)] py-4">
-        <h3 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h3>
-        <p className="mt-3 text-base font-semibold text-[var(--color-orange-700)]">{combination}</p>
+    <article
+      className="surface-resting relative overflow-hidden rounded-2xl border-2 border-[var(--border-selected)] p-5 shadow-[var(--shadow-raised)]"
+      aria-label={`Discovery result: ${title}`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-craft-accent)]">
+          {statusLabel}
+        </p>
+        <span
+          aria-hidden="true"
+          className="rounded-full bg-[var(--color-craft-accent)]/10 px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-craft-accent)]"
+        >
+          UNLOCKED
+        </span>
       </div>
-      <p className="mt-4 text-sm leading-6 text-muted-foreground">{supportingText}</p>
+      <div className="mt-4 border-y border-[var(--border-subtle)] py-3.5">
+        <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{title}</h3>
+        <p className="mt-1.5 text-xs sm:text-sm font-semibold text-[var(--color-craft-accent)]">{combination}</p>
+      </div>
+      <p className="mt-3.5 text-xs sm:text-sm leading-relaxed text-muted-foreground">{supportingText}</p>
     </article>
   );
 }

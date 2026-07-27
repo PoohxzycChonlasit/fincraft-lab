@@ -12,32 +12,58 @@ export type RecessedCraftBayProps = {
 };
 
 function CraftBaySlot({ item, label }: { item?: CraftBayItem; label: string }) {
-  return (
-    <div className="surface-resting min-w-0 border p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-      <div className="mt-4 flex min-h-12 items-center gap-3">
-        {item?.visual ? <span className="text-sm font-semibold text-[var(--color-teal-700)]">{item.visual}</span> : null}
-        <p className="min-w-0 text-base font-semibold text-foreground">{item?.name ?? "Open slot"}</p>
+  if (!item) {
+    return (
+      <div className="flex min-h-[56px] w-full flex-1 items-center justify-between gap-3 rounded-xl border border-dashed border-[var(--border-subtle)] bg-[var(--surface-flat)]/60 p-3.5">
+        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</span>
+        <span className="text-xs font-medium text-muted-foreground/70 italic">Empty slot</span>
       </div>
+    );
+  }
+
+  return (
+    <div className="surface-resting flex min-h-[56px] w-full flex-1 items-center justify-between gap-3 rounded-xl p-3.5 shadow-xs">
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+        <p className="mt-0.5 min-w-0 truncate text-sm font-semibold text-foreground">{item.name}</p>
+      </div>
+      {item.visual ? (
+        <span className="surface-inset flex size-8 shrink-0 items-center justify-center rounded-md border border-[var(--border-subtle)] text-xs font-semibold text-[var(--color-action-primary)]">
+          {item.visual}
+        </span>
+      ) : null}
     </div>
   );
 }
 
 export function RecessedCraftBay({ left, right, statusLabel }: RecessedCraftBayProps) {
+  const isFilled = Boolean(left && right);
+
   return (
-    <section className="surface-inset border p-4 sm:p-5" aria-label="Recessed craft bay specimen">
+    <section className="surface-inset rounded-2xl p-4 sm:p-5" aria-label="Recessed craft bay specimen">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-orange-700)]">
-          Craft bay
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-craft-accent)]">
+          Craft Bay
         </p>
-        <p className="text-xs font-medium text-muted-foreground">{statusLabel}</p>
+        <span className="rounded-md bg-[var(--surface-resting)] px-2.5 py-1 text-[11px] font-medium text-muted-foreground border border-[var(--border-subtle)]">
+          {statusLabel}
+        </span>
       </div>
-      <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
-        <CraftBaySlot item={left} label="Left slot" />
-        <span aria-hidden="true" className="text-xl font-semibold text-[var(--color-orange-700)]">+</span>
-        <CraftBaySlot item={right} label="Right slot" />
+      <div className="mt-4 flex flex-col items-center gap-3 sm:grid sm:grid-cols-[1fr_auto_1fr]">
+        <CraftBaySlot item={left} label="Left input" />
+        <span
+          aria-hidden="true"
+          className="surface-resting flex size-7 shrink-0 items-center justify-center rounded-full border border-[var(--border-subtle)] text-xs font-bold text-[var(--color-craft-accent)] shadow-xs"
+        >
+          +
+        </span>
+        <CraftBaySlot item={right} label="Right input" />
       </div>
-      <p className="mt-4 text-xs leading-5 text-muted-foreground">Two readable materials, one illustrative combination marker.</p>
+      <p className="mt-4 text-xs leading-5 text-muted-foreground">
+        {isFilled
+          ? "Two element specimens placed into the recessed craft bay."
+          : "Recessed bay ready for element specimens to combine."}
+      </p>
     </section>
   );
 }

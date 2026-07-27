@@ -1,6 +1,7 @@
 import { CompactInspectionNotes } from "./compact-inspection-notes";
 import { LabHeader } from "./lab-header";
 import { RelationshipTestBench } from "./relationship-test-bench";
+import { SignatureComponentBench } from "./signature-component-bench";
 import { TactileInstrumentConsole } from "./tactile-instrument-console";
 import { ThemeMaterialBench } from "./theme-material-bench";
 import { TokenSwatchRack } from "./token-swatch-rack";
@@ -13,6 +14,11 @@ export function DesignSystemLab() {
 
         {/* Theme and Material Prototype Bench */}
         <ThemeMaterialBench />
+
+        {/* Signature Components Bench */}
+        <section aria-label="Signature Components Bench">
+          <SignatureComponentBench />
+        </section>
 
         {/* Integrated Tactile Instrument Console (Client Island) */}
         <section aria-label="Tactile Instrument Console">
