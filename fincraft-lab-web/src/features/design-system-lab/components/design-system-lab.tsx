@@ -2,13 +2,17 @@ import { CompactInspectionNotes } from "./compact-inspection-notes";
 import { LabHeader } from "./lab-header";
 import { RelationshipTestBench } from "./relationship-test-bench";
 import { TactileInstrumentConsole } from "./tactile-instrument-console";
+import { ThemeMaterialBench } from "./theme-material-bench";
 import { TokenSwatchRack } from "./token-swatch-rack";
 
 export function DesignSystemLab() {
   return (
-    <main className="min-h-screen bg-[var(--surface-flat)] text-foreground">
+    <main className="min-h-screen bg-[var(--surface-flat)] text-[var(--color-text-primary)]">
       <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-8 space-y-6">
         <LabHeader />
+
+        {/* Theme and Material Prototype Bench */}
+        <ThemeMaterialBench />
 
         {/* Integrated Tactile Instrument Console (Client Island) */}
         <section aria-label="Tactile Instrument Console">
