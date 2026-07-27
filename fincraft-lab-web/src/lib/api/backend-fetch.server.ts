@@ -1,7 +1,10 @@
 import { getAccessToken } from "@/lib/auth/access-token.server";
-import { BackendApiError } from "./backend-api-error";
+import { parseBackendResponse } from "./backend-response";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const getBackendBaseUrl = (): string => {
+  const envUrl = process.env.FINCRAFT_API_URL || "http://localhost:4000";
+  return envUrl.trim().replace(/\/+$/, "");
+};
 
 export type BackendFetchOptions = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -10,14 +13,14 @@ export type BackendFetchOptions = {
   requireAuth?: boolean;
 };
 
-export type BackendFetchResponse<T> =
-  | { ok: true; status: number; data: T }
+export type BackendFetchResult =
+  | { ok: true; status: number; data: unknown }
   | { ok: false; status: number; error: string };
 
-export async function backendFetch<T = unknown>(
+export async function backendFetch(
   path: string,
   options: BackendFetchOptions = {},
-): Promise<BackendFetchResponse<T>> {
+): Promise<BackendFetchResult> {
   const { method = "GET", headers = {}, body, requireAuth = true } = options;
 
   let token: string | null = null;
@@ -37,7 +40,9 @@ export async function backendFetch<T = unknown>(
     requestHeaders.Authorization = `Bearer ${token}`;
   }
 
-  const url = `${BACKEND_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  const baseUrl = getBackendBaseUrl();
+  const url = `${baseUrl}${cleanPath}`;
 
   try {
     const res = await fetch(url, {
@@ -51,14 +56,12 @@ export async function backendFetch<T = unknown>(
       return { ok: false, status: 401, error: "Session expired. Please log in again." };
     }
 
-    const responseData: unknown = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      const message = BackendApiError.parseMessage(responseData);
-      return { ok: false, status: res.status, error: message };
+    const parsed = await parseBackendResponse(res);
+    if (!parsed.ok) {
+      return { ok: false, status: parsed.status, error: parsed.error };
     }
 
-    return { ok: true, status: res.status, data: responseData as T };
+    return { ok: true, status: parsed.status, data: parsed.data };
   } catch {
     return { ok: false, status: 500, error: "Network or server error connecting to backend" };
   }
