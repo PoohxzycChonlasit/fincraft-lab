@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { AvailableElement } from "../types/craft-element.type";
-import type { CraftResult } from "../types/craft-result.type";
+import type { CraftResult, CraftElementResult } from "../types/craft-result.type";
 
 export type UseCraftReturn = {
   isSubmitting: boolean;
@@ -14,7 +14,11 @@ export type UseCraftReturn = {
   dismissError: () => void;
 };
 
-export function useCraft(): UseCraftReturn {
+type UseCraftOptions = {
+  onDiscovery?: (element: CraftElementResult, isNew: boolean) => void;
+};
+
+export function useCraft({ onDiscovery }: UseCraftOptions = {}): UseCraftReturn {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [craftError, setCraftError] = useState<string | null>(null);
@@ -44,7 +48,13 @@ export function useCraft(): UseCraftReturn {
         return;
       }
 
-      if (json.data) setCraftResult(json.data);
+      if (json.data) {
+        setCraftResult(json.data);
+        if (json.data.outcome === "DISCOVERY") {
+          onDiscovery?.(json.data.element, json.data.isNewDiscovery);
+          router.refresh();
+        }
+      }
     } catch {
       setCraftError("Network error. Please check your connection and try again.");
     } finally {
