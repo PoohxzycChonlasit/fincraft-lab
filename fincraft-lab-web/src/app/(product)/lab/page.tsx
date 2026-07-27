@@ -43,27 +43,27 @@ export default async function CraftLabPage({ searchParams }: CraftLabPageProps) 
   const initialWorkspace = user && workspaceResult?.success ? workspaceResult : undefined;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <header className="space-y-1.5 border-b border-[var(--border-subtle)] pb-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-craft-accent)]">
-          Discovery Workspace
-        </p>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Craft Lab</h1>
-        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          Combine financial elements in a controlled simulation lab to discover core financial concepts and explore trade-offs.
-        </p>
-      </header>
+    <div className="mx-auto max-w-7xl space-y-4">
+      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Craft Lab</h1>
+          <p className="text-xs text-muted-foreground hidden sm:block">
+            Combine financial elements on the workspace canvas to discover financial concepts.
+          </p>
+        </div>
+        <span className="text-[11px] font-semibold text-[var(--color-craft-accent)] uppercase tracking-wider">
+          Infinite Craft
+        </span>
+      </div>
 
-      <main aria-label="Craft Lab Selection Area">
-        <FinCraftLabClient
-          key={initialWorkspace?.workspaceId ?? "guest-lab"}
-          elements={elements}
-          errorMessage={errorMessage}
-          workspaceErrorMessage={workspaceErrorMessage}
-          initialWorkspace={initialWorkspace}
-          isAuthenticated={isAuthenticated}
-        />
-      </main>
+      <FinCraftLabClient
+        key={initialWorkspace?.workspaceId ?? "guest-lab"}
+        elements={elements}
+        errorMessage={errorMessage}
+        workspaceErrorMessage={workspaceErrorMessage}
+        initialWorkspace={initialWorkspace}
+        isAuthenticated={isAuthenticated}
+      />
     </div>
   );
 }

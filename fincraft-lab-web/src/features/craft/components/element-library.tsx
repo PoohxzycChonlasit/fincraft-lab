@@ -10,12 +10,15 @@ export type ElementLibraryProps = {
 
 function LibraryTile({ element, onPlaceElement }: { element: AvailableElement; onPlaceElement: () => void }) {
   const handleDragStart = (event: React.DragEvent) => {
-    event.dataTransfer.setData("application/fincraft-element", JSON.stringify({
-      id: element.id,
-      name: element.name,
-      emoji: element.emoji,
-      categoryName: element.elementType,
-    }));
+    event.dataTransfer.setData(
+      "application/fincraft-element",
+      JSON.stringify({
+        id: element.id,
+        name: element.name,
+        emoji: element.emoji,
+        categoryName: element.elementType,
+      }),
+    );
     event.dataTransfer.effectAllowed = "copy";
   };
 
@@ -24,8 +27,8 @@ function LibraryTile({ element, onPlaceElement }: { element: AvailableElement; o
       <SpecimenElementTile
         name={element.name}
         category={element.category?.name || element.elementType}
-        visual={<span aria-hidden="true">{element.emoji || "Element"}</span>}
-        supportingLabel="Drag to the Canvas or tap to place"
+        visual={<span aria-hidden="true">{element.emoji || "📄"}</span>}
+        supportingLabel="Drag to Canvas or tap"
         onClick={onPlaceElement}
       />
     </div>
@@ -35,23 +38,31 @@ function LibraryTile({ element, onPlaceElement }: { element: AvailableElement; o
 export function ElementLibrary({ elements, onPlaceElement }: ElementLibraryProps) {
   if (elements.length === 0) {
     return (
-      <div className="surface-inset rounded-xl border border-[var(--border-subtle)] p-8 text-center">
-        <p className="text-sm font-semibold text-foreground">No Elements Available</p>
-        <p className="mt-1 text-xs text-muted-foreground">No public or unlocked elements were found.</p>
+      <div className="surface-inset rounded-xl border border-[var(--border-subtle)] p-4 text-center">
+        <p className="text-xs font-semibold text-foreground">No Elements</p>
+        <p className="mt-1 text-[11px] text-muted-foreground">No starter elements found.</p>
       </div>
     );
   }
 
   return (
-    <section aria-label="Element Library Specimen Rack" className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Available Element Specimen ({elements.length})</h2>
-        <span className="text-[11px] text-muted-foreground">Drag to Canvas or tap to place</span>
+    <section aria-label="Element Library" className="flex flex-col h-full space-y-2.5">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Elements</h2>
+          <span className="rounded-full bg-[var(--surface-inset)] px-2 py-0.5 text-[10px] font-semibold text-muted-foreground border border-[var(--border-subtle)]">
+            {elements.length}
+          </span>
+        </div>
+        <span className="text-[10px] text-muted-foreground hidden sm:inline">Drag to canvas</span>
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {elements.map((element) => (
-          <LibraryTile key={element.id} element={element} onPlaceElement={() => onPlaceElement(element)} />
-        ))}
+
+      <div className="flex-1 overflow-y-auto max-h-[400px] sm:max-h-[600px] pr-1 space-y-2">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-1">
+          {elements.map((element) => (
+            <LibraryTile key={element.id} element={element} onPlaceElement={() => onPlaceElement(element)} />
+          ))}
+        </div>
       </div>
     </section>
   );

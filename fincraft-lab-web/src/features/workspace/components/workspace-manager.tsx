@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWorkspaceManager } from "../hooks/use-workspace-manager";
@@ -12,34 +13,34 @@ type WorkspaceManagerProps = {
   selectedWorkspace: WorkspaceSummary;
 };
 
-function WorkspaceHeader({ manager }: { manager: WorkspaceManagerModel }) {
+function WorkspaceSelectorCompact({ manager, onToggleManage, isManaging }: {
+  manager: WorkspaceManagerModel;
+  onToggleManage: () => void;
+  isManaging: boolean;
+}) {
   return (
-    <header className="flex flex-wrap items-start justify-between gap-3">
-      <div className="space-y-1">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-craft-accent)]">Workspace desk</p>
-        <h2 id="workspace-manager-title" className="text-lg font-semibold text-foreground">{manager.selectedWorkspace?.name ?? "Workspace"}</h2>
-        <p className="text-xs text-muted-foreground">Keep each Canvas focused on a different learning experiment.</p>
-      </div>
-      <span className="text-xs text-muted-foreground">{manager.workspaces.length} available</span>
-    </header>
-  );
-}
-
-function WorkspaceSelection({ manager }: { manager: WorkspaceManagerModel }) {
-  return (
-    <div className="space-y-2">
-      <label htmlFor="workspace-select" className="text-xs font-semibold text-foreground">Active Workspace</label>
+    <div className="flex items-center gap-2">
       <select
-        id="workspace-select"
+        id="workspace-select-compact"
+        aria-label="Select active workspace"
         value={manager.selectedId ?? ""}
-        onChange={(event) => manager.handleSwitch(event.target.value)}
+        onChange={(e) => manager.handleSwitch(e.target.value)}
         disabled={manager.isBusy || manager.workspaces.length === 0}
-        className="min-h-[44px] w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-flat)] px-3 text-sm text-foreground outline-none transition-colors focus-visible:border-[var(--color-action-primary)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-60"
+        className="min-h-[38px] max-w-[200px] sm:max-w-[260px] rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-resting)] px-3 text-xs font-semibold text-foreground outline-none transition-colors focus-visible:border-[var(--color-action-primary)] focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
       >
-        {manager.workspaces.length === 0 ? <option value="">Preparing a default workspace...</option> : null}
-        {manager.workspaces.map((workspace) => <option key={workspace.id} value={workspace.id}>{workspace.name}</option>)}
+        {manager.workspaces.map((w) => (
+          <option key={w.id} value={w.id}>
+            Workspace: {w.name}
+          </option>
+        ))}
       </select>
-      <p className="text-[0.7rem] text-muted-foreground">Switching updates the URL and loads that Workspace&apos;s Canvas.</p>
+      <button
+        type="button"
+        onClick={onToggleManage}
+        className="min-h-[38px] rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-resting)] px-3 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-[var(--surface-inset)] transition-colors"
+      >
+        {isManaging ? "Close" : "Manage"}
+      </button>
     </div>
   );
 }
@@ -48,8 +49,8 @@ function WorkspaceCreateForm({ manager }: { manager: WorkspaceManagerModel }) {
   return (
     <form
       className="space-y-2"
-      onSubmit={(event) => {
-        event.preventDefault();
+      onSubmit={(e) => {
+        e.preventDefault();
         void manager.handleCreate();
       }}
     >
@@ -58,15 +59,13 @@ function WorkspaceCreateForm({ manager }: { manager: WorkspaceManagerModel }) {
         <Input
           id="workspace-create-name"
           value={manager.createName}
-          onChange={(event) => manager.setCreateName(event.target.value)}
+          onChange={(e) => manager.setCreateName(e.target.value)}
           placeholder="e.g. Emergency Fund"
-          required
-          minLength={1}
-          maxLength={100}
-          disabled={manager.isBusy}
-          className="min-h-[44px]"
+          required minLength={1} maxLength={100} disabled={manager.isBusy} className="min-h-[38px] text-xs"
         />
-        <Button type="submit" disabled={manager.isBusy} className="min-h-[44px]">{manager.pendingAction === "create" ? "Creating..." : "Create"}</Button>
+        <Button type="submit" disabled={manager.isBusy} className="min-h-[38px] text-xs">
+          {manager.pendingAction === "create" ? "Creating..." : "Create"}
+        </Button>
       </div>
     </form>
   );
@@ -75,23 +74,23 @@ function WorkspaceCreateForm({ manager }: { manager: WorkspaceManagerModel }) {
 function SelectedWorkspaceActions({ manager }: { manager: WorkspaceManagerModel }) {
   if (!manager.selectedWorkspace) return null;
   return (
-    <div className="grid gap-4 border-t border-[var(--border-subtle)] pt-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-      <label htmlFor="workspace-rename-name" className="space-y-2">
-        <span className="block text-xs font-semibold text-foreground">Rename selected Workspace</span>
+    <div className="grid gap-3 border-t border-[var(--border-subtle)] pt-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+      <label htmlFor="workspace-rename-name" className="space-y-1">
+        <span className="block text-xs font-semibold text-foreground">Rename selected</span>
         <Input
           id="workspace-rename-name"
           value={manager.renameName}
-          onChange={(event) => manager.setRenameName(event.target.value)}
-          required
-          minLength={1}
-          maxLength={100}
-          disabled={manager.isBusy}
-          className="min-h-[44px]"
+          onChange={(e) => manager.setRenameName(e.target.value)}
+          required minLength={1} maxLength={100} disabled={manager.isBusy} className="min-h-[38px] text-xs"
         />
       </label>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Button type="button" variant="outline" onClick={() => void manager.handleRename()} disabled={manager.isBusy} className="min-h-[44px]">{manager.pendingAction === "rename" ? "Renaming..." : "Rename"}</Button>
-        <Button type="button" variant="destructive" onClick={() => void manager.handleDelete()} disabled={manager.isBusy} className="min-h-[44px]">{manager.pendingAction === "delete" ? "Deleting..." : "Delete"}</Button>
+      <div className="flex gap-2">
+        <Button type="button" variant="outline" onClick={() => void manager.handleRename()} disabled={manager.isBusy} className="min-h-[38px] text-xs">
+          {manager.pendingAction === "rename" ? "Renaming..." : "Rename"}
+        </Button>
+        <Button type="button" variant="destructive" onClick={() => void manager.handleDelete()} disabled={manager.isBusy} className="min-h-[38px] text-xs">
+          {manager.pendingAction === "delete" ? "Deleting..." : "Delete"}
+        </Button>
       </div>
     </div>
   );
@@ -100,22 +99,27 @@ function SelectedWorkspaceActions({ manager }: { manager: WorkspaceManagerModel 
 function WorkspaceFeedback({ feedback }: { feedback: WorkspaceManagerModel["feedback"] }) {
   if (!feedback) return null;
   const className = feedback.kind === "error"
-    ? "rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-3 text-xs font-semibold text-[var(--color-text-danger)]"
-    : "rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-700 dark:text-emerald-300";
+    ? "rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-2 text-xs font-semibold text-[var(--color-text-danger)]"
+    : "rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300";
   return <p role={feedback.kind === "error" ? "alert" : "status"} className={className}>{feedback.message}</p>;
 }
 
 export function WorkspaceManager({ workspaces, selectedWorkspace }: WorkspaceManagerProps) {
   const manager = useWorkspaceManager(workspaces, selectedWorkspace);
+  const [isManaging, setIsManaging] = useState(false);
+
   return (
-    <section aria-labelledby="workspace-manager-title" className="surface-card rounded-2xl border border-[var(--border-subtle)] p-4 sm:p-5 space-y-5">
-      <WorkspaceHeader manager={manager} />
-      <div className="grid gap-4 sm:grid-cols-[minmax(0,1.15fr)_minmax(15rem,0.85fr)]">
-        <WorkspaceSelection manager={manager} />
-        <WorkspaceCreateForm manager={manager} />
-      </div>
-      <SelectedWorkspaceActions manager={manager} />
-      <WorkspaceFeedback feedback={manager.feedback} />
-    </section>
+    <div className="space-y-3">
+      <WorkspaceSelectorCompact manager={manager} onToggleManage={() => setIsManaging((prev) => !prev)} isManaging={isManaging} />
+      {isManaging ? (
+        <div className="surface-card rounded-2xl border border-[var(--border-subtle)] p-4 space-y-4 shadow-sm animate-in fade-in duration-150">
+          <WorkspaceCreateForm manager={manager} />
+          <SelectedWorkspaceActions manager={manager} />
+          <WorkspaceFeedback feedback={manager.feedback} />
+        </div>
+      ) : (
+        <WorkspaceFeedback feedback={manager.feedback} />
+      )}
+    </div>
   );
 }
