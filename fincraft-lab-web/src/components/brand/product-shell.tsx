@@ -4,7 +4,7 @@ import type { UserProfile } from "@/lib/auth/session";
 
 export type ProductShellProps = {
   children: ReactNode;
-  activeTab?: "home" | "lab" | "login";
+  activeTab?: "home" | "lab" | "login" | "admin-elements";
   user?: UserProfile | null;
 };
 
@@ -30,6 +30,8 @@ function ProductNav({ activeTab, user }: { activeTab: string; user?: UserProfile
   const isHome = activeTab === "home";
   const isLab = activeTab === "lab";
   const isLogin = activeTab === "login";
+  const isAdmin = activeTab === "admin-elements";
+  const isAdminAuthorized = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
 
   const activeStyle =
     "rounded-lg bg-[var(--surface-inset)] px-3 py-1.5 text-xs font-semibold text-foreground border border-[var(--border-subtle)]";
@@ -44,6 +46,11 @@ function ProductNav({ activeTab, user }: { activeTab: string; user?: UserProfile
       <Link href="/lab" aria-current={isLab ? "page" : undefined} className={isLab ? activeStyle : inactiveStyle}>
         Craft Lab
       </Link>
+      {isAdminAuthorized ? (
+        <Link href="/admin/elements" aria-current={isAdmin ? "page" : undefined} className={isAdmin ? activeStyle : inactiveStyle}>
+          Admin
+        </Link>
+      ) : null}
       {!user ? (
         <Link href="/login" aria-current={isLogin ? "page" : undefined} className={isLogin ? activeStyle : inactiveStyle}>
           Log In
