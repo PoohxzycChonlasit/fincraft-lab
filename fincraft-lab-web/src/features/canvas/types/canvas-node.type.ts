@@ -12,6 +12,9 @@ export type ElementNodeData = {
   name: string;
   emoji: string;
   categoryName: string;
+  isCombineTarget?: boolean;
+  isCombining?: boolean;
+  isSelectedForCombine?: boolean;
 };
 
 export type ElementCanvasNode = Node<ElementNodeData, "elementNode">;
