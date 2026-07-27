@@ -1,22 +1,35 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { ProductShell } from "@/components/brand/product-shell";
 import { MochiLabNote } from "@/components/fincraft/mochi-lab-note";
 import { RecessedCraftBay } from "@/components/fincraft/recessed-craft-bay";
 import { SpecimenElementTile } from "@/components/fincraft/specimen-element-tile";
+import { getSessionUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Craft Lab | FinCraft Lab",
   description: "Financial Literacy Discovery Craft Lab host page.",
 };
 
-export default function CraftLabPage() {
+export default async function CraftLabPage() {
+  const user = await getSessionUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   return (
-    <ProductShell activeTab="lab">
+    <ProductShell activeTab="lab" user={user}>
       <div className="space-y-6 max-w-4xl mx-auto">
         <header className="space-y-1.5 border-b border-[var(--border-subtle)] pb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-craft-accent)]">
-            Discovery Workspace
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-craft-accent)]">
+              Discovery Workspace
+            </p>
+            <span className="text-xs text-muted-foreground font-medium">
+              Signed in as <strong className="text-foreground">{user.displayName}</strong>
+            </span>
+          </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Craft Lab</h1>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
             Combine financial elements in a controlled simulation lab to discover core financial concepts and explore trade-offs.
