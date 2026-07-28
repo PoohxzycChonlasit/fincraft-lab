@@ -6,7 +6,7 @@ import type { AvailableElement, CraftDiscoveryResult, CraftElementResult } from 
 import { useCanvasNodes, type InitialEdgeInput, type InitialNodeInput, type PersistableCanvasNode, type SaveStatus } from "@/features/canvas/public";
 import { saveWorkspaceCanvasApi, type CanvasSnapshot, type WorkspaceSummary } from "@/features/workspace/public.client";
 import { useLabCraftCombine } from "../hooks/use-lab-craft-combine";
-import { LabWorkspaceContent } from "./lab-workspace-content";
+import { LabWorkspaceContent, type LabPanel } from "./lab-workspace-content";
 
 type InitialWorkspace = {
   workspaceId: string;
@@ -76,17 +76,19 @@ function useLabWorkspaceSave(
   return { saveStatus, saveError, handleSave };
 }
 
-function buildInitialCanvasNodes(initialWorkspace?: InitialWorkspace): InitialNodeInput[] | undefined {
-  return initialWorkspace?.snapshot.nodes.map((node) => ({
-    id: node.id,
-    elementId: node.elementId,
-    positionX: node.positionX,
-    positionY: node.positionY,
-    valueData: node.valueData,
-    name: node.element?.name,
-    emoji: node.element?.emoji,
-    categoryName: node.element?.elementType,
-  }));
+function buildInitialCanvasNodes(initialWorkspace: InitialWorkspace | undefined, availableIds: Set<string>): InitialNodeInput[] | undefined {
+  return initialWorkspace?.snapshot.nodes
+    .filter((node) => availableIds.has(node.elementId))
+    .map((node) => ({
+      id: node.id,
+      elementId: node.elementId,
+      positionX: node.positionX,
+      positionY: node.positionY,
+      valueData: node.valueData,
+      name: node.element?.name,
+      emoji: node.element?.emoji,
+      categoryName: node.element?.elementType,
+    }));
 }
 
 function buildInitialCanvasEdges(initialWorkspace?: InitialWorkspace): InitialEdgeInput[] | undefined {
@@ -98,6 +100,12 @@ function buildInitialCanvasEdges(initialWorkspace?: InitialWorkspace): InitialEd
   }));
 }
 
+function findUnavailableWorkspaceElements(initialWorkspace: InitialWorkspace | undefined, availableIds: Set<string>): string[] {
+  return initialWorkspace?.snapshot.nodes
+    .filter((node) => !availableIds.has(node.elementId))
+    .map((node) => node.element?.name ?? node.elementId) ?? [];
+}
+
 export function FinCraftLabClient({
   elements: initialElements,
   isAuthenticated,
@@ -106,12 +114,16 @@ export function FinCraftLabClient({
   initialWorkspace,
 }: FinCraftLabClientProps) {
   const [localElements, setLocalElements] = useState<AvailableElement[]>(initialElements);
-  const initialCanvasNodes = useMemo(() => buildInitialCanvasNodes(initialWorkspace), [initialWorkspace]);
+  const [activePanel, setActivePanel] = useState<LabPanel>(null);
+  const initialAvailableIds = useMemo(() => new Set(initialElements.map((element) => element.id)), [initialElements]);
+  const initialCanvasNodes = useMemo(() => buildInitialCanvasNodes(initialWorkspace, initialAvailableIds), [initialAvailableIds, initialWorkspace]);
   const initialCanvasEdges = useMemo(() => buildInitialCanvasEdges(initialWorkspace), [initialWorkspace]);
+  const unavailableWorkspaceElements = useMemo(() => findUnavailableWorkspaceElements(initialWorkspace, initialAvailableIds), [initialAvailableIds, initialWorkspace]);
 
   const canvas = useCanvasNodes(initialCanvasNodes, initialCanvasEdges);
   const handleDiscovery = useCallback((element: CraftElementResult) => {
     toast.success(`Discovered: ${element.emoji} ${element.name}!`, { duration: 3500 });
+    setActivePanel("context");
     if (!isAuthenticated) return;
     setLocalElements((current) => current.some((item) => item.id === element.id)
       ? current
@@ -152,6 +164,9 @@ export function FinCraftLabClient({
       save={save}
       combine={combine}
       localElements={localElements}
+      unavailableWorkspaceElements={unavailableWorkspaceElements}
+      activePanel={activePanel}
+      onPanelChange={setActivePanel}
       handlePlaceElement={handlePlaceElement}
     />
   );

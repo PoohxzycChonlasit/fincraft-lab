@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useEdgesState, useNodesState, type Edge, type OnEdgesChange, type OnNodesChange } from "@xyflow/react";
-import type { ElementCanvasNode, CanvasElementInput } from "../types/canvas-node.type";
+import type { ElementCanvasNode, CanvasElementInput, CanvasNodeValueData } from "../types/canvas-node.type";
 import { normalizeCanvasEdges } from "../utils/normalize-canvas-edges";
 
 export type InitialNodeInput = {
@@ -10,7 +10,7 @@ export type InitialNodeInput = {
   elementId: string;
   positionX: number;
   positionY: number;
-  valueData?: Record<string, unknown>;
+  valueData?: CanvasNodeValueData;
   name?: string;
   emoji?: string;
   categoryName?: string;
@@ -51,7 +51,7 @@ function mapInitialEdges(inputs?: InitialEdgeInput[] | null): Edge[] {
   }));
 }
 
-function buildNode(element: CanvasElementInput, position: { x: number; y: number }, valueData?: Record<string, unknown>): ElementCanvasNode {
+function buildNode(element: CanvasElementInput, position: { x: number; y: number }, valueData?: CanvasNodeValueData): ElementCanvasNode {
   return {
     id: crypto.randomUUID(),
     type: "elementNode",
@@ -62,8 +62,8 @@ function buildNode(element: CanvasElementInput, position: { x: number; y: number
 
 function buildLineageEdges(sourceNodeId: string, targetNodeId: string, resultNodeId: string): [Edge, Edge] {
   return [
-    { id: `craft-edge:${sourceNodeId}:${resultNodeId}`, source: sourceNodeId, target: resultNodeId, sourceHandle: "lineage-source", targetHandle: "lineage-target", type: "smoothstep", style: { stroke: "var(--color-craft-accent,#ea580c)", strokeWidth: 2 } },
-    { id: `craft-edge:${targetNodeId}:${resultNodeId}`, source: targetNodeId, target: resultNodeId, sourceHandle: "lineage-source", targetHandle: "lineage-target", type: "smoothstep", style: { stroke: "var(--color-action-primary,#0f766e)", strokeWidth: 2 } },
+    { id: crypto.randomUUID(), source: sourceNodeId, target: resultNodeId, sourceHandle: "lineage-source", targetHandle: "lineage-target", type: "smoothstep", style: { stroke: "var(--color-craft-accent,#ea580c)", strokeWidth: 2 } },
+    { id: crypto.randomUUID(), source: targetNodeId, target: resultNodeId, sourceHandle: "lineage-source", targetHandle: "lineage-target", type: "smoothstep", style: { stroke: "var(--color-action-primary,#0f766e)", strokeWidth: 2 } },
   ];
 }
 

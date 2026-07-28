@@ -1,5 +1,8 @@
 import type { CraftDiscoveryResult } from "@/features/craft/public";
 
+export type WorkspaceJsonValue = string | number | boolean | null | WorkspaceJsonValue[] | { [key: string]: WorkspaceJsonValue };
+export type WorkspaceNodeValueData = Record<string, WorkspaceJsonValue>;
+
 export type WorkspaceSummary = {
   id: string;
   name: string;
@@ -32,7 +35,7 @@ export type PersistedCanvasNode = {
   elementId: string;
   positionX: number;
   positionY: number;
-  valueData?: Record<string, unknown>;
+  valueData?: WorkspaceNodeValueData;
   element?: CanvasNodeElementMetadata;
 };
 
@@ -49,5 +52,5 @@ export type SaveWorkspacePayloadNode = {
   elementId: string;
   positionX: number;
   positionY: number;
-  valueData?: Record<string, unknown>;
+  valueData?: WorkspaceNodeValueData;
 };

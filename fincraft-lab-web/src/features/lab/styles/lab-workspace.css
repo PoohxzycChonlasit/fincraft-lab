@@ -1,0 +1,256 @@
+.lab-page-frame,
+.lab-page-content,
+.lab-page-content > * {
+  min-height: 0;
+}
+
+.lab-page-frame {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: hidden;
+}
+
+main:has(.lab-page-frame) {
+  overflow: hidden;
+}
+
+.lab-page-content {
+  height: 100%;
+  min-width: 0;
+  flex: 1 1 0%;
+  overflow: hidden;
+}
+
+.lab-workspace-shell {
+  display: grid;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.625rem;
+}
+
+.lab-toolbar-row {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lab-session-toolbar {
+  min-width: 0;
+}
+
+.lab-adaptive-controls,
+.lab-compact-bottom-toolbar {
+  display: none;
+}
+
+.lab-adaptive-controls {
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.lab-adaptive-control,
+.lab-bottom-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 2.75rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-resting);
+  color: var(--color-text-secondary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.lab-adaptive-control {
+  border-radius: 0.625rem;
+  padding: 0 0.75rem;
+}
+
+.lab-adaptive-control:hover,
+.lab-adaptive-control[aria-pressed="true"],
+.lab-bottom-control:hover,
+.lab-bottom-control[aria-pressed="true"] {
+  border-color: var(--border-interactive);
+  background: var(--surface-inset);
+  color: var(--color-text-primary);
+}
+
+.lab-workspace-stage {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "canvas";
+  overflow: hidden;
+}
+
+.lab-workspace-stage > *,
+.lab-canvas-section,
+.lab-canvas-frame,
+.lab-canvas-frame > .react-flow {
+  min-width: 0;
+  min-height: 0;
+}
+
+.lab-library-slot,
+.lab-context-slot {
+  display: none;
+}
+
+.lab-library-slot {
+  grid-area: library;
+}
+
+.lab-canvas-slot {
+  position: relative;
+  height: 100%;
+  grid-area: canvas;
+}
+
+.lab-context-slot {
+  grid-area: context;
+}
+
+.lab-canvas-section,
+.lab-canvas-frame,
+.lab-canvas-frame > .react-flow {
+  width: 100%;
+  height: 100%;
+}
+
+.lab-feedback-stack {
+  position: absolute;
+  z-index: 30;
+  top: 0.75rem;
+  right: 0.75rem;
+  left: 0.75rem;
+  display: flex;
+  max-width: 48rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.lab-feedback-stack > * {
+  pointer-events: auto;
+}
+
+.lab-no-recipe {
+  max-height: min(45vh, 20rem);
+  overflow: auto;
+}
+
+@media (min-width: 1280px) {
+  .lab-workspace-stage {
+    grid-template-columns: 272px minmax(0, 1fr) 360px;
+    grid-template-areas: "library canvas context";
+    gap: 0.75rem;
+  }
+
+  .lab-library-slot,
+  .lab-context-slot {
+    display: block;
+    height: 100%;
+  }
+}
+
+@media (min-width: 840px) and (max-width: 1279px) {
+  .lab-adaptive-controls {
+    display: flex;
+  }
+
+  .lab-library-slot[data-open="true"],
+  .lab-context-slot[data-open="true"] {
+    position: absolute;
+    z-index: 35;
+    top: 0.75rem;
+    bottom: 0.75rem;
+    display: block;
+    max-height: calc(100% - 1.5rem);
+  }
+
+  .lab-library-slot[data-open="true"] {
+    left: 0.75rem;
+    width: clamp(300px, 32vw, 340px);
+  }
+
+  .lab-context-slot[data-open="true"] {
+    right: 0.75rem;
+    width: clamp(340px, 35vw, 380px);
+  }
+}
+
+@media (max-width: 839px) {
+  .lab-page-heading,
+  .lab-adaptive-controls {
+    display: none;
+  }
+
+  .lab-library-slot[data-open="true"],
+  .lab-context-slot[data-open="true"] {
+    position: absolute;
+    z-index: 40;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    display: block;
+    height: min(70dvh, calc(100% - 1rem));
+    max-height: 70dvh;
+  }
+
+  .lab-compact-bottom-toolbar {
+    display: grid;
+    min-height: 3.25rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.375rem;
+    padding: 0.25rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.875rem;
+    background: var(--surface-card);
+  }
+
+  .lab-bottom-control {
+    min-width: 0;
+    flex-direction: column;
+    border-color: transparent;
+    border-radius: 0.625rem;
+    padding: 0.25rem;
+    font-size: 0.625rem;
+  }
+
+  .lab-page-frame,
+  .lab-workspace-shell {
+    gap: 0.5rem;
+  }
+
+  .lab-feedback-stack {
+    top: 0.5rem;
+    right: 0.5rem;
+    left: 0.5rem;
+  }
+
+  .lab-no-recipe {
+    max-height: 42%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-workspace-shell * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

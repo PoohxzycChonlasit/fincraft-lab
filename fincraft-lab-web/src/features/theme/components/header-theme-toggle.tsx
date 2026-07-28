@@ -1,7 +1,7 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getClientThemeCookie, setClientThemeCookie } from "../utils/theme-cookie";
 import type { ResolvedAppearance, ThemePreference } from "../types/theme-types";
 
@@ -18,26 +18,33 @@ function applyTheme(preference: ThemePreference, resolved: ResolvedAppearance) {
 }
 
 function useDirectThemeToggle() {
-  const [preference, setPreference] = useState<ThemePreference>(() => getClientThemeCookie());
-  const [resolved, setResolved] = useState<ResolvedAppearance>(() => resolveTheme(getClientThemeCookie()));
+  const preference = useRef<ThemePreference>("system");
+  const [resolved, setResolved] = useState<ResolvedAppearance>("light");
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleSystemChange = (event: MediaQueryListEvent) => {
-      if (preference !== "system") return;
+      if (preference.current !== "system") return;
       const nextResolved = event.matches ? "dark" : "light";
       setResolved(nextResolved);
-      applyTheme(preference, nextResolved);
+      applyTheme(preference.current, nextResolved);
     };
-
-    applyTheme(preference, resolveTheme(preference));
+    const frame = window.requestAnimationFrame(() => {
+      preference.current = getClientThemeCookie();
+      const nextResolved = resolveTheme(preference.current);
+      setResolved(nextResolved);
+      applyTheme(preference.current, nextResolved);
+    });
     mediaQuery.addEventListener("change", handleSystemChange);
-    return () => mediaQuery.removeEventListener("change", handleSystemChange);
-  }, [preference]);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      mediaQuery.removeEventListener("change", handleSystemChange);
+    };
+  }, []);
 
   const toggleTheme = () => {
     const nextPreference: ThemePreference = resolved === "light" ? "dark" : "light";
-    setPreference(nextPreference);
+    preference.current = nextPreference;
     setResolved(nextPreference);
     setClientThemeCookie(nextPreference);
     applyTheme(nextPreference, nextPreference);

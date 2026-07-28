@@ -1,5 +1,8 @@
 import type { Node } from "@xyflow/react";
 
+export type CanvasJsonValue = string | number | boolean | null | CanvasJsonValue[] | { [key: string]: CanvasJsonValue };
+export type CanvasNodeValueData = Record<string, CanvasJsonValue>;
+
 export type CanvasElementInput = {
   id: string;
   name: string;
@@ -23,7 +26,7 @@ export type ElementNodeData = {
   isCombineTarget?: boolean;
   isCombining?: boolean;
   isSelectedForCombine?: boolean;
-  valueData?: Record<string, unknown>;
+  valueData?: CanvasNodeValueData;
 };
 
 export type ElementCanvasNode = Node<ElementNodeData, "elementNode">;
@@ -33,5 +36,5 @@ export type PersistableCanvasNode = {
   elementId: string;
   positionX: number;
   positionY: number;
-  valueData?: Record<string, unknown>;
+  valueData?: CanvasNodeValueData;
 };

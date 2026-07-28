@@ -41,6 +41,22 @@ export interface RawDbWorkspaceEdge {
   label: string;
 }
 
+function isJsonValue(value: unknown): value is JsonValue {
+  if (value === null || ['string', 'number', 'boolean'].includes(typeof value))
+    return true;
+  if (Array.isArray(value)) return value.every(isJsonValue);
+  return isJsonObject(value);
+}
+
+function isJsonObject(value: unknown): value is JsonObject {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.values(value).every(isJsonValue)
+  );
+}
+
 /**
  * Maps raw database workspace nodes and edges into the public CanvasSnapshotResponse shape.
  */
@@ -59,9 +75,15 @@ export function mapCanvasSnapshotResponse(
 
   if (discoveryNode && discoveryNode.element.discoveryDetail) {
     const detail = discoveryNode.element.discoveryDetail;
-    let parsedSources: unknown[] = [];
+    let parsedSources: JsonValue[] = [];
     try {
-      parsedSources = parseCraftSources(detail.sources);
+      parsedSources = parseCraftSources(detail.sources).map((source) => ({
+        title: source.title,
+        organization: source.organization,
+        url: source.url,
+        ...(source.jurisdiction ? { jurisdiction: source.jurisdiction } : {}),
+        ...(source.sourceType ? { sourceType: source.sourceType } : {}),
+      }));
     } catch {
       parsedSources = [];
     }
@@ -93,23 +115,17 @@ export function mapCanvasSnapshotResponse(
         ...(detail.becomesDifficultWhen
           ? { becomesDifficultWhen: detail.becomesDifficultWhen }
           : {}),
-        sources: parsedSources as unknown as JsonValue[],
+        sources: parsedSources,
       },
     };
   }
 
   if (
     !lastDiscoveryObj &&
-    typeof rawSnapshotJson === 'object' &&
-    rawSnapshotJson !== null &&
-    !Array.isArray(rawSnapshotJson) &&
-    'lastDiscovery' in rawSnapshotJson &&
-    typeof (rawSnapshotJson as Record<string, unknown>).lastDiscovery ===
-      'object' &&
-    (rawSnapshotJson as Record<string, unknown>).lastDiscovery !== null
+    isJsonObject(rawSnapshotJson) &&
+    isJsonObject(rawSnapshotJson.lastDiscovery)
   ) {
-    lastDiscoveryObj = (rawSnapshotJson as Record<string, unknown>)
-      .lastDiscovery as JsonObject;
+    lastDiscoveryObj = rawSnapshotJson.lastDiscovery;
   }
 
   return {
@@ -119,13 +135,7 @@ export function mapCanvasSnapshotResponse(
       const rawValData = n.valueData;
       let valDataObj: JsonObject = {};
 
-      if (
-        typeof rawValData === 'object' &&
-        rawValData !== null &&
-        !Array.isArray(rawValData)
-      ) {
-        valDataObj = rawValData as Record<string, JsonValue>;
-      }
+      if (isJsonObject(rawValData)) valDataObj = rawValData;
 
       return {
         id: n.id,

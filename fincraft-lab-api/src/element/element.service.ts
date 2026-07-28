@@ -158,6 +158,7 @@ export class ElementService {
         elementId: { not: elementId },
         element: {
           status: ContentStatus.ACTIVE,
+          isStarter: true,
           category: { status: ActiveStatus.ACTIVE },
         },
       },

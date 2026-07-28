@@ -1,7 +1,7 @@
 import "server-only";
 
 import { backendFetch } from "@/lib/api/backend-fetch.server";
-import type { CanvasSnapshot, WorkspaceSummary } from "../types/workspace.type";
+import type { CanvasSnapshot, WorkspaceJsonValue, WorkspaceNodeValueData, WorkspaceSummary } from "../types/workspace.type";
 
 export type FetchWorkspaceResult =
   | {
@@ -16,6 +16,16 @@ export type FetchWorkspaceResult =
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function isWorkspaceJsonValue(value: unknown): value is WorkspaceJsonValue {
+  if (value === null || ["string", "number", "boolean"].includes(typeof value)) return true;
+  if (Array.isArray(value)) return value.every(isWorkspaceJsonValue);
+  return isRecord(value) && Object.values(value).every(isWorkspaceJsonValue);
+}
+
+function isWorkspaceNodeValueData(value: unknown): value is WorkspaceNodeValueData {
+  return isRecord(value) && !Array.isArray(value) && Object.values(value).every(isWorkspaceJsonValue);
 }
 
 function isWorkspaceSummary(value: unknown): value is WorkspaceSummary {
@@ -58,7 +68,7 @@ function isCanvasSnapshot(value: unknown): value is CanvasSnapshot {
       typeof node.elementId === "string" &&
       typeof node.positionX === "number" &&
       typeof node.positionY === "number" &&
-      (node.valueData === undefined || isRecord(node.valueData))
+      (node.valueData === undefined || isWorkspaceNodeValueData(node.valueData))
     );
   });
   const validEdges = value.edges.every((edge) => {

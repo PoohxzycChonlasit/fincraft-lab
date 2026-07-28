@@ -1,22 +1,22 @@
 import { NextResponse } from "next/server";
 import { backendFetch } from "@/lib/api/backend-fetch.server";
 
-type CraftRequestBody = {
-  inputElementIds?: unknown;
-};
+function isDistinctElementPair(value: unknown): value is [string, string] {
+  return Array.isArray(value)
+    && value.length === 2
+    && value.every((item): item is string => typeof item === "string")
+    && value[0] !== value[1];
+}
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as CraftRequestBody;
-    const { inputElementIds } = body;
+    const body: unknown = await request.json();
+    const inputElementIds = typeof body === "object" && body !== null && "inputElementIds" in body
+      ? body.inputElementIds
+      : undefined;
 
-    if (!Array.isArray(inputElementIds) || inputElementIds.length !== 2) {
-      return NextResponse.json({ error: "Exactly two element IDs are required" }, { status: 400 });
-    }
-
-    const [a, b] = inputElementIds as [string, string];
-    if (a === b) {
-      return NextResponse.json({ error: "Both input elements must be distinct" }, { status: 400 });
+    if (!isDistinctElementPair(inputElementIds)) {
+      return NextResponse.json({ error: "Exactly two distinct element IDs are required" }, { status: 400 });
     }
 
     const res = await backendFetch("/craft", {

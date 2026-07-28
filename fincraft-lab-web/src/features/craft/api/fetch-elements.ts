@@ -6,9 +6,28 @@ export type FetchElementsResult =
   | { success: false; redirectLogin: true }
   | { success: false; errorMessage: string };
 
-type ElementsEnvelope = {
-  data?: AvailableElement[];
-};
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isAvailableElement(value: unknown): value is AvailableElement {
+  if (!isRecord(value) || !isRecord(value.category)) return false;
+  return typeof value.id === "string"
+    && typeof value.name === "string"
+    && typeof value.slug === "string"
+    && typeof value.emoji === "string"
+    && (value.iconUrl === null || typeof value.iconUrl === "string")
+    && typeof value.elementType === "string"
+    && typeof value.isStarter === "boolean"
+    && typeof value.category.id === "string"
+    && typeof value.category.name === "string"
+    && typeof value.category.sortOrder === "number";
+}
+
+function readAvailableElements(value: unknown): AvailableElement[] | null {
+  if (!isRecord(value) || !Array.isArray(value.data)) return null;
+  return value.data.every(isAvailableElement) ? value.data : null;
+}
 
 export async function fetchAvailableElements(isAuthenticated: boolean): Promise<FetchElementsResult> {
   const res = await backendFetch(isAuthenticated ? "/elements/available" : "/elements", {
@@ -26,9 +45,12 @@ export async function fetchAvailableElements(isAuthenticated: boolean): Promise<
     };
   }
 
-  const json = res.data as ElementsEnvelope;
+  const elements = readAvailableElements(res.data);
+  if (!elements) {
+    return { success: false, errorMessage: "Elements response was invalid." };
+  }
   return {
     success: true,
-    elements: json.data ?? [],
+    elements,
   };
 }
