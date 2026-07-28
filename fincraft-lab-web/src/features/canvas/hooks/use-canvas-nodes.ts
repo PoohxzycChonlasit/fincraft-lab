@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useEdgesState, useNodesState, type Edge, type OnEdgesChange, type OnNodesChange } from "@xyflow/react";
 import type { ElementCanvasNode, CanvasElementInput } from "../types/canvas-node.type";
+import { normalizeCanvasEdges } from "../utils/normalize-canvas-edges";
 
 export type InitialNodeInput = {
   id: string;
@@ -33,13 +34,7 @@ function mapInitialNodes(inputs?: InitialNodeInput[] | null): ElementCanvasNode[
     id: node.id,
     type: "elementNode",
     position: { x: node.positionX, y: node.positionY },
-    data: {
-      elementId: node.elementId,
-      name: node.name ?? "Element",
-      emoji: node.emoji ?? "Element",
-      categoryName: node.categoryName ?? "CONCEPT",
-      valueData: node.valueData ?? {},
-    },
+    data: { elementId: node.elementId, name: node.name ?? "Element", emoji: node.emoji ?? "Element", categoryName: node.categoryName ?? "CONCEPT", valueData: node.valueData ?? {} },
   }));
 }
 
@@ -49,46 +44,26 @@ function mapInitialEdges(inputs?: InitialEdgeInput[] | null): Edge[] {
     id: e.id,
     source: e.sourceNodeId,
     target: e.targetNodeId,
+    sourceHandle: "lineage-source",
+    targetHandle: "lineage-target",
     type: "smoothstep",
     style: { stroke: "var(--color-craft-accent,#ea580c)", strokeWidth: 2 },
   }));
 }
 
-function buildNode(
-  element: CanvasElementInput,
-  position: { x: number; y: number },
-  valueData?: Record<string, unknown>,
-): ElementCanvasNode {
+function buildNode(element: CanvasElementInput, position: { x: number; y: number }, valueData?: Record<string, unknown>): ElementCanvasNode {
   return {
     id: crypto.randomUUID(),
     type: "elementNode",
     position: { x: Math.round(position.x), y: Math.round(position.y) },
-    data: {
-      elementId: element.id,
-      name: element.name,
-      emoji: element.emoji || "Element",
-      categoryName: element.categoryName || "CONCEPT",
-      valueData: valueData ?? {},
-    },
+    data: { elementId: element.id, name: element.name, emoji: element.emoji || "Element", categoryName: element.categoryName || "CONCEPT", valueData: valueData ?? {} },
   };
 }
 
 function buildLineageEdges(sourceNodeId: string, targetNodeId: string, resultNodeId: string): [Edge, Edge] {
   return [
-    {
-      id: `craft-edge:${sourceNodeId}:${resultNodeId}`,
-      source: sourceNodeId,
-      target: resultNodeId,
-      type: "smoothstep",
-      style: { stroke: "var(--color-craft-accent,#ea580c)", strokeWidth: 2 },
-    },
-    {
-      id: `craft-edge:${targetNodeId}:${resultNodeId}`,
-      source: targetNodeId,
-      target: resultNodeId,
-      type: "smoothstep",
-      style: { stroke: "var(--color-action-primary,#0f766e)", strokeWidth: 2 },
-    },
+    { id: `craft-edge:${sourceNodeId}:${resultNodeId}`, source: sourceNodeId, target: resultNodeId, sourceHandle: "lineage-source", targetHandle: "lineage-target", type: "smoothstep", style: { stroke: "var(--color-craft-accent,#ea580c)", strokeWidth: 2 } },
+    { id: `craft-edge:${targetNodeId}:${resultNodeId}`, source: targetNodeId, target: resultNodeId, sourceHandle: "lineage-source", targetHandle: "lineage-target", type: "smoothstep", style: { stroke: "var(--color-action-primary,#0f766e)", strokeWidth: 2 } },
   ];
 }
 
@@ -105,10 +80,7 @@ function clearLatestDiscoveryFlag(nodes: ElementCanvasNode[]): ElementCanvasNode
   });
 }
 
-function useNodeCreation(
-  setNodes: Dispatch<SetStateAction<ElementCanvasNode[]>>,
-  setIsDirty: (value: boolean) => void,
-) {
+function useNodeCreation(setNodes: Dispatch<SetStateAction<ElementCanvasNode[]>>, setIsDirty: (value: boolean) => void) {
   const addNodeAtPosition = useCallback((element: CanvasElementInput, position: { x: number; y: number }) => {
     setNodes((current) => [...current, buildNode(element, position)]);
     setIsDirty(true);
@@ -177,23 +149,11 @@ function useNodeCombineMutations(
   setEdges: Dispatch<SetStateAction<Edge[]>>,
   setIsDirty: (value: boolean) => void,
 ) {
-  const addResultNode = useCallback((
-    element: CanvasElementInput,
-    collisionPosition: { x: number; y: number },
-    sourceNodeId?: string,
-    targetNodeId?: string,
-  ) => {
+  const addResultNode = useCallback((element: CanvasElementInput, collisionPosition: { x: number; y: number }, sourceNodeId?: string, targetNodeId?: string) => {
     const existing = nodes.find((node) => node.data.elementId === element.id);
     if (existing) return existing.id;
-
-    const newNode = buildNode(
-      element,
-      { x: collisionPosition.x + RESULT_NODE_OFFSET.x, y: collisionPosition.y + RESULT_NODE_OFFSET.y },
-      { isLatestDiscovery: true, timestamp: Date.now() },
-    );
-
+    const newNode = buildNode(element, { x: collisionPosition.x + RESULT_NODE_OFFSET.x, y: collisionPosition.y + RESULT_NODE_OFFSET.y }, { isLatestDiscovery: true, timestamp: Date.now() });
     setNodes((current) => [...clearLatestDiscoveryFlag(current), newNode]);
-
     if (sourceNodeId && targetNodeId) {
       const [e1, e2] = buildLineageEdges(sourceNodeId, targetNodeId, newNode.id);
       setEdges((currEdges) => {
@@ -204,7 +164,6 @@ function useNodeCombineMutations(
         return next;
       });
     }
-
     setIsDirty(true);
     return newNode.id;
   }, [nodes, setNodes, setEdges, setIsDirty]);
@@ -217,12 +176,8 @@ function useNodeCombineMutations(
       const dx = source.position.x - target.position.x;
       const dy = source.position.y - target.position.y;
       const distance = Math.hypot(dx, dy);
-      const offset = distance === 0
-        ? { x: NODE_SEPARATION_DISTANCE, y: 24 }
-        : { x: (dx / distance) * NODE_SEPARATION_DISTANCE, y: (dy / distance) * NODE_SEPARATION_DISTANCE };
-      return current.map((node) => node.id === sourceNodeId
-        ? { ...node, position: { x: source.position.x + offset.x, y: source.position.y + offset.y } }
-        : node);
+      const offset = distance === 0 ? { x: NODE_SEPARATION_DISTANCE, y: 24 } : { x: (dx / distance) * NODE_SEPARATION_DISTANCE, y: (dy / distance) * NODE_SEPARATION_DISTANCE };
+      return current.map((node) => node.id === sourceNodeId ? { ...node, position: { x: source.position.x + offset.x, y: source.position.y + offset.y } } : node);
     });
     setIsDirty(true);
   }, [setNodes, setIsDirty]);
@@ -230,12 +185,9 @@ function useNodeCombineMutations(
   return { addResultNode, recoverCombine };
 }
 
-export function useCanvasNodes(
-  initialNodesInput?: InitialNodeInput[] | null,
-  initialEdgesInput?: InitialEdgeInput[] | null,
-) {
+export function useCanvasNodes(initialNodesInput?: InitialNodeInput[] | null, initialEdgesInput?: InitialEdgeInput[] | null) {
   const initialNodes = useMemo(() => mapInitialNodes(initialNodesInput), [initialNodesInput]);
-  const initialEdges = useMemo(() => mapInitialEdges(initialEdgesInput), [initialEdgesInput]);
+  const initialEdges = useMemo(() => normalizeCanvasEdges(mapInitialEdges(initialEdgesInput), initialNodes), [initialEdgesInput, initialNodes]);
 
   const [nodes, setNodes, onNodesChangeBase] = useNodesState<ElementCanvasNode>(initialNodes);
   const [edges, setEdges, onEdgesChangeBase] = useEdgesState<Edge>(initialEdges);
@@ -265,12 +217,9 @@ export function useCanvasNodes(
     valueData: n.data.valueData,
   })), [nodes]);
 
-  const getPersistableEdges = useCallback(() => edges.map((e) => ({
-    id: e.id,
-    sourceNodeId: e.source,
-    targetNodeId: e.target,
-    label: "",
-  })), [edges]);
+  const getPersistableEdges = useCallback(() => {
+    return normalizeCanvasEdges(edges, nodes).map((e) => ({ id: e.id, sourceNodeId: e.source, targetNodeId: e.target, label: "" }));
+  }, [edges, nodes]);
 
   const markSaved = useCallback(() => setIsDirty(false), []);
 

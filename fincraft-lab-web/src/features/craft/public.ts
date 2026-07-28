@@ -6,3 +6,4 @@ export { useElementGuidance, usePrefetchElementGuidance } from "./hooks/use-elem
 export { ElementLibrary } from "./components/element-library";
 export { ElementInspector } from "./components/element-inspector";
 export { CraftResultPanel } from "./components/craft-result-panel";
+export { ElementContextRail, type ContextTab } from "./components/element-context-rail";

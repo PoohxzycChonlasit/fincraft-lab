@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import type { NodeProps } from "@xyflow/react";
+import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { ElementCanvasNode } from "../types/canvas-node.type";
 
 function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>) {
@@ -24,17 +24,29 @@ function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>)
         isCombining ? "opacity-70 pointer-events-none" : ""
       }`}
     >
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="lineage-target"
+        className="!h-2.5 !w-2.5 !border-0 !bg-[var(--color-craft-accent)] opacity-40 transition-opacity hover:opacity-100"
+      />
       <div className="flex items-center gap-2">
         <span className="text-lg leading-none" aria-hidden="true">
           {data.emoji || "Element"}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-bold text-foreground truncate">{data.name}</p>
-          <p className="text-[10px] font-semibold text-[var(--color-craft-accent)] truncate">
+          <p className="text-xs font-bold truncate text-foreground">{data.name}</p>
+          <p className="text-[10px] font-semibold truncate text-[var(--color-craft-accent)]">
             {isCombining ? "Combining..." : isTarget ? "Drop to Combine" : data.categoryName}
           </p>
         </div>
       </div>
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="lineage-source"
+        className="!h-2.5 !w-2.5 !border-0 !bg-[var(--color-craft-accent)] opacity-40 transition-opacity hover:opacity-100"
+      />
     </article>
   );
 }
