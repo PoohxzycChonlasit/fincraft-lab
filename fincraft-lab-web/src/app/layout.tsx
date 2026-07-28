@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import { Providers } from "@/app/providers";
+import { FINCRAFT_BRAND } from "@/components/brand/fincraft-brand";
 import { Toaster } from "@/components/ui/sonner";
 import { THEME_COOKIE_NAME } from "@/features/theme/constants/theme-constants";
 import { parseThemePreference } from "@/features/theme/types/theme-types";
+import { getSiteUrl } from "@/lib/config/site-url";
 import "./globals.css";
 
 const inter = Inter({
@@ -13,9 +15,70 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "FinCraft Lab — Financial Literacy Discovery Lab",
-  description:
-    "Interactive Financial Literacy Discovery Lab for learning finance by combining elements and running simulations.",
+  metadataBase: getSiteUrl(),
+  title: {
+    default: FINCRAFT_BRAND.defaultTitle,
+    template: FINCRAFT_BRAND.titleTemplate,
+  },
+  description: FINCRAFT_BRAND.description,
+  applicationName: FINCRAFT_BRAND.name,
+  keywords: [
+    "financial literacy",
+    "finance education",
+    "interactive learning",
+    "financial concepts",
+    "financial simulation",
+  ],
+  alternates: { canonical: "/" },
+  icons: {
+    icon: [
+      { url: "/brand/favicon.svg", type: "image/svg+xml" },
+      { url: "/brand/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  manifest: "/manifest.webmanifest",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: FINCRAFT_BRAND.name,
+    title: FINCRAFT_BRAND.defaultTitle,
+    description: FINCRAFT_BRAND.description,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: FINCRAFT_BRAND.defaultTitle,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: FINCRAFT_BRAND.defaultTitle,
+    description: FINCRAFT_BRAND.description,
+    images: ["/opengraph-image"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+};
+
+export const viewport: Viewport = {
+  colorScheme: "light dark",
+  themeColor: [
+    {
+      media: "(prefers-color-scheme: light)",
+      color: FINCRAFT_BRAND.colors.lightTheme,
+    },
+    {
+      media: "(prefers-color-scheme: dark)",
+      color: FINCRAFT_BRAND.colors.darkTheme,
+    },
+  ],
 };
 
 export default async function RootLayout({

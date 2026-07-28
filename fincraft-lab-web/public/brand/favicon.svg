@@ -1,0 +1,22 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .tile { fill: #fffdf8; stroke: #0f766e; }
+    .primary { stroke: #0f766e; }
+    .primary-fill { fill: #0f766e; }
+    .accent { stroke: #ea580c; }
+    .accent-fill { fill: #ea580c; }
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: #0b1b29; stroke: #2dd4bf; }
+      .primary { stroke: #2dd4bf; }
+      .primary-fill { fill: #2dd4bf; }
+      .accent { stroke: #f59e0b; }
+      .accent-fill { fill: #f59e0b; }
+    }
+  </style>
+  <rect class="tile" x="3.5" y="3.5" width="57" height="57" rx="16.5" stroke-width="3"/>
+  <path class="primary" d="M18 44V20H34M18 31H30" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="accent" d="M47 24.5C44.9 21.6 41.8 20 38.2 20C31.9 20 28 25 28 32C28 39 31.9 44 38.2 44C41.8 44 44.9 42.4 47 39.5" stroke-width="4.5" stroke-linecap="round"/>
+  <path class="primary" d="M46.5 16.5L52.5 20M46.5 47.5L52.5 44" stroke-width="2" stroke-linecap="round"/>
+  <circle class="accent-fill" cx="54" cy="21" r="3"/>
+  <circle class="primary-fill" cx="54" cy="43" r="3"/>
+</svg>

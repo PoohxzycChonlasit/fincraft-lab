@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { UserProfile } from "@/lib/auth/session";
 import { HeaderThemeToggle } from "@/features/theme/components/header-theme-toggle";
+import { FinCraftLogo } from "./fincraft-logo";
 import { ProductNav } from "./product-nav";
 
 export type ProductTab = "home" | "lab" | "workspace" | "login" | "admin-elements";
@@ -16,14 +17,13 @@ export type ProductShellProps = {
 
 function ProductBrand() {
   return (
-    <div className="flex min-w-0 items-center gap-2.5">
-      <Link href="/" className="flex min-w-0 items-center gap-2">
-        <span className="surface-inset flex size-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-xs font-bold text-[var(--color-craft-accent)]">
-          FC
-        </span>
-        <span className="truncate text-base font-bold tracking-tight text-foreground sm:text-lg">
-          FinCraft <span className="text-[var(--color-craft-accent)]">Lab</span>
-        </span>
+    <div className="flex min-w-0 items-center gap-3">
+      <Link
+        href="/"
+        aria-label="FinCraft Lab home"
+        className="min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+      >
+        <FinCraftLogo />
       </Link>
       <span className="hidden border-l border-[var(--border-subtle)] pl-3 text-xs font-medium text-muted-foreground xl:inline-block">
         Financial Literacy Discovery Lab
