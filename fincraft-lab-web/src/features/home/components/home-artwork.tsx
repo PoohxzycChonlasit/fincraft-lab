@@ -7,8 +7,8 @@ import { THEME_CHANGE_EVENT } from "@/features/theme/constants/theme-constants";
 import type { ResolvedAppearance, ThemePreference } from "@/features/theme/types/theme-types";
 
 const HERO_ARTWORK = {
-  light: "/images/home/financial-city-day.png",
-  dark: "/images/home/financial-city-night.png",
+  light: "/images/home/financial-city-day-4k.jpg",
+  dark: "/images/home/financial-city-night-4k.jpg",
 } as const;
 
 type ThemeChangeDetail = {
@@ -57,7 +57,8 @@ export function HomeArtwork({ initialThemePreference }: HomeArtworkProps) {
           alt=""
           fill
           priority
-          sizes="(max-width: 639px) 120vw, (max-width: 1023px) 90vw, (max-width: 1439px) 52vw, 720px"
+          quality={90}
+          sizes="(max-width: 1440px) 100vw, 1440px"
           className="home-artwork-image"
         />
       ) : null}
