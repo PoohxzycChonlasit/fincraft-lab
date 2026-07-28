@@ -21,7 +21,7 @@ function ProductBrand() {
       <Link
         href="/"
         aria-label="FinCraft Lab home"
-        className="min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+        className="-m-1 min-w-0 rounded-lg p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
       >
         <FinCraftLogo />
       </Link>

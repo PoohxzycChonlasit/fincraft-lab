@@ -4,6 +4,7 @@
 @import "@xyflow/react/dist/style.css";
 @import "../styles/theme-materials.css";
 @import "../styles/glass-surface.css";
+@import "../styles/home.css";
 @import "../features/lab/styles/lab-workspace.css";
 
 @custom-variant dark {

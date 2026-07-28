@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { ShieldCheck } from "lucide-react";
+
 import type { UserProfile } from "@/lib/auth/session";
+import { HomeArtwork } from "./home-artwork";
 
 type HomeHeroProps = {
   user: UserProfile | null;
@@ -7,56 +10,51 @@ type HomeHeroProps = {
 
 export function HomeHero({ user }: HomeHeroProps) {
   return (
-    <section
-      aria-label="Hero Introduction"
-      className="relative overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-resting)] p-6 sm:p-10 space-y-6 text-center sm:text-left shadow-xs"
-    >
-      <div
-        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-40 dark:opacity-20"
-        style={{ backgroundImage: "url('/images/hero-constellation.svg')" }}
-        aria-hidden="true"
-      />
-
-      <div className="relative z-10 space-y-3 max-w-2xl">
-        <span className="inline-block rounded-full bg-[var(--color-craft-accent)]/10 px-3.5 py-1 text-xs font-semibold text-[var(--color-craft-accent)] border border-[var(--border-subtle)]">
+    <section aria-labelledby="home-hero-title" className="home-hero">
+      <div className="home-hero-copy">
+        <p className="home-eyebrow">
           Financial Literacy Discovery Lab
-        </span>
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-tight">
+        </p>
+        <h1 id="home-hero-title" className="home-hero-title">
           Learn finance by combining ideas.
         </h1>
-        <p className="text-sm sm:text-base leading-relaxed text-muted-foreground">
+        <p className="home-hero-description">
           Place financial elements on an interactive canvas, combine them, and discover how money concepts connect in real life.
         </p>
-      </div>
 
-      <div className="relative z-10 flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-2">
-        <Link
-          href="/lab"
-          className="min-h-[44px] inline-flex items-center justify-center rounded-xl bg-[var(--color-action-primary)] px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-[var(--color-action-hover)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-        >
-          Start Crafting
-        </Link>
-        {user ? (
+        <div className="home-hero-actions">
           <Link
             href="/lab"
-            className="min-h-[44px] inline-flex items-center justify-center rounded-xl border border-[var(--border-interactive)] bg-[var(--surface-resting)] px-5 py-2.5 text-xs font-semibold text-foreground hover:bg-[var(--surface-inset)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+            className="home-button home-button-primary"
           >
-            Continue to Lab
+            Start Crafting
           </Link>
-        ) : (
-          <div className="flex items-center gap-3">
+          {user ? (
             <Link
-              href="/login"
-              className="min-h-[44px] inline-flex items-center justify-center rounded-xl border border-[var(--border-interactive)] bg-[var(--surface-resting)] px-5 py-2.5 text-xs font-semibold text-foreground hover:bg-[var(--surface-inset)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              href="/workspace"
+              className="home-button home-button-secondary"
             >
-              Sign In to Save
+              Open Workspace
             </Link>
-            <Link href="/register" className="text-xs font-medium text-muted-foreground hover:text-foreground underline hover:no-underline">
-              Create Account
-            </Link>
-          </div>
-        )}
+          ) : (
+            <>
+              <Link href="/login" className="home-button home-button-secondary">
+                Sign In to Save
+              </Link>
+              <Link href="/register" className="home-text-link">
+                Create Account
+              </Link>
+            </>
+          )}
+        </div>
+
+        <div className="home-safety-note" role="note">
+          <ShieldCheck size={17} aria-hidden="true" />
+          <span>Education Only — Simulation Only — Not Financial Advice</span>
+        </div>
       </div>
+
+      <HomeArtwork />
     </section>
   );
 }
