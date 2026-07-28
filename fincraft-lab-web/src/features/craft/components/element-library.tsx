@@ -3,7 +3,7 @@
 import { Info, Search, X } from "lucide-react";
 import { useMemo, useState, type DragEvent, type MouseEvent } from "react";
 import type { AvailableElement } from "../types/craft-element.type";
-import { useElementGuidance } from "../hooks/use-element-guidance";
+import { useElementGuidance, usePrefetchElementGuidance } from "../hooks/use-element-guidance";
 
 export type ElementLibraryProps = {
   elements: AvailableElement[];
@@ -19,6 +19,7 @@ type CompactTileProps = {
   isInspecting: boolean;
   onPlaceElement: () => void;
   onInspectElement: () => void;
+  onPrefetch: () => void;
 };
 
 function buildTileDragData(element: AvailableElement): string {
@@ -30,7 +31,7 @@ function buildTileDragData(element: AvailableElement): string {
   });
 }
 
-function CompactElementTile({ element, isHighlighted, isInspecting, onPlaceElement, onInspectElement }: CompactTileProps) {
+function CompactElementTile({ element, isHighlighted, isInspecting, onPlaceElement, onInspectElement, onPrefetch }: CompactTileProps) {
   const categoryName = element.category?.name || element.elementType;
   const highlightClass = isHighlighted
     ? "ring-2 ring-[var(--color-craft-accent)] border-[var(--color-craft-accent)] bg-[var(--color-craft-accent)]/10"
@@ -67,6 +68,8 @@ function CompactElementTile({ element, isHighlighted, isInspecting, onPlaceEleme
       <button
         type="button"
         onClick={handleInspect}
+        onMouseEnter={onPrefetch}
+        onFocus={onPrefetch}
         aria-label={`About ${element.name}`}
         className="flex size-9 shrink-0 items-center justify-center self-center rounded-lg text-muted-foreground transition-colors hover:bg-[var(--surface-inset)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
       >
@@ -104,6 +107,7 @@ function LibraryHeader({ count, total, searchText, onSearch, onClose }: {
 export function ElementLibrary({ elements, selectedElementId, onPlaceElement, onInspectElement, onClose }: ElementLibraryProps) {
   const [searchText, setSearchText] = useState("");
   const { data: guidance } = useElementGuidance(selectedElementId);
+  const prefetch = usePrefetchElementGuidance();
   const normalizedSearch = searchText.trim().toLowerCase();
   const filteredElements = useMemo(() => {
     if (!normalizedSearch) return elements;
@@ -127,6 +131,7 @@ export function ElementLibrary({ elements, selectedElementId, onPlaceElement, on
               isInspecting={selectedElementId === element.id}
               onPlaceElement={() => onPlaceElement(element)}
               onInspectElement={() => onInspectElement(element.id)}
+              onPrefetch={() => prefetch(element.id)}
             />
           ))}
         </div>

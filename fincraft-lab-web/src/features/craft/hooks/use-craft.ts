@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { CraftResult, CraftElementResult } from "../types/craft-result.type";
+import type { CraftResult, CraftDiscoveryResult, CraftElementResult } from "../types/craft-result.type";
 
 export type CraftInputElement = { id: string };
 
@@ -10,9 +10,11 @@ export type UseCraftReturn = {
   isSubmitting: boolean;
   craftError: string | null;
   craftResult: CraftResult | null;
+  lastDiscovery: CraftDiscoveryResult | null;
   handleCraft: (leftElement: CraftInputElement | null, rightElement: CraftInputElement | null) => Promise<CraftResult | null>;
   handleReset: () => void;
   dismissError: () => void;
+  setLastDiscovery: (discovery: CraftDiscoveryResult | null) => void;
 };
 
 type UseCraftOptions = {
@@ -25,11 +27,11 @@ export function useCraft({ onDiscovery, isAuthenticated = true }: UseCraftOption
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [craftError, setCraftError] = useState<string | null>(null);
   const [craftResult, setCraftResult] = useState<CraftResult | null>(null);
+  const [lastDiscovery, setLastDiscovery] = useState<CraftDiscoveryResult | null>(null);
 
   const handleCraft = useCallback(async (left: CraftInputElement | null, right: CraftInputElement | null): Promise<CraftResult | null> => {
     if (!left || !right || isSubmitting) return null;
     setCraftError(null);
-    setCraftResult(null);
     setIsSubmitting(true);
 
     try {
@@ -54,6 +56,7 @@ export function useCraft({ onDiscovery, isAuthenticated = true }: UseCraftOption
       if (json.data) {
         setCraftResult(json.data);
         if (json.data.outcome === "DISCOVERY") {
+          setLastDiscovery(json.data);
           onDiscovery?.(json.data.element, json.data.isNewDiscovery);
           if (isAuthenticated) router.refresh();
         }
@@ -68,12 +71,12 @@ export function useCraft({ onDiscovery, isAuthenticated = true }: UseCraftOption
     }
   }, [isAuthenticated, isSubmitting, onDiscovery, router]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setCraftResult(null);
     setCraftError(null);
-  };
+  }, []);
 
-  const dismissError = () => setCraftError(null);
+  const dismissError = useCallback(() => setCraftError(null), []);
 
-  return { isSubmitting, craftError, craftResult, handleCraft, handleReset, dismissError };
+  return { isSubmitting, craftError, craftResult, lastDiscovery, handleCraft, handleReset, dismissError, setLastDiscovery };
 }

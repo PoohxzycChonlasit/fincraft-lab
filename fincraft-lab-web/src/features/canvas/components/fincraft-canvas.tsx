@@ -27,6 +27,7 @@ type FinCraftCanvasProps = {
   edges?: Edge[];
   onNodesChange: OnNodesChange<ElementCanvasNode>;
   onEdgesChange?: OnEdgesChange<Edge>;
+  onDragStopDirty?: () => void;
   onDropLibraryElement: (element: CanvasElementInput, position: { x: number; y: number }) => void;
   onTargetHighlight: (targetId: string | null) => void;
   onCombineNodes: (sourceNode: ElementCanvasNode, targetNode: ElementCanvasNode, collisionPosition: { x: number; y: number }) => void;
@@ -118,7 +119,7 @@ function CanvasHeader({ nodeCount, isDirty, saveStatus, canSave, isSaving, onSav
 
 type CanvasInnerProps = Omit<FinCraftCanvasProps, "workspaceId" | "isDirty" | "saveStatus" | "saveError" | "onSave">;
 
-function useCanvasDragHandlers({ nodes, onDropLibraryElement, onTargetHighlight, onCombineNodes }: CanvasInnerProps) {
+function useCanvasDragHandlers({ nodes, onDropLibraryElement, onTargetHighlight, onCombineNodes, onDragStopDirty }: CanvasInnerProps) {
   const { screenToFlowPosition } = useReactFlow();
   const currentTargetRef = useRef<ElementCanvasNode | null>(null);
 
@@ -152,12 +153,13 @@ function useCanvasDragHandlers({ nodes, onDropLibraryElement, onTargetHighlight,
     const target = currentTargetRef.current;
     currentTargetRef.current = null;
     onTargetHighlight(null);
+    onDragStopDirty?.();
     if (!target) return;
     onCombineNodes(draggedNode, target, {
       x: (draggedNode.position.x + target.position.x) / 2,
       y: (draggedNode.position.y + target.position.y) / 2,
     });
-  }, [onTargetHighlight, onCombineNodes]);
+  }, [onTargetHighlight, onCombineNodes, onDragStopDirty]);
 
   return { handleDragOver, handleDrop, handleNodeDrag, handleNodeDragStop };
 }

@@ -115,7 +115,16 @@ function useNodeCreation(
 
 function useNodeInteraction(setNodes: Dispatch<SetStateAction<ElementCanvasNode[]>>) {
   const setCombineTarget = useCallback((id: string | null) => {
-    setNodes((current) => current.map((n) => patchData(n, { isCombineTarget: n.id === id })));
+    setNodes((current) => {
+      let changed = false;
+      const next = current.map((n) => {
+        const isTarget = n.id === id;
+        if (Boolean(n.data.isCombineTarget) === isTarget) return n;
+        changed = true;
+        return patchData(n, { isCombineTarget: isTarget });
+      });
+      return changed ? next : current;
+    });
   }, [setNodes]);
 
   const setCombiningState = useCallback((ids: string[], isCombining: boolean) => {
@@ -123,11 +132,24 @@ function useNodeInteraction(setNodes: Dispatch<SetStateAction<ElementCanvasNode[
   }, [setNodes]);
 
   const setSelectedForCombine = useCallback((selectedId: string | null) => {
-    setNodes((current) => current.map((n) => patchData(n, { isSelectedForCombine: n.id === selectedId })));
+    setNodes((current) => {
+      let changed = false;
+      const next = current.map((n) => {
+        const isSel = n.id === selectedId;
+        if (Boolean(n.data.isSelectedForCombine) === isSel) return n;
+        changed = true;
+        return patchData(n, { isSelectedForCombine: isSel });
+      });
+      return changed ? next : current;
+    });
   }, [setNodes]);
 
   const clearInteractionState = useCallback(() => {
-    setNodes((current) => current.map((n) => patchData(n, { isCombineTarget: false, isCombining: false, isSelectedForCombine: false })));
+    setNodes((current) => {
+      const hasFlags = current.some((n) => n.data.isCombineTarget || n.data.isCombining || n.data.isSelectedForCombine);
+      if (!hasFlags) return current;
+      return current.map((n) => patchData(n, { isCombineTarget: false, isCombining: false, isSelectedForCombine: false }));
+    });
   }, [setNodes]);
 
   return { setCombineTarget, setCombiningState, setSelectedForCombine, clearInteractionState };
@@ -208,13 +230,15 @@ export function useCanvasNodes(
 
   const onNodesChange: OnNodesChange<ElementCanvasNode> = useCallback((changes) => {
     onNodesChangeBase(changes);
-    if (changes.some((c) => c.type === "position" || c.type === "remove" || c.type === "add")) setIsDirty(true);
+    if (changes.some((c) => c.type === "remove" || c.type === "add")) setIsDirty(true);
   }, [onNodesChangeBase]);
 
   const onEdgesChange: OnEdgesChange<Edge> = useCallback((changes) => {
     onEdgesChangeBase(changes);
     if (changes.some((c) => c.type === "remove" || c.type === "add")) setIsDirty(true);
   }, [onEdgesChangeBase]);
+
+  const markDragStopDirty = useCallback(() => setIsDirty(true), []);
 
   const getPersistableNodes = useCallback(() => nodes.map((n) => ({
     id: n.id,
@@ -237,6 +261,7 @@ export function useCanvasNodes(
     edges,
     onNodesChange,
     onEdgesChange,
+    markDragStopDirty,
     ...creation,
     ...interaction,
     ...combine,

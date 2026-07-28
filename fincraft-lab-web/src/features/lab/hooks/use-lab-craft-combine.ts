@@ -46,18 +46,20 @@ export function useLabCraftCombine({ canvas, isAuthenticated, onDiscovery }: Lab
 
   const canvasCombine = useCanvasCombine({ canvas, onCombineRequest: handleCombineRequest });
 
-  const handleResetAll = () => {
+  const handleResetAll = useCallback(() => {
     craft.handleReset();
     setLastFailedPair(null);
-  };
+  }, [craft]);
 
   return {
     ...canvasCombine,
     craftResult: craft.craftResult,
+    lastDiscovery: craft.lastDiscovery,
     craftError: craft.craftError,
     isSubmitting: craft.isSubmitting,
     lastFailedPair,
     handleReset: handleResetAll,
     dismissError: craft.dismissError,
+    setLastDiscovery: craft.setLastDiscovery,
   };
 }

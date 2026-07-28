@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { Info, PanelLeft, Sparkles } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { WorkspaceManager, type CanvasSnapshot, type WorkspaceSummary } from "@/features/workspace/public.client";
 import { FinCraftCanvas, useCanvasNodes, type SaveStatus } from "@/features/canvas/public";
-import { CraftResultPanel, ElementInspector, ElementLibrary, useElementGuidance, type AvailableElement, type SuggestedPartner } from "@/features/craft/public";
+import { CraftResultPanel, ElementInspector, ElementLibrary, useElementGuidance, type AvailableElement, type CraftDiscoveryResult, type SuggestedPartner } from "@/features/craft/public";
 import { mergeAndFilterSuggestions } from "@/features/craft/utils/merge-suggestions";
 import type { useLabCraftCombine } from "../hooks/use-lab-craft-combine";
 
@@ -115,32 +115,31 @@ function InlineCraftError({ message, onDismiss }: { message: string; onDismiss: 
   return <div role="alert" className="lab-inline-error flex items-center justify-between gap-3 rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 px-4 py-2 text-xs text-[var(--color-text-danger)]"><span>{message}</span><button type="button" onClick={onDismiss} className="font-semibold underline">Dismiss</button></div>;
 }
 
-function DiscoveryPanel({ combine, onReset, isOpen }: { combine: CombineController; onReset: () => void; isOpen: boolean }) {
-  const result = combine.craftResult;
-  if (!result || result.outcome !== "DISCOVERY") return null;
+function DiscoveryPanel({ result, onClose, isOpen }: { result: CraftDiscoveryResult | null; onClose: () => void; isOpen: boolean }) {
+  if (!result) return null;
 
   return (
     <aside className="lab-discovery-rail" data-open={isOpen} aria-label="Discovery result">
       <div className="surface-card flex h-full min-h-0 flex-col gap-3 rounded-2xl border border-[var(--border-subtle)] p-3 shadow-xs">
         <div className="flex shrink-0 items-center justify-between border-b border-[var(--border-subtle)] pb-2">
           <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-craft-accent)]">Discovery Result</h3>
-          <button type="button" onClick={onReset} className="text-xs font-medium text-muted-foreground hover:text-foreground">Close</button>
+          <button type="button" onClick={onClose} className="text-xs font-medium text-muted-foreground hover:text-foreground">Close</button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto"><CraftResultPanel result={result} leftElement={null} rightElement={null} onReset={onReset} /></div>
+        <div className="min-h-0 flex-1 overflow-y-auto"><CraftResultPanel result={result} leftElement={null} rightElement={null} onReset={onClose} /></div>
       </div>
     </aside>
   );
 }
 
-function useAdaptivePanelState({ isDiscoveryOpen, clearTapSelection, resetCraft }: { isDiscoveryOpen: boolean; clearTapSelection: () => void; resetCraft: () => void }) {
+function useAdaptivePanelState({ hasDiscovery, clearTapSelection, resetCraft }: { hasDiscovery: boolean; clearTapSelection: () => void; resetCraft: () => void }) {
   const [activePanel, setActivePanel] = useState<AdaptivePanel>(null);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
 
   const handleOpenPanel = useCallback((panel: Exclude<AdaptivePanel, null>) => {
     if (panel === "inspector" && !selectedElementId) return;
-    if (panel === "discovery" && !isDiscoveryOpen) return;
+    if (panel === "discovery" && !hasDiscovery) return;
     setActivePanel(panel);
-  }, [isDiscoveryOpen, selectedElementId]);
+  }, [hasDiscovery, selectedElementId]);
 
   const handleInspectElement = useCallback((elementId: string) => {
     setSelectedElementId(elementId);
@@ -153,34 +152,96 @@ function useAdaptivePanelState({ isDiscoveryOpen, clearTapSelection, resetCraft 
     clearTapSelection();
   }, [clearTapSelection]);
 
-  const handleReset = useCallback(() => {
-    resetCraft();
-    setActivePanel(null);
-  }, [resetCraft]);
+  const handleCloseDiscovery = useCallback(() => setActivePanel(null), []);
+  const handleDismissNoRecipe = useCallback(() => resetCraft(), [resetCraft]);
 
+  const openDiscoveryPanel = useCallback(() => setActivePanel("discovery"), []);
   const closePanel = useCallback(() => setActivePanel(null), []);
 
-  return { activePanel, selectedElementId, isLibraryOpen: activePanel === "elements", isInspectorOpen: activePanel === "inspector", handleOpenPanel, handleInspectElement, handleCloseInspector, handleReset, closePanel };
+  return {
+    activePanel,
+    selectedElementId,
+    isLibraryOpen: activePanel === "elements",
+    isInspectorOpen: activePanel === "inspector",
+    isDiscoveryOpen: activePanel === "discovery",
+    handleOpenPanel,
+    handleInspectElement,
+    handleCloseInspector,
+    handleCloseDiscovery,
+    handleDismissNoRecipe,
+    openDiscoveryPanel,
+    closePanel,
+  };
+}
+
+function useWorkspaceDiscoveryPersistence(
+  workspaceId: string | undefined,
+  lastDiscovery: CraftDiscoveryResult | null,
+  setLastDiscovery: (discovery: CraftDiscoveryResult | null) => void,
+  craftResultOutcome?: string,
+  openDiscoveryPanel?: () => void,
+) {
+  useEffect(() => {
+    if (!workspaceId) return;
+    try {
+      const stored = localStorage.getItem(`fincraft-last-discovery:${workspaceId}`);
+      if (stored) {
+        const parsed = JSON.parse(stored) as CraftDiscoveryResult;
+        if (parsed && parsed.outcome === "DISCOVERY") setLastDiscovery(parsed);
+      }
+    } catch {
+      // Ignore JSON parse error
+    }
+  }, [workspaceId, setLastDiscovery]);
+
+  useEffect(() => {
+    if (!workspaceId || !lastDiscovery) return;
+    try {
+      localStorage.setItem(`fincraft-last-discovery:${workspaceId}`, JSON.stringify(lastDiscovery));
+    } catch {
+      // Ignore quota error
+    }
+  }, [workspaceId, lastDiscovery]);
+
+  useEffect(() => {
+    if (craftResultOutcome === "DISCOVERY") openDiscoveryPanel?.();
+  }, [craftResultOutcome, openDiscoveryPanel]);
 }
 
 export function LabWorkspaceContent({ isAuthenticated, initialWorkspace, canvas, save, combine, localElements, handlePlaceElement }: LabWorkspaceContentProps) {
-  const isDiscoveryOpen = combine.craftResult?.outcome === "DISCOVERY";
-  const panels = useAdaptivePanelState({ isDiscoveryOpen, clearTapSelection: combine.handleClearTapSelection, resetCraft: combine.handleReset });
+  const workspaceId = initialWorkspace?.workspaceId;
+  const { lastDiscovery, setLastDiscovery } = combine;
+  const hasDiscovery = Boolean(lastDiscovery);
+
+  const panels = useAdaptivePanelState({
+    hasDiscovery,
+    clearTapSelection: combine.handleClearTapSelection,
+    resetCraft: combine.handleReset,
+  });
+
+  useWorkspaceDiscoveryPersistence(
+    workspaceId,
+    lastDiscovery,
+    setLastDiscovery,
+    combine.craftResult?.outcome,
+    panels.openDiscoveryPanel,
+  );
 
   return (
     <div className="lab-workspace-shell">
       <div className="lab-toolbar-row">
         <LabToolbar isAuthenticated={isAuthenticated} initialWorkspace={initialWorkspace} />
-        <AdaptivePanelControls activePanel={panels.activePanel} hasSelection={Boolean(panels.selectedElementId)} hasDiscovery={isDiscoveryOpen} onOpenPanel={panels.handleOpenPanel} />
+        <AdaptivePanelControls activePanel={panels.activePanel} hasSelection={Boolean(panels.selectedElementId)} hasDiscovery={hasDiscovery} onOpenPanel={panels.handleOpenPanel} />
       </div>
 
-      <div className="lab-workspace-stage" data-discovery-open={isDiscoveryOpen}>
+      <div className="lab-workspace-stage" data-discovery-open={panels.isDiscoveryOpen}>
         <main aria-label="Infinite Craft Canvas" className="lab-canvas-slot">
           <FinCraftCanvas
             nodes={canvas.nodes}
             edges={canvas.edges}
             onNodesChange={canvas.onNodesChange}
             onEdgesChange={canvas.onEdgesChange}
+            onDragStopDirty={canvas.markDragStopDirty}
             onDropLibraryElement={combine.handleDropOnCanvas}
             onTargetHighlight={combine.handleTargetHighlight}
             onCombineNodes={combine.handleCombineNodes}
@@ -196,7 +257,7 @@ export function LabWorkspaceContent({ isAuthenticated, initialWorkspace, canvas,
 
         <div className="lab-feedback-stack">
           {combine.craftError ? <InlineCraftError message={combine.craftError} onDismiss={combine.dismissError} /> : null}
-          {combine.craftResult?.outcome === "NO_RECIPE" ? <CompactNoRecipeNotice failedPair={combine.lastFailedPair} onDismiss={panels.handleReset} onPlaceElement={handlePlaceElement} /> : null}
+          {combine.craftResult?.outcome === "NO_RECIPE" ? <CompactNoRecipeNotice failedPair={combine.lastFailedPair} onDismiss={panels.handleDismissNoRecipe} onPlaceElement={handlePlaceElement} /> : null}
         </div>
 
         <div className="lab-library-rail" data-open={panels.isLibraryOpen}>
@@ -207,10 +268,10 @@ export function LabWorkspaceContent({ isAuthenticated, initialWorkspace, canvas,
           <ElementInspector elements={localElements} selectedElementId={panels.selectedElementId} onClose={panels.handleCloseInspector} onPlaceElement={handlePlaceElement} />
         </div>
 
-        <DiscoveryPanel combine={combine} onReset={panels.handleReset} isOpen={panels.activePanel === "discovery"} />
+        <DiscoveryPanel result={lastDiscovery} onClose={panels.handleCloseDiscovery} isOpen={panels.isDiscoveryOpen} />
       </div>
 
-      <CompactBottomToolbar activePanel={panels.activePanel} hasSelection={Boolean(panels.selectedElementId)} hasDiscovery={isDiscoveryOpen} onOpenPanel={panels.handleOpenPanel} />
+      <CompactBottomToolbar activePanel={panels.activePanel} hasSelection={Boolean(panels.selectedElementId)} hasDiscovery={hasDiscovery} onOpenPanel={panels.handleOpenPanel} />
     </div>
   );
 }

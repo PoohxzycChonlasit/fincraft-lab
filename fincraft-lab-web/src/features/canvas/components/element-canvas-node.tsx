@@ -1,9 +1,10 @@
 "use client";
 
+import { memo } from "react";
 import type { NodeProps } from "@xyflow/react";
 import type { ElementCanvasNode } from "../types/canvas-node.type";
 
-export function ElementCanvasNodeComponent({ data, selected }: NodeProps<ElementCanvasNode>) {
+function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>) {
   const isTarget = Boolean(data.isCombineTarget);
   const isCombining = Boolean(data.isCombining);
   const isTapSelected = Boolean(data.isSelectedForCombine);
@@ -11,10 +12,10 @@ export function ElementCanvasNodeComponent({ data, selected }: NodeProps<Element
   const borderStyle = isTarget
     ? "border-[var(--color-craft-accent)] ring-4 ring-[var(--color-craft-accent)]/30 scale-105 shadow-lg"
     : isTapSelected
-    ? "border-[var(--color-action-primary)] ring-2 ring-[var(--color-action-primary)]"
-    : selected
-    ? "border-[var(--border-selected)] ring-2 ring-[var(--ring)]"
-    : "border-[var(--border-subtle)]";
+      ? "border-[var(--color-action-primary)] ring-2 ring-[var(--color-action-primary)]"
+      : selected
+        ? "border-[var(--border-selected)] ring-2 ring-[var(--ring)]"
+        : "border-[var(--border-subtle)]";
 
   return (
     <article
@@ -37,3 +38,16 @@ export function ElementCanvasNodeComponent({ data, selected }: NodeProps<Element
     </article>
   );
 }
+
+export const ElementCanvasNodeComponent = memo(ElementCanvasNodeBase, (prev, next) => {
+  return (
+    prev.selected === next.selected &&
+    prev.data.elementId === next.data.elementId &&
+    prev.data.name === next.data.name &&
+    prev.data.emoji === next.data.emoji &&
+    prev.data.categoryName === next.data.categoryName &&
+    prev.data.isCombineTarget === next.data.isCombineTarget &&
+    prev.data.isCombining === next.data.isCombining &&
+    prev.data.isSelectedForCombine === next.data.isSelectedForCombine
+  );
+});
