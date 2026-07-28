@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import { backendFetch } from "@/lib/api/backend-fetch.server";
-import type { SaveWorkspacePayloadNode } from "@/features/workspace/types/workspace.type";
 
-type SaveCanvasRequestBody = {
-  nodes?: SaveWorkspacePayloadNode[];
-  edges?: unknown[];
-};
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 export async function PUT(
   request: Request,
@@ -17,13 +15,20 @@ export async function PUT(
       return NextResponse.json({ error: "Workspace ID is required" }, { status: 400 });
     }
 
-    const body = (await request.json()) as SaveCanvasRequestBody;
+    const body: unknown = await request.json();
+    if (!isRecord(body)) {
+      return NextResponse.json({ error: "Canvas payload must be an object" }, { status: 400 });
+    }
+
     const nodes = Array.isArray(body.nodes) ? body.nodes : [];
     const edges = Array.isArray(body.edges) ? body.edges : [];
+    if ("lastDiscovery" in body && body.lastDiscovery !== null && !isRecord(body.lastDiscovery)) {
+      return NextResponse.json({ error: "Last discovery must be an object or null" }, { status: 400 });
+    }
 
     const res = await backendFetch(`/workspaces/${workspaceId}/canvas`, {
       method: "PUT",
-      body: { nodes, edges },
+      body: { nodes, edges, lastDiscovery: body.lastDiscovery },
     });
 
     if (!res.ok) {

@@ -149,24 +149,33 @@ export function LabWorkspaceContent(props: LabWorkspaceContentProps) {
   const { initialWorkspace, combine, localElements, activePanel, onPanelChange, unavailableWorkspaceElements, handlePlaceElement } = props;
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [userTab, setUserTab] = useState<ContextTab | null>(null);
-  const { setLastDiscovery } = combine;
+  const { craftResult, handleReset, setLastDiscovery } = combine;
   useWorkspaceDiscoveryPersistence(initialWorkspace?.snapshot.lastDiscovery, setLastDiscovery);
-  const activeContextTab: ContextTab = userTab ?? (combine.craftResult?.outcome === "DISCOVERY" ? "discovery" : "element");
+  const activeContextTab: ContextTab = craftResult?.outcome === "DISCOVERY" ? "discovery" : (userTab ?? "element");
+
+  const handleContextTabChange = useCallback((tab: ContextTab) => {
+    if (tab === "element") handleReset();
+    setUserTab(tab);
+  }, [handleReset]);
 
   const handleInspectElement = useCallback((elementId: string) => {
+    handleReset();
     setSelectedElementId(elementId);
     setUserTab("element");
     onPanelChange("context");
-  }, [onPanelChange]);
+  }, [handleReset, onPanelChange]);
   const handleNodeTap = useCallback((node: ElementCanvasNode) => {
     combine.handleNodeTap(node);
     if (node.data.elementId) handleInspectElement(node.data.elementId);
   }, [combine, handleInspectElement]);
   const closeElement = useCallback(() => setSelectedElementId(null), []);
-  const closeDiscovery = useCallback(() => setLastDiscovery(null), [setLastDiscovery]);
+  const closeDiscovery = useCallback(() => {
+    handleReset();
+    setLastDiscovery(null);
+  }, [handleReset, setLastDiscovery]);
 
   const library = useMemo(() => <ElementLibrary elements={localElements} selectedElementId={selectedElementId} onPlaceElement={handlePlaceElement} onInspectElement={handleInspectElement} />, [handleInspectElement, handlePlaceElement, localElements, selectedElementId]);
-  const context = useMemo(() => <ElementContextRail activeTab={activeContextTab} onTabChange={setUserTab} selectedElementId={selectedElementId} lastDiscovery={combine.lastDiscovery} elements={localElements} onInspectElement={handleInspectElement} onCloseElementInspector={closeElement} onCloseDiscovery={closeDiscovery} onPlaceElement={handlePlaceElement} />, [activeContextTab, closeDiscovery, closeElement, combine.lastDiscovery, handleInspectElement, handlePlaceElement, localElements, selectedElementId]);
+  const context = useMemo(() => <ElementContextRail activeTab={activeContextTab} onTabChange={handleContextTabChange} selectedElementId={selectedElementId} lastDiscovery={combine.lastDiscovery} elements={localElements} onInspectElement={handleInspectElement} onCloseElementInspector={closeElement} onCloseDiscovery={closeDiscovery} onPlaceElement={handlePlaceElement} />, [activeContextTab, closeDiscovery, closeElement, combine.lastDiscovery, handleContextTabChange, handleInspectElement, handlePlaceElement, localElements, selectedElementId]);
 
   return (
     <div className="lab-workspace-shell">

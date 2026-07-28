@@ -11,9 +11,21 @@ export type UserProfile = {
   updatedAt: string;
 };
 
-type MeResponseBody = {
-  data?: UserProfile;
-};
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isUserProfile(value: unknown): value is UserProfile {
+  return isRecord(value)
+    && typeof value.id === "string"
+    && typeof value.email === "string"
+    && typeof value.displayName === "string"
+    && (value.avatarUrl === null || typeof value.avatarUrl === "string")
+    && typeof value.role === "string"
+    && typeof value.status === "string"
+    && typeof value.createdAt === "string"
+    && typeof value.updatedAt === "string";
+}
 
 export async function getSessionUser(): Promise<UserProfile | null> {
   const res = await backendFetch("/auth/me", {
@@ -25,6 +37,6 @@ export async function getSessionUser(): Promise<UserProfile | null> {
     return null;
   }
 
-  const json = res.data as MeResponseBody;
-  return json.data ?? null;
+  if (!isRecord(res.data)) return null;
+  return isUserProfile(res.data.data) ? res.data.data : null;
 }
