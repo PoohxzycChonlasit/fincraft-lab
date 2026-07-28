@@ -19,6 +19,7 @@ export function normalizeCanvasEdges(edges: Edge[] | undefined, nodes: ElementCa
       target: edge.target,
       sourceHandle: "lineage-source",
       targetHandle: "lineage-target",
+      label: edge.label || "Combines into",
       type: edge.type || "smoothstep",
       style: edge.style || { stroke: "var(--color-craft-accent,#ea580c)", strokeWidth: 2 },
     });

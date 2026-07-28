@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { AvailableElement, CraftDiscoveryResult, CraftElementResult } from "@/features/craft/public";
 import { useCanvasNodes, type InitialEdgeInput, type InitialNodeInput, type PersistableCanvasNode, type SaveStatus } from "@/features/canvas/public";
@@ -46,6 +46,7 @@ function LoadErrorBanner({ message }: { message: string }) {
 
 function useLabWorkspaceSave(
   workspaceId: string | undefined,
+  isDirty: boolean,
   getPersistableNodes: () => PersistableCanvasNode[],
   getPersistableEdges: () => Array<{ id: string; sourceNodeId: string; targetNodeId: string; label?: string }>,
   getLastDiscovery: () => CraftDiscoveryResult | null,
@@ -54,8 +55,8 @@ function useLabWorkspaceSave(
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const handleSave = useCallback(async () => {
-    if (!workspaceId || saveStatus === "saving") return;
+  const performSave = useCallback(async () => {
+    if (!workspaceId) return;
     setSaveStatus("saving");
     setSaveError(null);
     const result = await saveWorkspaceCanvasApi(
@@ -67,11 +68,26 @@ function useLabWorkspaceSave(
     if (result.success) {
       markSaved();
       setSaveStatus("saved");
-      return;
+    } else {
+      setSaveStatus("error");
+      setSaveError(result.errorMessage);
     }
-    setSaveStatus("error");
-    setSaveError(result.errorMessage);
-  }, [workspaceId, saveStatus, getPersistableNodes, getPersistableEdges, getLastDiscovery, markSaved]);
+  }, [workspaceId, getPersistableNodes, getPersistableEdges, getLastDiscovery, markSaved]);
+
+  const handleSave = useCallback(async () => {
+    if (!workspaceId || saveStatus === "saving") return;
+    await performSave();
+  }, [workspaceId, saveStatus, performSave]);
+
+  useEffect(() => {
+    if (!workspaceId || !isDirty || saveStatus === "saving") return;
+
+    const timer = setTimeout(() => {
+      void performSave();
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [workspaceId, isDirty, saveStatus, performSave]);
 
   return { saveStatus, saveError, handleSave };
 }
@@ -135,6 +151,7 @@ export function FinCraftLabClient({
 
   const save = useLabWorkspaceSave(
     initialWorkspace?.workspaceId,
+    canvas.isDirty,
     canvas.getPersistableNodes,
     canvas.getPersistableEdges,
     getLastDiscovery,

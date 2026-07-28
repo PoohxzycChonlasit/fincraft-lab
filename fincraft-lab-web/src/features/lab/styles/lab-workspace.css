@@ -254,3 +254,35 @@ main:has(.lab-page-frame) {
     transition-duration: 0.01ms !important;
   }
 }
+
+.react-flow__controls {
+  border-radius: 0.75rem !important;
+  border: 1px solid var(--border-subtle) !important;
+  background: var(--surface-card) !important;
+  box-shadow: var(--shadow-resting) !important;
+  overflow: hidden;
+}
+
+.react-flow__controls-button {
+  background: var(--surface-card) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  color: var(--color-text-primary) !important;
+  fill: var(--color-text-primary) !important;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: 0 !important;
+}
+
+.react-flow__controls-button:hover {
+  background: var(--surface-inset) !important;
+  color: var(--color-action-primary) !important;
+  fill: var(--color-action-primary) !important;
+}
+
+.react-flow__controls-button svg {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  max-width: 14px;
+  max-height: 14px;
+}

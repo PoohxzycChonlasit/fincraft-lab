@@ -26,7 +26,7 @@ function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>)
     >
       <Handle
         type="target"
-        position={Position.Left}
+        position={Position.Top}
         id="lineage-target"
         className="!h-2.5 !w-2.5 !border-0 !bg-[var(--color-craft-accent)] opacity-40 transition-opacity hover:opacity-100"
       />
@@ -43,7 +43,7 @@ function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>)
       </div>
       <Handle
         type="source"
-        position={Position.Right}
+        position={Position.Bottom}
         id="lineage-source"
         className="!h-2.5 !w-2.5 !border-0 !bg-[var(--color-craft-accent)] opacity-40 transition-opacity hover:opacity-100"
       />

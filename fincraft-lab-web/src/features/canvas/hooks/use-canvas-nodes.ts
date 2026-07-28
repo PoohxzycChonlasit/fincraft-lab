@@ -62,8 +62,8 @@ function buildNode(element: CanvasElementInput, position: { x: number; y: number
 
 function buildLineageEdges(sourceNodeId: string, targetNodeId: string, resultNodeId: string): [Edge, Edge] {
   return [
-    { id: crypto.randomUUID(), source: sourceNodeId, target: resultNodeId, sourceHandle: "lineage-source", targetHandle: "lineage-target", type: "smoothstep", style: { stroke: "var(--color-craft-accent,#ea580c)", strokeWidth: 2 } },
-    { id: crypto.randomUUID(), source: targetNodeId, target: resultNodeId, sourceHandle: "lineage-source", targetHandle: "lineage-target", type: "smoothstep", style: { stroke: "var(--color-action-primary,#0f766e)", strokeWidth: 2 } },
+    { id: crypto.randomUUID(), source: sourceNodeId, target: resultNodeId, sourceHandle: "lineage-source", targetHandle: "lineage-target", label: "Combines into", type: "smoothstep", style: { stroke: "var(--color-craft-accent,#ea580c)", strokeWidth: 2 } },
+    { id: crypto.randomUUID(), source: targetNodeId, target: resultNodeId, sourceHandle: "lineage-source", targetHandle: "lineage-target", label: "Combines into", type: "smoothstep", style: { stroke: "var(--color-action-primary,#0f766e)", strokeWidth: 2 } },
   ];
 }
 

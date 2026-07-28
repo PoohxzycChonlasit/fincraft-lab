@@ -8,6 +8,19 @@ export type SuggestedPartnerSummary = {
   categoryName: string;
 };
 
+export type ElementLearningDetail = {
+  shortDescription: string;
+  realLesson: string;
+  example?: string;
+  possibleBenefit?: string;
+  possibleTradeoff?: string;
+  hiddenRisk?: string;
+  worksWhen?: string;
+  becomesDifficultWhen?: string;
+  whatChangesOutcome?: string;
+  sources?: Array<Record<string, unknown>>;
+};
+
 export type ElementGuidanceResponse = {
   element: {
     id: string;
@@ -22,5 +35,6 @@ export type ElementGuidanceResponse = {
     };
     description: string;
   };
+  learningDetail?: ElementLearningDetail;
   suggestedPartners: SuggestedPartnerSummary[];
 };

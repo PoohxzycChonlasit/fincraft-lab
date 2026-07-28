@@ -64,6 +64,10 @@
    FINCRAFT DESIGN SYSTEM V2 — 5-LAYER TOKEN ARCHITECTURE
    ========================================================================== */
 
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   color-scheme: light;
 

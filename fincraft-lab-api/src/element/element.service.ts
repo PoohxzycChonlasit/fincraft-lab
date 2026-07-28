@@ -127,6 +127,15 @@ export class ElementService {
         discoveryDetail: {
           select: {
             shortDescription: true,
+            realLesson: true,
+            example: true,
+            possibleBenefit: true,
+            possibleTradeoff: true,
+            hiddenRisk: true,
+            worksWhen: true,
+            becomesDifficultWhen: true,
+            whatChangesOutcome: true,
+            sources: true,
           },
         },
       },
@@ -202,6 +211,31 @@ export class ElementService {
     }
 
     const suggestedPartners = Array.from(partnerMap.values()).slice(0, 4);
+    const detail = element.discoveryDetail;
+    const learningDetail = detail
+      ? {
+          shortDescription: detail.shortDescription,
+          realLesson: detail.realLesson,
+          ...(detail.example ? { example: detail.example } : {}),
+          ...(detail.possibleBenefit
+            ? { possibleBenefit: detail.possibleBenefit }
+            : {}),
+          ...(detail.possibleTradeoff
+            ? { possibleTradeoff: detail.possibleTradeoff }
+            : {}),
+          ...(detail.hiddenRisk ? { hiddenRisk: detail.hiddenRisk } : {}),
+          ...(detail.worksWhen ? { worksWhen: detail.worksWhen } : {}),
+          ...(detail.becomesDifficultWhen
+            ? { becomesDifficultWhen: detail.becomesDifficultWhen }
+            : {}),
+          ...(detail.whatChangesOutcome
+            ? { whatChangesOutcome: detail.whatChangesOutcome }
+            : {}),
+          ...(Array.isArray(detail.sources)
+            ? { sources: detail.sources as Array<Record<string, unknown>> }
+            : {}),
+        }
+      : undefined;
 
     return {
       element: {
@@ -216,6 +250,7 @@ export class ElementService {
           element.discoveryDetail?.shortDescription ||
           `Financial element: ${element.name}. Combine with other elements on the canvas to discover financial concepts.`,
       },
+      learningDetail,
       suggestedPartners,
     };
   }
