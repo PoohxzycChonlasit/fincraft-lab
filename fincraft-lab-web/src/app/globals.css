@@ -65,7 +65,26 @@
    ========================================================================== */
 
 html {
-  scrollbar-gutter: stable;
+  scrollbar-gutter: auto;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle, #e7e5e4);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted, #78716c);
 }
 
 :root {

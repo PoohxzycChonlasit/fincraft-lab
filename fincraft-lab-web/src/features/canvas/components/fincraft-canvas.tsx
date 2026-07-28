@@ -16,8 +16,10 @@ import {
 import type { SaveStatus } from "../hooks/use-canvas-nodes";
 import type { CanvasElementInput, ElementCanvasNode } from "../types/canvas-node.type";
 import { ElementCanvasNodeComponent } from "./element-canvas-node";
+import { LineageStraightEdge } from "./lineage-straight-edge";
 
 const nodeTypes = { elementNode: ElementCanvasNodeComponent };
+const edgeTypes = { lineage: LineageStraightEdge };
 const NODE_WIDTH = 160;
 const NODE_HEIGHT = 70;
 const COLLISION_THRESHOLD = 1200;
@@ -182,6 +184,7 @@ function ReactFlowCanvasInner(props: CanvasInnerProps) {
         onNodeClick={handleNodeClick}
         onPaneClick={onClearTapSelection}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         fitView={nodes.length > 0}
         minZoom={0.2}
         maxZoom={2}

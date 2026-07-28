@@ -11,6 +11,7 @@ export type ProductShellProps = {
   activeTab?: ProductTab;
   user?: UserProfile | null;
   contentMode?: "standard" | "wide";
+  layoutMode?: "document" | "workspace";
 };
 
 function ProductBrand() {
@@ -31,11 +32,12 @@ function ProductBrand() {
   );
 }
 
-export function ProductShell({ children, activeTab = "home", user, contentMode = "standard" }: ProductShellProps) {
+export function ProductShell({ children, activeTab = "home", user, contentMode = "standard", layoutMode = "document" }: ProductShellProps) {
   const maxWClass = contentMode === "wide" ? "max-w-[1560px]" : "max-w-7xl";
+  const isWorkspace = layoutMode === "workspace";
 
   return (
-    <div className="flex min-h-[100dvh] min-w-0 flex-col overflow-hidden bg-[var(--surface-flat)] text-[var(--color-text-primary)]">
+    <div className={`flex min-w-0 flex-col bg-[var(--surface-flat)] text-[var(--color-text-primary)] ${isWorkspace ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh]"}`}>
       <header className="product-header relative z-50 h-[60px] shrink-0 border-b border-[var(--border-subtle)] bg-[var(--surface-resting)] shadow-xs">
         <div className={`mx-auto flex h-full w-full ${maxWClass} min-w-0 flex-nowrap items-center justify-between gap-2 px-4 sm:px-6`}>
           <ProductBrand />
@@ -46,11 +48,11 @@ export function ProductShell({ children, activeTab = "home", user, contentMode =
         </div>
       </header>
 
-      <main className={`mx-auto w-full ${maxWClass} min-w-0 flex-1 basis-0 overflow-auto px-4 py-4 sm:px-6 sm:py-6`}>
+      <main className={`mx-auto w-full ${maxWClass} min-w-0 flex-1 px-4 py-4 sm:px-6 sm:py-6 ${isWorkspace ? "min-h-0 overflow-hidden" : ""}`}>
         {children}
       </main>
 
-      <footer className="shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-resting)] py-2.5 text-center text-xs text-muted-foreground">
+      <footer className="shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-resting)] py-2 text-center text-xs text-muted-foreground">
         <p>Education Only — Simulation Only — Not Financial Advice</p>
       </footer>
     </div>
