@@ -83,6 +83,12 @@ FinCraft V2 freezes 7 explicit Surface Elevation Roles and 6 Edge Roles:
 - Content, learning articles, inputs, graph nodes, simulation data, and admin tables **MUST remain solid opaque by default**.
 - If a browser does not support `backdrop-filter` or `@media (prefers-reduced-transparency: reduce)` is active, floating surfaces automatically revert to 100% solid color fills (`var(--surface-card)`).
 
+### Home Material Supersession (2026-07-28)
+
+The Owner-approved **FinCraft Living Financial City — Day/Night Edition** extends bounded glass eligibility for the public Home route. Home Hero support panels, the concept-combination surface, How It Works cards, outcome cards, and selected floating controls may use the shared bounded glass material when contrast and fallback requirements pass.
+
+This supersession is route-specific. Long-form reading surfaces, forms, Admin screens, dense Craft Lab information panels, graph nodes, and the active Craft Canvas remain sufficiently opaque. Glass is never the default for every container, and pointer-reactive material must not be applied to React Flow nodes or drag surfaces.
+
 ---
 
 ## Canonical Theme Architecture & Source of Truth

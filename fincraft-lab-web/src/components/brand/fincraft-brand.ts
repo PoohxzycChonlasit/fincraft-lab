@@ -6,10 +6,10 @@ export const FINCRAFT_BRAND = {
   description:
     "Learn financial concepts by combining ideas, exploring discoveries, and testing simplified real-world scenarios in an interactive financial literacy lab.",
   colors: {
-    lightBackground: "#fff8ec",
+    lightBackground: "#fbf4e8",
     lightTheme: "#0f766e",
     darkBackground: "#07131f",
-    darkTheme: "#14b8a6",
-    accent: "#ea580c",
+    darkTheme: "#2ac7b6",
+    accent: "#c2410c",
   },
 } as const;

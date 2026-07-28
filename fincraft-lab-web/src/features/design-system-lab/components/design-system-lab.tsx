@@ -1,4 +1,5 @@
 import { CompactInspectionNotes } from "./compact-inspection-notes";
+import { GlassSurfaceBench } from "./glass-surface-bench";
 import { LabHeader } from "./lab-header";
 import { RelationshipTestBench } from "./relationship-test-bench";
 import { SignatureComponentBench } from "./signature-component-bench";
@@ -14,6 +15,9 @@ export function DesignSystemLab() {
 
         {/* Theme and Material Prototype Bench */}
         <ThemeMaterialBench />
+
+        {/* Bounded Glass Primitive Bench */}
+        <GlassSurfaceBench />
 
         {/* Signature Components Bench */}
         <section aria-label="Signature Components Bench">

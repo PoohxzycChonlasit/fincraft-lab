@@ -14,14 +14,18 @@ interface ThemeSwitcherProps {
 }
 
 export function ThemeSwitcher({ initialPreference = "system" }: ThemeSwitcherProps) {
-  const [preference, setPreference] = useState<ThemePreference>(() => {
-    if (typeof window !== "undefined") {
-      return getClientThemeCookie();
-    }
-    return initialPreference;
-  });
+  const [preference, setPreference] = useState<ThemePreference>(initialPreference);
   const [resolved, setResolved] = useState<ResolvedAppearance>("light");
   const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    const cookieSync = window.setTimeout(() => {
+      const clientPreference = getClientThemeCookie();
+      if (clientPreference !== initialPreference) setPreference(clientPreference);
+    }, 0);
+
+    return () => window.clearTimeout(cookieSync);
+  }, [initialPreference]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
