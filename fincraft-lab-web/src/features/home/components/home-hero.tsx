@@ -18,10 +18,10 @@ export function HomeHero({ initialThemePreference, user }: HomeHeroProps) {
           Financial Literacy Discovery Lab
         </p>
         <h1 id="home-hero-title" className="home-hero-title">
-          Learn finance by combining ideas.
+          Learn finance by connecting ideas.
         </h1>
         <p className="home-hero-description">
-          Place financial elements on an interactive canvas, combine them, and discover how money concepts connect in real life.
+          Combine everyday financial concepts, discover how they relate, and build a clearer understanding of real-life money decisions.
         </p>
 
         <div className="home-hero-actions">
@@ -33,16 +33,17 @@ export function HomeHero({ initialThemePreference, user }: HomeHeroProps) {
           </Link>
           {user ? (
             <Link
-              href="/workspace"
+              href="/lab"
               className="home-button home-button-secondary"
             >
-              Open Workspace
+              Continue to Lab
             </Link>
           ) : (
             <Link href="/login" className="home-button home-button-secondary">
               Sign In to Save
             </Link>
           )}
+          {!user ? <Link href="/register" className="home-text-link">Create Account</Link> : null}
         </div>
 
         <div className="home-safety-note" role="note">

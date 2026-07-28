@@ -1,9 +1,8 @@
 import { ProductShell } from "@/components/brand/product-shell";
-import { HomeConceptCombination } from "@/features/home/components/home-concept-combination";
+import { HomeAbout } from "@/features/home/components/home-about";
 import { HomeFinalCta } from "@/features/home/components/home-final-cta";
-import { HomeFinancialOutcomes } from "@/features/home/components/home-financial-outcomes";
+import { HomeFeatures } from "@/features/home/components/home-features";
 import { HomeHero } from "@/features/home/components/home-hero";
-import { HomeHowItWorks } from "@/features/home/components/home-how-it-works";
 import { THEME_COOKIE_NAME } from "@/features/theme/constants/theme-constants";
 import { parseThemePreference } from "@/features/theme/types/theme-types";
 import { getSessionUser } from "@/lib/auth/session";
@@ -18,10 +17,9 @@ export default async function HomePage() {
       <div className="home-page">
         <div className="home-content">
           <HomeHero user={user} initialThemePreference={themePreference} />
-          <HomeConceptCombination />
-          <HomeHowItWorks />
-          <HomeFinancialOutcomes />
-          <HomeFinalCta />
+          <HomeAbout />
+          <HomeFeatures />
+          <HomeFinalCta user={user} />
         </div>
       </div>
     </ProductShell>
