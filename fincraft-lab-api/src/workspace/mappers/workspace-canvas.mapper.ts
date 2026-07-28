@@ -1,4 +1,5 @@
 import type { ElementType } from '../../database/generated/prisma/client';
+import { parseCraftSources } from '../../craft/parsers/craft-sources.parser';
 import type {
   CanvasSnapshotResponse,
   JsonObject,
@@ -19,6 +20,17 @@ export interface RawDbWorkspaceNode {
     iconUrl: string | null;
     elementType: ElementType;
     isStarter: boolean;
+    discoveryDetail?: {
+      shortDescription: string;
+      realLesson: string;
+      example: string | null;
+      possibleBenefit: string | null;
+      possibleTradeoff: string | null;
+      hiddenRisk: string | null;
+      worksWhen: string | null;
+      becomesDifficultWhen: string | null;
+      sources: unknown;
+    } | null;
   };
 }
 
@@ -37,7 +49,69 @@ export function mapCanvasSnapshotResponse(
   workspaceUpdatedAt: Date,
   nodes: RawDbWorkspaceNode[],
   edges: RawDbWorkspaceEdge[],
+  rawSnapshotJson?: unknown,
 ): CanvasSnapshotResponse {
+  let lastDiscoveryObj: JsonObject | null = null;
+
+  const discoveryNode = [...nodes]
+    .reverse()
+    .find((n) => !n.element.isStarter && n.element.discoveryDetail != null);
+
+  if (discoveryNode && discoveryNode.element.discoveryDetail) {
+    const detail = discoveryNode.element.discoveryDetail;
+    let parsedSources: unknown[] = [];
+    try {
+      parsedSources = parseCraftSources(detail.sources);
+    } catch {
+      parsedSources = [];
+    }
+
+    lastDiscoveryObj = {
+      outcome: 'DISCOVERY',
+      isNewDiscovery: false,
+      element: {
+        id: discoveryNode.element.id,
+        name: discoveryNode.element.name,
+        slug: discoveryNode.element.slug,
+        emoji: discoveryNode.element.emoji,
+        iconUrl: discoveryNode.element.iconUrl,
+        elementType: discoveryNode.element.elementType,
+        isStarter: discoveryNode.element.isStarter,
+      },
+      detail: {
+        shortDescription: detail.shortDescription,
+        realLesson: detail.realLesson,
+        ...(detail.example ? { example: detail.example } : {}),
+        ...(detail.possibleBenefit
+          ? { possibleBenefit: detail.possibleBenefit }
+          : {}),
+        ...(detail.possibleTradeoff
+          ? { possibleTradeoff: detail.possibleTradeoff }
+          : {}),
+        ...(detail.hiddenRisk ? { hiddenRisk: detail.hiddenRisk } : {}),
+        ...(detail.worksWhen ? { worksWhen: detail.worksWhen } : {}),
+        ...(detail.becomesDifficultWhen
+          ? { becomesDifficultWhen: detail.becomesDifficultWhen }
+          : {}),
+        sources: parsedSources as unknown as JsonValue[],
+      },
+    };
+  }
+
+  if (
+    !lastDiscoveryObj &&
+    typeof rawSnapshotJson === 'object' &&
+    rawSnapshotJson !== null &&
+    !Array.isArray(rawSnapshotJson) &&
+    'lastDiscovery' in rawSnapshotJson &&
+    typeof (rawSnapshotJson as Record<string, unknown>).lastDiscovery ===
+      'object' &&
+    (rawSnapshotJson as Record<string, unknown>).lastDiscovery !== null
+  ) {
+    lastDiscoveryObj = (rawSnapshotJson as Record<string, unknown>)
+      .lastDiscovery as JsonObject;
+  }
+
   return {
     workspaceId,
     workspaceUpdatedAt: workspaceUpdatedAt.toISOString(),
@@ -78,5 +152,6 @@ export function mapCanvasSnapshotResponse(
       targetNodeId: e.targetNodeId,
       label: e.label,
     })),
+    ...(lastDiscoveryObj ? { lastDiscovery: lastDiscoveryObj } : {}),
   };
 }

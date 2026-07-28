@@ -175,33 +175,31 @@ function useAdaptivePanelState({ hasDiscovery, clearTapSelection, resetCraft }: 
 }
 
 function useWorkspaceDiscoveryPersistence(
-  workspaceId: string | undefined,
-  lastDiscovery: CraftDiscoveryResult | null,
-  setLastDiscovery: (discovery: CraftDiscoveryResult | null) => void,
+  initialDiscovery?: CraftDiscoveryResult | null,
+  setLastDiscovery?: (discovery: CraftDiscoveryResult | null) => void,
   craftResultOutcome?: string,
   openDiscoveryPanel?: () => void,
 ) {
   useEffect(() => {
-    if (!workspaceId) return;
-    try {
-      const stored = localStorage.getItem(`fincraft-last-discovery:${workspaceId}`);
-      if (stored) {
-        const parsed = JSON.parse(stored) as CraftDiscoveryResult;
-        if (parsed && parsed.outcome === "DISCOVERY") setLastDiscovery(parsed);
-      }
-    } catch {
-      // Ignore JSON parse error
+    if (initialDiscovery && initialDiscovery.outcome === "DISCOVERY") {
+      setLastDiscovery?.(initialDiscovery);
+    } else {
+      setLastDiscovery?.(null);
     }
-  }, [workspaceId, setLastDiscovery]);
+  }, [initialDiscovery, setLastDiscovery]);
 
   useEffect(() => {
-    if (!workspaceId || !lastDiscovery) return;
     try {
-      localStorage.setItem(`fincraft-last-discovery:${workspaceId}`, JSON.stringify(lastDiscovery));
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key?.startsWith("fincraft-last-discovery:")) {
+          localStorage.removeItem(key);
+        }
+      }
     } catch {
-      // Ignore quota error
+      // Ignore storage error
     }
-  }, [workspaceId, lastDiscovery]);
+  }, []);
 
   useEffect(() => {
     if (craftResultOutcome === "DISCOVERY") openDiscoveryPanel?.();
@@ -209,7 +207,7 @@ function useWorkspaceDiscoveryPersistence(
 }
 
 export function LabWorkspaceContent({ isAuthenticated, initialWorkspace, canvas, save, combine, localElements, handlePlaceElement }: LabWorkspaceContentProps) {
-  const workspaceId = initialWorkspace?.workspaceId;
+  const initialDiscovery = initialWorkspace?.snapshot.lastDiscovery;
   const { lastDiscovery, setLastDiscovery } = combine;
   const hasDiscovery = Boolean(lastDiscovery);
 
@@ -220,8 +218,7 @@ export function LabWorkspaceContent({ isAuthenticated, initialWorkspace, canvas,
   });
 
   useWorkspaceDiscoveryPersistence(
-    workspaceId,
-    lastDiscovery,
+    initialDiscovery,
     setLastDiscovery,
     combine.craftResult?.outcome,
     panels.openDiscoveryPanel,

@@ -41,7 +41,9 @@ function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>)
 
 export const ElementCanvasNodeComponent = memo(ElementCanvasNodeBase, (prev, next) => {
   return (
+    prev.id === next.id &&
     prev.selected === next.selected &&
+    prev.dragging === next.dragging &&
     prev.data.elementId === next.data.elementId &&
     prev.data.name === next.data.name &&
     prev.data.emoji === next.data.emoji &&

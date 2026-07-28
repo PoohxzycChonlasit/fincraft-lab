@@ -1,3 +1,5 @@
+import type { CraftDiscoveryResult } from "@/features/craft/public";
+
 export type WorkspaceSummary = {
   id: string;
   name: string;
@@ -39,6 +41,7 @@ export type CanvasSnapshot = {
   workspaceUpdatedAt: string;
   nodes: PersistedCanvasNode[];
   edges: Array<{ id: string; sourceNodeId: string; targetNodeId: string; label: string }>;
+  lastDiscovery?: CraftDiscoveryResult | null;
 };
 
 export type SaveWorkspacePayloadNode = {

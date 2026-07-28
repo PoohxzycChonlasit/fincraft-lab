@@ -1,13 +1,10 @@
 import {
-  BadRequestException,
   ConflictException,
-  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import {
-  ActiveStatus,
   ContentStatus,
   Prisma,
   WorkspaceStatus,
@@ -101,61 +98,28 @@ export class WorkspaceCanvasWriterService {
       new Set(nodes.map((n) => n.elementId)),
     );
 
-    if (requestedElementIds.length === 0) {
-      return;
-    }
+    if (requestedElementIds.length === 0) return;
 
-    const elementsInDb = await tx.element.findMany({
-      where: { id: { in: requestedElementIds } },
-      select: {
-        id: true,
-        status: true,
-        isStarter: true,
-        category: {
-          select: {
-            status: true,
+    const availableElements = await tx.element.findMany({
+      where: {
+        id: { in: requestedElementIds },
+        status: ContentStatus.ACTIVE,
+        OR: [
+          { isStarter: true },
+          {
+            userElements: {
+              some: { userId },
+            },
           },
-        },
+        ],
       },
+      select: { id: true },
     });
 
-    const foundElementMap = new Map(elementsInDb.map((e) => [e.id, e]));
-
-    for (const elemId of requestedElementIds) {
-      const elem = foundElementMap.get(elemId);
-      if (!elem) {
-        throw new NotFoundException('Element not found');
-      }
-      if (elem.status !== ContentStatus.ACTIVE) {
-        throw new BadRequestException('Element is not active');
-      }
-      if (elem.category.status !== ActiveStatus.ACTIVE) {
-        throw new BadRequestException('Element category is not active');
-      }
-    }
-
-    const nonStarterIds = requestedElementIds.filter(
-      (id) => !foundElementMap.get(id)?.isStarter,
-    );
-
-    if (nonStarterIds.length > 0) {
-      const unlockedUserElements = await tx.userElement.findMany({
-        where: {
-          userId,
-          elementId: { in: nonStarterIds },
-        },
-        select: { elementId: true },
-      });
-
-      const unlockedSet = new Set(
-        unlockedUserElements.map((ue) => ue.elementId),
+    if (availableElements.length !== requestedElementIds.length) {
+      throw new ConflictException(
+        'Canvas contains un-unlocked or inactive elements',
       );
-
-      for (const nsId of nonStarterIds) {
-        if (!unlockedSet.has(nsId)) {
-          throw new ForbiddenException('Element is not unlocked by user');
-        }
-      }
     }
   }
 
@@ -164,21 +128,18 @@ export class WorkspaceCanvasWriterService {
     workspaceId: string,
     nodeIdsSet: Set<string>,
   ): Promise<void> {
-    const requestedNodeIds = Array.from(nodeIdsSet);
-    if (requestedNodeIds.length === 0) {
-      return;
-    }
+    if (nodeIdsSet.size === 0) return;
 
-    const otherNodeCollision = await tx.workspaceNode.findFirst({
+    const existingConflictingNodes = await tx.workspaceNode.findMany({
       where: {
-        id: { in: requestedNodeIds },
+        id: { in: Array.from(nodeIdsSet) },
         workspaceId: { not: workspaceId },
       },
       select: { id: true },
     });
 
-    if (otherNodeCollision) {
-      throw new ConflictException('Canvas identifier conflict');
+    if (existingConflictingNodes.length > 0) {
+      throw new ConflictException('Node ID collision across workspaces');
     }
   }
 
@@ -187,21 +148,18 @@ export class WorkspaceCanvasWriterService {
     workspaceId: string,
     edgeIdsSet: Set<string>,
   ): Promise<void> {
-    const requestedEdgeIds = Array.from(edgeIdsSet);
-    if (requestedEdgeIds.length === 0) {
-      return;
-    }
+    if (edgeIdsSet.size === 0) return;
 
-    const otherEdgeCollision = await tx.workspaceEdge.findFirst({
+    const existingConflictingEdges = await tx.workspaceEdge.findMany({
       where: {
-        id: { in: requestedEdgeIds },
+        id: { in: Array.from(edgeIdsSet) },
         workspaceId: { not: workspaceId },
       },
       select: { id: true },
     });
 
-    if (otherEdgeCollision) {
-      throw new ConflictException('Canvas identifier conflict');
+    if (existingConflictingEdges.length > 0) {
+      throw new ConflictException('Edge ID collision across workspaces');
     }
   }
 
@@ -267,6 +225,19 @@ export class WorkspaceCanvasWriterService {
             iconUrl: true,
             elementType: true,
             isStarter: true,
+            discoveryDetail: {
+              select: {
+                shortDescription: true,
+                realLesson: true,
+                example: true,
+                possibleBenefit: true,
+                possibleTradeoff: true,
+                hiddenRisk: true,
+                worksWhen: true,
+                becomesDifficultWhen: true,
+                sources: true,
+              },
+            },
           },
         },
       },

@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, ValidateNested } from 'class-validator';
+import { IsArray, IsObject, IsOptional, ValidateNested } from 'class-validator';
 import { WorkspaceEdgeInputDto } from './workspace-edge-input.dto';
 import { WorkspaceNodeInputDto } from './workspace-node-input.dto';
 
@@ -23,4 +23,12 @@ export class SaveCanvasSnapshotDto {
   @ValidateNested({ each: true })
   @Type(() => WorkspaceEdgeInputDto)
   edges!: WorkspaceEdgeInputDto[];
+
+  @ApiPropertyOptional({
+    description:
+      'Optional safe public discovery payload for workspace restoration',
+  })
+  @IsOptional()
+  @IsObject()
+  lastDiscovery?: Record<string, unknown> | null;
 }

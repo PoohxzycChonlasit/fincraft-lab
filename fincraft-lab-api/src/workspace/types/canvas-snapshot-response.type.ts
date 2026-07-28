@@ -36,4 +36,5 @@ export interface CanvasSnapshotResponse {
   workspaceUpdatedAt: string;
   nodes: CanvasNodeResponse[];
   edges: CanvasEdgeResponse[];
+  lastDiscovery?: JsonObject | null;
 }

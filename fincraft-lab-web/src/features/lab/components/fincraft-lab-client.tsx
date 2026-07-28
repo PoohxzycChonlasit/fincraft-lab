@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
-import type { AvailableElement, CraftElementResult } from "@/features/craft/public";
+import type { AvailableElement, CraftDiscoveryResult, CraftElementResult } from "@/features/craft/public";
 import { useCanvasNodes, type InitialEdgeInput, type InitialNodeInput, type PersistableCanvasNode, type SaveStatus } from "@/features/canvas/public";
 import { saveWorkspaceCanvasApi, type CanvasSnapshot, type WorkspaceSummary } from "@/features/workspace/public.client";
 import { useLabCraftCombine } from "../hooks/use-lab-craft-combine";
@@ -48,6 +48,7 @@ function useLabWorkspaceSave(
   workspaceId: string | undefined,
   getPersistableNodes: () => PersistableCanvasNode[],
   getPersistableEdges: () => Array<{ id: string; sourceNodeId: string; targetNodeId: string; label?: string }>,
+  getLastDiscovery: () => CraftDiscoveryResult | null,
   markSaved: () => void,
 ) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
@@ -57,7 +58,12 @@ function useLabWorkspaceSave(
     if (!workspaceId || saveStatus === "saving") return;
     setSaveStatus("saving");
     setSaveError(null);
-    const result = await saveWorkspaceCanvasApi(workspaceId, getPersistableNodes(), getPersistableEdges());
+    const result = await saveWorkspaceCanvasApi(
+      workspaceId,
+      getPersistableNodes(),
+      getPersistableEdges(),
+      getLastDiscovery(),
+    );
     if (result.success) {
       markSaved();
       setSaveStatus("saved");
@@ -65,7 +71,7 @@ function useLabWorkspaceSave(
     }
     setSaveStatus("error");
     setSaveError(result.errorMessage);
-  }, [workspaceId, saveStatus, getPersistableNodes, getPersistableEdges, markSaved]);
+  }, [workspaceId, saveStatus, getPersistableNodes, getPersistableEdges, getLastDiscovery, markSaved]);
 
   return { saveStatus, saveError, handleSave };
 }
@@ -103,13 +109,6 @@ export function FinCraftLabClient({
   const initialCanvasEdges = useMemo(() => buildInitialCanvasEdges(initialWorkspace), [initialWorkspace]);
 
   const canvas = useCanvasNodes(initialCanvasNodes, initialCanvasEdges);
-  const save = useLabWorkspaceSave(
-    initialWorkspace?.workspaceId,
-    canvas.getPersistableNodes,
-    canvas.getPersistableEdges,
-    canvas.markSaved,
-  );
-
   const handleDiscovery = useCallback((element: CraftElementResult) => {
     toast.success(`Discovered: ${element.emoji} ${element.name}!`, { duration: 3500 });
     if (!isAuthenticated) return;
@@ -119,6 +118,16 @@ export function FinCraftLabClient({
   }, [isAuthenticated]);
 
   const combine = useLabCraftCombine({ canvas, isAuthenticated, onDiscovery: handleDiscovery });
+  const getLastDiscovery = useCallback(() => combine.lastDiscovery, [combine.lastDiscovery]);
+
+  const save = useLabWorkspaceSave(
+    initialWorkspace?.workspaceId,
+    canvas.getPersistableNodes,
+    canvas.getPersistableEdges,
+    getLastDiscovery,
+    canvas.markSaved,
+  );
+
   const { addElementsToCanvas } = canvas;
   const handlePlaceElement = useCallback((element: AvailableElement) => {
     addElementsToCanvas([{
