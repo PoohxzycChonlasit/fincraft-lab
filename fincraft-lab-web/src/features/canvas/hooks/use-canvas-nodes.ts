@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState, type Dispatch, type SetStateAction } fr
 import { useEdgesState, useNodesState, type Edge, type OnEdgesChange, type OnNodesChange } from "@xyflow/react";
 import type { ElementCanvasNode, CanvasElementInput, CanvasNodeValueData } from "../types/canvas-node.type";
 import { normalizeCanvasEdges } from "../utils/normalize-canvas-edges";
+import { layoutCanvasGraph } from "../utils/layout-canvas-graph";
 
 export type InitialNodeInput = {
   id: string;
@@ -210,6 +211,11 @@ export function useCanvasNodes(initialNodesInput?: InitialNodeInput[] | null, in
 
   const markDragStopDirty = useCallback(() => setIsDirty(true), []);
 
+  const tidyCanvasNodes = useCallback(() => {
+    setNodes((currentNodes) => layoutCanvasGraph(currentNodes, edges));
+    setIsDirty(true);
+  }, [edges, setNodes]);
+
   const getPersistableNodes = useCallback(() => nodes.map((n) => ({
     id: n.id,
     elementId: n.data.elementId,
@@ -230,6 +236,7 @@ export function useCanvasNodes(initialNodesInput?: InitialNodeInput[] | null, in
     onNodesChange,
     onEdgesChange,
     markDragStopDirty,
+    tidyCanvasNodes,
     ...creation,
     ...interaction,
     ...combine,

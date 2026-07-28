@@ -1,8 +1,8 @@
 "use client";
 
-import { BaseEdge, EdgeLabelRenderer, getStraightPath, type EdgeProps } from "@xyflow/react";
+import { BaseEdge, EdgeLabelRenderer, getBezierPath, Position, type EdgeProps } from "@xyflow/react";
 
-export function LineageStraightEdge({
+export function LineageNoodleEdge({
   id,
   sourceX,
   sourceY,
@@ -13,11 +13,13 @@ export function LineageStraightEdge({
   style,
   markerEnd,
 }: EdgeProps) {
-  const [edgePath, labelX, labelY] = getStraightPath({
+  const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
+    sourcePosition: Position.Right,
     targetX,
     targetY,
+    targetPosition: Position.Left,
   });
 
   const strokeColor = selected

@@ -12,7 +12,7 @@ type ProductNavProps = {
   user?: UserProfile | null;
 };
 
-const activeStyle = "rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-all style-active-gradient";
+const activeStyle = "rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3 py-1.5 text-xs font-bold text-foreground shadow-xs transition-all";
 const inactiveStyle = "rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-[var(--surface-inset)]/50 hover:text-foreground";
 const menuLinkStyle = "block rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--surface-inset)]";
 

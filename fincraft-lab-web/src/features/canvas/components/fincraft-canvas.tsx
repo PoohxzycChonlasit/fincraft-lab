@@ -6,6 +6,7 @@ import {
   ReactFlowProvider,
   Background,
   Controls,
+  Panel,
   BackgroundVariant,
   useReactFlow,
   type Edge,
@@ -13,14 +14,15 @@ import {
   type OnNodeDrag,
   type OnNodesChange,
 } from "@xyflow/react";
+import { Wand2 } from "lucide-react";
 import type { SaveStatus } from "../hooks/use-canvas-nodes";
 import type { CanvasElementInput, ElementCanvasNode } from "../types/canvas-node.type";
 import { ElementCanvasNodeComponent } from "./element-canvas-node";
-import { LineageStraightEdge } from "./lineage-straight-edge";
+import { LineageNoodleEdge } from "./lineage-noodle-edge";
 
 const nodeTypes = { elementNode: ElementCanvasNodeComponent };
-const edgeTypes = { lineage: LineageStraightEdge };
-const NODE_WIDTH = 160;
+const edgeTypes = { lineage: LineageNoodleEdge };
+const NODE_WIDTH = 190;
 const NODE_HEIGHT = 70;
 const COLLISION_THRESHOLD = 1200;
 
@@ -30,6 +32,7 @@ type FinCraftCanvasProps = {
   onNodesChange: OnNodesChange<ElementCanvasNode>;
   onEdgesChange?: OnEdgesChange<Edge>;
   onDragStopDirty?: () => void;
+  onTidyCanvas?: () => void;
   onDropLibraryElement: (element: CanvasElementInput, position: { x: number; y: number }) => void;
   onTargetHighlight: (targetId: string | null) => void;
   onCombineNodes: (sourceNode: ElementCanvasNode, targetNode: ElementCanvasNode, collisionPosition: { x: number; y: number }) => void;
@@ -167,9 +170,18 @@ function useCanvasDragHandlers({ nodes, onDropLibraryElement, onTargetHighlight,
 }
 
 function ReactFlowCanvasInner(props: CanvasInnerProps) {
-  const { nodes, edges = [], onNodesChange, onEdgesChange, onNodeTap, onClearTapSelection } = props;
+  const { nodes, edges = [], onNodesChange, onEdgesChange, onTidyCanvas, onNodeTap, onClearTapSelection } = props;
   const { handleDragOver, handleDrop, handleNodeDrag, handleNodeDragStop } = useCanvasDragHandlers(props);
+  const { fitView } = useReactFlow();
+
   const handleNodeClick = useCallback((_: React.MouseEvent, node: ElementCanvasNode) => onNodeTap(node), [onNodeTap]);
+
+  const handleTidyClick = useCallback(() => {
+    onTidyCanvas?.();
+    setTimeout(() => {
+      fitView({ padding: 0.2, duration: 400 });
+    }, 50);
+  }, [onTidyCanvas, fitView]);
 
   return (
     <div className="lab-canvas-frame relative flex h-full min-h-0 min-w-0 w-full flex-1 basis-0 flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] shadow-xs" onDragOver={handleDragOver} onDrop={handleDrop}>
@@ -194,6 +206,21 @@ function ReactFlowCanvasInner(props: CanvasInnerProps) {
       >
         <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
         <Controls showInteractive={false} className="!rounded-xl !border-[var(--border-subtle)] !bg-[var(--surface-resting)] !shadow-[var(--shadow-resting)]" />
+        <Panel position="top-right" className="!m-2 flex items-center gap-2">
+          {onTidyCanvas ? (
+            <button
+              type="button"
+              onClick={handleTidyClick}
+              disabled={nodes.length === 0}
+              aria-label="Arrange connected elements and fit them into view"
+              title="Arrange connected elements and fit them into view"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-resting)] px-3 py-1.5 text-xs font-semibold text-foreground shadow-xs transition-colors hover:bg-[var(--surface-inset)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:opacity-50 cursor-pointer"
+            >
+              <Wand2 size={13} className="text-[var(--color-craft-accent)]" aria-hidden="true" />
+              <span>Tidy Canvas</span>
+            </button>
+          ) : null}
+        </Panel>
       </ReactFlow>
     </div>
   );
