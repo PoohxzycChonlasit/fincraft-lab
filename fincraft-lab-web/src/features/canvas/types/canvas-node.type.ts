@@ -23,6 +23,7 @@ export type ElementNodeData = {
   isCombineTarget?: boolean;
   isCombining?: boolean;
   isSelectedForCombine?: boolean;
+  valueData?: Record<string, unknown>;
 };
 
 export type ElementCanvasNode = Node<ElementNodeData, "elementNode">;
@@ -32,4 +33,5 @@ export type PersistableCanvasNode = {
   elementId: string;
   positionX: number;
   positionY: number;
+  valueData?: Record<string, unknown>;
 };

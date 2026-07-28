@@ -9,6 +9,7 @@ export type InitialNodeInput = {
   elementId: string;
   positionX: number;
   positionY: number;
+  valueData?: Record<string, unknown>;
   name?: string;
   emoji?: string;
   categoryName?: string;
@@ -37,6 +38,7 @@ function mapInitialNodes(inputs?: InitialNodeInput[] | null): ElementCanvasNode[
       name: node.name ?? "Element",
       emoji: node.emoji ?? "Element",
       categoryName: node.categoryName ?? "CONCEPT",
+      valueData: node.valueData ?? {},
     },
   }));
 }
@@ -52,7 +54,11 @@ function mapInitialEdges(inputs?: InitialEdgeInput[] | null): Edge[] {
   }));
 }
 
-function buildNode(element: CanvasElementInput, position: { x: number; y: number }): ElementCanvasNode {
+function buildNode(
+  element: CanvasElementInput,
+  position: { x: number; y: number },
+  valueData?: Record<string, unknown>,
+): ElementCanvasNode {
   return {
     id: crypto.randomUUID(),
     type: "elementNode",
@@ -62,6 +68,7 @@ function buildNode(element: CanvasElementInput, position: { x: number; y: number
       name: element.name,
       emoji: element.emoji || "Element",
       categoryName: element.categoryName || "CONCEPT",
+      valueData: valueData ?? {},
     },
   };
 }
@@ -87,6 +94,15 @@ function buildLineageEdges(sourceNodeId: string, targetNodeId: string, resultNod
 
 function patchData(node: ElementCanvasNode, patch: Partial<ElementCanvasNode["data"]>): ElementCanvasNode {
   return { ...node, data: { ...node.data, ...patch } };
+}
+
+function clearLatestDiscoveryFlag(nodes: ElementCanvasNode[]): ElementCanvasNode[] {
+  return nodes.map((n) => {
+    if (!n.data.valueData?.isLatestDiscovery) return n;
+    const copy = { ...n.data.valueData };
+    delete copy.isLatestDiscovery;
+    return patchData(n, { valueData: copy });
+  });
 }
 
 function useNodeCreation(
@@ -170,12 +186,13 @@ function useNodeCombineMutations(
     const existing = nodes.find((node) => node.data.elementId === element.id);
     if (existing) return existing.id;
 
-    const newNode = buildNode(element, {
-      x: collisionPosition.x + RESULT_NODE_OFFSET.x,
-      y: collisionPosition.y + RESULT_NODE_OFFSET.y,
-    });
+    const newNode = buildNode(
+      element,
+      { x: collisionPosition.x + RESULT_NODE_OFFSET.x, y: collisionPosition.y + RESULT_NODE_OFFSET.y },
+      { isLatestDiscovery: true, timestamp: Date.now() },
+    );
 
-    setNodes((current) => [...current, newNode]);
+    setNodes((current) => [...clearLatestDiscoveryFlag(current), newNode]);
 
     if (sourceNodeId && targetNodeId) {
       const [e1, e2] = buildLineageEdges(sourceNodeId, targetNodeId, newNode.id);
@@ -245,6 +262,7 @@ export function useCanvasNodes(
     elementId: n.data.elementId,
     positionX: Math.round(n.position.x),
     positionY: Math.round(n.position.y),
+    valueData: n.data.valueData,
   })), [nodes]);
 
   const getPersistableEdges = useCallback(() => edges.map((e) => ({

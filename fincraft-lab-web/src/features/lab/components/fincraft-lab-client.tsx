@@ -82,6 +82,7 @@ function buildInitialCanvasNodes(initialWorkspace?: InitialWorkspace): InitialNo
     elementId: node.elementId,
     positionX: node.positionX,
     positionY: node.positionY,
+    valueData: node.valueData,
     name: node.element?.name,
     emoji: node.element?.emoji,
     categoryName: node.element?.elementType,
