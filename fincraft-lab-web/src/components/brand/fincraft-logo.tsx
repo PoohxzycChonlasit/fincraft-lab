@@ -9,7 +9,7 @@ type FinCraftMarkProps = {
 export function FinCraftMark({ className, labelled = false, style }: FinCraftMarkProps) {
   return (
     <svg
-      viewBox="0 0 64 64"
+      viewBox="0 0 512 512"
       fill="none"
       className={className}
       style={style}
@@ -17,37 +17,18 @@ export function FinCraftMark({ className, labelled = false, style }: FinCraftMar
       aria-label={labelled ? "FinCraft Lab" : undefined}
       aria-hidden={labelled ? undefined : "true"}
     >
-      <rect
-        x="3.5"
-        y="3.5"
-        width="57"
-        height="57"
-        rx="16.5"
-        fill="var(--surface-card, #fffdf8)"
-        stroke="currentColor"
-        strokeWidth="3"
-      />
-      <path
-        d="M18 44V20H34M18 31H30"
-        stroke="currentColor"
-        strokeWidth="5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M47 24.5C44.9 21.6 41.8 20 38.2 20C31.9 20 28 25 28 32C28 39 31.9 44 38.2 44C41.8 44 44.9 42.4 47 39.5"
-        stroke="var(--color-craft-accent, #ea580c)"
-        strokeWidth="4.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M46.5 16.5L52.5 20M46.5 47.5L52.5 44"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <circle cx="54" cy="21" r="3" fill="var(--color-craft-accent, #ea580c)" />
-      <circle cx="54" cy="43" r="3" fill="currentColor" />
+      <defs>
+        <linearGradient id="fincraft-mark-teal" x1="96" y1="96" x2="416" y2="416">
+          <stop offset="0" stopColor="#2fa6a0" />
+          <stop offset="1" stopColor="#0f5b5d" />
+        </linearGradient>
+      </defs>
+      <g>
+        <path d="M96 96h224c53 0 96 43 96 96v16H240c-44 0-80 36-80 80v32H96z" fill="url(#fincraft-mark-teal)" />
+        <path d="M96 288h144v128H96z" fill="#17324d" />
+        <path d="M240 208h176v208H304c-35 0-64-29-64-64z" fill="#f28c28" />
+        <path d="M240 208h64v80h-64z" fill="#fff9ef" />
+      </g>
     </svg>
   );
 }
@@ -59,9 +40,9 @@ type FinCraftLogoProps = {
 export function FinCraftLogo({ showDescriptor = false }: FinCraftLogoProps) {
   return (
     <span className="flex min-w-0 items-center gap-2.5">
-      <FinCraftMark className="size-9 shrink-0 text-[var(--color-action-primary)]" />
+      <FinCraftMark className="size-10 shrink-0" />
       <span className="min-w-0">
-        <span className="block truncate text-base font-bold tracking-tight text-foreground sm:text-lg">
+        <span className="block truncate text-[15px] font-bold tracking-tight text-foreground sm:text-base">
           FinCraft <span className="text-[var(--color-craft-accent)]">Lab</span>
         </span>
         {showDescriptor ? (

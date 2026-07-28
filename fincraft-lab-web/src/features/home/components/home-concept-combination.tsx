@@ -46,10 +46,7 @@ export function HomeConceptCombination() {
       aria-labelledby="concept-combination-title"
       className="home-combination"
     >
-      <div className="home-combination-heading">
-        <p className="home-kicker">Interactive Concept Combination</p>
-        <h2 id="concept-combination-title">See what changes when two ideas connect.</h2>
-      </div>
+      <h2 id="concept-combination-title" className="home-kicker">Interactive Concept Combination</h2>
 
       <div className="home-equation" role="group" aria-label="Earned Income combined with General Expense creates Net Cash Flow">
         <ElementTile kind="income" title="Earned Income" type="Base" />

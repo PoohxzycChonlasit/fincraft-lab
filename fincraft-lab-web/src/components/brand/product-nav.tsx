@@ -12,8 +12,8 @@ type ProductNavProps = {
   user?: UserProfile | null;
 };
 
-const activeStyle = "rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3 py-1.5 text-xs font-bold text-foreground shadow-xs transition-all";
-const inactiveStyle = "rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-[var(--surface-inset)]/50 hover:text-foreground";
+const activeStyle = "inline-flex min-h-11 items-center border-b-2 border-[var(--brand-accent)] px-3 text-xs font-bold text-foreground transition-colors";
+const inactiveStyle = "inline-flex min-h-11 items-center border-b-2 border-transparent px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-[var(--border-interactive)] hover:text-foreground";
 const accountStyle = "inline-flex min-h-11 items-center rounded-xl bg-[var(--brand-primary)] px-4 text-xs font-bold text-[var(--brand-primary-foreground)] transition-colors hover:bg-[var(--color-action-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2";
 const menuLinkStyle = "block rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--surface-inset)]";
 
@@ -70,7 +70,7 @@ export function ProductNav({ activeTab, user }: ProductNavProps) {
 
   return (
     <div className="relative">
-      <nav aria-label="Main Navigation" className="hidden items-center gap-1.5 xl:flex">
+      <nav aria-label="Main Navigation" className="hidden items-center gap-1.5 lg:flex">
         <NavLinks activeTab={activeTab} user={user} />
       </nav>
 
@@ -81,13 +81,13 @@ export function ProductNav({ activeTab, user }: ProductNavProps) {
         aria-haspopup="menu"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((previous) => !previous)}
-        className="inline-flex size-11 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] text-foreground transition-colors hover:bg-[var(--surface-raised)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] xl:hidden"
+        className="inline-flex size-11 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] text-foreground transition-colors hover:bg-[var(--surface-raised)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] lg:hidden"
       >
         {isOpen ? <X size={17} aria-hidden="true" /> : <Menu size={17} aria-hidden="true" />}
       </button>
 
       {isOpen ? (
-        <div ref={menuRef} role="menu" aria-label="Navigation menu" className="surface-overlay absolute right-0 top-[calc(100%+8px)] z-50 w-[min(240px,calc(100vw-2rem))] rounded-2xl p-2 shadow-xl xl:hidden">
+        <div ref={menuRef} role="menu" aria-label="Navigation menu" className="surface-overlay absolute right-0 top-[calc(100%+8px)] z-50 w-[min(240px,calc(100vw-2rem))] rounded-2xl p-2 shadow-xl lg:hidden">
           <div className="flex flex-col gap-1">
             <NavLinks activeTab={activeTab} user={user} onNavigate={() => closeMenu(false)} mobile />
           </div>

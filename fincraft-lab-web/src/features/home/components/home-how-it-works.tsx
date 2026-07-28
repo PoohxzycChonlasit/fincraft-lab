@@ -41,8 +41,7 @@ export function HomeHowItWorks() {
   return (
     <section aria-labelledby="how-it-works-title" className="home-section">
       <div className="home-section-heading">
-        <p className="home-kicker">How It Works</p>
-        <h2 id="how-it-works-title">A simple lab for connecting financial ideas.</h2>
+        <h2 id="how-it-works-title" className="home-kicker">How It Works</h2>
       </div>
       <div className="home-how-grid">
         {STEPS.map(({ description, icon: Icon, imageSource, step, title, variant }) => (
@@ -51,8 +50,9 @@ export function HomeHowItWorks() {
               <Image
                 src={imageSource}
                 alt=""
-                fill
-                loading="lazy"
+                width={1448}
+                height={1086}
+                loading="eager"
                 sizes="(max-width: 779px) calc(100vw - 64px), (max-width: 1279px) 30vw, 390px"
               />
               <span className="home-step-number">{step}</span>

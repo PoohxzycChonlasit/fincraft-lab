@@ -17,7 +17,7 @@ export type ProductShellProps = {
 
 function ProductBrand() {
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className="flex min-w-0 items-center gap-2.5">
       <Link
         href="/"
         aria-label="FinCraft Lab home"
@@ -25,7 +25,7 @@ function ProductBrand() {
       >
         <FinCraftLogo />
       </Link>
-      <span className="hidden border-l border-[var(--border-subtle)] pl-3 text-xs font-medium text-muted-foreground xl:inline-block">
+      <span className="hidden text-[10px] font-medium text-muted-foreground xl:inline-block">
         Financial Literacy Discovery Lab
       </span>
     </div>
@@ -38,7 +38,7 @@ export function ProductShell({ children, activeTab = "home", user, contentMode =
 
   return (
     <div className={`flex min-w-0 flex-col bg-[var(--surface-flat)] text-[var(--color-text-primary)] ${isWorkspace ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh]"}`}>
-      <header className="product-header relative z-50 h-[60px] shrink-0 border-b border-[var(--border-subtle)] bg-[var(--surface-resting)] shadow-xs">
+      <header className="product-header relative z-50 h-[58px] shrink-0 border-b border-[var(--border-subtle)] bg-[var(--surface-resting)]">
         <div className={`mx-auto flex h-full w-full ${maxWClass} min-w-0 flex-nowrap items-center justify-between gap-2 px-4 sm:px-6`}>
           <ProductBrand />
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">

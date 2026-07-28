@@ -39,14 +39,9 @@ export function HomeHero({ initialThemePreference, user }: HomeHeroProps) {
               Open Workspace
             </Link>
           ) : (
-            <>
-              <Link href="/login" className="home-button home-button-secondary">
-                Sign In to Save
-              </Link>
-              <Link href="/register" className="home-text-link">
-                Create Account
-              </Link>
-            </>
+            <Link href="/login" className="home-button home-button-secondary">
+              Sign In to Save
+            </Link>
           )}
         </div>
 
