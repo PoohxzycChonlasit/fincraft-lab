@@ -2,6 +2,7 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { THEME_CHANGE_EVENT } from "../constants/theme-constants";
 import { getClientThemeCookie, setClientThemeCookie } from "../utils/theme-cookie";
 import type { ResolvedAppearance, ThemePreference } from "../types/theme-types";
 
@@ -15,6 +16,7 @@ function applyTheme(preference: ThemePreference, resolved: ResolvedAppearance) {
   root.dataset.themePreference = preference;
   root.classList.toggle("dark", resolved === "dark");
   root.style.colorScheme = resolved;
+  window.dispatchEvent(new CustomEvent(THEME_CHANGE_EVENT, { detail: { preference, resolved } }));
 }
 
 function useDirectThemeToggle() {

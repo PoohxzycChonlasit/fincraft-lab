@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 
+import type { ThemePreference } from "@/features/theme/types/theme-types";
 import type { UserProfile } from "@/lib/auth/session";
 import { HomeArtwork } from "./home-artwork";
 
 type HomeHeroProps = {
+  initialThemePreference: ThemePreference;
   user: UserProfile | null;
 };
 
-export function HomeHero({ user }: HomeHeroProps) {
+export function HomeHero({ initialThemePreference, user }: HomeHeroProps) {
   return (
     <section aria-labelledby="home-hero-title" className="home-hero">
       <div className="home-hero-copy">
@@ -54,7 +56,7 @@ export function HomeHero({ user }: HomeHeroProps) {
         </div>
       </div>
 
-      <HomeArtwork />
+      <HomeArtwork initialThemePreference={initialThemePreference} />
     </section>
   );
 }

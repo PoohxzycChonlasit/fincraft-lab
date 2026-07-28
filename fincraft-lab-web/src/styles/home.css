@@ -1,9 +1,5 @@
 .home-page {
   --home-line: rgba(15, 118, 110, 0.12);
-  --home-art-ink: #375a58;
-  --home-art-soft: #e2d5bd;
-  --home-art-room: #fff7e5;
-  --home-art-window: #f2c77d;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -41,10 +37,6 @@
 
 .dark .home-page {
   --home-line: rgba(78, 181, 191, 0.11);
-  --home-art-ink: #82adb8;
-  --home-art-soft: #17384d;
-  --home-art-room: #142f43;
-  --home-art-window: #f3a746;
   background:
     radial-gradient(circle at 76% 8%, rgba(243, 167, 70, 0.12), transparent 28rem),
     radial-gradient(circle at 12% 28%, rgba(42, 199, 182, 0.1), transparent 27rem),
@@ -98,32 +90,9 @@
 .home-safety-note { display: flex; max-width: 330px; align-items: flex-start; gap: 0.55rem; margin-top: 2.8rem; color: var(--page-muted); font-size: 0.72rem; line-height: 1.5; }
 .home-safety-note svg { flex: none; color: var(--brand-primary); }
 
-.home-artwork { position: relative; min-width: 0; }
-.home-artwork::after { position: absolute; right: 8%; bottom: 2%; left: 8%; height: 10%; border-radius: 50%; background: rgba(52, 91, 86, 0.2); filter: blur(22px); content: ""; }
-.home-artwork-orbit { position: absolute; inset: 10% 2% 8%; border: 1px solid var(--home-line); border-radius: 50%; transform: rotate(-9deg); }
-.home-artwork-svg { position: relative; z-index: 1; display: block; width: 100%; height: auto; filter: drop-shadow(0 24px 28px rgba(65, 49, 29, 0.16)); }
-.dark .home-artwork-svg { filter: drop-shadow(0 28px 34px rgba(0, 5, 13, 0.72)); }
-.home-art-sun { fill: #efbd67; opacity: 0.72; }
-.home-art-moon { fill: #f3c976; opacity: 0; }
-.dark .home-art-sun { opacity: 0; }
-.dark .home-art-moon { opacity: 0.92; }
-.home-art-clouds { fill: color-mix(in srgb, var(--surface-strong) 65%, transparent); stroke: var(--home-art-ink); stroke-width: 1.4; opacity: 0.65; }
-.dark .home-art-clouds { opacity: 0.22; }
-.home-art-skyline,
-.home-art-ground,
-.home-art-trees { stroke: var(--home-art-ink); stroke-width: 2; opacity: 0.46; }
-.home-art-building-shadow { fill: color-mix(in srgb, var(--home-art-soft) 62%, transparent); }
-.home-art-building { fill: var(--home-art-room); stroke: var(--home-art-ink); stroke-width: 3; }
-.home-art-roof { fill: var(--home-art-soft); stroke: var(--home-art-ink); stroke-linejoin: round; stroke-width: 3; }
-.home-art-divider,
-.home-art-room-details,
-.home-art-entry { stroke: var(--home-art-ink); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
-.home-art-room-details rect:not(.home-art-window) { fill: color-mix(in srgb, var(--home-art-soft) 62%, transparent); }
-.home-art-room-details circle { fill: var(--brand-accent); stroke: none; }
-.home-art-window { fill: color-mix(in srgb, var(--home-art-window) 45%, transparent); }
-.dark .home-art-window { fill: color-mix(in srgb, var(--home-art-window) 72%, transparent); }
-.home-art-garden { fill: color-mix(in srgb, var(--brand-primary) 62%, var(--surface-strong)); stroke: var(--home-art-ink); stroke-width: 2; }
-.home-art-connections { fill: var(--brand-accent); stroke: var(--brand-accent); stroke-dasharray: 6 8; stroke-width: 1.5; opacity: 0.58; }
+.home-artwork { position: relative; min-width: 0; aspect-ratio: 760 / 620; overflow: hidden; border: 1px solid color-mix(in srgb, var(--surface-border) 70%, transparent); border-radius: 2rem; background: color-mix(in srgb, var(--surface-resting) 75%, transparent); box-shadow: 0 28px 50px -34px rgba(51, 42, 31, 0.5); }
+.home-artwork-image { object-fit: cover; object-position: 74% center; }
+.dark .home-artwork { box-shadow: 0 30px 58px -30px rgba(0, 5, 13, 0.88); }
 
 .home-section { display: grid; gap: 1.5rem; }
 .home-section-heading { max-width: 720px; }
@@ -150,21 +119,20 @@
 .home-outcomes-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .home-how-card,
 .home-outcome-card { border-radius: 1.25rem; padding: 1.25rem; }
-.home-how-card { min-height: 230px; }
-.home-step-visual { display: flex; height: 88px; align-items: flex-start; justify-content: space-between; color: var(--brand-primary); }
-.home-step-visual span { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid var(--glass-variant-edge); border-radius: 0.65rem; color: var(--brand-accent); font-size: 0.75rem; font-weight: 800; }
+.home-how-card { min-height: 300px; }
+.home-card-artwork { position: relative; aspect-ratio: 4 / 3; overflow: hidden; margin: -0.25rem -0.25rem 1.1rem; border: 1px solid var(--surface-border); border-radius: 0.9rem; background: var(--surface-inset); }
+.home-card-artwork img { object-fit: cover; object-position: center; transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1); }
+.home-step-number,
+.home-card-icon { position: absolute; top: 0.65rem; z-index: 1; display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid var(--glass-variant-edge); border-radius: 0.7rem; background: color-mix(in srgb, var(--surface-strong) 88%, transparent); color: var(--brand-primary); backdrop-filter: blur(10px); }
+.home-step-number { left: 0.65rem; color: var(--brand-accent); font-size: 0.75rem; font-weight: 800; }
+.home-card-icon { right: 0.65rem; }
 .home-how-card h3,
 .home-outcome-card h3 { font-size: 1rem; font-weight: 800; }
 .home-how-card p,
 .home-outcome-card p { margin-top: 0.6rem; color: var(--page-muted); font-size: 0.8rem; line-height: 1.65; }
 
-.home-outcome-card { min-height: 320px; }
-.home-outcome-visual { position: relative; display: flex; height: 105px; align-items: flex-end; gap: 0.35rem; overflow: hidden; margin: -0.25rem -0.25rem 1.1rem; border-bottom: 1px solid var(--surface-border); color: var(--brand-primary); }
-.home-outcome-visual svg { position: absolute; top: 0.35rem; left: 0.35rem; }
-.home-outcome-visual span { width: 24%; border-radius: 0.35rem 0.35rem 0 0; background: var(--glass-variant-edge); opacity: 0.55; }
-.home-outcome-visual span:nth-of-type(1) { height: 28%; }
-.home-outcome-visual span:nth-of-type(2) { height: 47%; }
-.home-outcome-visual span:nth-of-type(3) { height: 68%; }
+.home-outcome-card { min-height: 390px; }
+.home-outcome-visual .home-card-icon { right: auto; left: 0.65rem; }
 .home-outcome-card ul { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 1rem; }
 .home-outcome-card li { border: 1px solid var(--surface-border); border-radius: 999px; padding: 0.3rem 0.55rem; color: var(--page-muted); font-size: 0.66rem; }
 .home-outcome-state { display: block; margin-top: 1rem; color: var(--brand-primary); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
@@ -180,12 +148,14 @@
   .home-outcome-card { transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1); }
   .home-how-card:hover,
   .home-outcome-card:hover { transform: translateY(-3px); }
+  .home-how-card:hover .home-card-artwork img,
+  .home-outcome-card:hover .home-card-artwork img { transform: scale(1.025); }
 }
 
 @media (max-width: 1023px) {
   .home-hero { min-height: auto; grid-template-columns: 1fr; }
   .home-hero-copy { max-width: 680px; }
-  .home-artwork { width: min(100%, 720px); margin: -3rem auto 0; }
+  .home-artwork { width: min(100%, 720px); aspect-ratio: 16 / 10; margin: -3rem auto 0; }
 }
 
 @media (max-width: 779px) {
@@ -195,7 +165,7 @@
   .home-equation-operator[data-operator="result"] { transform: rotate(90deg); }
   .home-how-grid,
   .home-outcomes-grid { grid-template-columns: 1fr; }
-  .home-how-card { min-height: 190px; }
+  .home-how-card { min-height: 0; }
   .home-outcome-card { min-height: 0; }
   .home-final-cta { align-items: flex-start; flex-direction: column; }
 }
@@ -208,12 +178,13 @@
   .home-button { width: 100%; }
   .home-text-link { justify-content: center; }
   .home-safety-note { margin-top: 2rem; }
-  .home-artwork { width: 125%; margin-top: -1rem; margin-left: -12%; }
+  .home-artwork { width: 125%; aspect-ratio: 4 / 3; margin-top: -1rem; margin-left: -12%; border-radius: 1.4rem; }
   .home-combination { border-radius: 1.2rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .home-button,
   .home-how-card,
-  .home-outcome-card { transition: none; transform: none; }
+  .home-outcome-card,
+  .home-card-artwork img { transition: none; transform: none; }
 }

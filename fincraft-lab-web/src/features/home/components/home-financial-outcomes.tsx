@@ -1,4 +1,5 @@
 import { Gauge, ShieldCheck, Sprout, type LucideIcon } from "lucide-react";
+import Image from "next/image";
 
 import { GlassSurface, type GlassSurfaceVariant } from "@/components/ui/glass-surface";
 
@@ -10,6 +11,7 @@ const OUTCOMES = [
     state: "Stable",
     variant: "green",
     icon: ShieldCheck,
+    imageSource: "/images/home/cards/prepared-resilient.png",
   },
   {
     title: "High Income, High Pressure",
@@ -18,6 +20,7 @@ const OUTCOMES = [
     state: "Risky",
     variant: "amber",
     icon: Gauge,
+    imageSource: "/images/home/cards/high-income-high-pressure.png",
   },
   {
     title: "Modest & Mindful",
@@ -26,6 +29,7 @@ const OUTCOMES = [
     state: "Growing",
     variant: "aqua",
     icon: Sprout,
+    imageSource: "/images/home/cards/modest-mindful.png",
   },
 ] satisfies ReadonlyArray<{
   title: string;
@@ -34,6 +38,7 @@ const OUTCOMES = [
   state: string;
   variant: GlassSurfaceVariant;
   icon: LucideIcon;
+  imageSource: string;
 }>;
 
 export function HomeFinancialOutcomes() {
@@ -48,13 +53,17 @@ export function HomeFinancialOutcomes() {
       </div>
 
       <div className="home-outcomes-grid">
-        {OUTCOMES.map(({ description, details, icon: Icon, state, title, variant }) => (
+        {OUTCOMES.map(({ description, details, icon: Icon, imageSource, state, title, variant }) => (
           <GlassSurface key={title} as="article" variant={variant} className="home-outcome-card">
-            <div className="home-outcome-visual" aria-hidden="true">
-              <Icon size={32} strokeWidth={1.6} />
-              <span />
-              <span />
-              <span />
+            <div className="home-card-artwork home-outcome-visual" aria-hidden="true">
+              <Image
+                src={imageSource}
+                alt=""
+                fill
+                loading="lazy"
+                sizes="(max-width: 779px) calc(100vw - 64px), (max-width: 1279px) 30vw, 390px"
+              />
+              <span className="home-card-icon"><Icon size={20} strokeWidth={1.6} /></span>
             </div>
             <h3>{title}</h3>
             <p>{description}</p>
