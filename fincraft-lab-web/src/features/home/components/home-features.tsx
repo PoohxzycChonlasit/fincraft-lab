@@ -24,7 +24,7 @@ const FEATURES = [
   {
     title: "Build Your Workspace",
     description: "Save Nodes, connections and discoveries in personal Workspaces and continue learning across sessions.",
-    evidence: ["Workspace CRUD", "Canvas node and connection persistence", "Auto-save", "Last Discovery restoration"],
+    evidence: ["Workspace CRUD", "Canvas node and connection persistence", "Auto-save", "Last Discovery restoration", "Tidy Canvas"],
     icon: PanelsTopLeft,
     visualIcon: Boxes,
     variant: "green",
