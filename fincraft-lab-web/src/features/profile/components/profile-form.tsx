@@ -139,13 +139,7 @@ function AvatarUrlField({
   );
 }
 
-function FormActions({
-  isPending,
-  onReset,
-}: {
-  isPending: boolean;
-  onReset: () => void;
-}) {
+function FormActions({ isPending, onReset }: { isPending: boolean; onReset: () => void }) {
   return (
     <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-[var(--border-subtle)]">
       <button
@@ -199,10 +193,9 @@ function validateInputs(displayName: string, avatarUrl: string): FieldErrors {
   return errors;
 }
 
-export function ProfileForm({ initialUser }: { initialUser: UserProfile }) {
+function useProfileFormState(initialUser: UserProfile) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-
   const [displayName, setDisplayName] = useState(initialUser.displayName);
   const [avatarUrl, setAvatarUrl] = useState(initialUser.avatarUrl || "");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -213,7 +206,6 @@ export function ProfileForm({ initialUser }: { initialUser: UserProfile }) {
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);
-
     const errors = validateInputs(displayName, avatarUrl);
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
@@ -251,12 +243,30 @@ export function ProfileForm({ initialUser }: { initialUser: UserProfile }) {
     setFieldErrors({});
   };
 
+  return {
+    displayName,
+    setDisplayName,
+    avatarUrl,
+    setAvatarUrl,
+    errorMsg,
+    fieldErrors,
+    setFieldErrors,
+    successMsg,
+    isPending,
+    handleSubmit,
+    handleReset,
+  };
+}
+
+export function ProfileForm({ initialUser }: { initialUser: UserProfile }) {
+  const form = useProfileFormState(initialUser);
+
   return (
     <div className="surface-card w-full max-w-2xl rounded-2xl border border-[var(--border-subtle)] p-4 sm:p-6 shadow-sm">
-      <ProfileHeader user={initialUser} avatarPreview={avatarUrl.trim()} />
+      <ProfileHeader user={initialUser} avatarPreview={form.avatarUrl.trim()} />
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-        <FormFeedback errorMsg={errorMsg} successMsg={successMsg} />
+      <form onSubmit={form.handleSubmit} className="mt-6 space-y-5">
+        <FormFeedback errorMsg={form.errorMsg} successMsg={form.successMsg} />
 
         <div className="space-y-1.5">
           <label htmlFor="email" className="block text-xs font-semibold text-muted-foreground">
@@ -272,24 +282,24 @@ export function ProfileForm({ initialUser }: { initialUser: UserProfile }) {
         </div>
 
         <DisplayNameField
-          value={displayName}
+          value={form.displayName}
           onChange={(val) => {
-            setDisplayName(val);
-            if (fieldErrors.displayName) setFieldErrors((prev) => ({ ...prev, displayName: undefined }));
+            form.setDisplayName(val);
+            if (form.fieldErrors.displayName) form.setFieldErrors((prev) => ({ ...prev, displayName: undefined }));
           }}
-          error={fieldErrors.displayName}
+          error={form.fieldErrors.displayName}
         />
 
         <AvatarUrlField
-          value={avatarUrl}
+          value={form.avatarUrl}
           onChange={(val) => {
-            setAvatarUrl(val);
-            if (fieldErrors.avatarUrl) setFieldErrors((prev) => ({ ...prev, avatarUrl: undefined }));
+            form.setAvatarUrl(val);
+            if (form.fieldErrors.avatarUrl) form.setFieldErrors((prev) => ({ ...prev, avatarUrl: undefined }));
           }}
-          error={fieldErrors.avatarUrl}
+          error={form.fieldErrors.avatarUrl}
         />
 
-        <FormActions isPending={isPending} onReset={handleReset} />
+        <FormActions isPending={form.isPending} onReset={form.handleReset} />
       </form>
     </div>
   );

@@ -11,7 +11,6 @@ import { UserResponseDto } from './dto/user-response.dto';
 
 describe('UserController & UserService (Profile Management)', () => {
   let userController: UserController;
-  let userService: UserService;
 
   const mockUser: UserResponseDto = {
     id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
@@ -49,7 +48,6 @@ describe('UserController & UserService (Profile Management)', () => {
     }).compile();
 
     userController = module.get<UserController>(UserController);
-    userService = module.get<UserService>(UserService);
   });
 
   describe('GET /users/me (getMyProfile)', () => {
