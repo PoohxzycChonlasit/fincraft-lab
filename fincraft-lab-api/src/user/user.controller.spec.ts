@@ -58,7 +58,7 @@ describe('UserController & UserService (Profile Management)', () => {
 
       const result = await userController.getMyProfile(mockAccessTokenPayload);
 
-      expect(userService.getUserById).toHaveBeenCalledWith(mockUser.id);
+      expect(mockUserService.getUserById).toHaveBeenCalledWith(mockUser.id);
       expect(result.data).toEqual(mockUser);
       expect(result.data).not.toHaveProperty('passwordHash');
     });
@@ -104,7 +104,7 @@ describe('UserController & UserService (Profile Management)', () => {
         updateDto,
       );
 
-      expect(userService.updateProfile).toHaveBeenCalledWith(
+      expect(mockUserService.updateProfile).toHaveBeenCalledWith(
         mockUser.id,
         updateDto,
       );
