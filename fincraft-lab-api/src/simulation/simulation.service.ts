@@ -17,6 +17,7 @@ import type {
   SimulationDetailResponseDto,
   SimulationRunResponseDto,
   SimulationSummaryResponseDto,
+  SurvivalMonthsResultDto,
 } from './dto/simulation-response.dto';
 import { SimulationCalculatorService } from './simulation-calculator.service';
 
@@ -168,6 +169,70 @@ export class SimulationService {
       sources: Array.from(SURVIVAL_MONTHS_DEFINITION.sources),
       disclaimer: SURVIVAL_MONTHS_DEFINITION.disclaimer,
       calculationVersion: SURVIVAL_MONTHS_DEFINITION.calculationVersion,
+      createdAt: run.createdAt.toISOString(),
+    };
+  }
+
+  async getSimulationRun(
+    userId: string,
+    runId: string,
+  ): Promise<SimulationRunResponseDto> {
+    await this.validateUser(userId);
+
+    const run = await this.prisma.simulationRun.findUnique({
+      where: { id: runId },
+      include: { simulation: true },
+    });
+
+    if (!run || run.userId !== userId) {
+      throw new NotFoundException('Simulation run not found');
+    }
+
+    const inputsObj = run.inputs as Record<string, string | number>;
+    const outputsObj = run.outputs as Record<string, unknown>;
+    const rawResult = outputsObj['result'] as SurvivalMonthsResultDto | undefined;
+
+    return {
+      runId: run.id,
+      simulation: {
+        id: run.simulation.id,
+        slug: run.simulation.simulationType,
+        name: run.simulation.name,
+      },
+      input: {
+        emergencyFund:
+          typeof inputsObj['emergencyFund'] === 'number' ||
+          typeof inputsObj['emergencyFund'] === 'string'
+            ? String(inputsObj['emergencyFund'])
+            : '0.00',
+        essentialMonthlyExpenses:
+          typeof inputsObj['essentialMonthlyExpenses'] === 'number' ||
+          typeof inputsObj['essentialMonthlyExpenses'] === 'string'
+            ? String(inputsObj['essentialMonthlyExpenses'])
+            : '0.00',
+      },
+      result: {
+        survivalMonths: rawResult?.survivalMonths ?? '0.00',
+        wholeMonthsCovered: rawResult?.wholeMonthsCovered ?? 0,
+        remainingAmount: rawResult?.remainingAmount ?? '0.00',
+        statementEn: rawResult?.statementEn ?? '',
+        statementTh: rawResult?.statementTh ?? '',
+      },
+      assumptions: Array.isArray(outputsObj['assumptions'])
+        ? (outputsObj['assumptions'] as string[])
+        : Array.from(SURVIVAL_MONTHS_DEFINITION.assumptions),
+      limitations: Array.isArray(outputsObj['limitations'])
+        ? (outputsObj['limitations'] as string[])
+        : Array.from(SURVIVAL_MONTHS_DEFINITION.limitations),
+      sources: Array.from(SURVIVAL_MONTHS_DEFINITION.sources),
+      disclaimer:
+        typeof outputsObj['disclaimer'] === 'string'
+          ? outputsObj['disclaimer']
+          : SURVIVAL_MONTHS_DEFINITION.disclaimer,
+      calculationVersion:
+        typeof outputsObj['calculationVersion'] === 'string'
+          ? outputsObj['calculationVersion']
+          : SURVIVAL_MONTHS_DEFINITION.calculationVersion,
       createdAt: run.createdAt.toISOString(),
     };
   }

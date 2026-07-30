@@ -90,3 +90,32 @@ export function ApiRunSimulationOperation() {
     }),
   );
 }
+
+export function ApiGetSimulationRunOperation() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Get simulation run details',
+      description:
+        'Returns historical snapshot inputs, outputs, assumptions, limitations, and safety disclaimer for a specific simulation run belonging to the authenticated user.',
+    }),
+    ApiParam({
+      name: 'runId',
+      type: String,
+      format: 'uuid',
+      description: 'Simulation run UUID v4',
+    }),
+    ApiOkResponse({
+      description: 'Simulation run retrieved successfully',
+      type: SimulationRunEnvelopeDto,
+    }),
+    ApiBadRequestResponse({
+      description: 'Malformed UUID v4 parameter',
+    }),
+    ApiUnauthorizedResponse({
+      description: 'Missing or invalid Bearer access token',
+    }),
+    ApiNotFoundResponse({
+      description: 'Simulation run not found or belongs to another user',
+    }),
+  );
+}
