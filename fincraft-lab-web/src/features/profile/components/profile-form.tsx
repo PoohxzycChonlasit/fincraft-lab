@@ -2,48 +2,11 @@
 
 import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { User, Shield, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
+import { CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
 import type { UserProfile } from "@/lib/auth/session";
+import { ProfileHeader } from "./profile-header";
 
 type FieldErrors = { displayName?: string; avatarUrl?: string };
-
-function ProfileHeader({ user, avatarPreview }: { user: UserProfile; avatarPreview: string }) {
-  return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--border-subtle)] pb-5">
-      <div className="flex items-center gap-4">
-        <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] overflow-hidden">
-          {avatarPreview ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarPreview}
-              alt={`${user.displayName}'s avatar`}
-              className="h-full w-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLElement).style.display = "none";
-              }}
-            />
-          ) : (
-            <User className="h-8 w-8 text-muted-foreground" />
-          )}
-        </div>
-        <div>
-          <h2 className="text-lg font-bold text-foreground">{user.displayName}</h2>
-          <p className="text-xs text-muted-foreground">{user.email}</p>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-inset)] px-3 py-1 text-xs font-semibold text-foreground border border-[var(--border-subtle)]">
-          <Shield className="h-3.5 w-3.5 text-[var(--brand-accent)]" />
-          {user.role}
-        </span>
-        <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-          {user.status}
-        </span>
-      </div>
-    </div>
-  );
-}
 
 function FormFeedback({ errorMsg, successMsg }: { errorMsg: string | null; successMsg: string | null }) {
   if (errorMsg) {
