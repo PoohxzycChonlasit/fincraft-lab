@@ -5,7 +5,7 @@ import { HeaderThemeToggle } from "@/features/theme/components/header-theme-togg
 import { FinCraftLogo } from "./fincraft-logo";
 import { ProductNav } from "./product-nav";
 
-export type ProductTab = "home" | "lab" | "workspace" | "simulations" | "profile" | "pet" | "login" | "admin-elements" | "admin-categories";
+export type ProductTab = "home" | "lab" | "workspace" | "simulations" | "profile" | "pet" | "login" | "admin-elements" | "admin-categories" | "admin-recipes";
 
 export type ProductShellProps = {
   children: ReactNode;

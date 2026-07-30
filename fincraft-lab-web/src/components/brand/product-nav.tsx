@@ -36,6 +36,7 @@ function NavLinks({ activeTab, user, onNavigate, mobile = false }: ProductNavPro
         <>
           <Link href="/admin/elements" aria-current={activeTab === "admin-elements" ? "page" : undefined} className={classFor("admin-elements")} onClick={onNavigate}>Elements</Link>
           <Link href="/admin/categories" aria-current={activeTab === "admin-categories" ? "page" : undefined} className={classFor("admin-categories")} onClick={onNavigate}>Categories</Link>
+          <Link href="/admin/recipes" aria-current={activeTab === "admin-recipes" ? "page" : undefined} className={classFor("admin-recipes")} onClick={onNavigate}>Recipes</Link>
         </>
       ) : null}
       {!user ? (
