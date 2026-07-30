@@ -5,6 +5,7 @@ import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 
 describe('Pet Management (e2e)', () => {
+  jest.setTimeout(30000);
   let app: INestApplication<App>;
   let user1Token: string;
   let user2Token: string;

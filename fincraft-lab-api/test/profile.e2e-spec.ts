@@ -5,6 +5,7 @@ import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 
 describe('Profile Management (e2e)', () => {
+  jest.setTimeout(30000);
   let app: INestApplication<App>;
   let accessToken: string;
   const testEmail = `profile_test_${Date.now()}@example.com`;

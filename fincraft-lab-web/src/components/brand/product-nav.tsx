@@ -32,7 +32,12 @@ function NavLinks({ activeTab, user, onNavigate, mobile = false }: ProductNavPro
       {user ? <Link href="/simulations" aria-current={activeTab === "simulations" ? "page" : undefined} className={classFor("simulations")} onClick={onNavigate}>Simulations</Link> : null}
       {user ? <Link href="/settings/pet" aria-current={activeTab === "pet" ? "page" : undefined} className={classFor("pet")} onClick={onNavigate}>Companion</Link> : null}
       {user ? <Link href="/settings/profile" aria-current={activeTab === "profile" ? "page" : undefined} className={classFor("profile")} onClick={onNavigate}>Profile</Link> : null}
-      {isAdminUser(user) ? <Link href="/admin/elements" aria-current={activeTab === "admin-elements" ? "page" : undefined} className={classFor("admin-elements")} onClick={onNavigate}>Admin</Link> : null}
+      {isAdminUser(user) ? (
+        <>
+          <Link href="/admin/elements" aria-current={activeTab === "admin-elements" ? "page" : undefined} className={classFor("admin-elements")} onClick={onNavigate}>Elements</Link>
+          <Link href="/admin/categories" aria-current={activeTab === "admin-categories" ? "page" : undefined} className={classFor("admin-categories")} onClick={onNavigate}>Categories</Link>
+        </>
+      ) : null}
       {!user ? (
         <>
           <Link href="/login" aria-current={activeTab === "login" ? "page" : undefined} className={classFor("login")} onClick={onNavigate}>Sign In</Link>
