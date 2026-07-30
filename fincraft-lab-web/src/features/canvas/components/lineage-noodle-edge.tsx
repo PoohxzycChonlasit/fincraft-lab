@@ -23,10 +23,10 @@ export function LineageNoodleEdge({
   });
 
   const strokeColor = selected
-    ? "var(--color-craft-accent, #ea580c)"
-    : (style?.stroke as string | undefined) ?? "var(--border-interactive, #a8a29e)";
+    ? "var(--accent-orange)"
+    : (style?.stroke as string | undefined) ?? "var(--border-strong)";
   const strokeWidth = selected ? 2.5 : 1.5;
-  const opacity = selected ? 1 : 0.65;
+  const opacity = selected ? 1 : 0.7;
 
   return (
     <>
@@ -50,7 +50,7 @@ export function LineageNoodleEdge({
               transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
               pointerEvents: "none",
             }}
-            className="nodrag nopan rounded-md border border-[var(--border-subtle)] bg-[var(--surface-floating)] px-2 py-0.5 text-[10px] font-semibold text-foreground shadow-xs animate-in fade-in duration-100"
+            className="nodrag nopan surface-paper rounded-md border border-[var(--border-subtle)] px-2 py-0.5 text-[10px] font-semibold text-foreground shadow-xs animate-in fade-in duration-100"
           >
             {label}
           </div>

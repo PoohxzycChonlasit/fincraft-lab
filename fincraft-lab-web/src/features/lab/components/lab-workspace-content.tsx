@@ -56,10 +56,10 @@ function LabPanelControls({ activePanel, compact, onPanelChange }: { activePanel
 
   return (
     <div className={containerClass} aria-label={compact ? "Compact Lab panels" : "Lab panels"}>
-      <button type="button" aria-pressed={activePanel === "library"} onClick={() => toggle("library")} className={buttonClass}>
+      <button type="button" aria-pressed={activePanel === "library"} aria-expanded={activePanel === "library"} aria-controls="lab-library-slot" onClick={() => toggle("library")} className={buttonClass}>
         <PanelLeft size={16} aria-hidden="true" /><span>Elements</span>
       </button>
-      <button type="button" aria-pressed={activePanel === "context"} onClick={() => toggle("context")} className={buttonClass}>
+      <button type="button" aria-pressed={activePanel === "context"} aria-expanded={activePanel === "context"} aria-controls="lab-context-slot" onClick={() => toggle("context")} className={buttonClass}>
         <PanelRight size={16} aria-hidden="true" /><span>Context</span>
       </button>
     </div>
@@ -185,9 +185,9 @@ export function LabWorkspaceContent(props: LabWorkspaceContentProps) {
         <LabPanelControls activePanel={activePanel} onPanelChange={onPanelChange} />
       </div>
       <div className="lab-workspace-stage">
-        <div className="lab-library-slot" data-open={activePanel === "library"}>{library}</div>
+        <div id="lab-library-slot" className="lab-library-slot" data-open={activePanel === "library"}>{library}</div>
         <LabCanvasSection props={props} handleNodeTap={handleNodeTap} />
-        <div className="lab-context-slot" data-open={activePanel === "context"}>{context}</div>
+        <div id="lab-context-slot" className="lab-context-slot" data-open={activePanel === "context"}>{context}</div>
       </div>
       <LabPanelControls activePanel={activePanel} compact onPanelChange={onPanelChange} />
     </div>

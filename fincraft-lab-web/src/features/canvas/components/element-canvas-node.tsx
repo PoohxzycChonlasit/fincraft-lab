@@ -7,19 +7,19 @@ import type { ElementCanvasNode } from "../types/canvas-node.type";
 function getTypeColor(type?: string): string {
   switch (type?.toUpperCase()) {
     case "BASE":
-      return "var(--primitive-teal-700,#0f766e)";
+      return "var(--accent-teal)";
     case "CONCEPT":
-      return "var(--primitive-orange-600,#ea580c)";
+      return "var(--accent-orange)";
     case "RISK":
-      return "#dc2626";
+      return "var(--destructive)";
     case "TOOL":
-      return "#2563eb";
+      return "var(--accent-teal-strong)";
     case "BEHAVIOR":
       return "#7c3aed";
     case "DISCOVERY":
-      return "#d97706";
+      return "var(--accent-orange)";
     default:
-      return "var(--color-craft-accent,#ea580c)";
+      return "var(--accent-orange)";
   }
 }
 
@@ -30,17 +30,17 @@ function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>)
   const typeColor = getTypeColor(data.categoryName);
 
   const borderStyle = isTarget
-    ? "border-[var(--color-craft-accent)] ring-4 ring-[var(--color-craft-accent)]/30 scale-105 shadow-md"
+    ? "border-[var(--accent-orange)] ring-4 ring-[var(--accent-orange)]/30 scale-105 shadow-md"
     : isTapSelected
-      ? "border-[var(--color-action-primary)] ring-2 ring-[var(--color-action-primary)]"
+      ? "border-[var(--accent-teal)] ring-2 ring-[var(--accent-teal)]"
       : selected
-        ? "border-[var(--border-selected)] ring-2 ring-[var(--ring)]"
+        ? "border-[var(--border-strong)] ring-2 ring-[var(--focus-ring)]"
         : "border-[var(--border-subtle)]";
 
   return (
     <article
-      aria-label={`Canvas specimen: ${data.name}${isTarget ? " (Combine Target)" : ""}`}
-      className={`relative w-[190px] rounded-xl border text-left surface-card shadow-xs transition-all duration-150 overflow-visible ${borderStyle} ${
+      aria-label={`Canvas element: ${data.name}${isTarget ? " (Combine Target)" : ""}`}
+      className={`relative w-[190px] rounded-xl border text-left surface-solid shadow-xs transition-all duration-150 overflow-visible ${borderStyle} ${
         isCombining ? "opacity-70 pointer-events-none" : ""
       }`}
     >
@@ -49,18 +49,18 @@ function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>)
         position={Position.Left}
         id="lineage-target"
         aria-label="Input port"
-        className="!h-3 !w-3 !-left-1.5 !border-2 !border-[var(--surface-card)] !bg-[var(--color-craft-accent)] transition-all hover:scale-125"
+        className="!h-3 !w-3 !-left-1.5 !border-2 !border-[var(--surface-solid)] !bg-[var(--accent-teal)] transition-transform hover:scale-125"
       />
 
-      <div className="rounded-t-lg px-2.5 py-1 border-b border-[var(--border-subtle)] bg-[var(--surface-inset)] flex items-center justify-between gap-1">
+      <div className="rounded-t-lg px-2.5 py-1 border-b border-[var(--border-subtle)] bg-[var(--surface-paper)] flex items-center justify-between gap-1">
         <span className="text-[9px] font-extrabold uppercase tracking-wider truncate" style={{ color: typeColor }}>
           {data.categoryName || "ELEMENT"}
         </span>
-        {isTarget ? <span className="text-[8px] font-bold uppercase text-[var(--color-craft-accent)]">Target</span> : null}
+        {isTarget ? <span className="text-[8px] font-bold uppercase text-[var(--accent-orange)]">Target</span> : null}
       </div>
 
       <div className="p-2.5 flex items-start gap-2 min-h-[44px]">
-        <span className="surface-inset flex size-7 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-sm leading-none">
+        <span className="surface-paper flex size-7 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-sm leading-none">
           {data.emoji || "Element"}
         </span>
         <div className="min-w-0 flex-1">
@@ -73,7 +73,7 @@ function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>)
         position={Position.Right}
         id="lineage-source"
         aria-label="Output port"
-        className="!h-3 !w-3 !-right-1.5 !border-2 !border-[var(--surface-card)] !bg-[var(--color-action-primary)] transition-all hover:scale-125"
+        className="!h-3 !w-3 !-right-1.5 !border-2 !border-[var(--surface-solid)] !bg-[var(--accent-orange)] transition-transform hover:scale-125"
       />
     </article>
   );
