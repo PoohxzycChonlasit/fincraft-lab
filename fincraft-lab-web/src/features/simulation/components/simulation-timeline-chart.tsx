@@ -25,27 +25,47 @@ function SvgCurve({ points, width, height }: { points: Point[]; width: number; h
   const maxM = points[points.length - 1].month || 1;
 
   const coords = points.map((p) => {
-    const x = (p.month / maxM) * (width - 60) + 40;
-    const y = height - 30 - (p.balance / maxB) * (height - 50);
+    const x = (p.month / maxM) * (width - 64) + 44;
+    const y = height - 32 - (p.balance / maxB) * (height - 56);
     return { x, y, p };
   });
 
   const pathD = coords.reduce((acc, c, idx) => `${acc} ${idx === 0 ? "M" : "L"} ${c.x} ${c.y}`, "");
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible select-none" aria-label="Balance Depletion Curve over Time">
-      <line x1="40" y1={height - 30} x2={width - 20} y2={height - 30} stroke="var(--border-subtle)" strokeWidth="1" />
-      <line x1="40" y1="20" x2="40" y2={height - 30} stroke="var(--border-subtle)" strokeWidth="1" />
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      role="img"
+      className="w-full h-auto overflow-visible select-none"
+      aria-labelledby="timeline-title timeline-desc"
+    >
+      <title id="timeline-title">Balance Depletion Curve</title>
+      <desc id="timeline-desc">
+        Line chart showing balance declining from ${points[0]?.balance ?? 0} at month 0 to $0 at month {points[points.length - 1]?.month ?? 0}.
+      </desc>
 
-      <path d={pathD} fill="none" stroke="var(--brand-accent)" strokeWidth="2.5" strokeLinecap="round" />
+      {/* Axis lines */}
+      <line x1="44" y1={height - 32} x2={width - 20} y2={height - 32} stroke="var(--border-subtle)" strokeWidth="1" />
+      <line x1="44" y1="20" x2="44" y2={height - 32} stroke="var(--border-subtle)" strokeWidth="1" />
 
-      {coords.map((c) => (
+      {/* Depletion path */}
+      <path d={pathD} fill="none" stroke="var(--accent-teal)" strokeWidth="2.5" strokeLinecap="round" />
+
+      {/* Data points — only first and last to avoid clutter */}
+      {[coords[0], coords[coords.length - 1]].filter(Boolean).map((c) => (
         <g key={c.p.month}>
-          <circle cx={c.x} cy={c.y} r="4" fill="var(--surface-resting)" stroke="var(--brand-accent)" strokeWidth="2" />
-          <text x={c.x} y={height - 12} textAnchor="middle" fill="currentColor" fontSize="10" className="text-muted-foreground font-mono">
+          <circle cx={c.x} cy={c.y} r="5" fill="var(--surface-solid)" stroke="var(--accent-teal)" strokeWidth="2" />
+          <text x={c.x} y={height - 14} textAnchor="middle" fill="currentColor" fontSize="10" className="font-mono">
             M{c.p.month}
           </text>
         </g>
+      ))}
+
+      {/* Intermediate month labels at quarter points */}
+      {coords.filter((_, i) => i > 0 && i < coords.length - 1 && i % Math.max(1, Math.floor(coords.length / 4)) === 0).map((c) => (
+        <text key={`label-${c.p.month}`} x={c.x} y={height - 14} textAnchor="middle" fill="currentColor" fontSize="10" className="font-mono opacity-60">
+          M{c.p.month}
+        </text>
       ))}
     </svg>
   );
@@ -53,25 +73,26 @@ function SvgCurve({ points, width, height }: { points: Point[]; width: number; h
 
 export function SimulationTimelineChart({ result }: { result: SimulationRunResult }) {
   const points = generatePoints(result);
+  const startBalance = parseFloat(result.input.emergencyFund) || 0;
+  const monthlyBurn = parseFloat(result.input.essentialMonthlyExpenses) || 0;
 
   return (
-    <div className="space-y-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-flat)] p-4 sm:p-5">
+    <section aria-label="Balance depletion timeline" className="surface-solid rounded-2xl border border-[var(--border-subtle)] p-4 sm:p-5 space-y-3">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        <h3 className="font-caption font-bold uppercase tracking-wider text-muted-foreground">
           Balance Depletion Timeline
-        </h4>
-        <span className="text-xs font-medium text-foreground">
-          {result.result.survivalMonths} Months Runway
+        </h3>
+        <span className="font-caption font-bold text-[var(--accent-teal)]">
+          {result.result.survivalMonths} mo. runway
         </span>
       </div>
 
-      <SvgCurve points={points} width={500} height={180} />
+      <SvgCurve points={points} width={520} height={180} />
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px] text-muted-foreground pt-2 border-t border-[var(--border-subtle)]">
-        <div>Initial Fund: <span className="font-semibold text-foreground">${result.input.emergencyFund}</span></div>
-        <div>Monthly Burn: <span className="font-semibold text-foreground">${result.input.essentialMonthlyExpenses}</span></div>
-        <div>Ending Balance: <span className="font-semibold text-foreground">${result.result.remainingAmount}</span></div>
-      </div>
-    </div>
+      {/* Text summary adjacent to chart (accessibility + non-colour-only) */}
+      <p className="font-body-small text-muted-foreground pt-1 border-t border-[var(--border-subtle)]">
+        Starting at <strong className="text-foreground">${startBalance.toLocaleString()}</strong>, depleting at <strong className="text-foreground">${monthlyBurn.toLocaleString()}</strong>/month, the balance reaches zero after approximately <strong className="text-foreground">{result.result.survivalMonths} months</strong> with <strong className="text-foreground">${result.result.remainingAmount}</strong> remaining in the partial final month.
+      </p>
+    </section>
   );
 }

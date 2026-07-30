@@ -1,18 +1,18 @@
-import { ShieldAlert, Info } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 
 export function SimulationDisclaimerBanner() {
   return (
-    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] p-4 text-xs space-y-2">
-      <div className="flex items-center gap-2 text-foreground font-bold">
-        <ShieldAlert className="h-4 w-4 text-[var(--brand-accent)] shrink-0" />
-        <span>Education Only • Simulation Only • Not Financial Advice</span>
+    <div
+      role="note"
+      className="surface-solid rounded-2xl border border-[var(--border-strong)] p-4 space-y-2"
+    >
+      <div className="flex items-center gap-2 font-bold text-sm text-foreground">
+        <ShieldAlert className="h-4 w-4 text-[var(--accent-orange)] shrink-0" />
+        <span>Education Only · Simulation Only · Not Financial Advice</span>
       </div>
-      <div className="flex items-start gap-2 text-muted-foreground leading-relaxed">
-        <Info className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
-        <p>
-          Calculations are simplified educational estimates derived from your entered assumptions. Results do not use real-time market data and do not constitute financial recommendations or advice.
-        </p>
-      </div>
+      <p className="text-xs text-muted-foreground leading-relaxed pl-6">
+        All calculations are simplified educational estimates based on your entered assumptions. Results do not use real-time market data, do not reflect your actual financial situation, and are not predictions or recommendations. Real outcomes can differ significantly. This tool is for learning, not financial planning.
+      </p>
     </div>
   );
 }

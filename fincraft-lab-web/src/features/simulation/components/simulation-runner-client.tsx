@@ -8,8 +8,8 @@ import { SimulationResultView } from "./simulation-result";
 
 function ErrorBanner({ error }: { error: string }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive">
-      <AlertCircle className="h-4 w-4 shrink-0" />
+    <div role="alert" className="flex items-center gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive">
+      <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
       <span>{error}</span>
     </div>
   );
@@ -46,15 +46,15 @@ export function SimulationRunnerClient({
           onError={setErrorMsg}
         />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-foreground">Active Run Result</span>
+            <span className="font-caption font-bold text-muted-foreground uppercase tracking-wider">Simulation Result</span>
             <button
               type="button"
               onClick={handleResetRun}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-[var(--surface-raised)] transition-colors"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-solid)] px-4 text-xs font-bold text-foreground hover:bg-[var(--surface-paper)] transition-colors"
             >
-              <RotateCcw className="h-3.5 w-3.5" />
+              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Run Again</span>
             </button>
           </div>
