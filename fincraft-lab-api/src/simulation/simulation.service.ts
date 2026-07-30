@@ -190,7 +190,9 @@ export class SimulationService {
 
     const inputsObj = run.inputs as Record<string, string | number>;
     const outputsObj = run.outputs as Record<string, unknown>;
-    const rawResult = outputsObj['result'] as SurvivalMonthsResultDto | undefined;
+    const rawResult = outputsObj['result'] as
+      | SurvivalMonthsResultDto
+      | undefined;
 
     return {
       runId: run.id,
