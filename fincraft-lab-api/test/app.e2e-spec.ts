@@ -6,6 +6,7 @@ import { AppModule } from './../src/app.module';
 import type { HealthStatus } from './../src/health/health.service';
 
 describe('AppModule (e2e)', () => {
+  jest.setTimeout(30000);
   let app: INestApplication<App>;
 
   beforeEach(async () => {

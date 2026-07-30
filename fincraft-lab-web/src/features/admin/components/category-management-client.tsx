@@ -141,11 +141,7 @@ function CategoryTable({
   );
 }
 
-export function CategoryManagementClient({
-  initialCategories,
-}: {
-  initialCategories: AdminCategory[];
-}) {
+function useCategoryManagementState(initialCategories: AdminCategory[]) {
   const [categories, setCategories] = useState<AdminCategory[]>(initialCategories);
   const [activeModalCat, setActiveModalCat] = useState<AdminCategory | null | "new">(null);
   const [isPending, startTransition] = useTransition();
@@ -184,6 +180,34 @@ export function CategoryManagementClient({
       }
     });
   };
+
+  return {
+    categories,
+    activeModalCat,
+    setActiveModalCat,
+    isPending,
+    errorMsg,
+    successMsg,
+    handleSaved,
+    handleArchive,
+  };
+}
+
+export function CategoryManagementClient({
+  initialCategories,
+}: {
+  initialCategories: AdminCategory[];
+}) {
+  const {
+    categories,
+    activeModalCat,
+    setActiveModalCat,
+    isPending,
+    errorMsg,
+    successMsg,
+    handleSaved,
+    handleArchive,
+  } = useCategoryManagementState(initialCategories);
 
   return (
     <div className="space-y-4">
