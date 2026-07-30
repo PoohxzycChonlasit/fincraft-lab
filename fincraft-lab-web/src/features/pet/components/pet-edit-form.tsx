@@ -146,13 +146,9 @@ function usePetEditFormState(initialPet: PetProfile, onUpdated: (pet: PetProfile
   return { name, setName, species, setSpecies, avatarUrl, setAvatarUrl, personality, setPersonality, learningGoal, setLearningGoal, errorMsg, successMsg, isPending, handleSubmit, handleReset };
 }
 
-export function PetEditForm({ pet, onUpdated }: { pet: PetProfile; onUpdated: (pet: PetProfile) => void }) {
-  const form = usePetEditFormState(pet, onUpdated);
-
+function PetEditFields({ form }: { form: ReturnType<typeof usePetEditFormState> }) {
   return (
-    <form onSubmit={form.handleSubmit} className="space-y-4">
-      <FormFeedback errorMsg={form.errorMsg} successMsg={form.successMsg} />
-
+    <>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <label htmlFor="name" className="block text-xs font-semibold text-foreground">
@@ -210,7 +206,17 @@ export function PetEditForm({ pet, onUpdated }: { pet: PetProfile; onUpdated: (p
           className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-flat)] px-3.5 py-2.5 text-xs font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:border-[var(--brand-accent)]"
         />
       </div>
+    </>
+  );
+}
 
+export function PetEditForm({ pet, onUpdated }: { pet: PetProfile; onUpdated: (pet: PetProfile) => void }) {
+  const form = usePetEditFormState(pet, onUpdated);
+
+  return (
+    <form onSubmit={form.handleSubmit} className="space-y-4">
+      <FormFeedback errorMsg={form.errorMsg} successMsg={form.successMsg} />
+      <PetEditFields form={form} />
       <FormActions isPending={form.isPending} onReset={form.handleReset} />
     </form>
   );
