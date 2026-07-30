@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ArrowRight, Layers, Sparkles } from "lucide-react";
+
 import { fetchUserWorkspaceCanvas } from "@/features/workspace/public.server";
-import { WorkspaceManager } from "@/features/workspace/public.client";
+import { WorkspaceManager, type CanvasSnapshot, type WorkspaceSummary } from "@/features/workspace/public.client";
 import { getSessionUser } from "@/lib/auth/session";
 import { getInitialPet } from "@/features/pet/api/get-initial-pet";
 import { CompanionWidget } from "@/features/pet/components/companion-widget";
 
 export const metadata: Metadata = {
   title: "Workspaces | FinCraft Lab",
-  description: "Manage your financial learning workspaces.",
+  description: "Personal financial learning world archive.",
 };
 
 type WorkspacePageProps = {
@@ -19,13 +21,78 @@ type WorkspacePageProps = {
 function WorkspaceErrorAlert({ error }: { error?: string }) {
   return (
     <div className="mx-auto max-w-4xl space-y-4">
-      <div className="surface-inset rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
-        <h1 className="text-base font-semibold text-destructive">Workspace Unavailable</h1>
-        <p className="mt-1 text-xs text-muted-foreground">
+      <div className="surface-solid rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
+        <h1 className="font-section-title text-destructive">Workspace Unavailable</h1>
+        <p className="font-body-small mt-1 text-muted-foreground">
           {error || "Workspace data could not be loaded."}
         </p>
       </div>
     </div>
+  );
+}
+
+function WorkspacePageHeader({ workspaceId }: { workspaceId: string }) {
+  return (
+    <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
+      <div className="space-y-1">
+        <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--accent-orange)]">
+          <Sparkles size={14} aria-hidden="true" />
+          <span>Personal World Archive</span>
+        </div>
+        <h1 className="font-page-title text-foreground">Saved Financial Worlds</h1>
+        <p className="font-body-small text-muted-foreground">
+          Every workspace preserves the concepts, positions, and lineage relationships you build in the Craft Lab.
+        </p>
+      </div>
+
+      <Link
+        href={`/lab?workspaceId=${workspaceId}`}
+        className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--brand-primary)] px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-[var(--accent-teal-strong)] transition-colors"
+      >
+        <span>Open in Lab</span>
+        <ArrowRight size={16} aria-hidden="true" />
+      </Link>
+    </header>
+  );
+}
+
+function ActiveWorkspaceCard({ selectedWorkspace, snapshot, workspaceId }: {
+  selectedWorkspace: WorkspaceSummary;
+  snapshot: CanvasSnapshot;
+  workspaceId: string;
+}) {
+  const nodeCount = snapshot.nodes.length;
+  const edgeCount = snapshot.edges?.length ?? 0;
+
+  return (
+    <section aria-label="Active Workspace Summary" className="surface-paper rounded-2xl border border-[var(--border-subtle)] p-6 space-y-4 shadow-xs">
+      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+        <div className="flex items-center gap-2">
+          <Layers size={18} className="text-[var(--accent-teal)]" aria-hidden="true" />
+          <h2 className="font-section-title text-foreground">Active World: {selectedWorkspace.name}</h2>
+        </div>
+        <span className="font-caption rounded-full bg-[var(--surface-solid)] px-3 py-1 border border-[var(--border-subtle)] font-bold text-[var(--accent-orange)]">
+          Active
+        </span>
+      </div>
+
+      <p className="font-body text-muted-foreground">
+        This experiment contains <strong className="text-foreground">{nodeCount}</strong> concept node{nodeCount === 1 ? "" : "s"} and <strong className="text-foreground">{edgeCount}</strong> lineage connection{edgeCount === 1 ? "" : "s"} saved on your infinite canvas.
+      </p>
+
+      <div className="flex items-center justify-between pt-2">
+        <span className="font-caption text-muted-foreground">
+          Last updated: {new Date(selectedWorkspace.updatedAt).toLocaleDateString(undefined, { dateStyle: "medium" })}
+        </span>
+        <Link
+          href={`/lab?workspaceId=${workspaceId}`}
+          className="font-caption font-bold text-[var(--brand-primary)] hover:underline inline-flex items-center gap-1"
+        >
+          <span>Resume Experiment</span>
+          <ArrowRight size={14} aria-hidden="true" />
+        </Link>
+      </div>
+    </section>
   );
 }
 
@@ -52,38 +119,13 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Workspaces</h1>
-          <p className="text-xs text-muted-foreground">
-            Manage your saved discovery canvases and financial learning experiments.
-          </p>
-        </div>
-        <Link
-          href={`/lab?workspaceId=${workspaceId}`}
-          className="min-h-[42px] inline-flex items-center justify-center rounded-xl bg-[var(--color-action-primary)] px-5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-[var(--color-action-hover)] transition-colors"
-        >
-          Open in Lab &rarr;
-        </Link>
-      </div>
-
+      <WorkspacePageHeader workspaceId={workspaceId} />
       <CompanionWidget pet={pet} />
-
-      <div className="space-y-6">
+      <ActiveWorkspaceCard selectedWorkspace={selectedWorkspace} snapshot={snapshot} workspaceId={workspaceId} />
+      <section aria-label="Workspace Manager" className="surface-solid rounded-2xl border border-[var(--border-subtle)] p-6 space-y-4">
+        <h2 className="font-section-title text-foreground">Manage Workspace Archives</h2>
         <WorkspaceManager workspaces={workspaces} selectedWorkspace={selectedWorkspace} />
-
-        <section aria-label="Workspace Canvas Preview" className="surface-card rounded-2xl border border-[var(--border-subtle)] p-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Canvas Summary: {selectedWorkspace.name}
-            </h2>
-            <span className="text-xs text-muted-foreground">{snapshot.nodes.length} nodes saved</span>
-          </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            This workspace currently contains {snapshot.nodes.length} elements placed on the Infinite Canvas. Open in Craft Lab to combine ideas.
-          </p>
-        </section>
-      </div>
+      </section>
     </div>
   );
 }
