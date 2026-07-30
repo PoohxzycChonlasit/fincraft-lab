@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { fetchUserWorkspaceCanvas } from "@/features/workspace/public.server";
 import { WorkspaceManager } from "@/features/workspace/public.client";
 import { getSessionUser } from "@/lib/auth/session";
+import { getInitialPet } from "@/features/pet/api/get-initial-pet";
+import { CompanionWidget } from "@/features/pet/components/companion-widget";
 
 export const metadata: Metadata = {
   title: "Workspaces | FinCraft Lab",
@@ -25,7 +27,10 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
     redirect("/login");
   }
 
-  const workspaceResult = await fetchUserWorkspaceCanvas(requestedWorkspaceId);
+  const [workspaceResult, pet] = await Promise.all([
+    fetchUserWorkspaceCanvas(requestedWorkspaceId),
+    getInitialPet(),
+  ]);
 
   if (!workspaceResult || !workspaceResult.success) {
     if (workspaceResult && "redirectLogin" in workspaceResult && workspaceResult.redirectLogin) {
@@ -61,6 +66,8 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
           Open in Lab &rarr;
         </Link>
       </div>
+
+      <CompanionWidget pet={pet} />
 
       <div className="space-y-6">
         <WorkspaceManager workspaces={workspaces} selectedWorkspace={selectedWorkspace} />
