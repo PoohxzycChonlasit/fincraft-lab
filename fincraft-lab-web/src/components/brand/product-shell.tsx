@@ -37,8 +37,8 @@ export function ProductShell({ children, activeTab = "home", user, contentMode =
   const isWorkspace = layoutMode === "workspace";
 
   return (
-    <div className={`flex min-w-0 flex-col bg-[var(--surface-flat)] text-[var(--color-text-primary)] ${isWorkspace ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh]"}`}>
-      <header className="product-header relative z-50 h-[58px] shrink-0 border-b border-[var(--border-subtle)] bg-[var(--surface-resting)]">
+    <div className={`flex min-w-0 flex-col bg-[var(--page-background)] text-[var(--color-text-primary)] ${isWorkspace ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh]"}`}>
+      <header className="product-header sticky top-0 z-50 h-[60px] shrink-0 border-b border-[var(--border-subtle)] bg-[var(--glass-background-medium)] backdrop-blur-md transition-colors">
         <div className={`mx-auto flex h-full w-full ${maxWClass} min-w-0 flex-nowrap items-center justify-between gap-2 px-4 sm:px-6`}>
           <ProductBrand />
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -52,8 +52,8 @@ export function ProductShell({ children, activeTab = "home", user, contentMode =
         {children}
       </main>
 
-      <footer className="shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-resting)] py-2 text-center text-xs text-muted-foreground">
-        <p>Education Only — Simulation Only — Not Financial Advice</p>
+      <footer className="shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-solid)] py-3 text-center text-xs font-medium text-muted-foreground">
+        <p className="tracking-wide">Education Only — Simulation Only — Not Financial Advice</p>
       </footer>
     </div>
   );

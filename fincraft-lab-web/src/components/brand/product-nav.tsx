@@ -12,10 +12,10 @@ type ProductNavProps = {
   user?: UserProfile | null;
 };
 
-const activeStyle = "inline-flex min-h-11 items-center border-b-2 border-[var(--brand-accent)] px-3 text-xs font-bold text-foreground transition-colors";
-const inactiveStyle = "inline-flex min-h-11 items-center border-b-2 border-transparent px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-[var(--border-interactive)] hover:text-foreground";
-const accountStyle = "inline-flex min-h-11 items-center rounded-xl bg-[var(--brand-primary)] px-4 text-xs font-bold text-[var(--brand-primary-foreground)] transition-colors hover:bg-[var(--color-action-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2";
-const menuLinkStyle = "block rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--surface-inset)]";
+const activeStyle = "inline-flex min-h-11 items-center border-b-2 border-[var(--brand-accent)] px-3 text-xs font-bold text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]";
+const inactiveStyle = "inline-flex min-h-11 items-center border-b-2 border-transparent px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-[var(--border-interactive)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]";
+const accountStyle = "inline-flex min-h-11 items-center rounded-xl bg-[var(--brand-primary)] px-4 text-xs font-bold text-[var(--brand-primary-foreground)] transition-colors hover:bg-[var(--color-action-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2";
+const menuLinkStyle = "block rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--surface-inset)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]";
 
 function isAdminUser(user?: UserProfile | null) {
   return user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
