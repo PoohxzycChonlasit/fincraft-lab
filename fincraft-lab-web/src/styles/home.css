@@ -141,11 +141,7 @@
 }
 
 .home-flow-line {
-  animation: flowLine 2s linear infinite;
-}
-
-@keyframes flowLine {
-  to { stroke-dashoffset: -16; }
+  stroke-dasharray: 4 4;
 }
 
 .home-visual-node {

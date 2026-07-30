@@ -16,17 +16,17 @@ function ActCraftRitual() {
         <div className="home-steps-grid">
           <div className="home-step-item">
             <span className="home-step-number">01</span>
-            <h4>Select Elements</h4>
+            <h3 className="font-card-title">Select Elements</h3>
             <p className="font-caption">Browse base concepts in your element library.</p>
           </div>
           <div className="home-step-item">
             <span className="home-step-number">02</span>
-            <h4>Position on Canvas</h4>
+            <h3 className="font-card-title">Position on Canvas</h3>
             <p className="font-caption">Arrange ideas visually to explore relationships.</p>
           </div>
           <div className="home-step-item">
             <span className="home-step-number">03</span>
-            <h4>Discover Insights</h4>
+            <h3 className="font-card-title">Discover Insights</h3>
             <p className="font-caption">Combine two nodes to trigger immediate discovery.</p>
           </div>
         </div>
