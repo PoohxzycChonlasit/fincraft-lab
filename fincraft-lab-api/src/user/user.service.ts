@@ -61,4 +61,36 @@ export class UserService {
       },
     });
   }
+
+  async updateProfile(
+    userId: string,
+    input: { displayName?: string; avatarUrl?: string | null },
+  ): Promise<UserResponseDto | null> {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+
+    if (!existingUser) {
+      return null;
+    }
+
+    const dataToUpdate: Prisma.UserUpdateInput = {};
+
+    if (input.displayName !== undefined) {
+      dataToUpdate.displayName = input.displayName;
+    }
+
+    if (input.avatarUrl !== undefined) {
+      dataToUpdate.avatarUrl = input.avatarUrl;
+    }
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: dataToUpdate,
+      omit: {
+        passwordHash: true,
+      },
+    });
+  }
 }
