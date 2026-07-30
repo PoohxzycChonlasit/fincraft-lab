@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Heart } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import type { PetProfile } from "../types/pet.types";
 import { PetHeader } from "./pet-header";
 import { PetOnboardingForm } from "./pet-onboarding-form";

@@ -16,16 +16,24 @@ type WorkspacePageProps = {
   searchParams: Promise<{ workspaceId?: string | string[] }>;
 };
 
+function WorkspaceErrorAlert({ error }: { error?: string }) {
+  return (
+    <div className="mx-auto max-w-4xl space-y-4">
+      <div className="surface-inset rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
+        <h1 className="text-base font-semibold text-destructive">Workspace Unavailable</h1>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {error || "Workspace data could not be loaded."}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default async function WorkspacePage({ searchParams }: WorkspacePageProps) {
   const params = await searchParams;
-  const requestedWorkspaceId = Array.isArray(params.workspaceId)
-    ? params.workspaceId[0]
-    : params.workspaceId;
+  const requestedWorkspaceId = Array.isArray(params.workspaceId) ? params.workspaceId[0] : params.workspaceId;
   const user = await getSessionUser();
-
-  if (!user) {
-    redirect("/login");
-  }
+  if (!user) redirect("/login");
 
   const [workspaceResult, pet] = await Promise.all([
     fetchUserWorkspaceCanvas(requestedWorkspaceId),
@@ -36,16 +44,8 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
     if (workspaceResult && "redirectLogin" in workspaceResult && workspaceResult.redirectLogin) {
       redirect("/login");
     }
-    return (
-      <div className="mx-auto max-w-4xl space-y-4">
-        <div className="surface-inset rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
-          <h1 className="text-base font-semibold text-destructive">Workspace Unavailable</h1>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {!workspaceResult ? "Workspace data could not be loaded." : ("errorMessage" in workspaceResult ? workspaceResult.errorMessage : "Error loading workspace.")}
-          </p>
-        </div>
-      </div>
-    );
+    const err = workspaceResult && "errorMessage" in workspaceResult ? workspaceResult.errorMessage : undefined;
+    return <WorkspaceErrorAlert error={err} />;
   }
 
   const { workspaceId, workspaces, selectedWorkspace, snapshot } = workspaceResult;

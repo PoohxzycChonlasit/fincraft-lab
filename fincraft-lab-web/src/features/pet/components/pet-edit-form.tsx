@@ -5,13 +5,7 @@ import { RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
 import type { PetProfile, PetSpecies } from "../types/pet.types";
 import { SPECIES_OPTIONS } from "../types/pet.types";
 
-function FormActions({
-  isPending,
-  onReset,
-}: {
-  isPending: boolean;
-  onReset: () => void;
-}) {
+function FormActions({ isPending, onReset }: { isPending: boolean; onReset: () => void }) {
   return (
     <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-[var(--border-subtle)]">
       <button
@@ -41,18 +35,10 @@ function FormActions({
   );
 }
 
-function SpeciesSelect({
-  value,
-  onChange,
-}: {
-  value: PetSpecies;
-  onChange: (val: PetSpecies) => void;
-}) {
+function SpeciesSelect({ value, onChange }: { value: PetSpecies; onChange: (val: PetSpecies) => void }) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor="species" className="block text-xs font-semibold text-foreground">
-        Species
-      </label>
+      <label htmlFor="species" className="block text-xs font-semibold text-foreground">Species</label>
       <select
         id="species"
         value={value}
@@ -67,6 +53,53 @@ function SpeciesSelect({
       </select>
     </div>
   );
+}
+
+function FormFeedback({ errorMsg, successMsg }: { errorMsg: string | null; successMsg: string | null }) {
+  if (errorMsg) {
+    return (
+      <div className="flex items-center gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive">
+        <AlertCircle className="h-4 w-4 shrink-0" />
+        <span>{errorMsg}</span>
+      </div>
+    );
+  }
+  if (successMsg) {
+    return (
+      <div className="flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-600 dark:text-emerald-400">
+        <CheckCircle2 className="h-4 w-4 shrink-0" />
+        <span>{successMsg}</span>
+      </div>
+    );
+  }
+  return null;
+}
+
+function submitPetUpdate(
+  payload: { name: string; species: PetSpecies; avatarUrl: string; personality: string; learningGoal: string },
+  onSuccess: (pet: PetProfile) => void,
+  onError: (err: string) => void,
+) {
+  fetch("/api/pets/me", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: payload.name.trim(),
+      species: payload.species,
+      avatarUrl: payload.avatarUrl.trim() === "" ? null : payload.avatarUrl.trim(),
+      personality: payload.personality.trim() === "" ? null : payload.personality.trim(),
+      learningGoal: payload.learningGoal.trim() === "" ? null : payload.learningGoal.trim(),
+    }),
+  })
+    .then(async (res) => {
+      const data = await res.json();
+      if (!res.ok) {
+        onError(data.error || "Failed to update Companion.");
+      } else {
+        onSuccess(data.data);
+      }
+    })
+    .catch(() => onError("Network error connecting to server."));
 }
 
 function usePetEditFormState(initialPet: PetProfile, onUpdated: (pet: PetProfile) => void) {
@@ -88,31 +121,15 @@ function usePetEditFormState(initialPet: PetProfile, onUpdated: (pet: PetProfile
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    startTransition(async () => {
-      try {
-        const res = await fetch("/api/pets/me", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: name.trim(),
-            species,
-            avatarUrl: avatarUrl.trim() === "" ? null : avatarUrl.trim(),
-            personality: personality.trim() === "" ? null : personality.trim(),
-            learningGoal: learningGoal.trim() === "" ? null : learningGoal.trim(),
-          }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          setErrorMsg(data.error || "Failed to update Companion.");
-          return;
-        }
-
-        setSuccessMsg("Companion profile updated successfully!");
-        onUpdated(data.data);
-      } catch {
-        setErrorMsg("Network error connecting to server.");
-      }
+    startTransition(() => {
+      submitPetUpdate(
+        { name, species, avatarUrl, personality, learningGoal },
+        (updated) => {
+          setSuccessMsg("Companion profile updated successfully!");
+          onUpdated(updated);
+        },
+        setErrorMsg,
+      );
     });
   };
 
@@ -126,49 +143,15 @@ function usePetEditFormState(initialPet: PetProfile, onUpdated: (pet: PetProfile
     setSuccessMsg(null);
   };
 
-  return {
-    name,
-    setName,
-    species,
-    setSpecies,
-    avatarUrl,
-    setAvatarUrl,
-    personality,
-    setPersonality,
-    learningGoal,
-    setLearningGoal,
-    errorMsg,
-    successMsg,
-    isPending,
-    handleSubmit,
-    handleReset,
-  };
+  return { name, setName, species, setSpecies, avatarUrl, setAvatarUrl, personality, setPersonality, learningGoal, setLearningGoal, errorMsg, successMsg, isPending, handleSubmit, handleReset };
 }
 
-export function PetEditForm({
-  pet,
-  onUpdated,
-}: {
-  pet: PetProfile;
-  onUpdated: (pet: PetProfile) => void;
-}) {
+export function PetEditForm({ pet, onUpdated }: { pet: PetProfile; onUpdated: (pet: PetProfile) => void }) {
   const form = usePetEditFormState(pet, onUpdated);
 
   return (
     <form onSubmit={form.handleSubmit} className="space-y-4">
-      {form.errorMsg ? (
-        <div className="flex items-center gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{form.errorMsg}</span>
-        </div>
-      ) : null}
-
-      {form.successMsg ? (
-        <div className="flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-600 dark:text-emerald-400">
-          <CheckCircle2 className="h-4 w-4 shrink-0" />
-          <span>{form.successMsg}</span>
-        </div>
-      ) : null}
+      <FormFeedback errorMsg={form.errorMsg} successMsg={form.successMsg} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
@@ -186,14 +169,11 @@ export function PetEditForm({
             className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-flat)] px-3.5 py-2.5 text-xs font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:border-[var(--brand-accent)]"
           />
         </div>
-
         <SpeciesSelect value={form.species} onChange={form.setSpecies} />
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="avatarUrl" className="block text-xs font-semibold text-foreground">
-          Avatar Image URL (Optional)
-        </label>
+        <label htmlFor="avatarUrl" className="block text-xs font-semibold text-foreground">Avatar Image URL (Optional)</label>
         <input
           id="avatarUrl"
           type="url"
@@ -206,9 +186,7 @@ export function PetEditForm({
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="personality" className="block text-xs font-semibold text-foreground">
-          Personality Trait (Optional)
-        </label>
+        <label htmlFor="personality" className="block text-xs font-semibold text-foreground">Personality Trait (Optional)</label>
         <input
           id="personality"
           type="text"
@@ -221,9 +199,7 @@ export function PetEditForm({
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="learningGoal" className="block text-xs font-semibold text-foreground">
-          Learning Focus / Goal (Optional)
-        </label>
+        <label htmlFor="learningGoal" className="block text-xs font-semibold text-foreground">Learning Focus / Goal (Optional)</label>
         <input
           id="learningGoal"
           type="text"

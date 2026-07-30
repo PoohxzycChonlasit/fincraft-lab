@@ -5,13 +5,7 @@ import { Sparkles, RefreshCw, AlertCircle } from "lucide-react";
 import type { PetProfile, PetSpecies } from "../types/pet.types";
 import { SPECIES_OPTIONS } from "../types/pet.types";
 
-function SpeciesGrid({
-  selected,
-  onSelect,
-}: {
-  selected: PetSpecies;
-  onSelect: (s: PetSpecies) => void;
-}) {
+function SpeciesGrid({ selected, onSelect }: { selected: PetSpecies; onSelect: (s: PetSpecies) => void }) {
   return (
     <div className="space-y-2">
       <label className="block text-xs font-semibold text-foreground">
@@ -44,13 +38,7 @@ function SpeciesGrid({
   );
 }
 
-function NameInput({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (val: string) => void;
-}) {
+function NameInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
   return (
     <div className="space-y-1.5">
       <label htmlFor="name" className="block text-xs font-semibold text-foreground">
@@ -71,13 +59,26 @@ function NameInput({
   );
 }
 
-function GoalInput({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (val: string) => void;
-}) {
+function PersonalityInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
+  return (
+    <div className="space-y-1.5">
+      <label htmlFor="personality" className="block text-xs font-semibold text-foreground">
+        Personality Trait (Optional)
+      </label>
+      <input
+        id="personality"
+        type="text"
+        maxLength={200}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="e.g. Cautious saver, Energetic budgeter"
+        className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-flat)] px-3.5 py-2.5 text-xs font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:border-[var(--brand-accent)]"
+      />
+    </div>
+  );
+}
+
+function GoalInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
   return (
     <div className="space-y-1.5">
       <label htmlFor="learningGoal" className="block text-xs font-semibold text-foreground">
@@ -96,11 +97,7 @@ function GoalInput({
   );
 }
 
-export function PetOnboardingForm({
-  onCreated,
-}: {
-  onCreated: (pet: PetProfile) => void;
-}) {
+function usePetOnboardingState(onCreated: (pet: PetProfile) => void) {
   const [isPending, startTransition] = useTransition();
   const [species, setSpecies] = useState<PetSpecies>("CAT");
   const [name, setName] = useState("");
@@ -140,41 +137,32 @@ export function PetOnboardingForm({
     });
   };
 
+  return { species, setSpecies, name, setName, personality, setPersonality, learningGoal, setLearningGoal, errorMsg, isPending, handleSubmit };
+}
+
+export function PetOnboardingForm({ onCreated }: { onCreated: (pet: PetProfile) => void }) {
+  const form = usePetOnboardingState(onCreated);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {errorMsg ? (
+    <form onSubmit={form.handleSubmit} className="space-y-5">
+      {form.errorMsg ? (
         <div className="flex items-center gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive">
           <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{errorMsg}</span>
+          <span>{form.errorMsg}</span>
         </div>
       ) : null}
 
-      <SpeciesGrid selected={species} onSelect={setSpecies} />
-      <NameInput value={name} onChange={setName} />
-      
-      <div className="space-y-1.5">
-        <label htmlFor="personality" className="block text-xs font-semibold text-foreground">
-          Personality Trait (Optional)
-        </label>
-        <input
-          id="personality"
-          type="text"
-          maxLength={200}
-          value={personality}
-          onChange={(e) => setPersonality(e.target.value)}
-          placeholder="e.g. Cautious saver, Energetic budgeter"
-          className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-flat)] px-3.5 py-2.5 text-xs font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:border-[var(--brand-accent)]"
-        />
-      </div>
-
-      <GoalInput value={learningGoal} onChange={setLearningGoal} />
+      <SpeciesGrid selected={form.species} onSelect={form.setSpecies} />
+      <NameInput value={form.name} onChange={form.setName} />
+      <PersonalityInput value={form.personality} onChange={form.setPersonality} />
+      <GoalInput value={form.learningGoal} onChange={form.setLearningGoal} />
 
       <button
         type="submit"
-        disabled={isPending}
+        disabled={form.isPending}
         className="w-full min-h-[42px] inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-action-primary)] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[var(--color-action-hover)] transition-colors disabled:opacity-50"
       >
-        {isPending ? (
+        {form.isPending ? (
           <>
             <RefreshCw className="h-4 w-4 animate-spin" />
             <span>Creating Companion...</span>
