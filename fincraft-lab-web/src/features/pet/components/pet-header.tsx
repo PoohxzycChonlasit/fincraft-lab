@@ -23,8 +23,8 @@ function AvatarImage({ pet }: { pet: PetProfile }) {
 function WelcomeBanner({ pet }: { pet: PetProfile }) {
   const goal = pet.learningGoal || "financial literacy discovery";
   return (
-    <div className="flex items-center gap-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] p-3 text-xs text-foreground">
-      <Sparkles className="h-4 w-4 shrink-0 text-[var(--brand-accent)]" />
+    <div className="surface-paper flex items-center gap-2.5 rounded-xl border border-[var(--border-subtle)] p-3 text-xs text-foreground">
+      <Sparkles className="h-4 w-4 shrink-0 text-[var(--accent-orange)]" />
       <span>
         <strong>{pet.name}</strong> is ready to help you explore {goal}.
       </span>
@@ -37,13 +37,13 @@ export function PetHeader({ pet }: { pet: PetProfile }) {
     <div className="space-y-4 border-b border-[var(--border-subtle)] pb-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] overflow-hidden shadow-xs">
+          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-solid)] overflow-hidden shadow-xs">
             <AvatarImage pet={pet} />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-foreground">{pet.name}</h2>
+            <h2 className="font-section-title text-foreground">{pet.name}</h2>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-inset)] px-2.5 py-0.5 text-xs font-semibold text-foreground border border-[var(--border-subtle)]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-solid)] px-2.5 py-0.5 text-xs font-bold text-foreground border border-[var(--border-subtle)]">
                 <Heart className="h-3 w-3 text-rose-500" />
                 {getSpeciesLabel(pet.species)}
               </span>
