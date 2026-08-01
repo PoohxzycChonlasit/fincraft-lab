@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { ProductShell } from "@/components/brand/product-shell";
+import { AdminRouteNav } from "@/features/admin/components/admin-route-nav";
 import { getSessionUser } from "@/lib/auth/session";
 
 function ForbiddenBanner() {
@@ -34,8 +35,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   }
 
   return (
-    <ProductShell activeTab="admin-elements" user={user}>
-      {children}
+    <ProductShell activeTab="admin" user={user}>
+      <div className="space-y-6">
+        <AdminRouteNav />
+        {children}
+      </div>
     </ProductShell>
   );
 }

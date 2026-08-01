@@ -7,8 +7,8 @@ import { FinCraftLogo } from "@/components/brand/fincraft-logo";
 export function AuthGatewayFrame({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[var(--page-background)] text-[var(--color-text-primary)]">
-      <header className="border-b border-[var(--border-subtle)] bg-[var(--surface-solid)]">
-        <div className="mx-auto flex min-h-[68px] w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+      <header className="sticky top-0 z-40 h-[var(--shell-header-height)] border-b border-[var(--border-subtle)] bg-[var(--surface-solid)]">
+        <div className="mx-auto flex h-full min-h-0 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link href="/" aria-label="FinCraft Lab home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2">
             <FinCraftLogo showDescriptor />
           </Link>

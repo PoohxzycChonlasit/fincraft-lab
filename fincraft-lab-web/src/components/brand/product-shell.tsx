@@ -5,7 +5,7 @@ import { HeaderThemeToggle } from "@/features/theme/components/header-theme-togg
 import { FinCraftLogo } from "./fincraft-logo";
 import { ProductNav } from "./product-nav";
 
-export type ProductTab = "home" | "lab" | "workspace" | "simulations" | "profile" | "pet" | "login" | "admin-elements" | "admin-categories" | "admin-recipes";
+export type ProductTab = "home" | "lab" | "workspace" | "simulations" | "profile" | "pet" | "login" | "admin";
 
 export type ProductShellProps = {
   children: ReactNode;
@@ -38,7 +38,7 @@ export function ProductShell({ children, activeTab = "home", user, contentMode =
 
   return (
     <div className={`flex min-w-0 flex-col bg-[var(--page-background)] text-[var(--color-text-primary)] ${isWorkspace ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh]"}`}>
-      <header className="product-header sticky top-0 z-50 h-[60px] shrink-0 border-b border-[var(--border-subtle)] bg-[var(--glass-background-medium)] backdrop-blur-md transition-colors">
+      <header className="product-header sticky top-0 z-40 h-[var(--shell-header-height)] shrink-0 border-b border-[var(--border-subtle)] bg-[var(--surface-solid)] transition-colors">
         <div className={`mx-auto flex h-full w-full ${maxWClass} min-w-0 flex-nowrap items-center justify-between gap-2 px-4 sm:px-6`}>
           <ProductBrand />
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">

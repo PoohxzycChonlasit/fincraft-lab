@@ -22,6 +22,10 @@
   }
 }
 
+:root {
+  --shell-header-height: 60px;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

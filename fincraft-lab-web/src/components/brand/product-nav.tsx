@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Menu, Home, Layers3, LogIn, PawPrint, ShieldCheck, Sparkles, UserRound } from "lucide-react";
 import type { UserProfile } from "@/lib/auth/session";
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { AccountMenu } from "./account-menu";
 import type { ProductTab } from "./product-shell";
 import { LogoutButton } from "./logout-button";
 
@@ -12,96 +13,132 @@ type ProductNavProps = {
   user?: UserProfile | null;
 };
 
-const activeStyle = "inline-flex min-h-11 items-center border-b-2 border-[var(--brand-accent)] px-3 text-xs font-bold text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]";
-const inactiveStyle = "inline-flex min-h-11 items-center border-b-2 border-transparent px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-[var(--border-interactive)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]";
-const accountStyle = "inline-flex min-h-11 items-center rounded-xl bg-[var(--brand-primary)] px-4 text-xs font-bold text-[var(--brand-primary-foreground)] transition-colors hover:bg-[var(--color-action-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2";
-const menuLinkStyle = "block rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--surface-inset)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]";
+type NavItem = {
+  label: string;
+  href: string;
+  tab: ProductTab;
+  icon: typeof Home;
+};
+
+const exploreItems: NavItem[] = [
+  { label: "Home", href: "/", tab: "home", icon: Home },
+  { label: "Craft Lab", href: "/lab", tab: "lab", icon: Sparkles },
+  { label: "Workspace", href: "/workspace", tab: "workspace", icon: Layers3 },
+  { label: "Simulations", href: "/simulations", tab: "simulations", icon: Sparkles },
+];
+
+const personalItems: NavItem[] = [
+  { label: "Companion", href: "/settings/pet", tab: "pet", icon: PawPrint },
+  { label: "Profile", href: "/settings/profile", tab: "profile", icon: UserRound },
+];
 
 function isAdminUser(user?: UserProfile | null) {
   return user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
 }
 
-function NavLinks({ activeTab, user, onNavigate, mobile = false }: ProductNavProps & { onNavigate?: () => void; mobile?: boolean }) {
-  const classFor = (tab: ProductTab) => mobile ? menuLinkStyle : (activeTab === tab ? activeStyle : inactiveStyle);
+function getExploreItems(user?: UserProfile | null) {
+  return user ? exploreItems : exploreItems.filter((item) => item.tab === "home" || item.tab === "lab");
+}
 
+function getCurrentLabel(activeTab: ProductTab) {
+  if (activeTab === "lab") return "Craft Lab";
+  if (activeTab === "workspace") return "Workspace";
+  if (activeTab === "simulations") return "Simulations";
+  if (activeTab === "pet") return "Companion";
+  if (activeTab === "profile") return "Profile";
+  if (activeTab === "admin") return "Admin";
+  return "Home";
+}
+
+function DesktopLink({ item, activeTab }: { item: NavItem; activeTab: ProductTab }) {
+  const active = item.tab === activeTab;
+  const Icon = item.icon;
   return (
-    <>
-      <Link href="/" aria-current={activeTab === "home" ? "page" : undefined} className={classFor("home")} onClick={onNavigate}>Home</Link>
-      <Link href="/lab" aria-current={activeTab === "lab" ? "page" : undefined} className={classFor("lab")} onClick={onNavigate}>Craft Lab</Link>
-      {user ? <Link href="/workspace" aria-current={activeTab === "workspace" ? "page" : undefined} className={classFor("workspace")} onClick={onNavigate}>Workspace</Link> : null}
-      {user ? <Link href="/simulations" aria-current={activeTab === "simulations" ? "page" : undefined} className={classFor("simulations")} onClick={onNavigate}>Simulations</Link> : null}
-      {user ? <Link href="/settings/pet" aria-current={activeTab === "pet" ? "page" : undefined} className={classFor("pet")} onClick={onNavigate}>Companion</Link> : null}
-      {user ? <Link href="/settings/profile" aria-current={activeTab === "profile" ? "page" : undefined} className={classFor("profile")} onClick={onNavigate}>Profile</Link> : null}
-      {isAdminUser(user) ? (
-        <>
-          <Link href="/admin/elements" aria-current={activeTab === "admin-elements" ? "page" : undefined} className={classFor("admin-elements")} onClick={onNavigate}>Elements</Link>
-          <Link href="/admin/categories" aria-current={activeTab === "admin-categories" ? "page" : undefined} className={classFor("admin-categories")} onClick={onNavigate}>Categories</Link>
-          <Link href="/admin/recipes" aria-current={activeTab === "admin-recipes" ? "page" : undefined} className={classFor("admin-recipes")} onClick={onNavigate}>Recipes</Link>
-        </>
-      ) : null}
-      {!user ? (
-        <>
-          <Link href="/login" aria-current={activeTab === "login" ? "page" : undefined} className={classFor("login")} onClick={onNavigate}>Sign In</Link>
-          <Link href="/register" className={mobile ? menuLinkStyle : accountStyle} onClick={onNavigate}>Create Account</Link>
-        </>
-      ) : <LogoutButton />}
-    </>
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      className={`inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 ${active ? "border-[var(--border-selected)] bg-[var(--surface-inset)] text-foreground shadow-xs" : "border-transparent text-muted-foreground hover:border-[var(--border-subtle)] hover:bg-[var(--surface-inset)] hover:text-foreground"}`}
+    >
+      <Icon size={14} aria-hidden="true" />
+      <span>{item.label}</span>
+    </Link>
+  );
+}
+
+function DesktopGroup({ label, items, activeTab }: { label: string; items: NavItem[]; activeTab: ProductTab }) {
+  return (
+    <div role="group" aria-label={label} className="flex items-center gap-0.5 border-l border-[var(--border-subtle)] pl-1.5 first:border-l-0 first:pl-0">
+      {items.map((item) => <DesktopLink key={item.href} item={item} activeTab={activeTab} />)}
+    </div>
+  );
+}
+
+function MobileLink({ item }: { item: NavItem }) {
+  const Icon = item.icon;
+  return (
+    <SheetClose asChild>
+      <Link href={item.href} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--surface-inset)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
+        <Icon size={17} aria-hidden="true" />
+        <span>{item.label}</span>
+      </Link>
+    </SheetClose>
+  );
+}
+
+function MobileGroup({ label, items }: { label: string; items: NavItem[] }) {
+  return (
+    <section className="space-y-1" aria-labelledby={`mobile-nav-${label.toLowerCase()}`}>
+      <h2 id={`mobile-nav-${label.toLowerCase()}`} className="px-3 pt-4 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{label}</h2>
+      {items.map((item) => <MobileLink key={item.href} item={item} />)}
+    </section>
+  );
+}
+
+function MobileNavigation({ activeTab, user }: ProductNavProps) {
+  const admin = isAdminUser(user);
+  const explore = getExploreItems(user);
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <button type="button" aria-label="Open navigation menu" className="inline-flex size-11 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] text-foreground transition-colors hover:bg-[var(--surface-raised)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
+          <Menu size={18} aria-hidden="true" />
+        </button>
+      </SheetTrigger>
+      <SheetContent side="right" className="h-[100dvh] max-h-[100dvh] w-[min(22rem,calc(100vw-1rem))] max-w-none gap-0 overflow-hidden border-l border-[var(--border-subtle)] bg-[var(--surface-solid)] p-0">
+        <SheetHeader className="shrink-0 border-b border-[var(--border-subtle)] pr-14">
+          <SheetTitle>FinCraft navigation</SheetTitle>
+          <SheetDescription>Current route: {getCurrentLabel(activeTab)}</SheetDescription>
+        </SheetHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
+          <MobileGroup label="Explore" items={explore} />
+          {user ? <MobileGroup label="Personal" items={personalItems} /> : null}
+          {admin ? <MobileGroup label="Admin" items={[{ label: "Admin", href: "/admin/elements", tab: "admin", icon: ShieldCheck }]} /> : null}
+          <section className="space-y-1" aria-labelledby="mobile-nav-account">
+            <h2 id="mobile-nav-account" className="px-3 pt-4 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Account</h2>
+            {user ? <div className="flex items-center gap-3 rounded-xl bg-[var(--surface-inset)] px-3 py-3"><span className="min-w-0"><span className="block truncate text-sm font-bold text-foreground">{user.displayName}</span><span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{user.role}</span></span></div> : <><SheetClose asChild><Link href="/login" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-foreground hover:bg-[var(--surface-inset)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"><LogIn size={17} aria-hidden="true" />Sign in</Link></SheetClose><SheetClose asChild><Link href="/register" className="flex min-h-11 items-center gap-3 rounded-xl bg-[var(--brand-primary)] px-3 text-sm font-bold text-[var(--brand-primary-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"><UserRound size={17} aria-hidden="true" />Create account</Link></SheetClose></>}
+            {user ? <div className="pt-2"><LogoutButton menuItem /></div> : <p className="px-3 pt-2 text-xs leading-5 text-muted-foreground">Explore the Craft Lab as a guest before creating an account.</p>}
+          </section>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 
 export function ProductNav({ activeTab, user }: ProductNavProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  const closeMenu = useCallback((restoreFocus = true) => {
-    setIsOpen(false);
-    if (restoreFocus) triggerRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handlePointerDown = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (!menuRef.current?.contains(target) && !triggerRef.current?.contains(target)) closeMenu(false);
-    };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeMenu();
-    };
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    menuRef.current?.querySelector<HTMLElement>("a, button")?.focus();
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [closeMenu, isOpen]);
-
+  const admin = isAdminUser(user);
+  const explore = getExploreItems(user);
   return (
-    <div className="relative">
-      <nav aria-label="Main Navigation" className="hidden items-center gap-1.5 lg:flex">
-        <NavLinks activeTab={activeTab} user={user} />
-      </nav>
-
-      <button
-        ref={triggerRef}
-        type="button"
-        aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((previous) => !previous)}
-        className="inline-flex size-11 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] text-foreground transition-colors hover:bg-[var(--surface-raised)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] lg:hidden"
-      >
-        {isOpen ? <X size={17} aria-hidden="true" /> : <Menu size={17} aria-hidden="true" />}
-      </button>
-
-      {isOpen ? (
-        <div ref={menuRef} role="menu" aria-label="Navigation menu" className="surface-overlay absolute right-0 top-[calc(100%+8px)] z-50 w-[min(240px,calc(100vw-2rem))] rounded-2xl p-2 shadow-xl lg:hidden">
-          <div className="flex flex-col gap-1">
-            <NavLinks activeTab={activeTab} user={user} onNavigate={() => closeMenu(false)} mobile />
-          </div>
-        </div>
-      ) : null}
+    <div className="flex min-w-0 items-center gap-2">
+      <span className="max-w-[7rem] truncate text-xs font-semibold text-muted-foreground xl:hidden">{getCurrentLabel(activeTab)}</span>
+      <div className="hidden items-center gap-2 xl:flex">
+        <nav aria-label="Primary navigation" className="flex items-center gap-1">
+          <DesktopGroup label="Explore" items={explore} activeTab={activeTab} />
+          {user ? <DesktopGroup label="Personal" items={personalItems} activeTab={activeTab} /> : null}
+          {admin ? <DesktopGroup label="Admin" items={[{ label: "Admin", href: "/admin/elements", tab: "admin", icon: ShieldCheck }]} activeTab={activeTab} /> : null}
+        </nav>
+        {user ? <AccountMenu user={user} activeTab={activeTab} /> : <div className="flex items-center gap-1"><Link href="/login" aria-current={activeTab === "login" ? "page" : undefined} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold text-muted-foreground hover:bg-[var(--surface-inset)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">Sign in</Link><Link href="/register" className="inline-flex min-h-11 items-center rounded-xl bg-[var(--brand-primary)] px-3 text-xs font-bold text-[var(--brand-primary-foreground)] hover:bg-[var(--color-action-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">Create account</Link></div>}
+      </div>
+      <div className="xl:hidden"><MobileNavigation activeTab={activeTab} user={user} /></div>
     </div>
   );
 }
