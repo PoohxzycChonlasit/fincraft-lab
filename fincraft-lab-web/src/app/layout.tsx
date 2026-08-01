@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Noto_Serif_Thai } from "next/font/google";
 import { cookies } from "next/headers";
 import { Providers } from "@/app/providers";
 import { FINCRAFT_BRAND } from "@/components/brand/fincraft-brand";
@@ -12,6 +12,12 @@ import "./globals.css";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+});
+
+const editorial = Noto_Serif_Thai({
+  subsets: ["latin", "thai"],
+  variable: "--font-editorial",
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -102,7 +108,7 @@ export default async function RootLayout({
     <html
       lang="en"
       data-theme-preference={initialPreference}
-      className={`${inter.variable} h-full antialiased ${isDark ? "dark" : ""}`}
+      className={`${inter.variable} ${editorial.variable} h-full antialiased ${isDark ? "dark" : ""}`}
       style={colorScheme ? { colorScheme } : undefined}
     >
       <body className="min-h-full flex flex-col font-sans bg-[var(--surface-flat,#FAFAF9)] text-[var(--color-text-primary,#1C1917)]">

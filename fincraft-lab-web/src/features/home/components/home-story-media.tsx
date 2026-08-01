@@ -1,9 +1,37 @@
 import Image from "next/image";
 import type { CSSProperties, ReactNode } from "react";
 
+type StoryPictureProps = {
+  desktopPoster: string;
+  mobilePoster?: string;
+  variant: "light" | "dark" | "universal";
+  alt: string;
+  priority: boolean;
+  sizes: string;
+};
+
+function StoryPicture({ desktopPoster, mobilePoster, variant, alt, priority, sizes }: StoryPictureProps) {
+  return (
+    <picture className="home-story-media-picture" data-theme-media={variant}>
+      {mobilePoster ? <source media="(max-width: 767px)" srcSet={mobilePoster} /> : null}
+      <Image
+        src={desktopPoster}
+        alt={alt}
+        fill
+        priority={priority}
+        loading={priority ? undefined : "lazy"}
+        sizes={sizes}
+        className="home-story-media-image"
+      />
+    </picture>
+  );
+}
+
 export type HomeStoryMediaProps = {
   desktopPoster?: string;
   mobilePoster?: string;
+  darkDesktopPoster?: string;
+  darkMobilePoster?: string;
   videoSrc?: string;
   objectPosition?: string;
   overlay?: "none" | "soft" | "strong";
@@ -18,17 +46,21 @@ export type HomeStoryMediaProps = {
 export function HomeStoryMedia({
   desktopPoster,
   mobilePoster,
+  darkDesktopPoster,
+  darkMobilePoster,
   videoSrc,
   objectPosition = "center",
-  overlay = "soft",
+  overlay = "none",
   priority = false,
   decorative = true,
   alt,
-  sizes = "(max-width: 900px) 100vw, 60vw",
+  sizes = "100vw",
   className,
   children,
 }: HomeStoryMediaProps) {
   const style = { "--home-media-object-position": objectPosition } as CSSProperties;
+  const imageAlt = decorative ? "" : alt ?? "";
+  const hasThemePair = Boolean(desktopPoster && darkDesktopPoster);
 
   return (
     <div
@@ -40,35 +72,30 @@ export function HomeStoryMedia({
       aria-hidden={decorative ? true : undefined}
     >
       {desktopPoster ? (
-        <picture className="home-story-media-picture">
-          {mobilePoster ? <source media="(max-width: 767px)" srcSet={mobilePoster} /> : null}
-          <Image
-            src={desktopPoster}
-            alt={decorative ? "" : alt ?? ""}
-            fill
-            priority={priority}
-            loading={priority ? undefined : "lazy"}
-            sizes={sizes}
-            className="home-story-media-image"
-          />
-        </picture>
+        <StoryPicture
+          desktopPoster={desktopPoster}
+          mobilePoster={mobilePoster}
+          variant={hasThemePair ? "light" : "universal"}
+          alt={imageAlt}
+          priority={priority}
+          sizes={sizes}
+        />
       ) : null}
-
+      {darkDesktopPoster ? (
+        <StoryPicture
+          desktopPoster={darkDesktopPoster}
+          mobilePoster={darkMobilePoster}
+          variant="dark"
+          alt={imageAlt}
+          priority={priority}
+          sizes={sizes}
+        />
+      ) : null}
       {videoSrc ? (
-        <video
-          className="home-story-media-video"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          poster={desktopPoster}
-          aria-hidden="true"
-        >
+        <video className="home-story-media-video" autoPlay muted loop playsInline preload="metadata" poster={desktopPoster} aria-hidden="true">
           <source src={videoSrc} />
         </video>
       ) : null}
-
       <div className="home-story-media-content">{children}</div>
     </div>
   );
