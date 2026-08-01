@@ -48,7 +48,7 @@ export function SimulationRunnerClient({
       ) : (
         <div className="space-y-5">
           <div className="flex items-center justify-between">
-            <span className="font-caption font-bold text-muted-foreground uppercase tracking-wider">Simulation Result</span>
+            <h2 className="font-caption font-bold text-muted-foreground uppercase tracking-wider">Simulation Result</h2>
             <button
               type="button"
               onClick={handleResetRun}
