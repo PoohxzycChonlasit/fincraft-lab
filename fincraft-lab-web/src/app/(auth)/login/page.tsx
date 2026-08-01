@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LoginForm } from "@/features/auth/components/login-form";
+import { getSafeReturnTo } from "@/features/auth/utils/auth-utils";
 
 export const metadata: Metadata = {
   title: "Log In | FinCraft Lab",
@@ -7,12 +8,13 @@ export const metadata: Metadata = {
 };
 
 type LoginPageProps = {
-  searchParams: Promise<{ registered?: string }>;
+  searchParams: Promise<{ registered?: string; returnTo?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { registered } = await searchParams;
+  const { registered, returnTo } = await searchParams;
   const isRegistered = registered === "true";
+  const safeReturnTo = getSafeReturnTo(returnTo);
 
-  return <LoginForm isRegistered={isRegistered} />;
+  return <LoginForm isRegistered={isRegistered} returnTo={safeReturnTo} />;
 }

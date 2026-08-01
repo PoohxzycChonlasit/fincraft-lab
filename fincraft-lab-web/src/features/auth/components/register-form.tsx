@@ -3,92 +3,52 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import {
+  AuthField,
+  AuthFormError,
+  AuthHeading,
+  AuthPasswordField,
+  AuthSubmitButton,
+} from "./auth-form-primitives";
+import { buildAuthHref, getRegisterErrorMessage, isValidEmail } from "../utils/auth-utils";
 
-type FormFieldProps = {
-  id: string;
-  label: string;
-  type: string;
-  value: string;
-  placeholder: string;
-  onChange: (value: string) => void;
-  autoComplete: string;
-};
+type RegisterField = "displayName" | "email" | "password" | "confirmPassword";
+type RegisterFieldErrors = Partial<Record<RegisterField, string>>;
 
-function validateInputs(displayName: string, email: string, password: string, confirmPassword: string): string | null {
-  if (!displayName.trim()) return "Display name is required";
-  if (!email.trim()) return "Email address is required";
-  if (password.length < 8) return "Password must be at least 8 characters long";
-  if (password !== confirmPassword) return "Password confirmation does not match";
-  return null;
+function validateRegister(displayName: string, email: string, password: string, confirmPassword: string): RegisterFieldErrors {
+  const errors: RegisterFieldErrors = {};
+  const trimmedName = displayName.trim();
+  const trimmedEmail = email.trim();
+  if (!trimmedName) errors.displayName = "Display name is required";
+  else if (trimmedName.length > 100) errors.displayName = "Display name must be 100 characters or fewer";
+  if (!trimmedEmail) errors.email = "Email address is required";
+  else if (!isValidEmail(trimmedEmail)) errors.email = "Enter a valid email address";
+  if (!password) errors.password = "Password is required";
+  else if (password.length < 8) errors.password = "Password must be at least 8 characters long";
+  else if (password.length > 72) errors.password = "Password must be 72 characters or fewer";
+  if (password !== confirmPassword) errors.confirmPassword = "Password confirmation does not match";
+  return errors;
 }
 
-function FormHeader() {
-  return (
-    <div className="space-y-1">
-      <h2 className="text-xl font-bold tracking-tight text-foreground">Create Account</h2>
-      <p className="text-xs text-muted-foreground">Sign up to get started with FinCraft Lab.</p>
-    </div>
-  );
-}
-
-function FormErrorMessage({ message }: { message: string }) {
-  return (
-    <div role="alert" className="rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-3.5 text-xs font-semibold text-[var(--color-text-danger)]">
-      {message}
-    </div>
-  );
-}
-
-function FormField({ id, label, type, value, placeholder, onChange, autoComplete }: FormFieldProps) {
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor={id} className="block text-xs font-semibold text-foreground">{label}</label>
-      <input
-        id={id}
-        type={type}
-        required
-        autoComplete={autoComplete}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        className="min-h-[44px] w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[var(--border-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]/20"
-      />
-    </div>
-  );
-}
-
-function SubmitButton({ isSubmitting }: { isSubmitting: boolean }) {
-  return (
-    <button
-      type="submit"
-      disabled={isSubmitting}
-      className="min-h-[44px] w-full cursor-pointer rounded-xl bg-[var(--color-action-primary)] px-4 py-3 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[var(--color-action-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      {isSubmitting ? "Creating account..." : "Sign Up"}
-    </button>
-  );
-}
-
-export function RegisterForm() {
+export function RegisterForm({ returnTo = "/lab" }: { returnTo?: string }) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<RegisterFieldErrors>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const validationError = validateInputs(displayName, email, password, confirmPassword);
-    if (validationError) {
-      setErrorMessage(validationError);
-      return;
-    }
-
+    if (isSubmitting) return;
+    const validationErrors = validateRegister(displayName, email, password, confirmPassword);
+    setFieldErrors(validationErrors);
     setErrorMessage(null);
-    setIsSubmitting(true);
+    if (Object.keys(validationErrors).length > 0) return;
 
+    setIsSubmitting(true);
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -96,37 +56,32 @@ export function RegisterForm() {
         body: JSON.stringify({ displayName: displayName.trim(), email: email.trim().toLowerCase(), password }),
       });
       const data: unknown = await response.json().catch(() => ({}));
-      const error = typeof data === "object" && data !== null && "error" in data && typeof data.error === "string"
-        ? data.error
-        : "Registration failed";
-
       if (!response.ok) {
-        setErrorMessage(error);
-        setIsSubmitting(false);
+        setErrorMessage(getRegisterErrorMessage(response.status, data));
         return;
       }
-
-      router.push("/login?registered=true");
+      router.push(buildAuthHref("/login", returnTo, true));
     } catch {
       setErrorMessage("Network error. Please try again.");
+    } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="surface-resting space-y-5 rounded-2xl border border-[var(--border-subtle)] p-6 shadow-xs sm:p-8">
-      <FormHeader />
-      {errorMessage ? <FormErrorMessage message={errorMessage} /> : null}
-      <FormField id="display-name-input" label="Display Name" type="text" value={displayName} placeholder="FinCrafter" onChange={setDisplayName} autoComplete="name" />
-      <FormField id="email-input" label="Email address" type="email" value={email} placeholder="user@example.com" onChange={setEmail} autoComplete="email" />
-      <FormField id="password-input" label="Password" type="password" value={password} placeholder="At least 8 characters" onChange={setPassword} autoComplete="new-password" />
-      <FormField id="confirm-password-input" label="Confirm Password" type="password" value={confirmPassword} placeholder="Re-enter your password" onChange={setConfirmPassword} autoComplete="new-password" />
-      <SubmitButton isSubmitting={isSubmitting} />
-      <div className="pt-1 text-center text-xs text-muted-foreground">
-        Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-[var(--color-action-primary)] hover:underline">
-          Log in
-        </Link>
+    <form onSubmit={handleSubmit} noValidate className="surface-resting space-y-6 rounded-2xl p-6 sm:p-8">
+      <AuthHeading title="Create your account" description="Save your financial worlds and keep your learning progress available when you return." />
+      {errorMessage ? <AuthFormError message={errorMessage} /> : null}
+      <div className="space-y-5">
+        <AuthField id="register-display-name" name="displayName" label="Display name" value={displayName} onChange={setDisplayName} autoComplete="name" placeholder="Your learning name" error={fieldErrors.displayName} />
+        <AuthField id="register-email" name="email" label="Email address" value={email} onChange={setEmail} autoComplete="email" placeholder="you@example.com" error={fieldErrors.email} />
+        <AuthPasswordField id="register-password" name="password" label="Password" value={password} onChange={setPassword} autoComplete="new-password" placeholder="At least 8 characters" helperText="Use 8–72 characters. Your password stays masked by default." error={fieldErrors.password} />
+        <AuthPasswordField id="register-confirm-password" name="confirmPassword" label="Confirm password" value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" placeholder="Re-enter your password" error={fieldErrors.confirmPassword} />
+      </div>
+      <AuthSubmitButton isSubmitting={isSubmitting} label="Create account" pendingLabel="Creating account…" />
+      <div className="space-y-3 border-t border-[var(--border-subtle)] pt-5 text-center text-sm text-muted-foreground">
+        <p>Already have an account? <Link href={buildAuthHref("/login", returnTo)} className="font-bold text-[var(--color-action-primary)] underline-offset-4 hover:underline">Log in</Link></p>
+        <p>Not ready to sign up? <Link href="/lab" className="font-bold text-[var(--color-action-primary)] underline-offset-4 hover:underline">Explore as Guest</Link></p>
       </div>
     </form>
   );
