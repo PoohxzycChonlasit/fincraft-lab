@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Activity } from "lucide-react";
+import { Activity, ArrowRight, RefreshCw } from "lucide-react";
+import { Suspense } from "react";
 import { getSessionUser } from "@/lib/auth/session";
 import { getSimulations } from "@/features/simulation/api/get-simulations";
 import { SimulationDisclaimerBanner } from "@/features/simulation/components/simulation-disclaimer-banner";
@@ -12,29 +13,50 @@ export const metadata: Metadata = {
   description: "Test financial assumptions with interactive educational decision models.",
 };
 
-function SimulationCard({ sim }: { sim: SimulationSummary }) {
+function SimulationRecord({ simulation }: { simulation: SimulationSummary }) {
   return (
-    <article className="surface-solid flex flex-col justify-between rounded-2xl border border-[var(--border-subtle)] p-5 sm:p-6 space-y-5 hover:border-[var(--accent-teal)] transition-colors">
-      <div className="space-y-2">
-        <div className="flex items-start justify-between gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-paper)] px-2.5 py-1 text-[10px] font-bold text-[var(--accent-teal)] border border-[var(--border-subtle)]">
-            <Activity className="h-3 w-3" aria-hidden="true" />
-            Active Model
+    <article className="surface-paper grid gap-6 rounded-2xl p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+      <div className="space-y-5">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-teal)]">
+            <Activity className="size-4" aria-hidden="true" />
+            Active simulation
           </span>
-          {sim.thaiName && (
-            <span className="font-caption text-muted-foreground">{sim.thaiName}</span>
-          )}
+          <span className="font-caption border-l border-[var(--border-subtle)] pl-4">
+            Model: {simulation.name}
+          </span>
         </div>
-        <h2 className="font-section-title text-foreground">{sim.name}</h2>
-        <p className="font-body-small text-muted-foreground leading-relaxed">{sim.summary}</p>
+
+        <div className="space-y-2">
+          <h2 className="font-section-title text-foreground sm:text-2xl">
+            Emergency Fund Runway
+          </h2>
+          <p className="font-body max-w-2xl leading-relaxed text-muted-foreground">
+            {simulation.summary}
+          </p>
+        </div>
+
+        <dl className="grid gap-3 border-t border-[var(--border-subtle)] pt-4 text-xs sm:grid-cols-2">
+          <div>
+            <dt className="font-label text-muted-foreground">Purpose</dt>
+            <dd className="mt-1 font-medium text-foreground">
+              See how one reserve compares with one monthly essential-cost assumption.
+            </dd>
+          </div>
+          <div>
+            <dt className="font-label text-muted-foreground">Type</dt>
+            <dd className="mt-1 font-medium text-foreground">{simulation.name}</dd>
+          </div>
+        </dl>
       </div>
 
       <Link
-        href={`/simulations/${sim.id}`}
-        className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand-primary)] px-5 text-xs font-bold text-white shadow-xs hover:bg-[var(--accent-teal-strong)] transition-colors"
+        href={`/simulations/${simulation.id}`}
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand-primary)] px-5 py-3 text-xs font-bold text-[var(--brand-primary-foreground)] shadow-xs transition-colors hover:bg-[var(--accent-teal-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 lg:min-w-52"
+        aria-label="Open Emergency Fund Runway simulation"
       >
-        <Activity className="h-3.5 w-3.5" aria-hidden="true" />
-        <span>Open Experiment</span>
+        <span>Open Simulation</span>
+        <ArrowRight className="size-4" aria-hidden="true" />
       </Link>
     </article>
   );
@@ -42,9 +64,81 @@ function SimulationCard({ sim }: { sim: SimulationSummary }) {
 
 function EmptyState() {
   return (
-    <div className="surface-paper rounded-2xl border border-[var(--border-subtle)] p-8 text-center space-y-2">
-      <p className="font-section-title text-muted-foreground">No Active Simulations</p>
-      <p className="font-body-small text-muted-foreground">Check back when financial experiment models are published.</p>
+    <section className="surface-paper rounded-2xl p-8 sm:p-10" aria-labelledby="simulation-empty-title">
+      <div className="max-w-xl space-y-2">
+        <p className="font-label text-[var(--accent-orange)]">No active experiments</p>
+        <h2 id="simulation-empty-title" className="font-section-title text-foreground">
+          There are no published simulations right now.
+        </h2>
+        <p className="font-body leading-relaxed text-muted-foreground">
+          This state means the active simulation list is empty. It is different from a loading or connection error.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function ErrorState() {
+  return (
+    <section className="rounded-2xl border border-destructive/35 bg-destructive/10 p-6" role="alert" aria-labelledby="simulation-list-error-title">
+      <div className="flex items-start gap-3">
+        <RefreshCw className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <h2 id="simulation-list-error-title" className="font-card-title text-foreground">
+              Simulations could not be loaded.
+            </h2>
+            <p className="font-body-small leading-relaxed text-muted-foreground">
+              The list request failed, so it is not being shown as an empty result.
+            </p>
+          </div>
+          <Link
+            href="/simulations"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-solid)] px-4 text-xs font-bold text-foreground transition-colors hover:bg-[var(--surface-inset)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2"
+          >
+            <RefreshCw className="size-3.5" aria-hidden="true" />
+            Try again
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function LoadingState() {
+  return (
+    <section className="surface-paper space-y-5 rounded-2xl p-5 sm:p-7" role="status" aria-label="Loading simulations">
+      <div className="h-3 w-36 animate-pulse rounded bg-[var(--surface-inset)]" />
+      <div className="space-y-3">
+        <div className="h-7 w-2/3 animate-pulse rounded bg-[var(--surface-inset)]" />
+        <div className="h-4 w-full animate-pulse rounded bg-[var(--surface-inset)]" />
+        <div className="h-4 w-4/5 animate-pulse rounded bg-[var(--surface-inset)]" />
+      </div>
+      <span className="sr-only">Loading active simulations.</span>
+    </section>
+  );
+}
+
+async function loadSimulationRecords() {
+  try {
+    return await getSimulations();
+  } catch {
+    return null;
+  }
+}
+
+async function SimulationRecords() {
+  const simulations = await loadSimulationRecords();
+  if (simulations === null) return <ErrorState />;
+
+  const activeSimulations = simulations.filter((simulation) => simulation.isActive);
+  if (activeSimulations.length === 0) return <EmptyState />;
+
+  return (
+    <div className="space-y-4">
+      {activeSimulations.map((simulation) => (
+        <SimulationRecord key={simulation.id} simulation={simulation} />
+      ))}
     </div>
   );
 }
@@ -53,32 +147,35 @@ export default async function SimulationsPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login?returnTo=/simulations");
 
-  const simulations = await getSimulations();
-
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <header className="border-b border-[var(--border-subtle)] pb-4 space-y-1">
-        <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--accent-teal)]">
-          <Activity size={14} aria-hidden="true" />
-          <span>Financial Experiments</span>
+    <div className="simulation-page-frame mx-auto w-full max-w-5xl space-y-7">
+      <header className="space-y-3 border-b border-[var(--border-subtle)] pb-5">
+        <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-teal)]">
+          <Activity className="size-4" aria-hidden="true" />
+          Financial consequence instrument
         </div>
-        <h1 className="font-page-title text-foreground">Financial Simulations</h1>
-        <p className="font-body-small text-muted-foreground">
-          Test financial assumptions using educational calculation models. Results are estimates — not predictions, not advice.
+        <h1 className="font-page-title text-foreground sm:text-3xl">Financial Simulations</h1>
+        <p className="font-body max-w-3xl leading-relaxed text-muted-foreground">
+          Start with one experiment, enter two assumptions, and read the estimated consequence in plain language. Results are estimates, not predictions or advice.
         </p>
       </header>
 
       <SimulationDisclaimerBanner />
 
-      {simulations.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {simulations.map((sim) => (
-            <SimulationCard key={sim.id} sim={sim} />
-          ))}
+      <section className="space-y-3" aria-labelledby="available-simulations-title">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div>
+            <p className="font-label text-muted-foreground">Available now</p>
+            <h2 id="available-simulations-title" className="font-section-title text-foreground">
+              Choose an experiment
+            </h2>
+          </div>
+          <p className="font-caption">Only active models are listed.</p>
         </div>
-      )}
+        <Suspense fallback={<LoadingState />}>
+          <SimulationRecords />
+        </Suspense>
+      </section>
     </div>
   );
 }

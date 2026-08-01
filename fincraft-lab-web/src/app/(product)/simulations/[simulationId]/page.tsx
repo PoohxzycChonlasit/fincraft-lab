@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Activity, FlaskConical } from "lucide-react";
+import { ArrowLeft, BookOpen, FlaskConical } from "lucide-react";
 import { getSessionUser } from "@/lib/auth/session";
 import { getSimulationDetail } from "@/features/simulation/api/get-simulation-detail";
 import { getSimulationRun } from "@/features/simulation/api/get-simulation-run";
@@ -29,50 +29,53 @@ export default async function SimulationDetailPage({ params, searchParams }: Pag
   if (!detail) notFound();
 
   const initialRun = runId ? await getSimulationRun(runId) : null;
+  const persistedRunError = runId && !initialRun
+    ? "The saved run could not be loaded. You can enter assumptions and run a new simulation."
+    : null;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      {/* BREADCRUMB */}
+    <div className="simulation-page-frame mx-auto w-full max-w-6xl space-y-7">
       <Link
         href="/simulations"
-        className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors"
+        className="inline-flex min-h-11 items-center gap-2 text-xs font-bold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2"
       >
-        <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-        <span>All Financial Experiments</span>
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        All financial experiments
       </Link>
 
-      {/* EXPERIMENT IDENTITY */}
-      <header className="space-y-3 border-b border-[var(--border-subtle)] pb-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--accent-teal)]">
-              <Activity size={13} aria-hidden="true" />
-              <span>Financial Experiment</span>
-            </div>
-            <h1 className="font-page-title text-foreground">{detail.name}</h1>
-            {detail.thaiName && (
-              <p className="font-caption text-muted-foreground">{detail.thaiName}</p>
-            )}
-          </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-solid)] px-3 py-1 text-[10px] font-bold text-muted-foreground border border-[var(--border-subtle)]">
-            <FlaskConical size={11} aria-hidden="true" />
-            v{detail.calculationVersion}
-          </span>
+      <header className="grid gap-5 border-b border-[var(--border-subtle)] pb-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+        <div className="space-y-3">
+          <p className="font-label text-[var(--accent-teal)]">Emergency Fund Runway · financial consequence instrument</p>
+          <h1 className="font-page-title text-foreground sm:text-4xl">{detail.name}</h1>
+          <p className="font-caption">{detail.thaiName}</p>
+          <p className="font-body max-w-3xl leading-relaxed text-muted-foreground">{detail.description}</p>
         </div>
-
-        <p className="font-body text-muted-foreground leading-relaxed">{detail.description}</p>
-
-        <div className="flex items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-solid)] p-3 text-xs font-mono text-foreground">
-          <FlaskConical className="h-4 w-4 shrink-0 text-[var(--accent-teal)]" aria-hidden="true" />
-          <span>Formula: {detail.formulaExplanation}</span>
+        <div className="inline-flex items-center gap-2 justify-self-start rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3 py-2 text-xs font-bold text-foreground lg:justify-self-end">
+          <FlaskConical className="size-4 text-[var(--accent-teal)]" aria-hidden="true" />
+          <span>Model {detail.calculationVersion}</span>
         </div>
       </header>
 
-      {/* SAFETY CONTEXT — near top */}
+      <section className="surface-paper flex gap-3 rounded-2xl p-5 sm:p-6" aria-labelledby="experiment-explanation-title">
+        <BookOpen className="mt-0.5 size-5 shrink-0 text-[var(--accent-teal)]" aria-hidden="true" />
+        <div className="space-y-2">
+          <p className="font-label text-muted-foreground">Understand the experiment</p>
+          <h2 id="experiment-explanation-title" className="font-section-title text-foreground">What this model compares</h2>
+          <p className="font-body leading-relaxed text-muted-foreground">{detail.summary}</p>
+          <p className="font-body-small leading-relaxed text-foreground">
+            <span className="font-bold">Model logic:</span>{" "}
+            <code className="break-words rounded bg-[var(--surface-inset)] px-1.5 py-0.5 font-mono text-[0.7rem]">{detail.formulaExplanation}</code>
+          </p>
+        </div>
+      </section>
+
       <SimulationDisclaimerBanner />
 
-      {/* RUNNER CLIENT ISLAND */}
-      <SimulationRunnerClient detail={detail} initialRun={initialRun} />
+      <SimulationRunnerClient
+        detail={detail}
+        initialRun={initialRun}
+        persistedRunError={persistedRunError}
+      />
     </div>
   );
 }

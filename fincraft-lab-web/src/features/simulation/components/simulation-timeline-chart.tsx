@@ -2,108 +2,93 @@ import type { SimulationRunResult } from "../types/simulation.types";
 
 type Point = { month: number; balance: number };
 
-function generatePoints(result: SimulationRunResult): Point[] {
-  const fund = parseFloat(result.input.emergencyFund) || 0;
-  const expense = parseFloat(result.input.essentialMonthlyExpenses) || 1;
-  const survival = parseFloat(result.result.survivalMonths) || 0;
+function formatAmount(value: number | string) {
+  const amount = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(amount)) return String(value);
+  return new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+}
+
+function generatePresentationPoints(result: SimulationRunResult): Point[] {
+  const fund = Number(result.input.emergencyFund) || 0;
+  const survival = Number(result.result.survivalMonths) || 0;
   const wholeMonths = Math.max(0, result.result.wholeMonthsCovered);
-  const remaining = parseFloat(result.result.remainingAmount) || 0;
-
+  const remaining = Number(result.result.remainingAmount) || 0;
   const points: Point[] = [{ month: 0, balance: fund }];
-  const displayedWholeMonths = Math.min(wholeMonths, 36);
 
-  for (let m = 1; m <= displayedWholeMonths; m++) {
-    const bal = Math.max(0, fund - m * expense);
-    points.push({ month: m, balance: bal });
-  }
-
-  const wholeMonthPoint = points[points.length - 1];
-  if (wholeMonthPoint && wholeMonthPoint.month === wholeMonths) {
-    wholeMonthPoint.balance = remaining;
-  } else {
-    points.push({ month: wholeMonths, balance: remaining });
-  }
-
-  if (survival > wholeMonths) {
-    points.push({ month: survival, balance: 0 });
-  }
-
+  if (wholeMonths > 0) points.push({ month: wholeMonths, balance: remaining });
+  if (survival > wholeMonths) points.push({ month: survival, balance: 0 });
   return points;
 }
 
-function SvgCurve({ points, width, height }: { points: Point[]; width: number; height: number }) {
-  if (points.length === 0) return null;
-  const maxB = points[0].balance || 1;
-  const maxM = points[points.length - 1].month || 1;
-
-  const coords = points.map((p) => {
-    const x = (p.month / maxM) * (width - 64) + 44;
-    const y = height - 32 - (p.balance / maxB) * (height - 56);
-    return { x, y, p };
-  });
-
-  const pathD = coords.reduce((acc, c, idx) => `${acc} ${idx === 0 ? "M" : "L"} ${c.x} ${c.y}`, "");
+function SvgCurve({ points }: { points: Point[] }) {
+  const width = 760;
+  const height = 260;
+  const left = 36;
+  const right = 24;
+  const top = 24;
+  const bottom = 28;
+  const maxBalance = Math.max(...points.map((point) => point.balance), 1);
+  const maxMonth = Math.max(points[points.length - 1]?.month ?? 0, 1);
+  const coordinates = points.map((point) => ({
+    x: left + (point.month / maxMonth) * (width - left - right),
+    y: height - bottom - (point.balance / maxBalance) * (height - top - bottom),
+    point,
+  }));
+  const path = coordinates.map((coordinate, index) => `${index === 0 ? "M" : "L"} ${coordinate.x} ${coordinate.y}`).join(" ");
 
   return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      role="img"
-      className="w-full h-auto overflow-visible select-none"
-      aria-labelledby="timeline-title timeline-desc"
-    >
-      <title id="timeline-title">Balance Depletion Curve</title>
-      <desc id="timeline-desc">
-        Illustrative line chart showing balance declining from ${points[0]?.balance ?? 0} at month 0 to ${points[points.length - 1]?.balance ?? 0} at month {points[points.length - 1]?.month ?? 0}.
-      </desc>
-
-      {/* Axis lines */}
-      <line x1="44" y1={height - 32} x2={width - 20} y2={height - 32} stroke="var(--border-subtle)" strokeWidth="1" />
-      <line x1="44" y1="20" x2="44" y2={height - 32} stroke="var(--border-subtle)" strokeWidth="1" />
-
-      {/* Depletion path */}
-      <path d={pathD} fill="none" stroke="var(--accent-teal)" strokeWidth="2.5" strokeLinecap="round" />
-
-      {/* Data points — only first and last to avoid clutter */}
-      {[coords[0], coords[coords.length - 1]].filter(Boolean).map((c) => (
-        <g key={c.p.month}>
-          <circle cx={c.x} cy={c.y} r="5" fill="var(--surface-solid)" stroke="var(--accent-teal)" strokeWidth="2" />
-          <text x={c.x} y={height - 14} textAnchor="middle" fill="currentColor" fontSize="10" className="font-mono">
-            M{c.p.month}
-          </text>
-        </g>
-      ))}
-
-      {/* Intermediate month labels at quarter points */}
-      {coords.filter((_, i) => i > 0 && i < coords.length - 1 && i % Math.max(1, Math.floor(coords.length / 4)) === 0).map((c) => (
-        <text key={`label-${c.p.month}`} x={c.x} y={height - 14} textAnchor="middle" fill="currentColor" fontSize="10" className="font-mono opacity-60">
-          M{c.p.month}
-        </text>
+    <svg className="block h-auto w-full overflow-visible text-[var(--accent-teal)]" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="simulation-timeline-title simulation-timeline-description">
+      <title id="simulation-timeline-title">Illustrative balance timeline</title>
+      <desc id="simulation-timeline-description">An illustrative path from the starting balance through the stored whole-month result to the estimated runway endpoint. The backend result remains authoritative.</desc>
+      <line x1={left} y1={height - bottom} x2={width - right} y2={height - bottom} stroke="var(--border-subtle)" strokeWidth="1" />
+      <line x1={left} y1={top} x2={left} y2={height - bottom} stroke="var(--border-subtle)" strokeWidth="1" />
+      <path d={path} fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      {coordinates.map((coordinate) => (
+        <circle key={`${coordinate.point.month}-${coordinate.point.balance}`} cx={coordinate.x} cy={coordinate.y} r="7" fill="var(--surface-paper)" stroke="currentColor" strokeWidth="3" />
       ))}
     </svg>
   );
 }
 
 export function SimulationTimelineChart({ result }: { result: SimulationRunResult }) {
-  const points = generatePoints(result);
-  const startBalance = parseFloat(result.input.emergencyFund) || 0;
-  const monthlyBurn = parseFloat(result.input.essentialMonthlyExpenses) || 0;
+  const points = generatePresentationPoints(result);
+  const startBalance = Number(result.input.emergencyFund) || 0;
+  const endingBalance = points[points.length - 1]?.balance ?? 0;
+  const survivalMonths = result.result.survivalMonths;
+  const wholeMonths = result.result.wholeMonthsCovered;
 
   return (
-    <section aria-label="Illustrative balance timeline" className="surface-solid rounded-2xl border border-[var(--border-subtle)] p-4 sm:p-5 space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="font-caption font-bold uppercase tracking-wider text-muted-foreground">
-          Illustrative Balance Timeline
-        </h3>
-        <span className="font-caption font-bold text-[var(--accent-teal)]">
-          {result.result.survivalMonths} mo. runway
-        </span>
+    <section className="surface-solid space-y-5 rounded-2xl p-5 sm:p-6" aria-labelledby="timeline-heading">
+      <div className="space-y-1">
+        <p className="font-label text-[var(--accent-teal)]">Step 3 · Inspect the illustrative timeline</p>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h3 id="timeline-heading" className="font-section-title text-foreground">Balance path over time</h3>
+          <span className="font-caption font-bold">Illustrative only · {survivalMonths} months</span>
+        </div>
       </div>
 
-      <SvgCurve points={points} width={520} height={180} />
+      <SvgCurve points={points} />
 
-      {/* Text summary adjacent to chart (accessibility + non-colour-only) */}
-      <p className="font-body-small text-muted-foreground pt-1 border-t border-[var(--border-subtle)]">
-        Illustrative path based on the entered assumptions and the backend result. Starting at <strong className="text-foreground">${startBalance.toLocaleString()}</strong> and using <strong className="text-foreground">${monthlyBurn.toLocaleString()}</strong>/month, the model estimates <strong className="text-foreground">{result.result.survivalMonths} months</strong> of runway, covering <strong className="text-foreground">{result.result.wholeMonthsCovered}</strong> whole months with <strong className="text-foreground">${result.result.remainingAmount}</strong> remaining after those whole months.
+      <ol className="grid gap-3 border-t border-[var(--border-subtle)] pt-4 sm:grid-cols-3">
+        <li className="space-y-1">
+          <p className="font-label text-muted-foreground">Starting balance</p>
+          <p className="text-sm font-bold text-foreground tabular-nums">{formatAmount(startBalance)}</p>
+          <p className="font-caption">Month 0</p>
+        </li>
+        <li className="space-y-1">
+          <p className="font-label text-muted-foreground">Whole months covered</p>
+          <p className="text-sm font-bold text-foreground tabular-nums">{wholeMonths} months · {formatAmount(result.result.remainingAmount)} remaining</p>
+          <p className="font-caption">Stored backend output</p>
+        </li>
+        <li className="space-y-1">
+          <p className="font-label text-muted-foreground">Estimated runway</p>
+          <p className="text-sm font-bold text-foreground tabular-nums">{survivalMonths} months</p>
+          <p className="font-caption">Ending presentation balance: {formatAmount(endingBalance)}</p>
+        </li>
+      </ol>
+
+      <p className="border-t border-[var(--border-subtle)] pt-4 font-body-small leading-relaxed text-muted-foreground">
+        This chart interpolates a presentation path from the stored inputs and outputs. It does not independently calculate or replace the primary result above.
       </p>
     </section>
   );

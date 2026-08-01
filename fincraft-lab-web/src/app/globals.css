@@ -112,3 +112,16 @@ html {
     scroll-behavior: auto !important;
   }
 }
+
+/* ProductShell also hosts the bounded Craft Lab. Simulation pages own normal document scrolling. */
+body:has(.simulation-page-frame) [data-layout-mode="workspace"] {
+  min-height: 100dvh;
+  height: auto;
+  overflow: visible;
+}
+
+body:has(.simulation-page-frame) [data-layout-mode="workspace"] > main {
+  min-height: auto;
+  height: auto;
+  overflow: visible;
+}

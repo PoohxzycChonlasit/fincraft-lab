@@ -1,35 +1,43 @@
-import { ShieldAlert, CheckCircle2, BookOpen, ExternalLink } from "lucide-react";
-import type { SimulationDetail, SimulationRunResult } from "../types/simulation.types";
-import { SimulationTimelineChart } from "./simulation-timeline-chart";
+import { BookOpen, CheckCircle2, ExternalLink, ShieldAlert } from "lucide-react";
+import type { SimulationRunResult } from "../types/simulation.types";
 import { SimulationDisclaimerBanner } from "./simulation-disclaimer-banner";
+import { SimulationTimelineChart } from "./simulation-timeline-chart";
+
+function formatAmount(value: string) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return value;
+  return new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+}
 
 function PrimaryResult({ result }: { result: SimulationRunResult }) {
   return (
-    <section aria-label="Primary simulation result" className="surface-paper rounded-2xl border border-[var(--border-subtle)] p-5 sm:p-6 shadow-xs">
-      <p className="font-caption text-muted-foreground mb-3">Estimated runway under these assumptions</p>
+    <section className="surface-paper space-y-5 rounded-2xl p-5 sm:p-6" aria-labelledby="primary-result-title">
+      <div className="space-y-1">
+        <p className="font-label text-[var(--accent-teal)]">Backend result</p>
+        <h3 id="primary-result-title" className="font-section-title text-foreground">Estimated runway under these assumptions</h3>
+        <p className="font-caption">Primary result from the saved {result.calculationVersion} calculation.</p>
+      </div>
 
-      <div className="flex flex-wrap items-end gap-4 sm:gap-6">
-        <div>
-          <div className="text-4xl sm:text-5xl font-extrabold text-[var(--accent-teal)] tabular-nums leading-none">
-            {result.result.survivalMonths}
-          </div>
-          <div className="font-caption mt-1 text-foreground font-bold">months survival runway</div>
-        </div>
+      <div className="grid gap-5 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:items-end">
+        <output className="block" aria-label={`${result.result.survivalMonths} months estimated runway`}>
+          <span className="block text-5xl font-extrabold leading-none tracking-tight text-[var(--accent-teal)] tabular-nums sm:text-6xl">{result.result.survivalMonths}</span>
+          <span className="mt-2 block text-sm font-bold text-foreground">months estimated runway</span>
+        </output>
 
-        <div className="flex flex-col gap-1 text-xs">
-          <div>
-            <span className="text-muted-foreground">Whole months covered: </span>
-            <span className="font-bold text-foreground">{result.result.wholeMonthsCovered}</span>
+        <dl className="grid gap-3 border-t border-[var(--border-subtle)] pt-4 text-sm sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0">
+          <div className="flex items-baseline justify-between gap-3">
+            <dt className="text-muted-foreground">Whole months covered</dt>
+            <dd className="font-bold text-foreground tabular-nums">{result.result.wholeMonthsCovered}</dd>
           </div>
-          <div>
-            <span className="text-muted-foreground">Remaining partial fund: </span>
-            <span className="font-bold text-foreground">${result.result.remainingAmount}</span>
+          <div className="flex items-baseline justify-between gap-3">
+            <dt className="text-muted-foreground">Remaining amount</dt>
+            <dd className="font-bold text-foreground tabular-nums">{formatAmount(result.result.remainingAmount)}</dd>
           </div>
-          <div>
-            <span className="text-muted-foreground">Calculation: </span>
-            <span className="font-bold text-foreground">v{result.calculationVersion}</span>
+          <div className="flex items-baseline justify-between gap-3">
+            <dt className="text-muted-foreground">Run snapshot</dt>
+            <dd className="font-mono text-xs font-bold text-foreground">{result.createdAt.slice(0, 10)}</dd>
           </div>
-        </div>
+        </dl>
       </div>
     </section>
   );
@@ -37,63 +45,75 @@ function PrimaryResult({ result }: { result: SimulationRunResult }) {
 
 function Interpretation({ result }: { result: SimulationRunResult }) {
   return (
-    <section aria-label="Educational interpretation" className="surface-paper rounded-2xl border border-[var(--border-subtle)] p-4 sm:p-5 space-y-2">
-      <div className="flex items-center gap-2 mb-1">
-        <BookOpen className="h-4 w-4 text-[var(--accent-teal)] shrink-0" />
-        <h3 className="font-section-title text-foreground">What This Result Means</h3>
+    <section className="surface-paper space-y-4 rounded-2xl p-5 sm:p-6" aria-labelledby="interpretation-title">
+      <div className="flex items-start gap-3">
+        <BookOpen className="mt-0.5 size-5 shrink-0 text-[var(--accent-teal)]" aria-hidden="true" />
+        <div className="space-y-1">
+          <p className="font-label text-muted-foreground">Interpretation</p>
+          <h3 id="interpretation-title" className="font-section-title text-foreground">Read the estimate in context</h3>
+        </div>
       </div>
-      <p className="font-body text-foreground">{result.result.statementEn}</p>
+      <div className="space-y-2">
+        <p className="font-label text-muted-foreground">English interpretation</p>
+        <p className="font-body leading-relaxed text-foreground">{result.result.statementEn}</p>
+      </div>
       {result.result.statementTh ? (
-        <div className="space-y-1 border-t border-[var(--border-subtle)] pt-2">
-          <p className="font-caption font-bold uppercase tracking-wider text-muted-foreground">Thai interpretation</p>
-          <p className="font-body-small text-muted-foreground">{result.result.statementTh}</p>
+        <div className="space-y-2 border-t border-[var(--border-subtle)] pt-4">
+          <p className="font-label text-muted-foreground">Thai interpretation</p>
+          <p className="font-body leading-relaxed text-muted-foreground">{result.result.statementTh}</p>
         </div>
       ) : null}
     </section>
   );
 }
 
-function AssumptionsSnapshot({ result }: { result: SimulationRunResult }) {
+function RunAssumptions({ result }: { result: SimulationRunResult }) {
   return (
-    <section aria-label="Assumptions used in this run" className="surface-solid rounded-2xl border border-[var(--border-subtle)] p-4 space-y-2">
-      <h3 className="font-caption font-bold uppercase tracking-wider text-muted-foreground">Assumptions Used in This Run</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-        <div className="flex justify-between gap-2 border-b border-[var(--border-subtle)] pb-1">
-          <span className="text-muted-foreground">Emergency Fund</span>
-          <span className="font-bold text-foreground tabular-nums">${result.input.emergencyFund}</span>
-        </div>
-        <div className="flex justify-between gap-2 border-b border-[var(--border-subtle)] pb-1">
-          <span className="text-muted-foreground">Monthly Expenses</span>
-          <span className="font-bold text-foreground tabular-nums">${result.input.essentialMonthlyExpenses}</span>
-        </div>
+    <section className="surface-solid space-y-4 rounded-2xl p-5" aria-labelledby="run-assumptions-title">
+      <div className="space-y-1">
+        <p className="font-label text-muted-foreground">Saved with this run</p>
+        <h3 id="run-assumptions-title" className="font-section-title text-foreground">Assumptions used</h3>
       </div>
-      <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground mt-1">
-        {result.assumptions.map((a, i) => <li key={i}>{a}</li>)}
-      </ul>
+      <dl className="grid gap-3 text-sm sm:grid-cols-2">
+        <div className="border-b border-[var(--border-subtle)] pb-3">
+          <dt className="text-muted-foreground">Emergency fund reserve</dt>
+          <dd className="mt-1 font-bold text-foreground tabular-nums">{formatAmount(result.input.emergencyFund)}</dd>
+        </div>
+        <div className="border-b border-[var(--border-subtle)] pb-3">
+          <dt className="text-muted-foreground">Essential monthly expenses</dt>
+          <dd className="mt-1 font-bold text-foreground tabular-nums">{formatAmount(result.input.essentialMonthlyExpenses)}</dd>
+        </div>
+      </dl>
     </section>
   );
 }
 
-function ModelAssumptionsAndLimitations({ detail }: { detail: SimulationDetail }) {
+function ModelAssumptionsAndLimitations({ result }: { result: SimulationRunResult }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <section aria-label="Model assumptions" className="surface-paper rounded-2xl border border-[var(--border-subtle)] p-4 space-y-2">
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-          <h3 className="font-section-title text-foreground">Model Assumptions</h3>
+    <div className="grid gap-5 xl:grid-cols-2">
+      <section className="surface-paper space-y-4 rounded-2xl p-5" aria-labelledby="model-assumptions-title">
+        <div className="flex items-start gap-3">
+          <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[var(--accent-teal)]" aria-hidden="true" />
+          <div className="space-y-1">
+            <p className="font-label text-muted-foreground">How to read it</p>
+            <h3 id="model-assumptions-title" className="font-section-title text-foreground">Model assumptions</h3>
+          </div>
         </div>
-        <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground">
-          {detail.assumptions.map((a, i) => <li key={i}>{a}</li>)}
+        <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
+          {result.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)}
         </ul>
       </section>
 
-      <section aria-label="Model limitations" className="surface-paper rounded-2xl border border-[var(--border-subtle)] p-4 space-y-2">
-        <div className="flex items-center gap-2">
-          <ShieldAlert className="h-4 w-4 text-[var(--accent-orange)] shrink-0" />
-          <h3 className="font-section-title text-foreground">Model Limitations</h3>
+      <section className="surface-paper space-y-4 rounded-2xl p-5" aria-labelledby="model-limitations-title">
+        <div className="flex items-start gap-3">
+          <ShieldAlert className="mt-0.5 size-5 shrink-0 text-[var(--accent-orange)]" aria-hidden="true" />
+          <div className="space-y-1">
+            <p className="font-label text-muted-foreground">Important boundaries</p>
+            <h3 id="model-limitations-title" className="font-section-title text-foreground">Limitations</h3>
+          </div>
         </div>
-        <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground">
-          {detail.limitations.map((l, i) => <li key={i}>{l}</li>)}
+        <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
+          {result.limitations.map((limitation) => <li key={limitation}>{limitation}</li>)}
         </ul>
       </section>
     </div>
@@ -102,49 +122,43 @@ function ModelAssumptionsAndLimitations({ detail }: { detail: SimulationDetail }
 
 function Sources({ sources }: { sources: SimulationRunResult["sources"] }) {
   return (
-    <section aria-label="Simulation sources" className="surface-paper rounded-2xl border border-[var(--border-subtle)] p-4 space-y-3">
-      <div className="flex items-center gap-2">
-        <BookOpen className="h-4 w-4 text-[var(--accent-teal)] shrink-0" />
-        <h3 className="font-section-title text-foreground">Sources</h3>
+    <section className="surface-paper space-y-4 rounded-2xl p-5" aria-labelledby="simulation-sources-title">
+      <div className="flex items-start gap-3">
+        <BookOpen className="mt-0.5 size-5 shrink-0 text-[var(--accent-teal)]" aria-hidden="true" />
+        <div className="space-y-1">
+          <p className="font-label text-muted-foreground">Reference trail</p>
+          <h3 id="simulation-sources-title" className="font-section-title text-foreground">Sources</h3>
+        </div>
       </div>
-      <ul className="space-y-3 text-xs text-muted-foreground">
-        {sources.map((source) => (
-          <li key={source.url} className="space-y-1 border-t border-[var(--border-subtle)] pt-2 first:border-t-0 first:pt-0">
-            <a
-              href={source.url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-start gap-1 font-bold text-foreground underline decoration-[var(--accent-teal)] underline-offset-2 break-words hover:text-[var(--accent-teal)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
-            >
-              <span>{source.title}</span>
-              <ExternalLink className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
-            </a>
-            <p>Publisher: {source.publisher}</p>
-            <p>Accessed: {source.accessedAt}</p>
-            <p className="break-all text-[11px]">{source.url}</p>
-          </li>
-        ))}
-      </ul>
+      {sources.length > 0 ? (
+        <ul className="space-y-4 text-sm text-muted-foreground">
+          {sources.map((source) => (
+            <li key={source.url} className="space-y-1.5 border-t border-[var(--border-subtle)] pt-4 first:border-t-0 first:pt-0">
+              <a href={source.url} target="_blank" rel="noopener noreferrer" className="inline-flex max-w-full items-start gap-1.5 font-bold leading-relaxed text-foreground underline decoration-[var(--accent-teal)] underline-offset-2 transition-colors hover:text-[var(--accent-teal)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2">
+                <span className="break-words">{source.title}</span>
+                <ExternalLink className="mt-1 size-3.5 shrink-0" aria-hidden="true" />
+              </a>
+              <p>Publisher: {source.publisher}</p>
+              <p>Accessed: {source.accessedAt}</p>
+              <p className="break-all font-mono text-xs">{source.url}</p>
+            </li>
+          ))}
+        </ul>
+      ) : <p className="font-body-small text-muted-foreground">No source metadata was provided for this saved run.</p>}
     </section>
   );
 }
 
-export function SimulationResultView({
-  detail,
-  runResult,
-}: {
-  detail: SimulationDetail;
-  runResult: SimulationRunResult;
-}) {
+export function SimulationResultView({ runResult }: { runResult: SimulationRunResult }) {
   return (
-    <div className="space-y-5" aria-live="polite" aria-atomic="true">
+    <div className="space-y-5" aria-live="polite" aria-atomic="false">
       <PrimaryResult result={runResult} />
       <SimulationTimelineChart result={runResult} />
       <Interpretation result={runResult} />
-      <AssumptionsSnapshot result={runResult} />
-      <ModelAssumptionsAndLimitations detail={detail} />
-      {runResult.sources.length > 0 ? <Sources sources={runResult.sources} /> : null}
       <SimulationDisclaimerBanner />
+      <RunAssumptions result={runResult} />
+      <ModelAssumptionsAndLimitations result={runResult} />
+      <Sources sources={runResult.sources} />
     </div>
   );
 }

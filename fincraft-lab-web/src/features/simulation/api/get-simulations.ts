@@ -12,12 +12,12 @@ export async function getSimulations(): Promise<SimulationSummary[]> {
   });
 
   if (!res.ok) {
-    return [];
+    throw new Error(res.error);
   }
 
   if (isRecord(res.data) && Array.isArray(res.data.data)) {
     return res.data.data as SimulationSummary[];
   }
 
-  return [];
+  throw new Error("Simulation list response was not valid.");
 }

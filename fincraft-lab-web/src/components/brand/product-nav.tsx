@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, Home, Layers3, LogIn, PawPrint, ShieldCheck, Sparkles, UserRound } from "lucide-react";
 import type { UserProfile } from "@/lib/auth/session";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -48,6 +49,16 @@ function getCurrentLabel(activeTab: ProductTab) {
   if (activeTab === "profile") return "Profile";
   if (activeTab === "admin") return "Admin";
   return "Home";
+}
+
+function getPathActiveTab(pathname: string): ProductTab | null {
+  if (pathname === "/lab" || pathname.startsWith("/lab/")) return "lab";
+  if (pathname === "/workspace" || pathname.startsWith("/workspace/")) return "workspace";
+  if (pathname === "/simulations" || pathname.startsWith("/simulations/")) return "simulations";
+  if (pathname === "/settings/pet") return "pet";
+  if (pathname === "/settings/profile") return "profile";
+  if (pathname.startsWith("/admin/")) return "admin";
+  return pathname === "/" ? "home" : null;
 }
 
 function DesktopLink({ item, activeTab }: { item: NavItem; activeTab: ProductTab }) {
@@ -125,20 +136,22 @@ function MobileNavigation({ activeTab, user }: ProductNavProps) {
 }
 
 export function ProductNav({ activeTab, user }: ProductNavProps) {
+  const pathname = usePathname();
+  const resolvedActiveTab = getPathActiveTab(pathname) ?? activeTab;
   const admin = isAdminUser(user);
   const explore = getExploreItems(user);
   return (
     <div className="flex min-w-0 items-center gap-2">
-      <span className="max-w-[7rem] truncate text-xs font-semibold text-muted-foreground xl:hidden">{getCurrentLabel(activeTab)}</span>
+      <span className="max-w-[7rem] truncate text-xs font-semibold text-muted-foreground xl:hidden">{getCurrentLabel(resolvedActiveTab)}</span>
       <div className="hidden items-center gap-2 xl:flex">
         <nav aria-label="Primary navigation" className="flex items-center gap-1">
-          <DesktopGroup label="Explore" items={explore} activeTab={activeTab} />
-          {user ? <DesktopGroup label="Personal" items={personalItems} activeTab={activeTab} /> : null}
-          {admin ? <DesktopGroup label="Admin" items={[{ label: "Admin", href: "/admin/elements", tab: "admin", icon: ShieldCheck }]} activeTab={activeTab} /> : null}
+          <DesktopGroup label="Explore" items={explore} activeTab={resolvedActiveTab} />
+          {user ? <DesktopGroup label="Personal" items={personalItems} activeTab={resolvedActiveTab} /> : null}
+          {admin ? <DesktopGroup label="Admin" items={[{ label: "Admin", href: "/admin/elements", tab: "admin", icon: ShieldCheck }]} activeTab={resolvedActiveTab} /> : null}
         </nav>
-        {user ? <AccountMenu user={user} activeTab={activeTab} /> : <div className="flex items-center gap-1"><Link href="/login" aria-current={activeTab === "login" ? "page" : undefined} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold text-muted-foreground hover:bg-[var(--surface-inset)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">Sign in</Link><Link href="/register" className="inline-flex min-h-11 items-center rounded-xl bg-[var(--brand-primary)] px-3 text-xs font-bold text-[var(--brand-primary-foreground)] hover:bg-[var(--color-action-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">Create account</Link></div>}
+        {user ? <AccountMenu user={user} activeTab={resolvedActiveTab} /> : <div className="flex items-center gap-1"><Link href="/login" aria-current={resolvedActiveTab === "login" ? "page" : undefined} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold text-muted-foreground hover:bg-[var(--surface-inset)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">Sign in</Link><Link href="/register" className="inline-flex min-h-11 items-center rounded-xl bg-[var(--brand-primary)] px-3 text-xs font-bold text-[var(--brand-primary-foreground)] hover:bg-[var(--color-action-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">Create account</Link></div>}
       </div>
-      <div className="xl:hidden"><MobileNavigation activeTab={activeTab} user={user} /></div>
+      <div className="xl:hidden"><MobileNavigation activeTab={resolvedActiveTab} user={user} /></div>
     </div>
   );
 }
