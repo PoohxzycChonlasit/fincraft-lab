@@ -6,14 +6,26 @@ function generatePoints(result: SimulationRunResult): Point[] {
   const fund = parseFloat(result.input.emergencyFund) || 0;
   const expense = parseFloat(result.input.essentialMonthlyExpenses) || 1;
   const survival = parseFloat(result.result.survivalMonths) || 0;
+  const wholeMonths = Math.max(0, result.result.wholeMonthsCovered);
+  const remaining = parseFloat(result.result.remainingAmount) || 0;
 
   const points: Point[] = [{ month: 0, balance: fund }];
-  const maxMonths = Math.min(Math.ceil(survival) + 1, 36);
+  const displayedWholeMonths = Math.min(wholeMonths, 36);
 
-  for (let m = 1; m <= maxMonths; m++) {
+  for (let m = 1; m <= displayedWholeMonths; m++) {
     const bal = Math.max(0, fund - m * expense);
     points.push({ month: m, balance: bal });
-    if (bal === 0) break;
+  }
+
+  const wholeMonthPoint = points[points.length - 1];
+  if (wholeMonthPoint && wholeMonthPoint.month === wholeMonths) {
+    wholeMonthPoint.balance = remaining;
+  } else {
+    points.push({ month: wholeMonths, balance: remaining });
+  }
+
+  if (survival > wholeMonths) {
+    points.push({ month: survival, balance: 0 });
   }
 
   return points;
@@ -41,7 +53,7 @@ function SvgCurve({ points, width, height }: { points: Point[]; width: number; h
     >
       <title id="timeline-title">Balance Depletion Curve</title>
       <desc id="timeline-desc">
-        Line chart showing balance declining from ${points[0]?.balance ?? 0} at month 0 to $0 at month {points[points.length - 1]?.month ?? 0}.
+        Illustrative line chart showing balance declining from ${points[0]?.balance ?? 0} at month 0 to ${points[points.length - 1]?.balance ?? 0} at month {points[points.length - 1]?.month ?? 0}.
       </desc>
 
       {/* Axis lines */}
@@ -77,10 +89,10 @@ export function SimulationTimelineChart({ result }: { result: SimulationRunResul
   const monthlyBurn = parseFloat(result.input.essentialMonthlyExpenses) || 0;
 
   return (
-    <section aria-label="Balance depletion timeline" className="surface-solid rounded-2xl border border-[var(--border-subtle)] p-4 sm:p-5 space-y-3">
+    <section aria-label="Illustrative balance timeline" className="surface-solid rounded-2xl border border-[var(--border-subtle)] p-4 sm:p-5 space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="font-caption font-bold uppercase tracking-wider text-muted-foreground">
-          Balance Depletion Timeline
+          Illustrative Balance Timeline
         </h3>
         <span className="font-caption font-bold text-[var(--accent-teal)]">
           {result.result.survivalMonths} mo. runway
@@ -91,7 +103,7 @@ export function SimulationTimelineChart({ result }: { result: SimulationRunResul
 
       {/* Text summary adjacent to chart (accessibility + non-colour-only) */}
       <p className="font-body-small text-muted-foreground pt-1 border-t border-[var(--border-subtle)]">
-        Starting at <strong className="text-foreground">${startBalance.toLocaleString()}</strong>, depleting at <strong className="text-foreground">${monthlyBurn.toLocaleString()}</strong>/month, the balance reaches zero after approximately <strong className="text-foreground">{result.result.survivalMonths} months</strong> with <strong className="text-foreground">${result.result.remainingAmount}</strong> remaining in the partial final month.
+        Illustrative path based on the entered assumptions and the backend result. Starting at <strong className="text-foreground">${startBalance.toLocaleString()}</strong> and using <strong className="text-foreground">${monthlyBurn.toLocaleString()}</strong>/month, the model estimates <strong className="text-foreground">{result.result.survivalMonths} months</strong> of runway, covering <strong className="text-foreground">{result.result.wholeMonthsCovered}</strong> whole months with <strong className="text-foreground">${result.result.remainingAmount}</strong> remaining after those whole months.
       </p>
     </section>
   );

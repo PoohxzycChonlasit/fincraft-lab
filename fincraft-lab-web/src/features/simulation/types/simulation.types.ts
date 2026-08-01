@@ -7,11 +7,19 @@ export type SimulationSummary = {
   isActive: boolean;
 };
 
+export type SimulationSourceMetadata = {
+  title: string;
+  publisher: string;
+  url: string;
+  accessedAt: string;
+};
+
 export type SimulationDetail = SimulationSummary & {
   description: string;
   formulaExplanation: string;
   assumptions: string[];
   limitations: string[];
+  sources: SimulationSourceMetadata[];
   disclaimer: string;
   calculationVersion: string;
 };
@@ -41,6 +49,7 @@ export type SimulationRunResult = {
   };
   assumptions: string[];
   limitations: string[];
+  sources: SimulationSourceMetadata[];
   disclaimer: string;
   calculationVersion: string;
   createdAt: string;
