@@ -4,6 +4,7 @@ export type AdminElementRef = {
   name: string;
   categoryId: string | null;
   status: string;
+  emoji?: string;
 };
 
 export type AdminRecipeInput = {

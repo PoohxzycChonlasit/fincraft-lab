@@ -1,248 +1,69 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Plus, Edit2, Archive, CheckCircle2, AlertCircle } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { CheckCircle2, Edit2, Plus, RotateCcw } from "lucide-react";
 import type { AdminCategory } from "../types/category.types";
+import { AdminArchiveDialog } from "./admin-archive-dialog";
 import { CategoryFormModal } from "./category-form-modal";
 
-function StatusBadge({ status }: { status: "ACTIVE" | "INACTIVE" }) {
-  const isOk = status === "ACTIVE";
-  return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border ${
-        isOk
-          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-          : "border-muted-foreground/30 bg-muted/20 text-muted-foreground"
-      }`}
-    >
-      <span className={`h-1.5 w-1.5 rounded-full ${isOk ? "bg-emerald-500" : "bg-muted-foreground"}`} />
-      {status}
-    </span>
-  );
+function StatusBadge({ status }: { status: AdminCategory["status"] }) {
+  const active = status === "ACTIVE";
+  return <span className={`inline-flex min-h-6 items-center rounded-full border px-2 py-0.5 text-[10px] font-bold ${active ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-stone-500/30 bg-stone-500/10 text-stone-700 dark:text-stone-300"}`}>{status}</span>;
 }
 
-function CategoryTableRow({
-  cat,
-  onEdit,
-  onArchive,
-  isPending,
-}: {
-  cat: AdminCategory;
-  onEdit: (c: AdminCategory) => void;
-  onArchive: (id: string) => void;
-  isPending: boolean;
-}) {
-  return (
-    <tr className="border-b border-[var(--border-subtle)] hover:bg-[var(--surface-flat)] transition-colors">
-      <td className="p-3 text-xs font-bold text-foreground">{cat.name}</td>
-      <td className="p-3 text-xs text-muted-foreground max-w-xs truncate">{cat.description || "—"}</td>
-      <td className="p-3 text-xs font-mono text-center">{cat.sortOrder}</td>
-      <td className="p-3 text-xs text-center font-mono">{cat.elementCount}</td>
-      <td className="p-3 text-xs text-center">
-        <StatusBadge status={cat.status} />
-      </td>
-      <td className="p-3 text-xs text-right space-x-2">
-        <button
-          type="button"
-          onClick={() => onEdit(cat)}
-          className="inline-flex items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-2.5 py-1 text-[11px] font-semibold text-foreground hover:bg-[var(--surface-raised)] transition-colors"
-        >
-          <Edit2 className="h-3 w-3" />
-          <span>Edit</span>
-        </button>
-
-        {cat.status === "ACTIVE" ? (
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => onArchive(cat.id)}
-            className="inline-flex items-center gap-1 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors disabled:opacity-50"
-          >
-            <Archive className="h-3 w-3" />
-            <span>Archive</span>
-          </button>
-        ) : null}
-      </td>
-    </tr>
-  );
+async function parseResponse(response: Response) {
+  return (await response.json().catch(() => ({}))) as { data?: AdminCategory; error?: string };
 }
 
-function FeedbackBanners({
-  errorMsg,
-  successMsg,
-}: {
-  errorMsg: string | null;
-  successMsg: string | null;
-}) {
-  if (errorMsg) {
-    return (
-      <div className="flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
-        <AlertCircle className="h-4 w-4 shrink-0" />
-        <span>{errorMsg}</span>
-      </div>
-    );
-  }
-  if (successMsg) {
-    return (
-      <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-600 dark:text-emerald-400">
-        <CheckCircle2 className="h-4 w-4 shrink-0" />
-        <span>{successMsg}</span>
-      </div>
-    );
-  }
-  return null;
-}
-
-function CategoryTable({
-  categories,
-  onEdit,
-  onArchive,
-  isPending,
-}: {
-  categories: AdminCategory[];
-  onEdit: (c: AdminCategory) => void;
-  onArchive: (id: string) => void;
-  isPending: boolean;
-}) {
-  return (
-    <div className="surface-card overflow-x-auto rounded-2xl border border-[var(--border-subtle)] shadow-sm">
-      <table className="w-full text-left border-collapse">
-        <thead>
-          <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-flat)] text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            <th className="p-3">Category Name</th>
-            <th className="p-3">Description</th>
-            <th className="p-3 text-center">Sort</th>
-            <th className="p-3 text-center">Elements</th>
-            <th className="p-3 text-center">Status</th>
-            <th className="p-3 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {categories.length === 0 ? (
-            <tr>
-              <td colSpan={6} className="p-8 text-center text-xs text-muted-foreground">
-                No element categories found. Click &quot;New Category&quot; to create one.
-              </td>
-            </tr>
-          ) : (
-            categories.map((cat) => (
-              <CategoryTableRow
-                key={cat.id}
-                cat={cat}
-                onEdit={onEdit}
-                onArchive={onArchive}
-                isPending={isPending}
-              />
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
+function CategoryRecords({ categories, isPending, onEdit, onArchive, onReactivate }: { categories: AdminCategory[]; isPending: boolean; onEdit: (category: AdminCategory) => void; onArchive: (category: AdminCategory) => Promise<boolean>; onReactivate: (category: AdminCategory) => Promise<boolean> }) {
+  if (categories.length === 0) return <div className="surface-inset rounded-2xl p-8 text-center"><p className="text-sm font-semibold text-foreground">No element categories found</p><p className="mt-1 text-xs text-muted-foreground">Create a category to organize the Element catalogue.</p></div>;
+  return <div role="list" aria-label="Element categories" className="surface-card overflow-hidden rounded-2xl"><div className="hidden border-b border-[var(--border-subtle)] bg-[var(--surface-flat)] px-4 py-3 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground md:grid md:grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_8rem_8rem_auto] md:gap-4"><span>Category</span><span>Description</span><span>Sort</span><span>Elements</span><span className="text-right">Actions</span></div>{categories.map((category) => <article key={category.id} role="listitem" className="grid gap-3 border-b border-[var(--border-subtle)] p-4 last:border-b-0 md:grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_8rem_8rem_auto] md:items-center md:gap-4"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h2 className="text-sm font-bold text-foreground">{category.name}</h2><StatusBadge status={category.status} /></div><p className="mt-1 text-xs text-muted-foreground md:hidden">{category.description || "No description"}</p></div><p className="break-words text-xs leading-5 text-muted-foreground">{category.description || "No description"}</p><span className="text-xs font-mono text-muted-foreground">Sort {category.sortOrder}</span><span className="text-xs text-muted-foreground"><span className="font-mono text-foreground">{category.elementCount}</span> linked Elements</span><div className="flex flex-wrap justify-start gap-2 md:justify-end"><button type="button" onClick={() => onEdit(category)} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3 text-xs font-semibold text-foreground hover:bg-[var(--surface-raised)]"><Edit2 className="size-4" aria-hidden="true" />Edit</button>{category.status === "ACTIVE" ? <AdminArchiveDialog trigger={<button type="button" disabled={isPending} className="min-h-11 rounded-lg border border-amber-500/30 px-3 text-xs font-semibold text-amber-700 hover:bg-amber-500/10 disabled:opacity-50">Archive</button>} itemName={category.name} description="The category becomes INACTIVE, while its related Elements remain intact and stored." isPending={isPending} onConfirm={() => onArchive(category)} /> : <button type="button" onClick={() => void onReactivate(category)} disabled={isPending} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-[var(--border-interactive)] px-3 text-xs font-semibold text-[var(--brand-primary)] hover:bg-[var(--surface-inset)] disabled:opacity-50"><RotateCcw className="size-4" aria-hidden="true" />Reactivate</button>}</div></article>)}</div>;
 }
 
 function useCategoryManagementState(initialCategories: AdminCategory[]) {
-  const [categories, setCategories] = useState<AdminCategory[]>(initialCategories);
+  const [categories, setCategories] = useState(initialCategories);
   const [activeModalCat, setActiveModalCat] = useState<AdminCategory | null | "new">(null);
-  const [isPending, startTransition] = useTransition();
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(initialCategories.length === 0);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+
+  const loadCategories = useCallback(async () => {
+    await Promise.resolve();
+    setIsLoading(true); setLoadError(null);
+    try {
+      const response = await fetch("/api/admin/categories", { cache: "no-store" });
+      const payload = await parseResponse(response);
+      if (!response.ok || !Array.isArray(payload.data)) throw new Error(payload.error || `Unable to load categories (HTTP ${response.status}).`);
+      setCategories(payload.data);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Unable to load categories.");
+    } finally { setIsLoading(false); }
+  }, []);
+
+  useEffect(() => { if (initialCategories.length === 0) void Promise.resolve().then(() => loadCategories()); }, [initialCategories.length, loadCategories]);
 
   const handleSaved = (saved: AdminCategory) => {
-    setCategories((prev) => {
-      const idx = prev.findIndex((c) => c.id === saved.id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = saved;
-        return next;
-      }
-      return [saved, ...prev];
-    });
-    setActiveModalCat(null);
-    setSuccessMsg("Category saved successfully!");
+    setCategories((current) => { const index = current.findIndex((category) => category.id === saved.id); if (index < 0) return [saved, ...current]; const next = [...current]; next[index] = saved; return next; });
+    setActiveModalCat(null); setMutationError(null); setSuccessMsg("Category saved successfully.");
   };
 
-  const handleArchive = (categoryId: string) => {
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    startTransition(async () => {
-      try {
-        const res = await fetch(`/api/admin/categories/${categoryId}`, { method: "DELETE" });
-        const data = await res.json();
-        if (!res.ok) {
-          setErrorMsg(data.error || "Failed to archive category.");
-          return;
-        }
-        setCategories((prev) => prev.map((c) => (c.id === categoryId ? data.data : c)));
-        setSuccessMsg("Category archived successfully.");
-      } catch {
-        setErrorMsg("Network error archiving category.");
-      }
-    });
+  const updateStatus = async (category: AdminCategory, status: "ACTIVE" | "INACTIVE") => {
+    setPendingId(category.id); setMutationError(null); setSuccessMsg(null);
+    try {
+      const response = await fetch(`/api/admin/categories/${category.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+      const payload = await parseResponse(response);
+      if (!response.ok || !payload.data) { setMutationError(payload.error || `Status update failed (HTTP ${response.status}).`); return false; }
+      setCategories((current) => current.map((item) => item.id === category.id ? payload.data! : item));
+      setSuccessMsg(`${category.name} ${status === "ACTIVE" ? "reactivated" : "archived"} successfully.`); return true;
+    } catch { setMutationError(`Network error updating ${category.name}.`); return false; } finally { setPendingId(null); }
   };
 
-  return {
-    categories,
-    activeModalCat,
-    setActiveModalCat,
-    isPending,
-    errorMsg,
-    successMsg,
-    handleSaved,
-    handleArchive,
-  };
+  return { categories, activeModalCat, setActiveModalCat, isLoading, loadError, mutationError, successMsg, isPending: Boolean(pendingId), handleSaved, handleArchive: (category: AdminCategory) => updateStatus(category, "INACTIVE"), handleReactivate: (category: AdminCategory) => updateStatus(category, "ACTIVE"), retryLoad: loadCategories };
 }
 
-export function CategoryManagementClient({
-  initialCategories,
-}: {
-  initialCategories: AdminCategory[];
-}) {
-  const {
-    categories,
-    activeModalCat,
-    setActiveModalCat,
-    isPending,
-    errorMsg,
-    successMsg,
-    handleSaved,
-    handleArchive,
-  } = useCategoryManagementState(initialCategories);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--brand-accent)]">Master Data</span>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Element Categories</h1>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setActiveModalCat("new")}
-          className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-[var(--color-action-primary)] px-4 text-xs font-semibold text-white shadow-xs hover:bg-[var(--color-action-hover)] transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Category</span>
-        </button>
-      </div>
-
-      <FeedbackBanners errorMsg={errorMsg} successMsg={successMsg} />
-
-      <CategoryTable
-        categories={categories}
-        onEdit={(c) => setActiveModalCat(c)}
-        onArchive={handleArchive}
-        isPending={isPending}
-      />
-
-      {activeModalCat ? (
-        <CategoryFormModal
-          category={activeModalCat === "new" ? null : activeModalCat}
-          onClose={() => setActiveModalCat(null)}
-          onSaved={handleSaved}
-        />
-      ) : null}
-    </div>
-  );
+export function CategoryManagementClient({ initialCategories }: { initialCategories: AdminCategory[] }) {
+  const state = useCategoryManagementState(initialCategories);
+  return <div className="space-y-5"><div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--border-subtle)] pb-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--color-craft-accent)]">Content catalogue</p><h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground">Categories</h1><p className="mt-1 text-xs text-muted-foreground">Organize Elements without changing their stored relationships.</p></div><button type="button" onClick={() => state.setActiveModalCat("new")} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--color-action-primary)] px-4 text-xs font-semibold text-white hover:bg-[var(--color-action-hover)]"><Plus className="size-4" aria-hidden="true" />New category</button></div>{state.mutationError ? <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">{state.mutationError}</div> : null}{state.successMsg ? <div role="status" className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-700 dark:text-emerald-300"><CheckCircle2 className="size-4" aria-hidden="true" />{state.successMsg}</div> : null}{state.isLoading ? <div className="surface-inset rounded-2xl p-8 text-center" aria-busy="true"><p className="text-sm font-semibold text-foreground">Loading categories...</p></div> : state.loadError ? <div role="alert" className="surface-inset rounded-2xl border-destructive/30 p-6"><p className="text-sm font-semibold text-destructive">Unable to load categories</p><p className="mt-1 text-xs text-muted-foreground">{state.loadError}</p><button type="button" onClick={() => void state.retryLoad()} className="mt-4 min-h-11 rounded-xl bg-[var(--color-action-primary)] px-4 text-xs font-semibold text-white">Retry</button></div> : <CategoryRecords categories={state.categories} isPending={state.isPending} onEdit={state.setActiveModalCat} onArchive={state.handleArchive} onReactivate={state.handleReactivate} />}{state.activeModalCat ? <CategoryFormModal category={state.activeModalCat === "new" ? null : state.activeModalCat} onClose={() => state.setActiveModalCat(null)} onSaved={state.handleSaved} /> : null}</div>;
 }

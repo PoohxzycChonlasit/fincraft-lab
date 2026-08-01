@@ -1,99 +1,37 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import type {
-  AdminElementSummary,
-  CategoryOption,
-  ContentStatusEnum,
-  CreateAdminElementPayload,
-  UpdateAdminElementPayload,
-} from "../types/admin-element.type";
+import { useCallback, useMemo, useState } from "react";
+import type { AdminElementSummary, CategoryOption, ContentStatusEnum, CreateAdminElementPayload, UpdateAdminElementPayload } from "../types/admin-element.type";
 
-async function postAdminElement(payload: CreateAdminElementPayload) {
-  const res = await fetch("/api/admin/elements", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const json = (await res.json().catch(() => ({}))) as { error?: string };
-  return { ok: res.ok, status: res.status, error: json.error };
-}
+async function readMutation(path: string, method: "POST" | "PATCH" | "DELETE", body?: unknown) { const response = await fetch(path, { method, headers: body ? { "Content-Type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined }); const payload = (await response.json().catch(() => ({}))) as { error?: string }; return { ok: response.ok, status: response.status, error: payload.error }; }
 
-async function patchAdminElement(elementId: string, payload: UpdateAdminElementPayload) {
-  const res = await fetch(`/api/admin/elements/${elementId}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const json = (await res.json().catch(() => ({}))) as { error?: string };
-  return { ok: res.ok, status: res.status, error: json.error };
-}
-
-async function deleteAdminElementApi(elementId: string) {
-  const res = await fetch(`/api/admin/elements/${elementId}`, { method: "DELETE" });
-  const json = (await res.json().catch(() => ({}))) as { error?: string };
-  return { ok: res.ok, status: res.status, error: json.error };
-}
-
-export function useAdminElementManager(initialElements: AdminElementSummary[]) {
-  const [elements, setElements] = useState<AdminElementSummary[]>(initialElements);
+function useElementState(initialElements: AdminElementSummary[]) {
+  const [elements, setElements] = useState(initialElements);
   const [editingElement, setEditingElement] = useState<AdminElementSummary | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const categories = useMemo<CategoryOption[]>(() => { const categoryMap = new Map<string, string>(); for (const element of elements) { if (element.categoryId && element.categoryName) categoryMap.set(element.categoryId, element.categoryName); } return Array.from(categoryMap.entries()).map(([id, name]) => ({ id, name })); }, [elements]);
+  const refreshElements = async () => { const response = await fetch("/api/admin/elements", { cache: "no-store" }).catch(() => null); if (!response?.ok) return false; const payload = (await response.json().catch(() => null)) as { data?: AdminElementSummary[] } | null; if (!payload || !Array.isArray(payload.data)) return false; setElements(payload.data); return true; };
+  return { elements, setElements, categories, editingElement, setEditingElement, isFormOpen, setIsFormOpen, isSubmitting, setIsSubmitting, feedback, setFeedback, error, setError, refreshElements };
+}
 
-  const categories = useMemo<CategoryOption[]>(() => {
-    const map = new Map<string, string>();
-    for (const el of elements) {
-      if (el.categoryId && el.categoryName) map.set(el.categoryId, el.categoryName);
-    }
-    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-  }, [elements]);
+function useElementActions(state: ReturnType<typeof useElementState>) {
+  const handleOpenCreate = () => { state.setEditingElement(null); state.setIsFormOpen(true); state.setError(null); state.setFeedback(null); };
+  const handleOpenEdit = (element: AdminElementSummary) => { state.setEditingElement(element); state.setIsFormOpen(true); state.setError(null); state.setFeedback(null); };
+  const handleCancelForm = () => { state.setIsFormOpen(false); state.setEditingElement(null); };
+  const handleCreateSubmit = useCallback(async (payload: CreateAdminElementPayload) => { state.setIsSubmitting(true); state.setError(null); state.setFeedback(null); const result = await readMutation("/api/admin/elements", "POST", payload); if (!result.ok) { state.setError(result.error || `Create failed (HTTP ${result.status})`); state.setIsSubmitting(false); return; } state.setFeedback(`Element "${payload.name}" created successfully.`); state.setIsFormOpen(false); await state.refreshElements(); state.setIsSubmitting(false); }, [state]);
+  const handleUpdateSubmit = useCallback(async (elementId: string, payload: UpdateAdminElementPayload) => { state.setIsSubmitting(true); state.setError(null); state.setFeedback(null); const result = await readMutation(`/api/admin/elements/${elementId}`, "PATCH", payload); if (!result.ok) { state.setError(result.error || `Update failed (HTTP ${result.status})`); state.setIsSubmitting(false); return; } state.setFeedback("Element updated successfully."); state.setIsFormOpen(false); state.setEditingElement(null); await state.refreshElements(); state.setIsSubmitting(false); }, [state]);
+  const handleArchiveElement = useCallback(async (elementId: string, name: string): Promise<boolean> => { state.setIsSubmitting(true); state.setError(null); state.setFeedback(null); const result = await readMutation(`/api/admin/elements/${elementId}`, "DELETE"); if (!result.ok) { state.setError(result.error || `Archive failed (HTTP ${result.status})`); state.setIsSubmitting(false); return false; } state.setFeedback(`Element "${name}" archived successfully.`); const refreshed = await state.refreshElements(); state.setIsSubmitting(false); return refreshed; }, [state]);
+  const handleReactivateElement = useCallback(async (elementId: string, name: string): Promise<boolean> => { state.setIsSubmitting(true); state.setError(null); state.setFeedback(null); const result = await readMutation(`/api/admin/elements/${elementId}`, "PATCH", { status: "ACTIVE" }); if (!result.ok) { state.setError(result.error || `Reactivation failed (HTTP ${result.status})`); state.setIsSubmitting(false); return false; } state.setFeedback(`Element "${name}" reactivated successfully.`); const refreshed = await state.refreshElements(); state.setIsSubmitting(false); return refreshed; }, [state]);
+  const handleQuickStatusChange = useCallback(async (elementId: string, status: ContentStatusEnum) => { await handleUpdateSubmit(elementId, { status }); }, [handleUpdateSubmit]);
+  const handleDetailSaved = useCallback((elementId: string) => { state.setElements((current) => current.map((element) => element.id === elementId ? { ...element, hasDiscoveryDetail: true } : element)); state.setFeedback("Discovery Detail saved successfully."); }, [state]);
+  return { handleOpenCreate, handleOpenEdit, handleCancelForm, handleCreateSubmit, handleUpdateSubmit, handleArchiveElement, handleReactivateElement, handleQuickStatusChange, handleDetailSaved };
+}
 
-  const refreshElements = async () => {
-    const res = await fetch("/api/admin/elements").catch(() => null);
-    if (res?.ok) {
-      const json = (await res.json()) as { data?: AdminElementSummary[] };
-      if (json.data) setElements(json.data);
-    }
-  };
-
-  const handleOpenCreate = () => { setEditingElement(null); setIsFormOpen(true); setError(null); setFeedback(null); };
-  const handleOpenEdit = (el: AdminElementSummary) => { setEditingElement(el); setIsFormOpen(true); setError(null); setFeedback(null); };
-  const handleCancelForm = () => { setIsFormOpen(false); setEditingElement(null); };
-
-  const handleCreateSubmit = useCallback(async (payload: CreateAdminElementPayload) => {
-    setIsSubmitting(true); setError(null); setFeedback(null);
-    const res = await postAdminElement(payload);
-    if (!res.ok) { setError(res.error || `Create failed (HTTP ${res.status})`); setIsSubmitting(false); return; }
-    setFeedback(`Element "${payload.name}" created successfully.`); setIsFormOpen(false);
-    await refreshElements(); setIsSubmitting(false);
-  }, []);
-
-  const handleUpdateSubmit = useCallback(async (elementId: string, payload: UpdateAdminElementPayload) => {
-    setIsSubmitting(true); setError(null); setFeedback(null);
-    const res = await patchAdminElement(elementId, payload);
-    if (!res.ok) { setError(res.error || `Update failed (HTTP ${res.status})`); setIsSubmitting(false); return; }
-    setFeedback("Element updated successfully."); setIsFormOpen(false); setEditingElement(null);
-    await refreshElements(); setIsSubmitting(false);
-  }, []);
-
-  const handleArchiveElement = useCallback(async (elementId: string, name: string) => {
-    if (!window.confirm(`Archive master element "${name}"? It will be hidden from normal discovery library but retained in learning records.`)) return;
-    setIsSubmitting(true); setError(null); setFeedback(null);
-    const res = await deleteAdminElementApi(elementId);
-    if (!res.ok) { setError(res.error || `Archive failed (HTTP ${res.status})`); setIsSubmitting(false); return; }
-    setFeedback(`Element "${name}" archived successfully.`);
-    await refreshElements(); setIsSubmitting(false);
-  }, []);
-
-  const handleQuickStatusChange = useCallback(async (elementId: string, status: ContentStatusEnum) => {
-    await handleUpdateSubmit(elementId, { status });
-  }, [handleUpdateSubmit]);
-
-  return {
-    elements, categories, editingElement, isFormOpen, isSubmitting, feedback, error,
-    handleOpenCreate, handleOpenEdit, handleCancelForm, handleCreateSubmit, handleUpdateSubmit, handleArchiveElement, handleQuickStatusChange,
-  };
+export function useAdminElementManager(initialElements: AdminElementSummary[]) {
+  const state = useElementState(initialElements);
+  const actions = useElementActions(state);
+  return { elements: state.elements, categories: state.categories, editingElement: state.editingElement, isFormOpen: state.isFormOpen, isSubmitting: state.isSubmitting, feedback: state.feedback, error: state.error, ...actions };
 }
