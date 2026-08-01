@@ -2,26 +2,18 @@
 
 import { useCallback, useRef } from "react";
 import {
-  ReactFlow,
   ReactFlowProvider,
-  Background,
-  Controls,
-  Panel,
-  BackgroundVariant,
   useReactFlow,
   type Edge,
   type OnEdgesChange,
   type OnNodeDrag,
   type OnNodesChange,
 } from "@xyflow/react";
-import { Wand2 } from "lucide-react";
 import type { SaveStatus } from "../hooks/use-canvas-nodes";
+import { useCanvasActions } from "../hooks/use-canvas-actions";
 import type { CanvasElementInput, ElementCanvasNode } from "../types/canvas-node.type";
-import { ElementCanvasNodeComponent } from "./element-canvas-node";
-import { LineageNoodleEdge } from "./lineage-noodle-edge";
+import { CanvasFlowSurface } from "./canvas-flow-surface";
 
-const nodeTypes = { elementNode: ElementCanvasNodeComponent };
-const edgeTypes = { lineage: LineageNoodleEdge };
 const NODE_WIDTH = 190;
 const NODE_HEIGHT = 70;
 const COLLISION_THRESHOLD = 1200;
@@ -38,6 +30,8 @@ type FinCraftCanvasProps = {
   onCombineNodes: (sourceNode: ElementCanvasNode, targetNode: ElementCanvasNode, collisionPosition: { x: number; y: number }) => void;
   onNodeTap: (node: ElementCanvasNode) => void;
   onClearTapSelection: () => void;
+  onRemoveNode: (nodeId: string) => void;
+  isCraftPending?: boolean;
   workspaceId?: string;
   isDirty?: boolean;
   saveStatus?: SaveStatus;
@@ -71,19 +65,6 @@ function isCanvasElementInput(value: unknown): value is CanvasElementInput {
   if (typeof value.id !== "string" || typeof value.name !== "string") return false;
   return (!("emoji" in value) || value.emoji === undefined || typeof value.emoji === "string")
     && (!("categoryName" in value) || value.categoryName === undefined || typeof value.categoryName === "string");
-}
-
-function CanvasEmptyOverlay() {
-  return (
-    <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center p-6 text-center">
-      <div className="surface-floating max-w-sm space-y-1.5 rounded-2xl border border-[var(--border-subtle)] p-5 shadow-xs">
-        <p className="text-sm font-semibold text-foreground">Drag an element here to begin.</p>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          Select or drag elements from the Element Library onto this infinite workspace.
-        </p>
-      </div>
-    </div>
-  );
 }
 
 function SaveStatusIndicator({ isDirty, saveStatus }: { isDirty?: boolean; saveStatus?: SaveStatus }) {
@@ -122,7 +103,7 @@ function CanvasHeader({ nodeCount, isDirty, saveStatus, canSave, isSaving, onSav
   );
 }
 
-type CanvasInnerProps = Omit<FinCraftCanvasProps, "workspaceId" | "isDirty" | "saveStatus" | "saveError" | "onSave">;
+type CanvasInnerProps = Omit<FinCraftCanvasProps, "workspaceId" | "isDirty" | "saveStatus" | "saveError" | "onSave"> & { isSaving: boolean };
 
 function useCanvasDragHandlers({ nodes, onDropLibraryElement, onTargetHighlight, onCombineNodes, onDragStopDirty }: CanvasInnerProps) {
   const { screenToFlowPosition } = useReactFlow();
@@ -169,61 +150,75 @@ function useCanvasDragHandlers({ nodes, onDropLibraryElement, onTargetHighlight,
   return { handleDragOver, handleDrop, handleNodeDrag, handleNodeDragStop };
 }
 
+type CanvasFitView = (options?: { padding?: number; duration?: number }) => void;
+
+function useCanvasTidy(canTidy: boolean, fitView: CanvasFitView, onTidyCanvas?: () => void) {
+  return useCallback(() => {
+    if (!canTidy) return;
+    onTidyCanvas?.();
+    const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 250;
+    setTimeout(() => fitView({ padding: 0.2, duration }), 50);
+  }, [canTidy, fitView, onTidyCanvas]);
+}
+
 function ReactFlowCanvasInner(props: CanvasInnerProps) {
-  const { nodes, edges = [], onNodesChange, onEdgesChange, onTidyCanvas, onNodeTap, onClearTapSelection } = props;
+  const { nodes, edges = [], onNodesChange, onEdgesChange, onTidyCanvas, onNodeTap, onClearTapSelection, onRemoveNode, isCraftPending, isSaving } = props;
   const { handleDragOver, handleDrop, handleNodeDrag, handleNodeDragStop } = useCanvasDragHandlers(props);
   const { fitView } = useReactFlow();
-
-  const handleNodeClick = useCallback((_: React.MouseEvent, node: ElementCanvasNode) => onNodeTap(node), [onNodeTap]);
-
-  const handleTidyClick = useCallback(() => {
-    onTidyCanvas?.();
-    setTimeout(() => {
-      fitView({ padding: 0.2, duration: 400 });
-    }, 50);
-  }, [onTidyCanvas, fitView]);
-
-  return (
-    <div className="lab-canvas-frame relative flex h-full min-h-0 min-w-0 w-full flex-1 basis-0 flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] shadow-xs" onDragOver={handleDragOver} onDrop={handleDrop}>
-      {nodes.length === 0 ? <CanvasEmptyOverlay /> : null}
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onNodeDrag={handleNodeDrag}
-        onNodeDragStop={handleNodeDragStop}
-        onNodeClick={handleNodeClick}
-        onPaneClick={onClearTapSelection}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        fitView={nodes.length > 0}
-        minZoom={0.2}
-        maxZoom={2}
-        proOptions={{ hideAttribution: true }}
-        aria-label="Craft Workspace Diagram"
-        style={{ width: "100%", height: "100%" }}
-      >
-        <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
-        <Controls showInteractive={false} className="!rounded-xl !border-[var(--border-subtle)] !bg-[var(--surface-resting)] !shadow-[var(--shadow-resting)]" />
-        <Panel position="top-right" className="!m-2 flex items-center gap-2">
-          {onTidyCanvas ? (
-            <button
-              type="button"
-              onClick={handleTidyClick}
-              disabled={nodes.length === 0}
-              aria-label="Arrange connected elements and fit them into view"
-              title="Arrange connected elements and fit them into view"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-resting)] px-3 py-1.5 text-xs font-semibold text-foreground shadow-xs transition-colors hover:bg-[var(--surface-inset)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:opacity-50 cursor-pointer"
-            >
-              <Wand2 size={13} className="text-[var(--color-craft-accent)]" aria-hidden="true" />
-              <span>Tidy Canvas</span>
-            </button>
-          ) : null}
-        </Panel>
-      </ReactFlow>
-    </div>
-  );
+  const canvasFrameRef = useRef<HTMLDivElement>(null);
+  const selectedNode = nodes.find((node) => node.selected) ?? null;
+  const incidentEdges = selectedNode
+    ? edges.filter((edge) => edge.source === selectedNode.id || edge.target === selectedNode.id)
+    : [];
+  const isActionBusy = Boolean(isCraftPending || isSaving);
+  const {
+    removalDialogOpen,
+    setRemovalDialogOpen,
+    isRemovalProcessing,
+    removeTriggerRef,
+    removeSelectedNode,
+    requestRemoveSelectedNode,
+    handleCanvasKeyDown,
+  } = useCanvasActions({
+    selectedNode,
+    incidentEdges,
+    isBusy: isActionBusy,
+    onRemoveNode,
+    onClearTapSelection,
+  });
+  const canvasActionBusy = isActionBusy || isRemovalProcessing || removalDialogOpen;
+  const canTidy = nodes.length > 1 && !canvasActionBusy;
+  const handleNodeClick = useCallback((_: React.MouseEvent, node: ElementCanvasNode) => {
+    onNodeTap(node);
+    window.requestAnimationFrame(() => canvasFrameRef.current?.focus({ preventScroll: true }));
+  }, [onNodeTap]);
+  const handleTidyClick = useCanvasTidy(canTidy, fitView, onTidyCanvas);
+  return <CanvasFlowSurface
+    frameRef={canvasFrameRef}
+    nodes={nodes}
+    edges={edges}
+    onNodesChange={onNodesChange}
+    onEdgesChange={onEdgesChange}
+    onNodeDrag={handleNodeDrag}
+    onNodeDragStop={handleNodeDragStop}
+    onNodeClick={handleNodeClick}
+    onPaneClick={onClearTapSelection}
+    onDragOver={handleDragOver}
+    onDrop={handleDrop}
+    onKeyDown={handleCanvasKeyDown}
+    onTidyCanvas={onTidyCanvas}
+    onTidyClick={handleTidyClick}
+    canTidy={canTidy}
+    selectedNode={selectedNode}
+    isActionBusy={canvasActionBusy}
+    isRemovalProcessing={isRemovalProcessing}
+    removeTriggerRef={removeTriggerRef}
+    onRemoveRequest={requestRemoveSelectedNode}
+    removalDialogOpen={removalDialogOpen}
+    onRemovalDialogOpenChange={setRemovalDialogOpen}
+    onConfirmRemove={removeSelectedNode}
+    incidentEdgeCount={incidentEdges.length}
+  />;
 }
 
 export function FinCraftCanvas(props: FinCraftCanvasProps) {
@@ -236,7 +231,7 @@ export function FinCraftCanvas(props: FinCraftCanvasProps) {
       <CanvasHeader nodeCount={nodes.length} isDirty={isDirty} saveStatus={saveStatus} canSave={canSave} isSaving={isSaving} onSave={onSave} />
       {saveError ? <div role="alert" className="shrink-0 rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-2 text-xs text-[var(--color-text-danger)]">{saveError}</div> : null}
       <ReactFlowProvider>
-        <ReactFlowCanvasInner {...props} />
+        <ReactFlowCanvasInner {...props} isSaving={isSaving} />
       </ReactFlowProvider>
     </section>
   );

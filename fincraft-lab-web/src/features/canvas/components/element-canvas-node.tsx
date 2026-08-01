@@ -39,7 +39,7 @@ function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>)
 
   return (
     <article
-      aria-label={`Canvas element: ${data.name}${isTarget ? " (Combine Target)" : ""}`}
+      aria-label={`Canvas element: ${data.name}${selected ? " (Selected)" : ""}${isTarget ? " (Combine Target)" : ""}`}
       className={`relative w-[190px] rounded-xl border text-left surface-solid shadow-xs transition-all duration-150 overflow-visible ${borderStyle} ${
         isCombining ? "opacity-70 pointer-events-none" : ""
       }`}
