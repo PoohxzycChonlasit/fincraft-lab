@@ -17,7 +17,8 @@ function StoryPicture({ desktopPoster, mobilePoster, variant, alt, priority, siz
       <Image
         src={desktopPoster}
         alt={alt}
-        fill
+        width={1600}
+        height={900}
         priority={priority}
         loading={priority ? undefined : "lazy"}
         sizes={sizes}
@@ -61,6 +62,7 @@ export function HomeStoryMedia({
   const style = { "--home-media-object-position": objectPosition } as CSSProperties;
   const imageAlt = decorative ? "" : alt ?? "";
   const hasThemePair = Boolean(desktopPoster && darkDesktopPoster);
+  const imagePriority = priority && !hasThemePair;
 
   return (
     <div
@@ -77,7 +79,7 @@ export function HomeStoryMedia({
           mobilePoster={mobilePoster}
           variant={hasThemePair ? "light" : "universal"}
           alt={imageAlt}
-          priority={priority}
+          priority={imagePriority}
           sizes={sizes}
         />
       ) : null}
@@ -87,7 +89,7 @@ export function HomeStoryMedia({
           mobilePoster={darkMobilePoster}
           variant="dark"
           alt={imageAlt}
-          priority={priority}
+          priority={imagePriority}
           sizes={sizes}
         />
       ) : null}
