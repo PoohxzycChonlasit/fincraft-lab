@@ -113,14 +113,16 @@ html {
   }
 }
 
-/* ProductShell also hosts the bounded Craft Lab. Simulation pages own normal document scrolling. */
-body:has(.simulation-page-frame) [data-layout-mode="workspace"] {
+/* ProductShell also hosts the bounded Craft Lab. Long-form product pages own normal document scrolling. */
+body:has(.simulation-page-frame) [data-layout-mode="workspace"],
+body:has([data-document-page]) [data-layout-mode="workspace"] {
   min-height: 100dvh;
   height: auto;
   overflow: visible;
 }
 
-body:has(.simulation-page-frame) [data-layout-mode="workspace"] > main {
+body:has(.simulation-page-frame) [data-layout-mode="workspace"] > main,
+body:has([data-document-page]) [data-layout-mode="workspace"] > main {
   min-height: auto;
   height: auto;
   overflow: visible;

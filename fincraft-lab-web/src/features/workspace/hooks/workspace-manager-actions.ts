@@ -5,7 +5,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { createWorkspaceApi, updateWorkspaceApi } from "../api/workspace.client";
 import type { WorkspaceSummary } from "../types/workspace.type";
 
-export type PendingAction = "create" | "rename" | "delete" | "switch" | null;
+export type PendingAction = "create" | "rename" | "delete" | "switch" | "archive" | "restore" | null;
 export type Feedback = { kind: "success" | "error"; message: string } | null;
 type SetPendingAction = Dispatch<SetStateAction<PendingAction>>;
 type SetFeedback = Dispatch<SetStateAction<Feedback>>;
@@ -33,8 +33,11 @@ export type WorkspaceActionContext = {
 export function useSwitchWorkspaceAction(input: WorkspaceActionContext) {
   return useCallback((workspaceId: string) => {
     if (input.isBusy || workspaceId === input.selectedId) return;
+    const nextWorkspace = input.workspaces.find((workspace) => workspace.id === workspaceId);
+    if (!nextWorkspace) return;
     input.setFeedback(null);
     input.setSelectedId(workspaceId);
+    input.setRenameName(nextWorkspace.name);
     input.setPendingAction("switch");
     input.navigateToWorkspace(workspaceId);
     input.setPendingAction(null);
@@ -43,6 +46,7 @@ export function useSwitchWorkspaceAction(input: WorkspaceActionContext) {
 
 export function useCreateWorkspaceAction(input: WorkspaceActionContext) {
   return useCallback(async () => {
+    if (input.isBusy) return;
     const name = input.createName.trim();
     if (!name) {
       input.setFeedback({ kind: "error", message: "Workspace name is required." });
@@ -67,7 +71,7 @@ export function useCreateWorkspaceAction(input: WorkspaceActionContext) {
 
 export function useRenameWorkspaceAction(input: WorkspaceActionContext) {
   return useCallback(async () => {
-    if (!input.selectedWorkspace) return;
+    if (!input.selectedWorkspace || input.isBusy) return;
     const name = input.renameName.trim();
     if (!name) {
       input.setFeedback({ kind: "error", message: "Workspace name is required." });
@@ -86,5 +90,27 @@ export function useRenameWorkspaceAction(input: WorkspaceActionContext) {
     input.setFeedback({ kind: "success", message: `Workspace renamed to "${result.data.name}".` });
     input.setPendingAction(null);
     input.refresh();
+  }, [input]);
+}
+
+type StatusActionInput = Pick<WorkspaceActionContext, "isBusy" | "setWorkspaces" | "setPendingAction" | "setFeedback" | "refresh">;
+
+export function useSetWorkspaceStatusAction(input: StatusActionInput) {
+  return useCallback(async (workspace: WorkspaceSummary, status: "ACTIVE" | "ARCHIVED"): Promise<boolean> => {
+    if (input.isBusy) return false;
+    const pendingAction: PendingAction = status === "ARCHIVED" ? "archive" : "restore";
+    input.setPendingAction(pendingAction);
+    input.setFeedback(null);
+    const result = await updateWorkspaceApi(workspace.id, { status });
+    if (!result.success) {
+      input.setPendingAction(null);
+      input.setFeedback({ kind: "error", message: result.errorMessage });
+      return false;
+    }
+    input.setWorkspaces((current) => current.map((entry) => entry.id === result.data.id ? result.data : entry));
+    input.setFeedback({ kind: "success", message: status === "ARCHIVED" ? `Workspace "${result.data.name}" archived.` : `Workspace "${result.data.name}" restored.` });
+    input.setPendingAction(null);
+    input.refresh();
+    return true;
   }, [input]);
 }

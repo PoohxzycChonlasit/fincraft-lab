@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import {
   useCreateWorkspaceAction,
   useRenameWorkspaceAction,
+  useSetWorkspaceStatusAction,
   useSwitchWorkspaceAction,
   type Feedback,
   type PendingAction,
   type WorkspaceActionContext,
 } from "./workspace-manager-actions";
-import { useDeleteWorkspaceAction } from "./workspace-manager-delete-action";
 import type { WorkspaceSummary } from "../types/workspace.type";
 
 function workspaceHref(workspaceId: string | null): string {
@@ -45,11 +45,11 @@ export function useWorkspaceManager(initialWorkspaces: WorkspaceSummary[], initi
   const handleSwitch = useSwitchWorkspaceAction(actionContext);
   const handleCreate = useCreateWorkspaceAction(actionContext);
   const handleRename = useRenameWorkspaceAction(actionContext);
-  const handleDelete = useDeleteWorkspaceAction(actionContext);
+  const handleStatusChange = useSetWorkspaceStatusAction(actionContext);
 
   return {
     workspaces, selectedId, selectedWorkspace, createName, renameName,
     pendingAction, feedback, isBusy, setCreateName, setRenameName,
-    handleSwitch, handleCreate, handleRename, handleDelete,
+    handleSwitch, handleCreate, handleRename, handleStatusChange,
   };
 }

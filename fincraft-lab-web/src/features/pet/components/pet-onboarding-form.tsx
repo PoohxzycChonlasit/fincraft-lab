@@ -1,179 +1,91 @@
 "use client";
 
-import { useState, useTransition, type FormEvent } from "react";
-import { Sparkles, RefreshCw, AlertCircle } from "lucide-react";
+import { useRef, useState, useTransition, type FormEvent } from "react";
+import { AlertCircle, RefreshCw, Sparkles } from "lucide-react";
 import type { PetProfile, PetSpecies } from "../types/pet.types";
 import { SPECIES_OPTIONS } from "../types/pet.types";
+import { createPetApi } from "../api/pet.client";
+import { CompanionAvatar, SpeciesIcon } from "./pet-header";
 
-function SpeciesGrid({ selected, onSelect }: { selected: PetSpecies; onSelect: (s: PetSpecies) => void }) {
+type FieldErrors = { name?: string; avatarUrl?: string };
+
+function validate(name: string, avatarUrl: string): FieldErrors {
+  const errors: FieldErrors = {};
+  const trimmedName = name.trim();
+  const trimmedAvatar = avatarUrl.trim();
+  if (trimmedName.length < 1 || trimmedName.length > 50) errors.name = "Companion name must be between 1 and 50 characters.";
+  if (trimmedAvatar.length > 2048) errors.avatarUrl = "Avatar URL must not exceed 2048 characters.";
+  else if (trimmedAvatar) {
+    try {
+      const url = new URL(trimmedAvatar);
+      if (url.protocol !== "http:" && url.protocol !== "https:") errors.avatarUrl = "Avatar URL must start with http:// or https://.";
+    } catch { errors.avatarUrl = "Please enter a valid absolute HTTP or HTTPS URL."; }
+  }
+  return errors;
+}
+
+function Feedback({ message }: { message: string | null }) {
+  return message ? <div role="alert" className="flex items-start gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive"><AlertCircle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" /><span>{message}</span></div> : null;
+}
+
+function SpeciesGrid({ selected, onSelect, disabled }: { selected: PetSpecies; onSelect: (species: PetSpecies) => void; disabled: boolean }) {
   return (
-    <div className="space-y-2">
-      <label className="block text-xs font-semibold text-foreground">
-        Choose Companion Species <span className="text-destructive">*</span>
-      </label>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        {SPECIES_OPTIONS.map((opt) => {
-          const isSelected = selected === opt.value;
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => onSelect(opt.value)}
-              className={`flex items-start gap-3 rounded-xl border p-3 text-left transition-all ${
-                isSelected
-                  ? "border-[var(--brand-accent)] bg-[var(--surface-inset)] ring-2 ring-[var(--brand-accent)]"
-                  : "border-[var(--border-subtle)] bg-[var(--surface-flat)] hover:bg-[var(--surface-inset)]"
-              }`}
-            >
-              <span className="text-2xl select-none">{opt.emoji}</span>
-              <div>
-                <div className="text-xs font-bold text-foreground">{opt.label}</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">{opt.description}</div>
-              </div>
-            </button>
-          );
+    <fieldset disabled={disabled} className="space-y-2">
+      <legend className="block text-xs font-semibold text-foreground">Choose Companion Species <span className="text-destructive">*</span></legend>
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        {SPECIES_OPTIONS.map((option) => {
+          const isSelected = selected === option.value;
+          return <button key={option.value} type="button" aria-pressed={isSelected} onClick={() => onSelect(option.value)} className={`flex min-h-[68px] items-start gap-3 rounded-xl border p-3 text-left transition-colors ${isSelected ? "border-[var(--brand-accent)] bg-[var(--surface-inset)] ring-2 ring-[var(--brand-accent)]" : "border-[var(--border-subtle)] bg-[var(--surface-flat)] hover:bg-[var(--surface-inset)]"}`}><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-solid)] text-[var(--brand-primary)]"><SpeciesIcon species={option.value} className="h-5 w-5" /></span><span><span className="block text-xs font-bold text-foreground">{option.label}</span><span className="mt-0.5 block text-[11px] text-muted-foreground">{option.description}</span></span></button>;
         })}
       </div>
-    </div>
+    </fieldset>
   );
 }
 
-function NameInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor="name" className="block text-xs font-semibold text-foreground">
-        Companion Name <span className="text-destructive">*</span>
-      </label>
-      <input
-        id="name"
-        type="text"
-        required
-        minLength={1}
-        maxLength={50}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="e.g. Penny, Finny, Barnaby"
-        className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-flat)] px-3.5 py-2.5 text-xs font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:border-[var(--brand-accent)]"
-      />
-    </div>
-  );
+function Field({ id, label, value, onChange, error, hint, placeholder, type = "text", maxLength = 200 }: { id: string; label: string; value: string; onChange: (value: string) => void; error?: string; hint?: string; placeholder: string; type?: "text" | "url"; maxLength?: number }) {
+  const helpId = `${id}-help`;
+  const errorId = `${id}-error`;
+  return <div className="space-y-1.5"><label htmlFor={id} className="block text-xs font-semibold text-foreground">{label}</label><input id={id} type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} maxLength={maxLength} aria-invalid={Boolean(error)} aria-describedby={error ? errorId : helpId} className={`min-h-[44px] w-full rounded-xl border bg-[var(--surface-flat)] px-3.5 py-2.5 text-xs font-medium text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${error ? "border-destructive focus-visible:ring-destructive" : "border-[var(--border-subtle)] focus-visible:border-[var(--brand-accent)]"}`} />{(error || hint) && <p id={error ? errorId : helpId} className={`text-[11px] ${error ? "font-medium text-destructive" : "text-muted-foreground"}`}>{error || hint}</p>}</div>;
 }
 
-function PersonalityInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor="personality" className="block text-xs font-semibold text-foreground">
-        Personality Trait (Optional)
-      </label>
-      <input
-        id="personality"
-        type="text"
-        maxLength={200}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="e.g. Cautious saver, Energetic budgeter"
-        className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-flat)] px-3.5 py-2.5 text-xs font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:border-[var(--brand-accent)]"
-      />
-    </div>
-  );
-}
-
-function GoalInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor="learningGoal" className="block text-xs font-semibold text-foreground">
-        Learning Focus / Goal
-      </label>
-      <input
-        id="learningGoal"
-        type="text"
-        maxLength={200}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="e.g. Build emergency savings, Understand interest rates"
-        className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-flat)] px-3.5 py-2.5 text-xs font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:border-[var(--brand-accent)]"
-      />
-    </div>
-  );
-}
-
-function usePetOnboardingState(onCreated: (pet: PetProfile) => void) {
+function useOnboardingState(onCreated: (pet: PetProfile) => void) {
   const [isPending, startTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitGuard = useRef(false);
   const [species, setSpecies] = useState<PetSpecies>("CAT");
   const [name, setName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [personality, setPersonality] = useState("");
   const [learningGoal, setLearningGoal] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      setErrorMsg("Please enter a Companion name.");
-      return;
-    }
+  const isBusy = isPending || isSubmitting;
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (submitGuard.current || isBusy) return;
+    const errors = validate(name, avatarUrl);
+    setFieldErrors(errors);
     setErrorMsg(null);
-
+    if (Object.keys(errors).length > 0) return;
+    submitGuard.current = true;
+    setIsSubmitting(true);
     startTransition(async () => {
       try {
-        const res = await fetch("/api/pets/me", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: name.trim(),
-            species,
-            personality: personality.trim() || null,
-            learningGoal: learningGoal.trim() || null,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          setErrorMsg(data.error || "Failed to create Companion.");
-          return;
-        }
-        onCreated(data.data);
-      } catch {
-        setErrorMsg("Network error connecting to server.");
+        const result = await createPetApi({ name: name.trim(), species, avatarUrl: avatarUrl.trim() || null, personality: personality.trim() || null, learningGoal: learningGoal.trim() || null });
+        if (result.success) onCreated(result.data);
+        else setErrorMsg(result.errorMessage);
+      } finally {
+        setIsSubmitting(false);
+        submitGuard.current = false;
       }
     });
   };
-
-  return { species, setSpecies, name, setName, personality, setPersonality, learningGoal, setLearningGoal, errorMsg, isPending, handleSubmit };
+  return { species, setSpecies, name, setName, avatarUrl, setAvatarUrl, personality, setPersonality, learningGoal, setLearningGoal, fieldErrors, setFieldErrors, errorMsg, isBusy, handleSubmit };
 }
 
 export function PetOnboardingForm({ onCreated }: { onCreated: (pet: PetProfile) => void }) {
-  const form = usePetOnboardingState(onCreated);
-
-  return (
-    <form onSubmit={form.handleSubmit} className="space-y-5">
-      {form.errorMsg ? (
-        <div className="flex items-center gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{form.errorMsg}</span>
-        </div>
-      ) : null}
-
-      <SpeciesGrid selected={form.species} onSelect={form.setSpecies} />
-      <NameInput value={form.name} onChange={form.setName} />
-      <PersonalityInput value={form.personality} onChange={form.setPersonality} />
-      <GoalInput value={form.learningGoal} onChange={form.setLearningGoal} />
-
-      <button
-        type="submit"
-        disabled={form.isPending}
-        className="w-full min-h-[42px] inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-action-primary)] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[var(--color-action-hover)] transition-colors disabled:opacity-50"
-      >
-        {form.isPending ? (
-          <>
-            <RefreshCw className="h-4 w-4 animate-spin" />
-            <span>Creating Companion...</span>
-          </>
-        ) : (
-          <>
-            <Sparkles className="h-4 w-4" />
-            <span>Create Companion</span>
-          </>
-        )}
-      </button>
-    </form>
-  );
+  const form = useOnboardingState(onCreated);
+  const clearError = (field: keyof FieldErrors) => form.setFieldErrors((current) => ({ ...current, [field]: undefined }));
+  const preview = { name: form.name.trim() || "Companion", species: form.species, avatarUrl: form.avatarUrl.trim() || null };
+  return <form onSubmit={form.handleSubmit} className="space-y-5" noValidate><fieldset disabled={form.isBusy} className="space-y-5"><Feedback message={form.errorMsg} /><SpeciesGrid selected={form.species} onSelect={form.setSpecies} disabled={form.isBusy} /><Field id="name" label="Companion Name *" value={form.name} onChange={(value) => { form.setName(value); clearError("name"); }} error={form.fieldErrors.name} hint="Use a name you will recognize in your learning workspace." placeholder="e.g. Penny, Finny, Barnaby" maxLength={50} /><div className="grid gap-4 sm:grid-cols-2"><Field id="avatarUrl" label="Avatar Image URL (Optional)" type="url" value={form.avatarUrl} onChange={(value) => { form.setAvatarUrl(value); clearError("avatarUrl"); }} error={form.fieldErrors.avatarUrl} hint="HTTPS works best; leave blank for the species fallback." placeholder="https://example.com/avatar.png" maxLength={2048} /><div className="flex items-end gap-3 rounded-xl border border-dashed border-[var(--border-subtle)] bg-[var(--surface-inset)] p-3"><CompanionAvatar pet={preview} className="h-12 w-12 rounded-xl after:rounded-xl" /><p className="text-[11px] text-muted-foreground">Preview updates as you add an avatar URL.</p></div></div><div className="grid gap-4 sm:grid-cols-2"><Field id="personality" label="Personality Trait (Optional)" value={form.personality} onChange={form.setPersonality} placeholder="e.g. Cautious saver" /><Field id="learningGoal" label="Learning Focus / Goal (Optional)" value={form.learningGoal} onChange={form.setLearningGoal} placeholder="e.g. Build emergency savings" /></div><button type="submit" disabled={form.isBusy} className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-action-primary)] px-5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[var(--color-action-hover)] disabled:opacity-50">{form.isBusy ? <><RefreshCw aria-hidden="true" className="h-4 w-4 animate-spin" /><span>Creating Companion...</span></> : <><Sparkles aria-hidden="true" className="h-4 w-4" /><span>Create Companion</span></>}</button></fieldset></form>;
 }

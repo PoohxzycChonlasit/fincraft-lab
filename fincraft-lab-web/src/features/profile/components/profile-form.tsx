@@ -1,268 +1,159 @@
 "use client";
 
-import { useState, useTransition, type FormEvent } from "react";
+import { useRef, useState, useTransition, type FormEvent } from "react";
+import { AlertCircle, CheckCircle2, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
 import type { UserProfile } from "@/lib/auth/session";
+import { updateProfileApi } from "../api/profile.client";
 import { ProfileHeader } from "./profile-header";
 
 type FieldErrors = { displayName?: string; avatarUrl?: string };
 
-function FormFeedback({ errorMsg, successMsg }: { errorMsg: string | null; successMsg: string | null }) {
-  if (errorMsg) {
-    return (
-      <div className="flex items-center gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive">
-        <AlertCircle className="h-4 w-4 shrink-0" />
-        <span>{errorMsg}</span>
-      </div>
-    );
-  }
-  if (successMsg) {
-    return (
-      <div className="flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-600 dark:text-emerald-400">
-        <CheckCircle2 className="h-4 w-4 shrink-0" />
-        <span>{successMsg}</span>
-      </div>
-    );
-  }
-  return null;
-}
-
-function DisplayNameField({
-  value,
-  onChange,
-  error,
-}: {
-  value: string;
-  onChange: (val: string) => void;
-  error?: string;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor="displayName" className="block text-xs font-semibold text-foreground">
-        Display Name <span className="text-destructive">*</span>
-      </label>
-      <input
-        id="displayName"
-        type="text"
-        required
-        minLength={2}
-        maxLength={50}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="e.g. FinCrafter"
-        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs font-medium text-foreground bg-[var(--surface-flat)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] transition-colors ${
-          error ? "border-destructive focus-visible:ring-destructive" : "border-[var(--border-subtle)] focus-visible:border-[var(--brand-accent)]"
-        }`}
-      />
-      {error ? (
-        <p className="text-[11px] font-medium text-destructive">{error}</p>
-      ) : (
-        <p className="text-[11px] text-muted-foreground">
-          Your name as displayed in learning workspaces and community activities.
-        </p>
-      )}
-    </div>
-  );
-}
-
-function AvatarUrlField({
-  value,
-  onChange,
-  error,
-}: {
-  value: string;
-  onChange: (val: string) => void;
-  error?: string;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor="avatarUrl" className="block text-xs font-semibold text-foreground">
-        Avatar Image URL (Optional)
-      </label>
-      <input
-        id="avatarUrl"
-        type="url"
-        maxLength={2048}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="https://example.com/my-avatar.png"
-        className={`w-full rounded-xl border px-3.5 py-2.5 text-xs font-medium text-foreground bg-[var(--surface-flat)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] transition-colors ${
-          error ? "border-destructive focus-visible:ring-destructive" : "border-[var(--border-subtle)] focus-visible:border-[var(--brand-accent)]"
-        }`}
-      />
-      {error ? (
-        <p className="text-[11px] font-medium text-destructive">{error}</p>
-      ) : (
-        <p className="text-[11px] text-muted-foreground">
-          Direct HTTPS URL to an avatar image (leave blank to clear).
-        </p>
-      )}
-    </div>
-  );
-}
-
-function FormActions({ isPending, onReset }: { isPending: boolean; onReset: () => void }) {
-  return (
-    <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-[var(--border-subtle)]">
-      <button
-        type="button"
-        onClick={onReset}
-        disabled={isPending}
-        className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-4 text-xs font-semibold text-foreground hover:bg-[var(--surface-raised)] transition-colors disabled:opacity-50"
-      >
-        Reset
-      </button>
-
-      <button
-        type="submit"
-        disabled={isPending}
-        className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-[var(--color-action-primary)] px-5 text-xs font-semibold text-white shadow-xs hover:bg-[var(--color-action-hover)] transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-      >
-        {isPending ? (
-          <>
-            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-            <span>Saving...</span>
-          </>
-        ) : (
-          "Save Changes"
-        )}
-      </button>
-    </div>
-  );
-}
-
 function validateInputs(displayName: string, avatarUrl: string): FieldErrors {
   const errors: FieldErrors = {};
-  const trimmedName = displayName.trim();
-  if (trimmedName.length < 2 || trimmedName.length > 50) {
+  const name = displayName.trim();
+  const avatar = avatarUrl.trim();
+  if (name.length < 2 || name.length > 50) {
     errors.displayName = "Display name must be between 2 and 50 characters.";
   }
-  const trimmedAvatar = avatarUrl.trim();
-  if (trimmedAvatar.length > 0) {
-    if (trimmedAvatar.length > 2048) {
-      errors.avatarUrl = "Avatar URL must not exceed 2048 characters.";
-    } else {
-      try {
-        const url = new URL(trimmedAvatar);
-        if (url.protocol !== "http:" && url.protocol !== "https:") {
-          errors.avatarUrl = "Avatar URL must start with http:// or https://";
-        }
-      } catch {
-        errors.avatarUrl = "Please enter a valid absolute HTTP or HTTPS URL.";
+  if (avatar.length > 2048) {
+    errors.avatarUrl = "Avatar URL must not exceed 2048 characters.";
+  } else if (avatar) {
+    try {
+      const url = new URL(avatar);
+      if (url.protocol !== "http:" && url.protocol !== "https:") {
+        errors.avatarUrl = "Avatar URL must start with http:// or https://.";
       }
+    } catch {
+      errors.avatarUrl = "Please enter a valid absolute HTTP or HTTPS URL.";
     }
   }
   return errors;
 }
 
+function FormFeedback({ errorMsg, successMsg }: { errorMsg: string | null; successMsg: string | null }) {
+  if (errorMsg) {
+    return <div role="alert" className="flex items-center gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive"><AlertCircle aria-hidden="true" className="h-4 w-4 shrink-0" /><span>{errorMsg}</span></div>;
+  }
+  if (successMsg) {
+    return <div role="status" className="flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-700 dark:text-emerald-300"><CheckCircle2 aria-hidden="true" className="h-4 w-4 shrink-0" /><span>{successMsg}</span></div>;
+  }
+  return null;
+}
+
+function TextField({ id, label, value, onChange, error, hint, type = "text", placeholder }: {
+  id: string;
+  label: string;
+  value: string;
+  onChange?: (value: string) => void;
+  error?: string;
+  hint: string;
+  type?: "text" | "url";
+  placeholder?: string;
+}) {
+  const hintId = `${id}-hint`;
+  const errorId = `${id}-error`;
+  return (
+    <div className="space-y-1.5">
+      <label htmlFor={id} className="block text-xs font-semibold text-foreground">{label}</label>
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={onChange ? (event) => onChange(event.target.value) : undefined}
+        placeholder={placeholder}
+        maxLength={id === "avatarUrl" ? 2048 : 50}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? errorId : hintId}
+        className={`min-h-[44px] w-full rounded-xl border bg-[var(--surface-flat)] px-3.5 py-2.5 text-xs font-medium text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${error ? "border-destructive focus-visible:ring-destructive" : "border-[var(--border-subtle)] focus-visible:border-[var(--brand-accent)]"}`}
+      />
+      <p id={error ? errorId : hintId} className={`text-[11px] ${error ? "font-medium text-destructive" : "text-muted-foreground"}`}>{error || hint}</p>
+    </div>
+  );
+}
+
+function FormActions({ isBusy, onReset }: { isBusy: boolean; onReset: () => void }) {
+  return (
+    <div className="flex flex-col-reverse gap-2 border-t border-[var(--border-subtle)] pt-4 sm:flex-row sm:justify-end">
+      <button type="button" onClick={onReset} disabled={isBusy} className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-4 text-xs font-semibold text-foreground transition-colors hover:bg-[var(--surface-raised)] disabled:opacity-50">Reset</button>
+      <button type="submit" disabled={isBusy} className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--color-action-primary)] px-5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[var(--color-action-hover)] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]">
+        {isBusy ? <><RefreshCw aria-hidden="true" className="h-3.5 w-3.5 animate-spin" /><span>Saving...</span></> : "Save Changes"}
+      </button>
+    </div>
+  );
+}
+
 function useProfileFormState(initialUser: UserProfile) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [persistedUser, setPersistedUser] = useState(initialUser);
   const [displayName, setDisplayName] = useState(initialUser.displayName);
   const [avatarUrl, setAvatarUrl] = useState(initialUser.avatarUrl || "");
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const submitGuard = useRef(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (submitGuard.current || isSubmitting || isPending) return;
     setErrorMsg(null);
     setSuccessMsg(null);
     const errors = validateInputs(displayName, avatarUrl);
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
+    submitGuard.current = true;
+    setIsSubmitting(true);
     startTransition(async () => {
       try {
-        const res = await fetch("/api/users/me", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            displayName: displayName.trim(),
-            avatarUrl: avatarUrl.trim() === "" ? null : avatarUrl.trim(),
-          }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          setErrorMsg(data.error || "Failed to update profile. Please try again.");
-          return;
+        const result = await updateProfileApi({ displayName: displayName.trim(), avatarUrl: avatarUrl.trim() || null });
+        if (!result.success) {
+          setErrorMsg(result.errorMessage);
+        } else {
+          setPersistedUser(result.data);
+          setDisplayName(result.data.displayName);
+          setAvatarUrl(result.data.avatarUrl || "");
+          setSuccessMsg("Profile saved. Your identity summary is up to date.");
+          router.refresh();
         }
-
-        setSuccessMsg("Profile updated successfully!");
-        router.refresh();
-      } catch {
-        setErrorMsg("Network error connecting to server.");
+      } finally {
+        setIsSubmitting(false);
+        submitGuard.current = false;
       }
     });
   };
 
   const handleReset = () => {
-    setDisplayName(initialUser.displayName);
-    setAvatarUrl(initialUser.avatarUrl || "");
+    setDisplayName(persistedUser.displayName);
+    setAvatarUrl(persistedUser.avatarUrl || "");
+    setFieldErrors({});
     setErrorMsg(null);
     setSuccessMsg(null);
-    setFieldErrors({});
   };
 
-  return {
-    displayName,
-    setDisplayName,
-    avatarUrl,
-    setAvatarUrl,
-    errorMsg,
-    fieldErrors,
-    setFieldErrors,
-    successMsg,
-    isPending,
-    handleSubmit,
-    handleReset,
-  };
+  return { persistedUser, displayName, setDisplayName, avatarUrl, setAvatarUrl, fieldErrors, setFieldErrors, errorMsg, successMsg, isBusy: isPending || isSubmitting, handleSubmit, handleReset };
 }
 
 export function ProfileForm({ initialUser }: { initialUser: UserProfile }) {
   const form = useProfileFormState(initialUser);
+  const clearError = (field: keyof FieldErrors) => form.setFieldErrors((current) => ({ ...current, [field]: undefined }));
 
   return (
-    <div className="surface-card w-full max-w-2xl rounded-2xl border border-[var(--border-subtle)] p-4 sm:p-6 shadow-sm">
-      <ProfileHeader user={initialUser} avatarPreview={form.avatarUrl.trim()} />
-
-      <form onSubmit={form.handleSubmit} className="mt-6 space-y-5">
+    <div data-document-page="profile" className="surface-card w-full max-w-2xl rounded-2xl border border-[var(--border-subtle)] p-4 shadow-sm sm:p-6">
+      <ProfileHeader user={form.persistedUser} displayName={form.displayName} avatarPreview={form.avatarUrl.trim()} />
+      <form onSubmit={form.handleSubmit} className="mt-6 space-y-5" noValidate>
         <FormFeedback errorMsg={form.errorMsg} successMsg={form.successMsg} />
-
-        <div className="space-y-1.5">
-          <label htmlFor="email" className="block text-xs font-semibold text-muted-foreground">
-            Account Email (Read-Only)
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={initialUser.email}
-            disabled
-            className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3.5 py-2.5 text-xs font-medium text-muted-foreground cursor-not-allowed opacity-80"
-          />
-        </div>
-
-        <DisplayNameField
-          value={form.displayName}
-          onChange={(val) => {
-            form.setDisplayName(val);
-            if (form.fieldErrors.displayName) form.setFieldErrors((prev) => ({ ...prev, displayName: undefined }));
-          }}
-          error={form.fieldErrors.displayName}
-        />
-
-        <AvatarUrlField
-          value={form.avatarUrl}
-          onChange={(val) => {
-            form.setAvatarUrl(val);
-            if (form.fieldErrors.avatarUrl) form.setFieldErrors((prev) => ({ ...prev, avatarUrl: undefined }));
-          }}
-          error={form.fieldErrors.avatarUrl}
-        />
-
-        <FormActions isPending={form.isPending} onReset={form.handleReset} />
+        <fieldset disabled={form.isBusy} className="space-y-5">
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="block text-xs font-semibold text-foreground">Account Email <span className="font-normal text-muted-foreground">(Read-Only)</span></label>
+            <input id="email" type="email" value={form.persistedUser.email} readOnly aria-readonly="true" className="min-h-[44px] w-full cursor-default rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3.5 py-2.5 text-xs font-medium text-muted-foreground" />
+          </div>
+          <TextField id="displayName" label="Display Name *" value={form.displayName} onChange={(value) => { form.setDisplayName(value); clearError("displayName"); }} error={form.fieldErrors.displayName} hint="Shown in learning workspaces and community activities." placeholder="e.g. FinCrafter" />
+          <TextField id="avatarUrl" label="Avatar Image URL (Optional)" type="url" value={form.avatarUrl} onChange={(value) => { form.setAvatarUrl(value); clearError("avatarUrl"); }} error={form.fieldErrors.avatarUrl} hint="Use an HTTP or HTTPS image URL, or leave blank for a deterministic fallback." placeholder="https://example.com/my-avatar.png" />
+        </fieldset>
+        <FormActions isBusy={form.isBusy} onReset={form.handleReset} />
       </form>
     </div>
   );
