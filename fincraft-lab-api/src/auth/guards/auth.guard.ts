@@ -6,8 +6,9 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { UserRole } from '../../database/generated/prisma/client';
+import { UserRole, UserStatus } from '../../database/generated/prisma/client';
 import { AccessTokenService } from '../../infrastructure/jwt/access-token.service';
+import { UserService } from '../../user/user.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { AccessTokenPayload } from '../types/access-token-payload.type';
 
@@ -29,6 +30,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly accessTokenService: AccessTokenService,
     private readonly reflector: Reflector,
+    private readonly userService: UserService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -100,10 +102,18 @@ export class AuthGuard implements CanActivate {
       );
     }
 
+    const user = await this.userService.getUserById(sub);
+
+    if (!user || user.status !== UserStatus.ACTIVE) {
+      throw new UnauthorizedException(
+        'Authentication session is no longer valid',
+      );
+    }
+
     const validatedPayload: AccessTokenPayload = {
-      sub,
-      email,
-      role,
+      sub: user.id,
+      email: user.email,
+      role: user.role,
     };
 
     if (typeof iat === 'number') {

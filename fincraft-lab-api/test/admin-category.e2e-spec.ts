@@ -13,6 +13,7 @@ describe('Admin Category Management (e2e)', () => {
   jest.setTimeout(30000);
   let app: INestApplication<App>;
   let userToken: string;
+  let prePromotionAdminToken: string;
   let adminToken: string;
   let superAdminToken: string;
   let createdCategoryId: string;
@@ -56,6 +57,15 @@ describe('Admin Category Management (e2e)', () => {
       .post('/auth/register')
       .send({ email: adminEmail, password, displayName: 'Admin User' })
       .expect(201);
+
+    const prePromotionAdminLoginRes = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: adminEmail, password })
+      .expect(200);
+    const prePromotionAdminBody = prePromotionAdminLoginRes.body as {
+      data: { accessToken: string };
+    };
+    prePromotionAdminToken = prePromotionAdminBody.data.accessToken;
 
     // Promote to ADMIN in DB
     const prismaService = app.get(PrismaService);
@@ -127,6 +137,21 @@ describe('Admin Category Management (e2e)', () => {
 
     const body = res.body as { data: Array<{ id: string; name: string }> };
     expect(Array.isArray(body.data)).toBe(true);
+  });
+
+  it('refreshes the current role for a token issued before promotion', async () => {
+    const meRes = await request(app.getHttpServer())
+      .get('/auth/me')
+      .set('Authorization', `Bearer ${prePromotionAdminToken}`)
+      .expect(200);
+
+    const meBody = meRes.body as { data: { role: UserRole } };
+    expect(meBody.data.role).toBe(UserRole.ADMIN);
+
+    await request(app.getHttpServer())
+      .get('/admin/categories')
+      .set('Authorization', `Bearer ${prePromotionAdminToken}`)
+      .expect(200);
   });
 
   it('5. ADMIN creates a valid Category', async () => {
