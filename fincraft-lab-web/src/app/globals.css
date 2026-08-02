@@ -7,6 +7,7 @@
 @import "../styles/home.css";
 @import "../styles/home-scenes.css";
 @import "../features/lab/styles/lab-workspace.css";
+@import "../features/lab/styles/lab-workspace-context.css";
 
 @custom-variant dark {
   &:where(.dark, .dark *) {

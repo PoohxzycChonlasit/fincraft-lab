@@ -6,8 +6,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FinCraftCanvas, useCanvasNodes, type ElementCanvasNode, type SaveStatus } from "@/features/canvas/public";
 import { ElementContextRail, ElementLibrary, useElementGuidance, type AvailableElement, type ContextTab, type CraftDiscoveryResult, type SuggestedPartner } from "@/features/craft/public";
 import { mergeAndFilterSuggestions } from "@/features/craft/utils/merge-suggestions";
-import { WorkspaceManager, type CanvasSnapshot, type WorkspaceSummary } from "@/features/workspace/public.client";
+import type { CanvasSnapshot, WorkspaceSummary } from "@/features/workspace/public.client";
 import type { useLabCraftCombine } from "../hooks/use-lab-craft-combine";
+import { LabWorkspaceContext } from "./lab-workspace-context";
 
 type InitialWorkspace = {
   workspaceId: string;
@@ -34,9 +35,9 @@ export type LabWorkspaceContentProps = {
   handlePlaceElement: (element: AvailableElement) => void;
 };
 
-function LabToolbar({ isAuthenticated, initialWorkspace }: { isAuthenticated: boolean; initialWorkspace?: InitialWorkspace }) {
+function LabToolbar({ isAuthenticated, initialWorkspace, save }: { isAuthenticated: boolean; initialWorkspace?: InitialWorkspace; save: SaveController }) {
   if (isAuthenticated && initialWorkspace) {
-    return <div className="lab-session-toolbar"><WorkspaceManager workspaces={initialWorkspace.workspaces} selectedWorkspace={initialWorkspace.selectedWorkspace} /></div>;
+    return <div className="lab-session-toolbar"><LabWorkspaceContext workspaceId={initialWorkspace.workspaceId} workspaces={initialWorkspace.workspaces} selectedWorkspace={initialWorkspace.selectedWorkspace} saveStatus={save.saveStatus} saveError={save.saveError} /></div>;
   }
 
   return (
@@ -180,7 +181,7 @@ export function LabWorkspaceContent(props: LabWorkspaceContentProps) {
   return (
     <div className="lab-workspace-shell">
       <div className="lab-toolbar-row">
-        <LabToolbar isAuthenticated={props.isAuthenticated} initialWorkspace={initialWorkspace} />
+        <LabToolbar isAuthenticated={props.isAuthenticated} initialWorkspace={initialWorkspace} save={props.save} />
         <WorkspaceEligibilityNotice elementNames={unavailableWorkspaceElements} />
         <LabPanelControls activePanel={activePanel} onPanelChange={onPanelChange} />
       </div>

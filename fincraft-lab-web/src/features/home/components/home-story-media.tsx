@@ -92,7 +92,7 @@ export function HomeStoryMedia({
         />
       ) : null}
       {videoSrc ? (
-        <video className="home-story-media-video" autoPlay muted loop playsInline preload="metadata" poster={desktopPoster} aria-hidden="true">
+        <video className="home-story-media-video" muted playsInline preload="metadata" poster={desktopPoster} aria-hidden="true">
           <source src={videoSrc} />
         </video>
       ) : null}

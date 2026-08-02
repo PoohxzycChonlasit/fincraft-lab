@@ -50,21 +50,23 @@ export function AccountMenu({ user, activeTab }: { user: UserProfile; activeTab:
       <DropdownMenuTrigger asChild>
         <button
           id="account-menu-trigger"
+          data-account-trigger="true"
           type="button"
           aria-label={`Open account menu for ${user.displayName}`}
+          title={user.displayName}
           aria-controls="account-menu"
           aria-expanded={open}
-          className={`inline-flex min-h-11 max-w-[15rem] items-center gap-2 rounded-xl border px-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 ${activeAccount || open ? "border-[var(--border-selected)] bg-[var(--surface-inset)]" : "border-[var(--border-subtle)] bg-[var(--surface-solid)] hover:bg-[var(--surface-inset)]"}`}
+          className={`inline-flex min-h-11 max-w-[min(15rem,calc(100vw-7rem))] items-center gap-2 rounded-xl border px-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 ${activeAccount || open ? "border-[var(--border-selected)] bg-[var(--surface-inset)]" : "border-[var(--border-subtle)] bg-[var(--surface-solid)] hover:bg-[var(--surface-inset)]"}`}
         >
-          <Avatar size="sm" className="bg-[var(--surface-paper)] text-[var(--color-action-primary)]">
+          <Avatar size="sm" className="shrink-0 bg-[var(--surface-paper)] font-bold text-[var(--color-action-primary)]">
             {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}
             <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
           </Avatar>
           <span className="hidden min-w-0 flex-1 xl:block">
             <span className="block truncate text-xs font-bold text-foreground">{user.displayName}</span>
-            <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{user.role}</span>
+            <span className="block truncate text-[10px] font-bold uppercase tracking-wide text-[var(--color-text-secondary)]">{user.role}</span>
           </span>
-          <ChevronDown size={15} aria-hidden="true" className={`shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+          <ChevronDown size={15} aria-hidden="true" className={`shrink-0 text-[var(--color-text-secondary)] transition-transform ${open ? "rotate-180" : ""}`} />
         </button>
       </DropdownMenuTrigger>
 
