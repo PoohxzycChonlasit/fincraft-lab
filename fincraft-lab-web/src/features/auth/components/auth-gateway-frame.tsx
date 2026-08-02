@@ -6,10 +6,10 @@ import { FinCraftLogo } from "@/components/brand/fincraft-logo";
 
 export function AuthGatewayFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-[100dvh] bg-[var(--page-background)] text-[var(--color-text-primary)]">
-      <header className="sticky top-0 z-40 h-[var(--shell-header-height)] border-b border-[var(--border-subtle)] bg-[var(--surface-solid)]">
+    <div className="min-h-[100dvh] bg-(--page-background) text-(--color-text-primary)">
+      <header className="sticky top-0 z-40 h-(--shell-header-height) border-b border-(--border-subtle) bg-(--surface-solid)">
         <div className="mx-auto flex h-full min-h-0 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-          <Link href="/" aria-label="FinCraft Lab home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2">
+          <Link href="/" aria-label="FinCraft Lab home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring) focus-visible:ring-offset-2">
             <FinCraftLogo showDescriptor />
           </Link>
           <HeaderThemeToggle />
@@ -21,7 +21,7 @@ export function AuthGatewayFrame({ children }: { children: ReactNode }) {
 
         <aside className="order-2 space-y-6 md:order-1 md:pt-10">
           <div className="max-w-xl space-y-3">
-            <p className="font-label text-[var(--color-craft-accent)]">FinCraft account gateway</p>
+            <p className="font-label text-(--color-craft-accent)">FinCraft account gateway</p>
             <p className="max-w-lg text-lg font-semibold leading-8 text-foreground sm:text-xl">
               A quiet entry point into the financial learning lab.
             </p>
@@ -45,7 +45,7 @@ export function AuthGatewayFrame({ children }: { children: ReactNode }) {
           <div className="space-y-2">
             <Link
               href="/lab"
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border-interactive)] bg-[var(--surface-inset)] px-4 py-2.5 text-sm font-bold text-[var(--color-action-primary)] transition-colors hover:bg-[var(--surface-raised)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-(--border-interactive) bg-(--surface-inset) px-4 py-2.5 text-sm font-bold text-(--color-action-primary) transition-colors hover:bg-(--surface-raised) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring) focus-visible:ring-offset-2"
             >
               Explore as Guest <ArrowRight size={16} aria-hidden="true" />
             </Link>
@@ -54,7 +54,7 @@ export function AuthGatewayFrame({ children }: { children: ReactNode }) {
         </aside>
       </main>
 
-      <footer className="border-t border-[var(--border-subtle)] bg-[var(--surface-solid)] px-4 py-4 text-center text-xs font-medium text-muted-foreground">
+      <footer className="border-t border-(--border-subtle) bg-(--surface-solid) px-4 py-4 text-center text-xs font-medium text-muted-foreground">
         Education Only — Simulation Only — Not Financial Advice
       </footer>
     </div>
@@ -64,7 +64,7 @@ export function AuthGatewayFrame({ children }: { children: ReactNode }) {
 function BenefitItem({ children }: { children: ReactNode }) {
   return (
     <li className="flex items-start gap-2.5">
-      <Check size={16} className="mt-0.5 shrink-0 text-[var(--color-action-primary)]" aria-hidden="true" />
+      <Check size={16} className="mt-0.5 shrink-0 text-(--color-action-primary)" aria-hidden="true" />
       <span>{children}</span>
     </li>
   );

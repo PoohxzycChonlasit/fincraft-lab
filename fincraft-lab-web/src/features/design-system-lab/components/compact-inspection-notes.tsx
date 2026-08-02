@@ -1,9 +1,9 @@
 export function CompactInspectionNotes() {
   return (
-    <div className="surface-inset border border-[var(--border-subtle)] p-4 text-xs">
+    <div className="surface-inset border border-(--border-subtle) p-4 text-xs">
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <p className="font-semibold uppercase tracking-wider text-[var(--color-orange-700)] text-[10px]">
+          <p className="font-semibold uppercase tracking-wider text-(--color-orange-700) text-[10px]">
             Shallow Tactile Depth
           </p>
           <p className="mt-1 leading-relaxed text-muted-foreground">
@@ -11,7 +11,7 @@ export function CompactInspectionNotes() {
           </p>
         </div>
         <div>
-          <p className="font-semibold uppercase tracking-wider text-[var(--color-teal-700)] text-[10px]">
+          <p className="font-semibold uppercase tracking-wider text-(--color-teal-700) text-[10px]">
             Zero Idle CPU
           </p>
           <p className="mt-1 leading-relaxed text-muted-foreground">

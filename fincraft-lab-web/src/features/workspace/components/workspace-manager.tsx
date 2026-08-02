@@ -35,7 +35,7 @@ function WorkspaceSelector({ manager }: { manager: WorkspaceManagerModel }) {
         value={manager.selectedId ?? ""}
         onChange={(event) => manager.handleSwitch(event.target.value)}
         disabled={manager.isBusy || manager.workspaces.length === 0}
-        className="min-h-[44px] w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-paper)] px-3 text-xs font-bold text-foreground outline-none transition-colors focus-visible:border-[var(--border-interactive)] focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+        className="min-h-[44px] w-full rounded-xl border border-(--border-subtle) bg-(--surface-paper) px-3 text-xs font-bold text-foreground outline-none transition-colors focus-visible:border-(--border-interactive) focus-visible:ring-2 focus-visible:ring-(--focus-ring)"
       >
         {manager.workspaces.map((workspace) => <option key={workspace.id} value={workspace.id}>{workspace.name}</option>)}
       </select>
@@ -45,13 +45,13 @@ function WorkspaceSelector({ manager }: { manager: WorkspaceManagerModel }) {
 
 function WorkspaceCreateForm({ manager }: { manager: WorkspaceManagerModel }) {
   return (
-    <form className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-paper)] p-4" onSubmit={(event) => { event.preventDefault(); void manager.handleCreate(); }}>
+    <form className="rounded-2xl border border-(--border-subtle) bg-(--surface-paper) p-4" onSubmit={(event) => { event.preventDefault(); void manager.handleCreate(); }}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <label htmlFor="workspace-create-name" className="grid flex-1 gap-1.5 text-xs font-bold text-foreground">
           <span>Create Workspace</span>
           <Input id="workspace-create-name" value={manager.createName} onChange={(event) => manager.setCreateName(event.target.value)} placeholder="e.g. Debt Payoff Strategy" required minLength={1} maxLength={100} disabled={manager.isBusy} className="min-h-[44px] text-xs font-medium" />
         </label>
-        <Button type="submit" disabled={manager.isBusy} className="min-h-[44px] bg-[var(--brand-primary)] text-xs font-bold text-white hover:bg-[var(--accent-teal-strong)]">{manager.pendingAction === "create" ? "Creating..." : "Create Workspace"}</Button>
+        <Button type="submit" disabled={manager.isBusy} className="min-h-[44px] bg-(--brand-primary) text-xs font-bold text-white hover:bg-(--accent-teal-strong)">{manager.pendingAction === "create" ? "Creating..." : "Create Workspace"}</Button>
       </div>
     </form>
   );
@@ -60,7 +60,7 @@ function WorkspaceCreateForm({ manager }: { manager: WorkspaceManagerModel }) {
 function RenameWorkspaceForm({ manager }: { manager: WorkspaceManagerModel }) {
   if (!manager.selectedWorkspace) return null;
   return (
-    <form className="grid gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-paper)] p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end" onSubmit={(event) => { event.preventDefault(); void manager.handleRename(); }}>
+    <form className="grid gap-3 rounded-2xl border border-(--border-subtle) bg-(--surface-paper) p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end" onSubmit={(event) => { event.preventDefault(); void manager.handleRename(); }}>
       <label htmlFor="workspace-rename-name" className="grid gap-1.5 text-xs font-bold text-foreground">
         <span>Rename Selected Workspace</span>
         <Input id="workspace-rename-name" value={manager.renameName} onChange={(event) => manager.setRenameName(event.target.value)} required minLength={1} maxLength={100} disabled={manager.isBusy} className="min-h-[44px] text-xs font-medium" />
@@ -75,13 +75,13 @@ function WorkspaceRecord({ workspace, manager, selectedMetrics, onRequestStatus 
   const isArchived = workspace.status === "ARCHIVED";
   const isStatusPending = manager.pendingAction === (isArchived ? "restore" : "archive");
   return (
-    <article aria-label={`Workspace record ${workspace.name}`} className={`rounded-2xl border p-4 transition-colors ${isSelected ? "border-[var(--border-selected)] bg-[var(--surface-inset)] shadow-sm" : "border-[var(--border-subtle)] bg-[var(--surface-paper)]"}`}>
+    <article aria-label={`Workspace record ${workspace.name}`} className={`rounded-2xl border p-4 transition-colors ${isSelected ? "border-(--border-selected) bg-(--surface-inset) shadow-sm" : "border-(--border-subtle) bg-(--surface-paper)"}`}>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="break-words text-sm font-bold text-foreground">{workspace.name}</h3>
             <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${isArchived ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"}`}>{isArchived ? "Archived" : "Active"}</span>
-            {isSelected && <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-solid)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--accent-teal)]"><Check aria-hidden="true" className="h-3 w-3" />Current</span>}
+            {isSelected && <span className="inline-flex items-center gap-1 rounded-full border border-(--border-subtle) bg-(--surface-solid) px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-(--accent-teal)"><Check aria-hidden="true" className="h-3 w-3" />Current</span>}
           </div>
           <p className="text-xs text-muted-foreground">Updated {formatWorkspaceDate(workspace.updatedAt)}</p>
           <p className="text-xs text-muted-foreground">{isSelected && selectedMetrics ? <><span className="font-semibold text-foreground">{selectedMetrics.nodeCount}</span> nodes · <span className="font-semibold text-foreground">{selectedMetrics.edgeCount}</span> edges in the loaded canvas</> : "Open in Workspace to inspect this canvas's saved counts."}</p>
@@ -97,7 +97,7 @@ function WorkspaceRecord({ workspace, manager, selectedMetrics, onRequestStatus 
 
 function WorkspaceFeedback({ feedback }: { feedback: WorkspaceManagerModel["feedback"] }) {
   if (!feedback) return null;
-  const className = feedback.kind === "error" ? "rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-3 text-xs font-semibold text-[var(--color-text-danger)]" : "rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-700 dark:text-emerald-300";
+  const className = feedback.kind === "error" ? "rounded-xl border border-(--color-text-danger)/30 bg-(--color-text-danger)/10 p-3 text-xs font-semibold text-(--color-text-danger)" : "rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-700 dark:text-emerald-300";
   return <p role={feedback.kind === "error" ? "alert" : "status"} className={className}>{feedback.message}</p>;
 }
 
@@ -127,7 +127,7 @@ export function WorkspaceManager({ workspaces, selectedWorkspace, selectedMetric
       <WorkspaceCreateForm manager={manager} />
       <RenameWorkspaceForm manager={manager} />
       <WorkspaceFeedback feedback={manager.feedback} />
-      {manager.workspaces.length === 0 ? <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] p-6 text-center text-xs text-muted-foreground">No workspace records yet. Create your first workspace above.</div> : <div role="list" aria-label="Workspace records" className="space-y-3">{manager.workspaces.map((workspace) => <WorkspaceRecord key={workspace.id} workspace={workspace} manager={manager} selectedMetrics={selectedMetrics} onRequestStatus={(record, nextStatus) => setStatusRequest({ workspace: record, nextStatus })} />)}</div>}
+      {manager.workspaces.length === 0 ? <div className="rounded-2xl border border-dashed border-(--border-subtle) p-6 text-center text-xs text-muted-foreground">No workspace records yet. Create your first workspace above.</div> : <div role="list" aria-label="Workspace records" className="space-y-3">{manager.workspaces.map((workspace) => <WorkspaceRecord key={workspace.id} workspace={workspace} manager={manager} selectedMetrics={selectedMetrics} onRequestStatus={(record, nextStatus) => setStatusRequest({ workspace: record, nextStatus })} />)}</div>}
       <StatusDialog request={statusRequest} manager={manager} onClose={() => setStatusRequest(null)} />
     </div>
   );

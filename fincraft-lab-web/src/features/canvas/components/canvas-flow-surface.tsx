@@ -51,7 +51,7 @@ type CanvasFlowSurfaceProps = {
 function CanvasEmptyOverlay() {
   return (
     <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center p-6 text-center">
-      <div className="surface-floating max-w-sm space-y-1.5 rounded-2xl border border-[var(--border-subtle)] p-5 shadow-xs">
+      <div className="surface-floating max-w-sm space-y-1.5 rounded-2xl border border-(--border-subtle) p-5 shadow-xs">
         <p className="text-sm font-semibold text-foreground">Drag an element here to begin.</p>
         <p className="text-xs leading-relaxed text-muted-foreground">
           Select or drag elements from the Element Library onto this infinite workspace.
@@ -71,9 +71,9 @@ function CanvasActionPanel({ onTidyCanvas, onTidyClick, canTidy, nodes, selected
           disabled={!canTidy}
           aria-label="Arrange connected elements and fit them into view"
           title={nodes.length <= 1 ? "Add at least two elements before arranging the Canvas" : "Arrange connected elements and fit them into view"}
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-resting)] px-3 py-1.5 text-xs font-semibold text-foreground shadow-xs transition-colors hover:bg-[var(--surface-inset)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-(--border-subtle) bg-(--surface-resting) px-3 py-1.5 text-xs font-semibold text-foreground shadow-xs transition-colors hover:bg-(--surface-inset) focus:outline-none focus:ring-2 focus:ring-(--ring) disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Wand2 size={13} className="text-[var(--color-craft-accent)]" aria-hidden="true" />
+          <Wand2 size={13} className="text-(--color-craft-accent)" aria-hidden="true" />
           <span>Tidy Canvas</span>
         </button>
       ) : null}
@@ -84,7 +84,7 @@ function CanvasActionPanel({ onTidyCanvas, onTidyClick, canTidy, nodes, selected
         disabled={!selectedNode || isActionBusy}
         aria-label={selectedNode ? `Remove ${selectedNode.data.name} from this Canvas` : "Remove selected Node"}
         title={selectedNode ? `Remove ${selectedNode.data.name} from this Canvas` : "Select a Node to remove it"}
-        className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-[var(--border-destructive)] bg-[var(--surface-resting)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text-danger)] shadow-xs transition-colors hover:bg-[var(--surface-inset)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-(--border-destructive) bg-(--surface-resting) px-3 py-1.5 text-xs font-semibold text-(--color-text-danger) shadow-xs transition-colors hover:bg-(--surface-inset) focus:outline-none focus:ring-2 focus:ring-(--ring) disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Trash2 size={13} aria-hidden="true" />
         <span>Remove Node</span>
@@ -99,7 +99,7 @@ export function CanvasFlowSurface(props: CanvasFlowSurfaceProps) {
     onTidyCanvas, onTidyClick, canTidy, selectedNode, isActionBusy, removeTriggerRef, onRemoveRequest, removalDialogOpen, onRemovalDialogOpenChange, onConfirmRemove, incidentEdgeCount, isRemovalProcessing,
   } = props;
   return (
-    <div ref={frameRef} tabIndex={0} aria-label="Canvas keyboard controls" onKeyDown={onKeyDown} className="lab-canvas-frame relative flex h-full min-h-0 min-w-0 w-full flex-1 basis-0 flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]" onDragOver={onDragOver} onDrop={onDrop}>
+    <div ref={frameRef} tabIndex={0} aria-label="Canvas keyboard controls" onKeyDown={onKeyDown} className="lab-canvas-frame relative flex h-full min-h-0 min-w-0 w-full flex-1 basis-0 flex-col overflow-hidden rounded-2xl border border-(--border-subtle) bg-(--surface-inset) shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring)" onDragOver={onDragOver} onDrop={onDrop}>
       {nodes.length === 0 ? <CanvasEmptyOverlay /> : null}
       <p className="sr-only" aria-live="polite" aria-atomic="true">
         {selectedNode ? `Selected canvas element: ${selectedNode.data.name}. Delete or Backspace removes it from this Canvas.` : "No canvas element selected."}
@@ -124,7 +124,7 @@ export function CanvasFlowSurface(props: CanvasFlowSurfaceProps) {
         style={{ width: "100%", height: "100%" }}
       >
         <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
-        <Controls showInteractive={false} className="!rounded-xl !border-[var(--border-subtle)] !bg-[var(--surface-resting)] !shadow-[var(--shadow-resting)]" />
+        <Controls showInteractive={false} className="!rounded-xl !border-(--border-subtle) !bg-(--surface-resting) !shadow-(--shadow-resting)" />
         <CanvasActionPanel
           onTidyCanvas={onTidyCanvas}
           onTidyClick={onTidyClick}

@@ -13,7 +13,7 @@ function DetailSection({ heading, id, text }: SectionProps) {
     <div className="space-y-1">
       <h4
         id={id}
-        className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-craft-accent)]"
+        className="text-[11px] font-semibold uppercase tracking-wider text-(--color-craft-accent)"
       >
         {heading}
       </h4>
@@ -25,7 +25,7 @@ function DetailSection({ heading, id, text }: SectionProps) {
 function SourcesList({ sources }: { sources: CraftDiscoverySource[] }) {
   if (sources.length === 0) return null;
   return (
-    <div className="space-y-2 pt-2 border-t border-[var(--border-subtle)]">
+    <div className="space-y-2 pt-2 border-t border-(--border-subtle)">
       <div className="flex flex-col space-y-0.5">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           Reference Sources
@@ -36,11 +36,11 @@ function SourcesList({ sources }: { sources: CraftDiscoverySource[] }) {
       </div>
       <ul className="space-y-2">
         {sources.map((src) => (
-          <li key={src.url} className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-resting)] p-2.5 text-xs space-y-1">
-            <div className="flex items-center justify-between gap-2 text-[10px] font-semibold text-[var(--color-craft-accent)]">
+          <li key={src.url} className="rounded-lg border border-(--border-subtle) bg-(--surface-resting) p-2.5 text-xs space-y-1">
+            <div className="flex items-center justify-between gap-2 text-[10px] font-semibold text-(--color-craft-accent)">
               <span>{src.organization}</span>
               {src.jurisdiction ? (
-                <span className="rounded bg-[var(--surface-inset)] px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground border border-[var(--border-subtle)]">
+                <span className="rounded bg-(--surface-inset) px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground border border-(--border-subtle)">
                   {src.jurisdiction.replace(/_/g, " ")}
                 </span>
               ) : null}
@@ -49,7 +49,7 @@ function SourcesList({ sources }: { sources: CraftDiscoverySource[] }) {
               href={src.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-foreground underline hover:text-[var(--color-action-primary)] transition-colors inline-flex items-center gap-1 leading-snug"
+              className="font-medium text-foreground underline hover:text-(--color-action-primary) transition-colors inline-flex items-center gap-1 leading-snug"
             >
               <span>{src.title}</span>
               <span className="text-[10px] shrink-0" aria-hidden="true">↗</span>
@@ -92,7 +92,7 @@ export function DiscoveryDetailPanel({ detail, elementName }: DiscoveryDetailPan
   return (
     <section
       aria-label={`Learning detail for ${elementName}`}
-      className="surface-inset rounded-xl border border-[var(--border-subtle)] p-4 sm:p-5 space-y-4"
+      className="surface-inset rounded-xl border border-(--border-subtle) p-4 sm:p-5 space-y-4"
     >
       <DetailSection
         heading="Real Lesson"
@@ -114,11 +114,11 @@ export function DiscoveryDetailPanel({ detail, elementName }: DiscoveryDetailPan
       })}
 
       <div className="flex flex-wrap gap-2 pt-1">
-        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-resting)] border border-[var(--border-subtle)] px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
+        <span className="inline-flex items-center gap-1 rounded-full bg-(--surface-resting) border border-(--border-subtle) px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
           <span aria-hidden="true">📊</span>
           {detail.realityLevel}
         </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-resting)] border border-[var(--border-subtle)] px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
+        <span className="inline-flex items-center gap-1 rounded-full bg-(--surface-resting) border border-(--border-subtle) px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
           <span aria-hidden="true">🏷</span>
           {detail.safetyLabel}
         </span>

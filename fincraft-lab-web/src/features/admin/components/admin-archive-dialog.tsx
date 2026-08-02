@@ -66,7 +66,7 @@ export function AdminArchiveDialog({
         {error ? <div role="alert" className="mx-5 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs leading-5 text-destructive">{error}</div> : null}
         <DialogFooter className="mx-0 mb-0">
           <DialogClose asChild>
-            <button type="button" disabled={busy} className="min-h-11 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-4 text-xs font-semibold text-foreground hover:bg-[var(--surface-raised)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-60">
+            <button type="button" disabled={busy} className="min-h-11 rounded-xl border border-(--border-subtle) bg-(--surface-inset) px-4 text-xs font-semibold text-foreground hover:bg-(--surface-raised) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:opacity-60">
               Keep active
             </button>
           </DialogClose>

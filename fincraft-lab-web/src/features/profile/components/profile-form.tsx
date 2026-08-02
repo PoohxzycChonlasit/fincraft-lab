@@ -65,7 +65,7 @@ function TextField({ id, label, value, onChange, error, hint, type = "text", pla
         maxLength={id === "avatarUrl" ? 2048 : 50}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : hintId}
-        className={`min-h-[44px] w-full rounded-xl border bg-[var(--surface-flat)] px-3.5 py-2.5 text-xs font-medium text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${error ? "border-destructive focus-visible:ring-destructive" : "border-[var(--border-subtle)] focus-visible:border-[var(--brand-accent)]"}`}
+        className={`min-h-[44px] w-full rounded-xl border bg-(--surface-flat) px-3.5 py-2.5 text-xs font-medium text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ring) ${error ? "border-destructive focus-visible:ring-destructive" : "border-(--border-subtle) focus-visible:border-(--brand-accent)"}`}
       />
       <p id={error ? errorId : hintId} className={`text-[11px] ${error ? "font-medium text-destructive" : "text-muted-foreground"}`}>{error || hint}</p>
     </div>
@@ -74,9 +74,9 @@ function TextField({ id, label, value, onChange, error, hint, type = "text", pla
 
 function FormActions({ isBusy, onReset }: { isBusy: boolean; onReset: () => void }) {
   return (
-    <div className="flex flex-col-reverse gap-2 border-t border-[var(--border-subtle)] pt-4 sm:flex-row sm:justify-end">
-      <button type="button" onClick={onReset} disabled={isBusy} className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-4 text-xs font-semibold text-foreground transition-colors hover:bg-[var(--surface-raised)] disabled:opacity-50">Reset</button>
-      <button type="submit" disabled={isBusy} className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--color-action-primary)] px-5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[var(--color-action-hover)] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]">
+    <div className="flex flex-col-reverse gap-2 border-t border-(--border-subtle) pt-4 sm:flex-row sm:justify-end">
+      <button type="button" onClick={onReset} disabled={isBusy} className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-(--border-subtle) bg-(--surface-inset) px-4 text-xs font-semibold text-foreground transition-colors hover:bg-(--surface-raised) disabled:opacity-50">Reset</button>
+      <button type="submit" disabled={isBusy} className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-(--color-action-primary) px-5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-(--color-action-hover) disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ring)">
         {isBusy ? <><RefreshCw aria-hidden="true" className="h-3.5 w-3.5 animate-spin" /><span>Saving...</span></> : "Save Changes"}
       </button>
     </div>
@@ -141,14 +141,14 @@ export function ProfileForm({ initialUser }: { initialUser: UserProfile }) {
   const clearError = (field: keyof FieldErrors) => form.setFieldErrors((current) => ({ ...current, [field]: undefined }));
 
   return (
-    <div data-document-page="profile" className="surface-card w-full max-w-2xl rounded-2xl border border-[var(--border-subtle)] p-4 shadow-sm sm:p-6">
+    <div data-document-page="profile" className="surface-card w-full max-w-2xl rounded-2xl border border-(--border-subtle) p-4 shadow-sm sm:p-6">
       <ProfileHeader user={form.persistedUser} displayName={form.displayName} avatarPreview={form.avatarUrl.trim()} />
       <form onSubmit={form.handleSubmit} className="mt-6 space-y-5" noValidate>
         <FormFeedback errorMsg={form.errorMsg} successMsg={form.successMsg} />
         <fieldset disabled={form.isBusy} className="space-y-5">
           <div className="space-y-1.5">
             <label htmlFor="email" className="block text-xs font-semibold text-foreground">Account Email <span className="font-normal text-muted-foreground">(Read-Only)</span></label>
-            <input id="email" type="email" value={form.persistedUser.email} readOnly aria-readonly="true" className="min-h-[44px] w-full cursor-default rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3.5 py-2.5 text-xs font-medium text-muted-foreground" />
+            <input id="email" type="email" value={form.persistedUser.email} readOnly aria-readonly="true" className="min-h-[44px] w-full cursor-default rounded-xl border border-(--border-subtle) bg-(--surface-inset) px-3.5 py-2.5 text-xs font-medium text-muted-foreground" />
           </div>
           <TextField id="displayName" label="Display Name *" value={form.displayName} onChange={(value) => { form.setDisplayName(value); clearError("displayName"); }} error={form.fieldErrors.displayName} hint="Shown in learning workspaces and community activities." placeholder="e.g. FinCrafter" />
           <TextField id="avatarUrl" label="Avatar Image URL (Optional)" type="url" value={form.avatarUrl} onChange={(value) => { form.setAvatarUrl(value); clearError("avatarUrl"); }} error={form.fieldErrors.avatarUrl} hint="Use an HTTP or HTTPS image URL, or leave blank for a deterministic fallback." placeholder="https://example.com/my-avatar.png" />

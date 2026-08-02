@@ -16,8 +16,8 @@ const messages = [
 
 export function InteractionStateGrid() {
   return (
-    <section aria-labelledby="state-heading" className="h-full border-l-2 border-[var(--color-teal-600)] pl-5">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-teal-700)]">
+    <section aria-labelledby="state-heading" className="h-full border-l-2 border-(--color-teal-600) pl-5">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-(--color-teal-700)">
         Control state test
       </p>
       <h2 id="state-heading" className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
@@ -31,7 +31,7 @@ export function InteractionStateGrid() {
           {interactiveStates.map(([label, className, description]) => (
             <div
               key={label}
-              className="border-b border-[var(--border-subtle)] pb-3 last:border-b-0 sm:[&:nth-last-child(2)]:border-b-0"
+              className="border-b border-(--border-subtle) pb-3 last:border-b-0 sm:[&:nth-last-child(2)]:border-b-0"
             >
               <button
                 type="button"
@@ -46,8 +46,8 @@ export function InteractionStateGrid() {
           ))}
         </div>
       </div>
-      <div className="mt-6 border-t border-[var(--border-subtle)] pt-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-orange-700)]">
+      <div className="mt-6 border-t border-(--border-subtle) pt-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-(--color-orange-700)">
           Status rail
         </p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">

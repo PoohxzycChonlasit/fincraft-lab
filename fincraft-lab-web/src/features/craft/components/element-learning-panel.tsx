@@ -14,19 +14,19 @@ export type ElementLearningPanelProps = {
 
 function LearningHeader({ element, categoryName, onClose }: { element: AvailableElement; categoryName: string; onClose: () => void }) {
   return (
-    <div className="flex items-start justify-between gap-3 border-b border-[var(--border-subtle)] pb-2.5">
+    <div className="flex items-start justify-between gap-3 border-b border-(--border-subtle) pb-2.5">
       <div className="flex items-center gap-2.5">
-        <span className="surface-inset flex size-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-xl leading-none">
+        <span className="surface-inset flex size-9 shrink-0 items-center justify-center rounded-lg border border-(--border-subtle) text-xl leading-none">
           {element.emoji || "📄"}
         </span>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-craft-accent)]">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-(--color-craft-accent)">
             {categoryName} &bull; {element.elementType}
           </p>
           <h3 className="text-sm font-bold text-foreground leading-snug">{element.name}</h3>
         </div>
       </div>
-      <button type="button" onClick={onClose} aria-label="Close element guide" className="rounded-lg p-1 text-xs text-muted-foreground hover:text-foreground hover:bg-[var(--surface-inset)]">
+      <button type="button" onClick={onClose} aria-label="Close element guide" className="rounded-lg p-1 text-xs text-muted-foreground hover:text-foreground hover:bg-(--surface-inset)">
         ✕
       </button>
     </div>
@@ -39,7 +39,7 @@ function LearningSection({ title, content, badge }: { title: string; content?: s
     <div className="space-y-1">
       <div className="flex items-center justify-between">
         <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{title}</h4>
-        {badge ? <span className="text-[9px] font-semibold text-[var(--color-craft-accent)]">{badge}</span> : null}
+        {badge ? <span className="text-[9px] font-semibold text-(--color-craft-accent)">{badge}</span> : null}
       </div>
       <p className="text-xs text-foreground leading-relaxed">{content}</p>
     </div>
@@ -70,21 +70,21 @@ function SuggestedPartnerList({ partners, onPlaceElement }: { partners: Suggeste
   if (partners.length === 0) return null;
 
   return (
-    <div className="space-y-2 pt-2 border-t border-[var(--border-subtle)]">
-      <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-craft-accent)]">Try combining with</h4>
+    <div className="space-y-2 pt-2 border-t border-(--border-subtle)">
+      <h4 className="text-[11px] font-bold uppercase tracking-wider text-(--color-craft-accent)">Try combining with</h4>
       <div className="grid grid-cols-1 gap-1.5 max-h-36 overflow-y-auto pr-1">
         {partners.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => onPlaceElement({ id: p.id, name: p.name, slug: p.slug, emoji: p.emoji, iconUrl: p.iconUrl, elementType: p.elementType, isStarter: false, category: { id: "", name: p.categoryName, sortOrder: 0 } })}
-            className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-2.5 py-1.5 text-left text-xs font-medium hover:border-[var(--color-craft-accent)] hover:bg-[var(--surface-resting)] transition-colors"
+            className="flex items-center justify-between rounded-lg border border-(--border-subtle) bg-(--surface-inset) px-2.5 py-1.5 text-left text-xs font-medium hover:border-(--color-craft-accent) hover:bg-(--surface-resting) transition-colors"
           >
             <div className="flex items-center gap-2">
               <span>{p.emoji || "📄"}</span>
               <span className="text-foreground font-semibold">{p.name}</span>
             </div>
-            <span className="text-[10px] text-[var(--color-action-primary)] font-semibold">+ Place</span>
+            <span className="text-[10px] text-(--color-action-primary) font-semibold">+ Place</span>
           </button>
         ))}
       </div>
@@ -108,12 +108,12 @@ export function ElementLearningPanel({ element, guidance, isLoading, onClose, on
   const learningDetail = isMatchingGuidance ? guidance?.learningDetail : undefined;
 
   return (
-    <div role="region" aria-label={`About ${element.name}`} className="surface-card rounded-2xl border border-[var(--color-craft-accent)]/40 p-4 space-y-3 shadow-xl max-h-[540px] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+    <div role="region" aria-label={`About ${element.name}`} className="surface-card rounded-2xl border border-(--color-craft-accent)/40 p-4 space-y-3 shadow-xl max-h-[540px] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
       <LearningHeader element={element} categoryName={categoryName} onClose={onClose} />
       {isLoading || !isMatchingGuidance ? <p className="text-xs text-muted-foreground py-2">Loading explanation...</p> : <LearningDetailSections detail={learningDetail} fallbackDescription={description} />}
       <SuggestedPartnerList partners={partners} onPlaceElement={onPlaceElement} />
       <div className="pt-2">
-        <button type="button" onClick={() => onPlaceElement(element)} className="w-full rounded-xl bg-[var(--color-action-primary)] py-2 text-xs font-semibold text-white shadow-xs hover:bg-[var(--color-action-hover)] transition-colors">
+        <button type="button" onClick={() => onPlaceElement(element)} className="w-full rounded-xl bg-(--color-action-primary) py-2 text-xs font-semibold text-white shadow-xs hover:bg-(--color-action-hover) transition-colors">
           Place {element.name} on Canvas
         </button>
       </div>

@@ -21,18 +21,18 @@ const SHADOW_MAP = [
 
 const ACCENT_COLOR_MAP: Record<AccentRole, { text: string; bg: string; border: string }> = {
   teal: {
-    text: "text-[var(--color-teal-700)]",
-    bg: "bg-[var(--color-teal-600)]",
-    border: "border-[var(--color-teal-600)]",
+    text: "text-(--color-teal-700)",
+    bg: "bg-(--color-teal-600)",
+    border: "border-(--color-teal-600)",
   },
   orange: {
-    text: "text-[var(--color-orange-700)]",
-    bg: "bg-[var(--color-orange-600)]",
-    border: "border-[var(--color-orange-600)]",
+    text: "text-(--color-orange-700)",
+    bg: "bg-(--color-orange-600)",
+    border: "border-(--color-orange-600)",
   },
   neutral: {
     text: "text-foreground",
-    bg: "bg-[var(--muted-foreground)]",
+    bg: "bg-(--muted-foreground)",
     border: "border-foreground",
   },
 };
@@ -66,10 +66,10 @@ export function TactileInstrumentConsole() {
 
   return (
     <div
-      className="surface-resting border border-[var(--border-subtle)] overflow-hidden"
+      className="surface-resting border border-(--border-subtle) overflow-hidden"
       style={{ boxShadow: "var(--shadow-resting)" }}
     >
-      <div className="grid grid-cols-1 divide-y divide-[var(--border-subtle)] lg:grid-cols-12 lg:divide-x lg:divide-y-0">
+      <div className="grid grid-cols-1 divide-y divide-(--border-subtle) lg:grid-cols-12 lg:divide-x lg:divide-y-0">
         <ConsoleControls
           surface={surface}
           accent={accent}

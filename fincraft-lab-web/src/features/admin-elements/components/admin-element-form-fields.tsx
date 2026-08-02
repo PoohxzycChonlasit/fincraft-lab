@@ -6,7 +6,7 @@ import type {
   ElementTypeEnum,
 } from "../types/admin-element.type";
 
-const INPUT_CLASS = "min-h-11 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-paper)] px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] aria-invalid:border-destructive";
+const INPUT_CLASS = "min-h-11 w-full rounded-xl border border-(--border-subtle) bg-(--surface-paper) px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ring) aria-invalid:border-destructive";
 const LABEL_CLASS = "text-xs font-semibold text-foreground";
 
 export type ElementFieldErrors = {
@@ -122,7 +122,7 @@ export function CreateOnlyFields({
         </select>
       </div>
       <div className="col-span-full flex min-h-11 items-center gap-2">
-        <input id="element-is-starter" type="checkbox" checked={isStarter} onChange={(event) => setIsStarter(event.target.checked)} className="size-4 rounded border-[var(--border-subtle)] focus:ring-[var(--ring)]" />
+        <input id="element-is-starter" type="checkbox" checked={isStarter} onChange={(event) => setIsStarter(event.target.checked)} className="size-4 rounded border-(--border-subtle) focus:ring-(--ring)" />
         <label htmlFor="element-is-starter" className={LABEL_CLASS}>Starter Element</label>
       </div>
     </>

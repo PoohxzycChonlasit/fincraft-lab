@@ -43,7 +43,7 @@ export function FinCraftLogo({ showDescriptor = false }: FinCraftLogoProps) {
       <FinCraftMark className="size-10 shrink-0" />
       <span className="min-w-0">
         <span className="block truncate text-[15px] font-bold tracking-tight text-foreground sm:text-base">
-          FinCraft <span className="text-[var(--color-craft-accent)]">Lab</span>
+          FinCraft <span className="text-(--color-craft-accent)">Lab</span>
         </span>
         {showDescriptor ? (
           <span className="hidden text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:block">

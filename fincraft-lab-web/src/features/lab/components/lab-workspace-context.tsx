@@ -44,7 +44,7 @@ export function LabWorkspaceContext({ workspaceId, workspaces, selectedWorkspace
       <div className="lab-workspace-context__heading">
         <div className="min-w-0">
           <p className="lab-workspace-context__eyebrow">Workspace context</p>
-          <h2 className="truncate text-sm font-bold text-[var(--color-text-primary)]" title={selectedWorkspace.name}>{selectedWorkspace.name}</h2>
+          <h2 className="truncate text-sm font-bold text-(--color-text-primary)" title={selectedWorkspace.name}>{selectedWorkspace.name}</h2>
         </div>
         <span className={getSaveTone(saveStatus)} aria-live="polite">
           <Save size={13} aria-hidden="true" />

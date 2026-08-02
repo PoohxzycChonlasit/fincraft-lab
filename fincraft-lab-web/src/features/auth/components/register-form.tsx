@@ -79,9 +79,9 @@ export function RegisterForm({ returnTo = "/lab" }: { returnTo?: string }) {
         <AuthPasswordField id="register-confirm-password" name="confirmPassword" label="Confirm password" value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" placeholder="Re-enter your password" error={fieldErrors.confirmPassword} />
       </div>
       <AuthSubmitButton isSubmitting={isSubmitting} label="Create account" pendingLabel="Creating account…" />
-      <div className="space-y-3 border-t border-[var(--border-subtle)] pt-5 text-center text-sm text-muted-foreground">
-        <p>Already have an account? <Link href={buildAuthHref("/login", returnTo)} className="font-bold text-[var(--color-action-primary)] underline-offset-4 hover:underline">Log in</Link></p>
-        <p>Not ready to sign up? <Link href="/lab" className="font-bold text-[var(--color-action-primary)] underline-offset-4 hover:underline">Explore as Guest</Link></p>
+      <div className="space-y-3 border-t border-(--border-subtle) pt-5 text-center text-sm text-muted-foreground">
+        <p>Already have an account? <Link href={buildAuthHref("/login", returnTo)} className="font-bold text-(--color-action-primary) underline-offset-4 hover:underline">Log in</Link></p>
+        <p>Not ready to sign up? <Link href="/lab" className="font-bold text-(--color-action-primary) underline-offset-4 hover:underline">Explore as Guest</Link></p>
       </div>
     </form>
   );

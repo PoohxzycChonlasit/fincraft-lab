@@ -21,7 +21,7 @@ function ColourSwatch({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-3 border-b border-[var(--border-subtle)] py-3 last:border-b-0">
+    <div className="flex items-center gap-3 border-b border-(--border-subtle) py-3 last:border-b-0">
       <span
         aria-hidden="true"
         className="size-10 shrink-0 rounded-lg border border-black/10"
@@ -38,7 +38,7 @@ function ColourSwatch({
 export function SemanticTokenGrid() {
   return (
     <aside aria-labelledby="token-heading" className="surface-resting h-full border p-5">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-teal-700)]">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-(--color-teal-700)">
         Token readout
       </p>
       <h2 id="token-heading" className="mt-2 text-xl font-semibold tracking-tight text-foreground">
@@ -52,12 +52,12 @@ export function SemanticTokenGrid() {
           ))}
         </div>
       </div>
-      <div className="mt-5 border-t border-[var(--border-subtle)] pt-4">
+      <div className="mt-5 border-t border-(--border-subtle) pt-4">
         <h3 className="text-sm font-semibold text-foreground">Semantic aliases</h3>
-        <dl className="mt-2 divide-y divide-[var(--border-subtle)]">
+        <dl className="mt-2 divide-y divide-(--border-subtle)">
           {semanticRoles.map(([token, description]) => (
             <div key={token} className="flex min-h-11 items-center justify-between gap-4 py-3">
-              <dt className="text-xs font-medium text-[var(--color-teal-700)]">{token}</dt>
+              <dt className="text-xs font-medium text-(--color-teal-700)">{token}</dt>
               <dd className="text-right text-sm text-muted-foreground">{description}</dd>
             </div>
           ))}

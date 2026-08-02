@@ -68,7 +68,7 @@ function DesktopLink({ item, activeTab }: { item: NavItem; activeTab: ProductTab
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
-      className={`inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 ${active ? "border-[var(--border-selected)] bg-[var(--surface-inset)] text-foreground shadow-xs" : "border-transparent text-muted-foreground hover:border-[var(--border-subtle)] hover:bg-[var(--surface-inset)] hover:text-foreground"}`}
+      className={`inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring) focus-visible:ring-offset-2 ${active ? "border-(--border-selected) bg-(--surface-inset) text-foreground shadow-xs" : "border-transparent text-muted-foreground hover:border-(--border-subtle) hover:bg-(--surface-inset) hover:text-foreground"}`}
     >
       <Icon size={14} aria-hidden="true" />
       <span>{item.label}</span>
@@ -78,7 +78,7 @@ function DesktopLink({ item, activeTab }: { item: NavItem; activeTab: ProductTab
 
 function DesktopGroup({ label, items, activeTab }: { label: string; items: NavItem[]; activeTab: ProductTab }) {
   return (
-    <div role="group" aria-label={label} className="flex items-center gap-0.5 border-l border-[var(--border-subtle)] pl-1.5 first:border-l-0 first:pl-0">
+    <div role="group" aria-label={label} className="flex items-center gap-0.5 border-l border-(--border-subtle) pl-1.5 first:border-l-0 first:pl-0">
       {items.map((item) => <DesktopLink key={item.href} item={item} activeTab={activeTab} />)}
     </div>
   );
@@ -88,7 +88,7 @@ function MobileLink({ item }: { item: NavItem }) {
   const Icon = item.icon;
   return (
     <SheetClose asChild>
-      <Link href={item.href} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--surface-inset)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
+      <Link href={item.href} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-foreground transition-colors hover:bg-(--surface-inset) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring)">
         <Icon size={17} aria-hidden="true" />
         <span>{item.label}</span>
       </Link>
@@ -111,12 +111,12 @@ function MobileNavigation({ activeTab, user }: ProductNavProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <button type="button" aria-label="Open navigation menu" className="inline-flex size-11 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] text-foreground transition-colors hover:bg-[var(--surface-raised)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
+        <button type="button" aria-label="Open navigation menu" className="inline-flex size-11 items-center justify-center rounded-xl border border-(--border-subtle) bg-(--surface-inset) text-foreground transition-colors hover:bg-(--surface-raised) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring)">
           <Menu size={18} aria-hidden="true" />
         </button>
       </SheetTrigger>
-      <SheetContent side="right" className="h-[100dvh] max-h-[100dvh] w-[min(22rem,calc(100vw-1rem))] max-w-none gap-0 overflow-hidden border-l border-[var(--border-subtle)] bg-[var(--surface-solid)] p-0">
-        <SheetHeader className="shrink-0 border-b border-[var(--border-subtle)] pr-14">
+      <SheetContent side="right" className="h-[100dvh] max-h-[100dvh] w-[min(22rem,calc(100vw-1rem))] max-w-none gap-0 overflow-hidden border-l border-(--border-subtle) bg-(--surface-solid) p-0">
+        <SheetHeader className="shrink-0 border-b border-(--border-subtle) pr-14">
           <SheetTitle>FinCraft navigation</SheetTitle>
           <SheetDescription>Current route: {getCurrentLabel(activeTab)}</SheetDescription>
         </SheetHeader>
@@ -126,7 +126,7 @@ function MobileNavigation({ activeTab, user }: ProductNavProps) {
           {admin ? <MobileGroup label="Admin" items={[{ label: "Admin", href: "/admin/elements", tab: "admin", icon: ShieldCheck }]} /> : null}
           <section className="space-y-1" aria-labelledby="mobile-nav-account">
             <h2 id="mobile-nav-account" className="px-3 pt-4 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Account</h2>
-            {user ? <div className="flex items-center gap-3 rounded-xl bg-[var(--surface-inset)] px-3 py-3"><span className="min-w-0"><span className="block truncate text-sm font-bold text-foreground">{user.displayName}</span><span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{user.role}</span></span></div> : <><SheetClose asChild><Link href="/login" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-foreground hover:bg-[var(--surface-inset)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"><LogIn size={17} aria-hidden="true" />Sign in</Link></SheetClose><SheetClose asChild><Link href="/register" className="flex min-h-11 items-center gap-3 rounded-xl bg-[var(--brand-primary)] px-3 text-sm font-bold text-[var(--brand-primary-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"><UserRound size={17} aria-hidden="true" />Create account</Link></SheetClose></>}
+            {user ? <div className="flex items-center gap-3 rounded-xl bg-(--surface-inset) px-3 py-3"><span className="min-w-0"><span className="block truncate text-sm font-bold text-foreground">{user.displayName}</span><span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{user.role}</span></span></div> : <><SheetClose asChild><Link href="/login" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-foreground hover:bg-(--surface-inset) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring)"><LogIn size={17} aria-hidden="true" />Sign in</Link></SheetClose><SheetClose asChild><Link href="/register" className="flex min-h-11 items-center gap-3 rounded-xl bg-(--brand-primary) px-3 text-sm font-bold text-(--brand-primary-foreground) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring)"><UserRound size={17} aria-hidden="true" />Create account</Link></SheetClose></>}
             {user ? <div className="pt-2"><LogoutButton menuItem /></div> : <p className="px-3 pt-2 text-xs leading-5 text-muted-foreground">Explore the Craft Lab as a guest before creating an account.</p>}
           </section>
         </div>
@@ -150,7 +150,7 @@ export function ProductNav({ activeTab, user }: ProductNavProps) {
           {admin ? <DesktopGroup label="Admin" items={[{ label: "Admin", href: "/admin/elements", tab: "admin", icon: ShieldCheck }]} activeTab={resolvedActiveTab} /> : null}
         </nav>
       </div>
-      {user ? <AccountMenu user={user} activeTab={resolvedActiveTab} /> : <div className="hidden items-center gap-1 xl:flex"><Link href="/login" aria-current={resolvedActiveTab === "login" ? "page" : undefined} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold text-muted-foreground hover:bg-[var(--surface-inset)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">Sign in</Link><Link href="/register" className="inline-flex min-h-11 items-center rounded-xl bg-[var(--brand-primary)] px-3 text-xs font-bold text-[var(--brand-primary-foreground)] hover:bg-[var(--color-action-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">Create account</Link></div>}
+      {user ? <AccountMenu user={user} activeTab={resolvedActiveTab} /> : <div className="hidden items-center gap-1 xl:flex"><Link href="/login" aria-current={resolvedActiveTab === "login" ? "page" : undefined} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold text-muted-foreground hover:bg-(--surface-inset) hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring)">Sign in</Link><Link href="/register" className="inline-flex min-h-11 items-center rounded-xl bg-(--brand-primary) px-3 text-xs font-bold text-(--brand-primary-foreground) hover:bg-(--color-action-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring)">Create account</Link></div>}
       <div className="xl:hidden"><MobileNavigation activeTab={resolvedActiveTab} user={user} /></div>
     </div>
   );

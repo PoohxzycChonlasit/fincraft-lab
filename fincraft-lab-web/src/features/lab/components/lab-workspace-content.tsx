@@ -41,11 +41,11 @@ function LabToolbar({ isAuthenticated, initialWorkspace, save }: { isAuthenticat
   }
 
   return (
-    <div className="lab-session-toolbar flex items-center justify-between gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3 py-2">
+    <div className="lab-session-toolbar flex items-center justify-between gap-3 rounded-2xl border border-(--border-subtle) bg-(--surface-inset) px-3 py-2">
       <p role="note" className="truncate text-xs text-muted-foreground">
-        Guest mode — <Link href="/login" className="font-semibold text-[var(--color-action-primary)] underline hover:no-underline">Sign in to save your workspace.</Link>
+        Guest mode — <Link href="/login" className="font-semibold text-(--color-action-primary) underline hover:no-underline">Sign in to save your workspace.</Link>
       </p>
-      <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-craft-accent)]">Guest Session</span>
+      <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-(--color-craft-accent)">Guest Session</span>
     </div>
   );
 }
@@ -71,7 +71,7 @@ function WorkspaceEligibilityNotice({ elementNames }: { elementNames: string[] }
   if (elementNames.length === 0) return null;
   const names = elementNames.join(", ");
   return (
-    <div role="status" className="rounded-xl border border-[var(--color-craft-accent)]/40 bg-[var(--color-craft-accent)]/10 px-3 py-2 text-xs text-foreground">
+    <div role="status" className="rounded-xl border border-(--color-craft-accent)/40 bg-(--color-craft-accent)/10 px-3 py-2 text-xs text-foreground">
       <span className="font-semibold">Locked workspace element not loaded:</span> {names}. It remains stored until you explicitly save this workspace.
     </div>
   );
@@ -80,12 +80,12 @@ function WorkspaceEligibilityNotice({ elementNames }: { elementNames: string[] }
 function SuggestionButtonList({ suggestions, onPlaceElement }: { suggestions: SuggestedPartner[]; onPlaceElement: (element: AvailableElement) => void }) {
   if (suggestions.length === 0) return <p className="text-[11px] italic text-muted-foreground">Try combining starter elements from the Library or inspect Info for connection hints.</p>;
   return (
-    <div className="flex flex-wrap items-center gap-2 border-t border-[var(--border-subtle)] pt-1">
+    <div className="flex flex-wrap items-center gap-2 border-t border-(--border-subtle) pt-1">
       <span className="text-[11px] font-semibold text-foreground">Try one of these suggested connections:</span>
       <div className="flex flex-wrap items-center gap-1.5">
         {suggestions.map((partner) => (
-          <button key={partner.id} type="button" onClick={() => onPlaceElement({ id: partner.id, name: partner.name, slug: partner.slug, emoji: partner.emoji, iconUrl: partner.iconUrl, elementType: partner.elementType, isStarter: true, category: { id: "", name: partner.categoryName, sortOrder: 0 } })} className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-resting)] px-2.5 py-1 text-[11px] font-medium text-foreground hover:border-[var(--color-craft-accent)]">
-            <span>{partner.emoji || "Element"}</span><span>{partner.name}</span><span className="text-[10px] font-bold text-[var(--color-action-primary)]">+ Place</span>
+          <button key={partner.id} type="button" onClick={() => onPlaceElement({ id: partner.id, name: partner.name, slug: partner.slug, emoji: partner.emoji, iconUrl: partner.iconUrl, elementType: partner.elementType, isStarter: true, category: { id: "", name: partner.categoryName, sortOrder: 0 } })} className="inline-flex items-center gap-1.5 rounded-lg border border-(--border-subtle) bg-(--surface-resting) px-2.5 py-1 text-[11px] font-medium text-foreground hover:border-(--color-craft-accent)">
+            <span>{partner.emoji || "Element"}</span><span>{partner.name}</span><span className="text-[10px] font-bold text-(--color-action-primary)">+ Place</span>
           </button>
         ))}
       </div>
@@ -100,7 +100,7 @@ function CompactNoRecipeNotice({ failedPair, onDismiss, onPlaceElement }: { fail
   return (
     <div role="status" className="lab-no-recipe surface-card flex flex-col gap-2.5 rounded-xl p-3 text-xs text-muted-foreground">
       <div className="flex items-center justify-between gap-3">
-        <div><span className="font-bold text-[var(--color-craft-accent)]">No discovery yet: </span><span>These elements do not have an approved discovery recipe in the current lab.</span></div>
+        <div><span className="font-bold text-(--color-craft-accent)">No discovery yet: </span><span>These elements do not have an approved discovery recipe in the current lab.</span></div>
         <button type="button" onClick={onDismiss} className="shrink-0 font-semibold text-foreground hover:underline">Dismiss</button>
       </div>
       <SuggestionButtonList suggestions={suggestions} onPlaceElement={onPlaceElement} />
@@ -110,7 +110,7 @@ function CompactNoRecipeNotice({ failedPair, onDismiss, onPlaceElement }: { fail
 
 function InlineCraftError({ message, onDismiss }: { message: string; onDismiss: () => void }) {
   return (
-    <div role="alert" className="lab-inline-error flex items-center justify-between gap-3 rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 px-4 py-2 text-xs text-[var(--color-text-danger)]">
+    <div role="alert" className="lab-inline-error flex items-center justify-between gap-3 rounded-xl border border-(--color-text-danger)/30 bg-(--color-text-danger)/10 px-4 py-2 text-xs text-(--color-text-danger)">
       <span>{message}</span><button type="button" onClick={onDismiss} className="font-semibold underline">Dismiss</button>
     </div>
   );

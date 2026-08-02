@@ -19,7 +19,7 @@ const RELATIONS: Relation[] = [
 
 function NodeBox({ label }: { label: string }) {
   return (
-    <div className="surface-resting border border-[var(--border-subtle)] rounded-md px-3 py-2 text-[11px] font-semibold text-foreground text-center min-w-[80px] flex-shrink-0" style={{ boxShadow: "var(--shadow-resting)" }}>
+    <div className="surface-resting border border-(--border-subtle) rounded-md px-3 py-2 text-[11px] font-semibold text-foreground text-center min-w-[80px] flex-shrink-0" style={{ boxShadow: "var(--shadow-resting)" }}>
       {label}
     </div>
   );
@@ -49,10 +49,10 @@ function RelationRow({ r }: { r: Relation }) {
 
 export function RelationshipTestBench() {
   return (
-    <div className="surface-resting border border-[var(--border-subtle)] p-5">
-      <div className="flex flex-wrap items-center justify-between border-b border-[var(--border-subtle)] pb-3 mb-5 gap-2">
+    <div className="surface-resting border border-(--border-subtle) p-5">
+      <div className="flex flex-wrap items-center justify-between border-b border-(--border-subtle) pb-3 mb-5 gap-2">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-teal-700)]">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-(--color-teal-700)">
             Connection Test Bench
           </p>
           <h3 className="text-base font-semibold text-foreground">Educational Relationship Paths</h3>

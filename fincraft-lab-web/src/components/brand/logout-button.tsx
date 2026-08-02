@@ -35,7 +35,7 @@ export function LogoutButton({ menuItem = false }: { menuItem?: boolean }) {
       disabled={isSubmitting}
       className={menuItem
         ? "flex min-h-11 w-full items-center rounded-xl px-3 text-sm font-semibold text-destructive outline-none transition-colors hover:bg-destructive/10 focus-visible:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50"
-        : "min-h-11 rounded-lg border border-[var(--border-subtle)] px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-[var(--surface-inset)]/50 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50"}
+        : "min-h-11 rounded-lg border border-(--border-subtle) px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-(--surface-inset)/50 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-(--ring) disabled:cursor-not-allowed disabled:opacity-50"}
     >
       {isSubmitting ? "Logging out..." : "Log out"}
       {errorMessage ? <span role="alert" className="sr-only">{errorMessage}</span> : null}

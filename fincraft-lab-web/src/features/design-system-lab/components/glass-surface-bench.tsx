@@ -17,16 +17,16 @@ export function GlassSurfaceBench() {
   return (
     <section
       aria-labelledby="glass-surface-heading"
-      className="space-y-5 rounded-2xl border border-[var(--surface-border)] p-5 sm:p-6"
+      className="space-y-5 rounded-2xl border border-(--surface-border) p-5 sm:p-6"
     >
       <header className="max-w-2xl space-y-1.5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand-accent)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-(--brand-accent)">
           Bounded Material Primitive
         </p>
-        <h2 id="glass-surface-heading" className="text-lg font-bold text-[var(--page-foreground)]">
+        <h2 id="glass-surface-heading" className="text-lg font-bold text-(--page-foreground)">
           GlassSurface variants
         </h2>
-        <p className="text-sm leading-relaxed text-[var(--page-muted)]">
+        <p className="text-sm leading-relaxed text-(--page-muted)">
           Static specimens stay Server-rendered. Only the focused pointer specimen below hydrates as a Client leaf.
         </p>
       </header>
@@ -39,13 +39,13 @@ export function GlassSurfaceBench() {
             variant={variant}
             className="min-h-36 rounded-2xl p-5"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--page-muted)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-(--page-muted)">
               {variant}
             </p>
-            <h3 className="mt-5 text-base font-bold capitalize text-[var(--page-foreground)]">
+            <h3 className="mt-5 text-base font-bold capitalize text-(--page-foreground)">
               {variant} material
             </h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-[var(--page-muted)]">
+            <p className="mt-1.5 text-sm leading-relaxed text-(--page-muted)">
               {VARIANT_COPY[variant]}
             </p>
           </GlassSurface>
@@ -57,10 +57,10 @@ export function GlassSurfaceBench() {
         aria-describedby="interactive-glass-note"
         className="w-full rounded-2xl p-5 text-left"
       >
-        <span className="block text-sm font-bold text-[var(--page-foreground)]">
+        <span className="block text-sm font-bold text-(--page-foreground)">
           Interactive pointer specimen
         </span>
-        <span id="interactive-glass-note" className="mt-1 block text-xs leading-relaxed text-[var(--page-muted)]">
+        <span id="interactive-glass-note" className="mt-1 block text-xs leading-relaxed text-(--page-muted)">
           Keyboard-focusable button; pointer highlight is decorative and disabled for touch or reduced motion.
         </span>
       </InteractiveGlassSurface>

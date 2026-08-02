@@ -37,7 +37,7 @@ function SvgCurve({ points }: { points: Point[] }) {
   const path = coordinates.map((coordinate, index) => `${index === 0 ? "M" : "L"} ${coordinate.x} ${coordinate.y}`).join(" ");
 
   return (
-    <svg className="block h-auto w-full overflow-visible text-[var(--accent-teal)]" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="simulation-timeline-title simulation-timeline-description">
+    <svg className="block h-auto w-full overflow-visible text-(--accent-teal)" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="simulation-timeline-title simulation-timeline-description">
       <title id="simulation-timeline-title">Illustrative balance timeline</title>
       <desc id="simulation-timeline-description">An illustrative path from the starting balance through the stored whole-month result to the estimated runway endpoint. The backend result remains authoritative.</desc>
       <line x1={left} y1={height - bottom} x2={width - right} y2={height - bottom} stroke="var(--border-subtle)" strokeWidth="1" />
@@ -60,7 +60,7 @@ export function SimulationTimelineChart({ result }: { result: SimulationRunResul
   return (
     <section className="surface-solid space-y-5 rounded-2xl p-5 sm:p-6" aria-labelledby="timeline-heading">
       <div className="space-y-1">
-        <p className="font-label text-[var(--accent-teal)]">Step 3 · Inspect the illustrative timeline</p>
+        <p className="font-label text-(--accent-teal)">Step 3 · Inspect the illustrative timeline</p>
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h3 id="timeline-heading" className="font-section-title text-foreground">Balance path over time</h3>
           <span className="font-caption font-bold">Illustrative only · {survivalMonths} months</span>
@@ -69,7 +69,7 @@ export function SimulationTimelineChart({ result }: { result: SimulationRunResul
 
       <SvgCurve points={points} />
 
-      <ol className="grid gap-3 border-t border-[var(--border-subtle)] pt-4 sm:grid-cols-3">
+      <ol className="grid gap-3 border-t border-(--border-subtle) pt-4 sm:grid-cols-3">
         <li className="space-y-1">
           <p className="font-label text-muted-foreground">Starting balance</p>
           <p className="text-sm font-bold text-foreground tabular-nums">{formatAmount(startBalance)}</p>
@@ -87,7 +87,7 @@ export function SimulationTimelineChart({ result }: { result: SimulationRunResul
         </li>
       </ol>
 
-      <p className="border-t border-[var(--border-subtle)] pt-4 font-body-small leading-relaxed text-muted-foreground">
+      <p className="border-t border-(--border-subtle) pt-4 font-body-small leading-relaxed text-muted-foreground">
         This chart interpolates a presentation path from the stored inputs and outputs. It does not independently calculate or replace the primary result above.
       </p>
     </section>

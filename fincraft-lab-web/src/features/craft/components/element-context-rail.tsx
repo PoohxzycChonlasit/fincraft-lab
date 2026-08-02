@@ -33,15 +33,15 @@ function ContextRailHeader({
   onCloseRail?: () => void;
 }) {
   return (
-    <div className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--surface-card)] pb-2">
-      <div role="tablist" aria-label="Context tabs" className="flex items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] p-1">
+    <div className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b border-(--border-subtle) bg-(--surface-card) pb-2">
+      <div role="tablist" aria-label="Context tabs" className="flex items-center gap-1.5 rounded-xl border border-(--border-subtle) bg-(--surface-inset) p-1">
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === "element"}
           onClick={() => onTabChange("element")}
           className={`flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
-            activeTab === "element" ? "bg-[var(--surface-resting)] text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+            activeTab === "element" ? "bg-(--surface-resting) text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <Info size={14} aria-hidden="true" />
@@ -54,7 +54,7 @@ function ContextRailHeader({
           disabled={!hasDiscovery}
           onClick={() => onTabChange("discovery")}
           className={`flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-            activeTab === "discovery" ? "bg-[var(--surface-resting)] text-[var(--color-craft-accent)] shadow-xs" : "text-muted-foreground hover:text-foreground"
+            activeTab === "discovery" ? "bg-(--surface-resting) text-(--color-craft-accent) shadow-xs" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <Sparkles size={14} aria-hidden="true" />
@@ -62,7 +62,7 @@ function ContextRailHeader({
         </button>
       </div>
       {onCloseRail ? (
-        <button type="button" onClick={onCloseRail} aria-label="Close context panel" className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--surface-inset)] hover:text-foreground">
+        <button type="button" onClick={onCloseRail} aria-label="Close context panel" className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-(--surface-inset) hover:text-foreground">
           <X size={15} aria-hidden="true" />
         </button>
       ) : null}
@@ -91,7 +91,7 @@ export function ElementContextRail(props: ElementContextRailProps) {
   const { activeTab, onTabChange, lastDiscovery, onCloseRail } = props;
 
   return (
-    <aside aria-label="Context Rail" className="lab-context-rail flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-2 shadow-xs">
+    <aside aria-label="Context Rail" className="lab-context-rail flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-(--border-subtle) bg-(--surface-card) p-2 shadow-xs">
       <ContextRailHeader activeTab={activeTab} hasDiscovery={Boolean(lastDiscovery)} onTabChange={onTabChange} onCloseRail={onCloseRail} />
       <div className="min-h-0 flex-1 overflow-y-auto pt-2">
         <ContextRailBody {...props} />

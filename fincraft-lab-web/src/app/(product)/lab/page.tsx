@@ -44,9 +44,9 @@ export default async function CraftLabPage({ searchParams }: CraftLabPageProps) 
 
   return (
     <div className="lab-page-frame min-w-0 overflow-hidden">
-      <div className="lab-page-heading flex items-center justify-between border-b border-[var(--border-subtle)] pb-2.5">
+      <div className="lab-page-heading flex items-center justify-between border-b border-(--border-subtle) pb-2.5">
         <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-          Craft Lab <span className="text-xs font-semibold text-[var(--color-craft-accent)] font-mono">Discovery Workspace</span>
+          Craft Lab <span className="text-xs font-semibold text-(--color-craft-accent) font-mono">Discovery Workspace</span>
         </h1>
         <p className="lab-page-description text-xs text-muted-foreground hidden sm:block">
           Drag elements onto the canvas to discover financial concepts.

@@ -34,10 +34,10 @@ function buildTileDragData(element: AvailableElement): string {
 function TileActionButtons({ name, onInspect, onPlace }: { name: string; onInspect: (e: MouseEvent<HTMLButtonElement>) => void; onPlace: (e: MouseEvent<HTMLButtonElement>) => void }) {
   return (
     <div className="flex shrink-0 items-center gap-1">
-      <button type="button" onClick={onInspect} aria-label={`Inspect ${name}`} className="flex size-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-[var(--surface-inset)] hover:text-foreground">
+      <button type="button" onClick={onInspect} aria-label={`Inspect ${name}`} className="flex size-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-(--surface-inset) hover:text-foreground">
         <Info size={14} aria-hidden="true" />
       </button>
-      <button type="button" onClick={onPlace} aria-label={`Place ${name} on canvas`} className="flex size-7 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-inset)] text-[var(--color-action-primary)] transition-colors hover:bg-[var(--color-action-primary)] hover:text-white">
+      <button type="button" onClick={onPlace} aria-label={`Place ${name} on canvas`} className="flex size-7 items-center justify-center rounded-lg border border-(--border-subtle) bg-(--surface-inset) text-(--color-action-primary) transition-colors hover:bg-(--color-action-primary) hover:text-white">
         <Plus size={14} aria-hidden="true" />
       </button>
     </div>
@@ -47,10 +47,10 @@ function TileActionButtons({ name, onInspect, onPlace }: { name: string; onInspe
 function ElementTile({ element, isHighlighted, isInspecting, onPlaceElement, onInspectElement, onPrefetch }: ElementTileProps) {
   const categoryName = element.category?.name || element.elementType;
   const highlightClass = isHighlighted
-    ? "ring-2 ring-[var(--color-craft-accent)] border-[var(--color-craft-accent)] bg-[var(--color-craft-accent)]/10"
+    ? "ring-2 ring-(--color-craft-accent) border-(--color-craft-accent) bg-(--color-craft-accent)/10"
     : isInspecting
-      ? "ring-2 ring-[var(--color-action-primary)] border-[var(--color-action-primary)]"
-      : "border-[var(--border-subtle)] hover:border-[var(--color-craft-accent)]/60";
+      ? "ring-2 ring-(--color-action-primary) border-(--color-action-primary)"
+      : "border-(--border-subtle) hover:border-(--color-craft-accent)/60";
 
   const handleDragStart = (event: DragEvent<HTMLDivElement>) => {
     event.dataTransfer.setData("application/fincraft-element", buildTileDragData(element));
@@ -58,17 +58,17 @@ function ElementTile({ element, isHighlighted, isInspecting, onPlaceElement, onI
   };
 
   return (
-    <div draggable onDragStart={handleDragStart} onMouseEnter={onPrefetch} onFocus={onPrefetch} className={`group flex min-h-[52px] items-center justify-between rounded-xl border bg-[var(--surface-resting)] p-2 text-left transition-all duration-150 active:cursor-grabbing ${highlightClass}`}>
+    <div draggable onDragStart={handleDragStart} onMouseEnter={onPrefetch} onFocus={onPrefetch} className={`group flex min-h-[52px] items-center justify-between rounded-xl border bg-(--surface-resting) p-2 text-left transition-all duration-150 active:cursor-grabbing ${highlightClass}`}>
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <span title="Drag to canvas" aria-label="Drag handle" className="flex cursor-grab items-center text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing">
           <GripVertical size={14} aria-hidden="true" />
         </span>
         <button type="button" onClick={(e) => { e.stopPropagation(); onInspectElement(); }} aria-label={`View ${element.name} details`} className="flex min-w-0 flex-1 items-center gap-2 text-left focus-visible:outline-none">
-          <span className="surface-inset flex size-7 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-sm leading-none font-semibold">
+          <span className="surface-inset flex size-7 shrink-0 items-center justify-center rounded-lg border border-(--border-subtle) text-sm leading-none font-semibold">
             <span aria-hidden="true">{element.emoji || "Element"}</span>
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[9px] font-semibold uppercase tracking-wider text-[var(--color-craft-accent)]">{categoryName}</span>
+            <span className="block truncate text-[9px] font-semibold uppercase tracking-wider text-(--color-craft-accent)">{categoryName}</span>
             <span className="block truncate text-xs font-bold leading-snug text-foreground">{element.name}</span>
           </span>
         </button>
@@ -93,13 +93,13 @@ function CategoryFolder({ categoryName, elements, selectedElementId, onPlaceElem
   const highlightedIds = new Set(guidance?.suggestedPartners?.map((p) => p.id) || []);
 
   return (
-    <div className="space-y-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] p-1.5">
-      <button type="button" aria-expanded={open} onClick={() => setIsExpanded((curr) => !curr)} className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-[var(--surface-card)]">
+    <div className="space-y-1 rounded-xl border border-(--border-subtle) bg-(--surface-inset) p-1.5">
+      <button type="button" aria-expanded={open} onClick={() => setIsExpanded((curr) => !curr)} className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-(--surface-card)">
         <div className="flex items-center gap-2">
           {open ? <ChevronDown size={14} className="text-muted-foreground" /> : <ChevronRight size={14} className="text-muted-foreground" />}
           <span className="text-xs font-bold text-foreground">{categoryName}</span>
         </div>
-        <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-resting)] px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{elements.length}</span>
+        <span className="rounded-full border border-(--border-subtle) bg-(--surface-resting) px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{elements.length}</span>
       </button>
 
       {open ? (
@@ -135,16 +135,16 @@ export function ElementLibrary({ elements, selectedElementId, onPlaceElement, on
   }, [groupedCategories, normalizedSearch]);
 
   return (
-    <section aria-label="Element Library" className="lab-library-panel flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-2 shadow-xs">
-      <div className="sticky top-0 z-10 space-y-2 bg-[var(--surface-card)] pb-2">
+    <section aria-label="Element Library" className="lab-library-panel flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-(--border-subtle) bg-(--surface-card) p-2 shadow-xs">
+      <div className="sticky top-0 z-10 space-y-2 bg-(--surface-card) pb-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Elements</h2>
-            <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{elements.length}</span>
+            <span className="rounded-full border border-(--border-subtle) bg-(--surface-inset) px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{elements.length}</span>
           </div>
-          {onClose ? <button type="button" onClick={onClose} aria-label="Close element library" className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-[var(--surface-inset)] hover:text-foreground"><X size={15} aria-hidden="true" /></button> : null}
+          {onClose ? <button type="button" onClick={onClose} aria-label="Close element library" className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-(--surface-inset) hover:text-foreground"><X size={15} aria-hidden="true" /></button> : null}
         </div>
-        <label className="surface-inset flex h-9 items-center gap-2 rounded-lg border border-[var(--border-subtle)] px-2.5">
+        <label className="surface-inset flex h-9 items-center gap-2 rounded-lg border border-(--border-subtle) px-2.5">
           <Search size={14} className="shrink-0 text-muted-foreground" aria-hidden="true" />
           <span className="sr-only">Search elements</span>
           <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="Search name or category" className="min-w-0 flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground" />

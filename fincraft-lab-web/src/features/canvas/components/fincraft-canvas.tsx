@@ -68,10 +68,10 @@ function isCanvasElementInput(value: unknown): value is CanvasElementInput {
 }
 
 function SaveStatusIndicator({ isDirty, saveStatus }: { isDirty?: boolean; saveStatus?: SaveStatus }) {
-  if (saveStatus === "saving") return <span className="text-xs font-semibold text-[var(--color-craft-accent)] animate-pulse">Saving...</span>;
-  if (saveStatus === "error") return <span className="text-xs font-semibold text-[var(--color-text-danger)]">Save error</span>;
-  if (isDirty) return <span className="text-xs font-semibold text-[var(--color-craft-accent)]">Unsaved changes</span>;
-  if (saveStatus === "saved") return <span className="text-xs font-semibold text-[var(--primitive-teal-700)]">Saved</span>;
+  if (saveStatus === "saving") return <span className="text-xs font-semibold text-(--color-craft-accent) animate-pulse">Saving...</span>;
+  if (saveStatus === "error") return <span className="text-xs font-semibold text-(--color-text-danger)">Save error</span>;
+  if (isDirty) return <span className="text-xs font-semibold text-(--color-craft-accent)">Unsaved changes</span>;
+  if (saveStatus === "saved") return <span className="text-xs font-semibold text-(--primitive-teal-700)">Saved</span>;
   return null;
 }
 
@@ -94,7 +94,7 @@ function CanvasHeader({ nodeCount, isDirty, saveStatus, canSave, isSaving, onSav
           Drag one element onto another to combine.
         </span>
         {onSave ? (
-          <button type="button" onClick={onSave} disabled={!canSave} aria-label="Save workspace" className="min-h-9 rounded-xl border border-[var(--border-subtle)] bg-[var(--color-action-primary)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-action-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50">
+          <button type="button" onClick={onSave} disabled={!canSave} aria-label="Save workspace" className="min-h-9 rounded-xl border border-(--border-subtle) bg-(--color-action-primary) px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-(--color-action-hover) focus:outline-none focus:ring-2 focus:ring-(--ring) disabled:cursor-not-allowed disabled:opacity-50">
             {isSaving ? "Saving..." : <><span className="min-[840px]:hidden">Save</span><span className="hidden min-[840px]:inline">Save workspace</span></>}
           </button>
         ) : null}
@@ -229,7 +229,7 @@ export function FinCraftCanvas(props: FinCraftCanvasProps) {
   return (
     <section aria-label="Infinite Craft Workspace" className="lab-canvas-section flex h-full min-h-0 min-w-0 flex-1 flex-col gap-2">
       <CanvasHeader nodeCount={nodes.length} isDirty={isDirty} saveStatus={saveStatus} canSave={canSave} isSaving={isSaving} onSave={onSave} />
-      {saveError ? <div role="alert" className="shrink-0 rounded-xl border border-[var(--color-text-danger)]/30 bg-[var(--color-text-danger)]/10 p-2 text-xs text-[var(--color-text-danger)]">{saveError}</div> : null}
+      {saveError ? <div role="alert" className="shrink-0 rounded-xl border border-(--color-text-danger)/30 bg-(--color-text-danger)/10 p-2 text-xs text-(--color-text-danger)">{saveError}</div> : null}
       <ReactFlowProvider>
         <ReactFlowCanvasInner {...props} isSaving={isSaving} />
       </ReactFlowProvider>

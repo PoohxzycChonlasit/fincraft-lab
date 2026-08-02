@@ -41,10 +41,10 @@ function InspectorCard({
 }) {
   return (
     <div
-      className="absolute bottom-0 right-0 translate-y-1/3 translate-x-[8%] z-10 surface-floating border border-[var(--border-interactive)] p-3 rounded-md min-w-[160px]"
+      className="absolute bottom-0 right-0 translate-y-1/3 translate-x-[8%] z-10 surface-floating border border-(--border-interactive) p-3 rounded-md min-w-[160px]"
       style={{ boxShadow: "var(--shadow-floating)" }}
     >
-      <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-teal-700)] mb-1.5">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-(--color-teal-700) mb-1.5">
         Inspector
       </p>
       <dl className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 font-mono text-[10px]">
@@ -82,7 +82,7 @@ function PreviewSpecimen(p: PreviewProps) {
           Material Specimen
         </span>
         <span
-          className="rounded px-2 py-0.5 font-mono text-[10px] text-muted-foreground border border-[var(--border-subtle)] bg-[var(--surface-inset)]"
+          className="rounded px-2 py-0.5 font-mono text-[10px] text-muted-foreground border border-(--border-subtle) bg-(--surface-inset)"
           style={{ borderRadius: `${p.currentRadius}px` }}
         >
           surface-{p.surface}
@@ -90,7 +90,7 @@ function PreviewSpecimen(p: PreviewProps) {
       </div>
 
       {/* Recessed value well */}
-      <div className="surface-inset border border-[var(--border-subtle)] px-4 py-3 rounded-md">
+      <div className="surface-inset border border-(--border-subtle) px-4 py-3 rounded-md">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Recessed Value Well
         </p>
@@ -121,9 +121,9 @@ function PreviewSpecimen(p: PreviewProps) {
 
 export function ConsolePreview(p: PreviewProps) {
   return (
-    <div className="flex flex-col justify-between p-5 lg:col-span-7 bg-[var(--surface-flat)]">
-      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3 mb-5">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-orange-700)]">
+    <div className="flex flex-col justify-between p-5 lg:col-span-7 bg-(--surface-flat)">
+      <div className="flex items-center justify-between border-b border-(--border-subtle) pb-3 mb-5">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-(--color-orange-700)">
           Live Material Preview
         </p>
         <span className="font-mono text-[10px] text-muted-foreground">REALTIME SPECIMEN</span>

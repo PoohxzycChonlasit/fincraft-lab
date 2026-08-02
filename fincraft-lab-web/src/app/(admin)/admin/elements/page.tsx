@@ -29,8 +29,8 @@ export default async function AdminElementsPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <header className="space-y-1.5 border-b border-[var(--border-subtle)] pb-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-craft-accent)]">
+      <header className="space-y-1.5 border-b border-(--border-subtle) pb-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-(--color-craft-accent)">
           Teacher Administration
         </p>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">

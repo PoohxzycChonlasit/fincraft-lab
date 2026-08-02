@@ -9,10 +9,10 @@ const relationships = [
 
 export function RelationshipLanguage() {
   return (
-    <section aria-labelledby="relation-heading" className="border-t border-[var(--border-subtle)] pt-8">
+    <section aria-labelledby="relation-heading" className="border-t border-(--border-subtle) pt-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-teal-700)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-(--color-teal-700)">
             Connection experiment
           </p>
           <h2 id="relation-heading" className="mt-2 text-2xl font-semibold tracking-tight text-foreground">

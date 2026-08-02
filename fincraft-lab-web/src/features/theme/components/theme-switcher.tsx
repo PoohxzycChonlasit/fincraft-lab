@@ -70,7 +70,7 @@ export function ThemeSwitcher({ initialPreference = "system" }: ThemeSwitcherPro
   };
 
   return (
-    <div className="flex flex-col gap-3 p-4 rounded-xl bg-[var(--surface-resting)] border border-[var(--border-subtle)] shadow-[var(--shadow-resting)]">
+    <div className="flex flex-col gap-3 p-4 rounded-xl bg-(--surface-resting) border border-(--border-subtle) shadow-(--shadow-resting)">
       <SwitcherHeader resolved={resolved} />
       <SwitcherButtons preference={preference} onSelect={handleSelectPreference} />
     </div>
@@ -80,11 +80,11 @@ export function ThemeSwitcher({ initialPreference = "system" }: ThemeSwitcherPro
 function SwitcherHeader({ resolved }: { resolved: ResolvedAppearance }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
-      <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">
+      <span className="text-xs font-semibold uppercase tracking-wider text-(--color-text-secondary)">
         Theme Preference
       </span>
-      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--surface-inset)] border border-[var(--border-subtle)] text-[var(--color-text-secondary)]">
-        Resolved Appearance: <strong className="capitalize text-[var(--color-text-primary)]">{resolved}</strong>
+      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-(--surface-inset) border border-(--border-subtle) text-(--color-text-secondary)">
+        Resolved Appearance: <strong className="capitalize text-(--color-text-primary)">{resolved}</strong>
       </span>
     </div>
   );
@@ -107,10 +107,10 @@ function SwitcherButtons({
             type="button"
             aria-pressed={isSelected}
             onClick={() => onSelect(option)}
-            className={`min-h-[44px] min-w-[44px] px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive)] focus-visible:ring-offset-2 ${
+            className={`min-h-[44px] min-w-[44px] px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--border-interactive) focus-visible:ring-offset-2 ${
               isSelected
                 ? "bg-[var(--color-action-primary,#0f766e)] text-[var(--color-text-inverse,#ffffff)] font-semibold shadow-sm"
-                : "bg-[var(--surface-inset)] hover:bg-[var(--color-surface-subtle,#e7e5e4)] text-[var(--color-text-primary)] border border-[var(--border-subtle)]"
+                : "bg-(--surface-inset) hover:bg-[var(--color-surface-subtle,#e7e5e4)] text-(--color-text-primary) border border-(--border-subtle)"
             }`}
           >
             <span className="capitalize">{option}</span>

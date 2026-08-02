@@ -28,7 +28,7 @@ function SlotClearButton({ label, slotKey, onClear }: { label: string; slotKey: 
     <button
       type="button"
       onClick={(e) => { e.stopPropagation(); onClear(slotKey); }}
-      className="flex size-7 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-resting)] text-xs font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40 transition-colors"
+      className="flex size-7 items-center justify-center rounded-lg border border-(--border-subtle) bg-(--surface-resting) text-xs font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40 transition-colors"
       title={`Clear ${label} slot`}
       aria-label={`Clear ${label} slot`}
     >
@@ -40,8 +40,8 @@ function SlotClearButton({ label, slotKey, onClear }: { label: string; slotKey: 
 function CraftBaySlot({ item, label, slotKey, isActive, onSelectSlot, onClearSlot }: SlotProps) {
   const isInteractive = Boolean(onSelectSlot);
   const borderStyle = isActive
-    ? "ring-2 ring-[var(--color-craft-accent)] border-[var(--color-craft-accent)] bg-[var(--surface-resting)]"
-    : "border-[var(--border-subtle)] hover:border-[var(--color-craft-accent)]/60 bg-[var(--surface-flat)]/60";
+    ? "ring-2 ring-(--color-craft-accent) border-(--color-craft-accent) bg-(--surface-resting)"
+    : "border-(--border-subtle) hover:border-(--color-craft-accent)/60 bg-(--surface-flat)/60";
 
   return (
     <div
@@ -55,7 +55,7 @@ function CraftBaySlot({ item, label, slotKey, isActive, onSelectSlot, onClearSlo
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-          {isActive ? <span className="rounded bg-[var(--color-craft-accent)]/15 px-1.5 py-0.5 text-[9px] font-bold text-[var(--color-craft-accent)] uppercase tracking-wider">Active</span> : null}
+          {isActive ? <span className="rounded bg-(--color-craft-accent)/15 px-1.5 py-0.5 text-[9px] font-bold text-(--color-craft-accent) uppercase tracking-wider">Active</span> : null}
         </div>
         {item ? (
           <p className="mt-0.5 min-w-0 truncate text-sm font-semibold text-foreground">{item.name}</p>
@@ -66,7 +66,7 @@ function CraftBaySlot({ item, label, slotKey, isActive, onSelectSlot, onClearSlo
 
       <div className="flex items-center gap-2">
         {item?.visual ? (
-          <span className="surface-inset flex size-9 shrink-0 items-center justify-center rounded-md border border-[var(--border-subtle)] text-lg sm:text-xl leading-none font-semibold text-[var(--color-action-primary)]">
+          <span className="surface-inset flex size-9 shrink-0 items-center justify-center rounded-md border border-(--border-subtle) text-lg sm:text-xl leading-none font-semibold text-(--color-action-primary)">
             {item.visual}
           </span>
         ) : null}
@@ -82,12 +82,12 @@ export function RecessedCraftBay({ left, right, statusLabel, activeSlot, onSelec
   return (
     <section className="surface-inset rounded-2xl p-4 sm:p-5" aria-label="Recessed craft bay specimen">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-craft-accent)]">Craft Bay</p>
-        <span className="rounded-md bg-[var(--surface-resting)] px-2.5 py-1 text-[11px] font-medium text-muted-foreground border border-[var(--border-subtle)]">{statusLabel}</span>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-(--color-craft-accent)">Craft Bay</p>
+        <span className="rounded-md bg-(--surface-resting) px-2.5 py-1 text-[11px] font-medium text-muted-foreground border border-(--border-subtle)">{statusLabel}</span>
       </div>
       <div className="mt-4 flex flex-col items-center gap-3 sm:grid sm:grid-cols-[1fr_auto_1fr]">
         <CraftBaySlot item={left} label="Left Input" slotKey="left" isActive={activeSlot === "left"} onSelectSlot={onSelectSlot} onClearSlot={onClearSlot} />
-        <span aria-hidden="true" className="surface-resting flex size-7 shrink-0 items-center justify-center rounded-full border border-[var(--border-subtle)] text-xs font-bold text-[var(--color-craft-accent)] shadow-xs">+</span>
+        <span aria-hidden="true" className="surface-resting flex size-7 shrink-0 items-center justify-center rounded-full border border-(--border-subtle) text-xs font-bold text-(--color-craft-accent) shadow-xs">+</span>
         <CraftBaySlot item={right} label="Right Input" slotKey="right" isActive={activeSlot === "right"} onSelectSlot={onSelectSlot} onClearSlot={onClearSlot} />
       </div>
       <p className="mt-4 text-xs leading-5 text-muted-foreground">

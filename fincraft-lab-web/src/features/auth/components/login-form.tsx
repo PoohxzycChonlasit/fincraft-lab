@@ -74,9 +74,9 @@ export function LoginForm({ isRegistered = false, returnTo = "/lab" }: { isRegis
         <AuthPasswordField id="login-password" name="password" label="Password" value={password} onChange={setPassword} autoComplete="current-password" placeholder="Enter your password" helperText="Use the password for your FinCraft account." error={fieldErrors.password} />
       </div>
       <AuthSubmitButton isSubmitting={isSubmitting} label="Log in" pendingLabel="Signing in…" />
-      <div className="space-y-3 border-t border-[var(--border-subtle)] pt-5 text-center text-sm text-muted-foreground">
-        <p>New to FinCraft Lab? <Link href={buildAuthHref("/register", returnTo)} className="font-bold text-[var(--color-action-primary)] underline-offset-4 hover:underline">Create an account</Link></p>
-        <p>Want to try the Lab first? <Link href="/lab" className="font-bold text-[var(--color-action-primary)] underline-offset-4 hover:underline">Explore as Guest</Link></p>
+      <div className="space-y-3 border-t border-(--border-subtle) pt-5 text-center text-sm text-muted-foreground">
+        <p>New to FinCraft Lab? <Link href={buildAuthHref("/register", returnTo)} className="font-bold text-(--color-action-primary) underline-offset-4 hover:underline">Create an account</Link></p>
+        <p>Want to try the Lab first? <Link href="/lab" className="font-bold text-(--color-action-primary) underline-offset-4 hover:underline">Explore as Guest</Link></p>
       </div>
     </form>
   );

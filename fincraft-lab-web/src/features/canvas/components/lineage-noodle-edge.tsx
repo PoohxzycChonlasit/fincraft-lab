@@ -50,7 +50,7 @@ export function LineageNoodleEdge({
               transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
               pointerEvents: "none",
             }}
-            className="nodrag nopan surface-paper rounded-md border border-[var(--border-subtle)] px-2 py-0.5 text-[10px] font-semibold text-foreground shadow-xs animate-in fade-in duration-100"
+            className="nodrag nopan surface-paper rounded-md border border-(--border-subtle) px-2 py-0.5 text-[10px] font-semibold text-foreground shadow-xs animate-in fade-in duration-100"
           >
             {label}
           </div>

@@ -20,19 +20,19 @@ export function SpecimenElementTile({
   const isSelected = state === "selected";
 
   const containerClasses = isSelected
-    ? "surface-raised rounded-xl p-4 transition-all duration-150 motion-reduce:transition-none text-left w-full ring-2 ring-[var(--color-craft-accent)]"
-    : "surface-resting rounded-xl p-4 transition-all duration-150 motion-reduce:transition-none hover:-translate-y-0.5 text-left w-full cursor-pointer hover:border-[var(--color-craft-accent)]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-craft-accent)]";
+    ? "surface-raised rounded-xl p-4 transition-all duration-150 motion-reduce:transition-none text-left w-full ring-2 ring-(--color-craft-accent)"
+    : "surface-resting rounded-xl p-4 transition-all duration-150 motion-reduce:transition-none hover:-translate-y-0.5 text-left w-full cursor-pointer hover:border-(--color-craft-accent)/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-craft-accent)";
 
   const content = (
     <>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-craft-accent)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-(--color-craft-accent)">
             {category}
           </p>
           <h3 className="mt-1.5 text-base sm:text-lg font-semibold text-foreground truncate">{name}</h3>
         </div>
-        <div className="surface-inset flex size-11 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-xl sm:text-2xl leading-none font-semibold text-foreground">
+        <div className="surface-inset flex size-11 shrink-0 items-center justify-center rounded-lg border border-(--border-subtle) text-xl sm:text-2xl leading-none font-semibold text-foreground">
           {visual}
         </div>
       </div>
@@ -41,8 +41,8 @@ export function SpecimenElementTile({
           aria-hidden="true"
           className={
             isSelected
-              ? "size-2 shrink-0 rounded-full bg-[var(--color-craft-accent)]"
-              : "size-2 shrink-0 rounded-full border border-[var(--border-subtle)]"
+              ? "size-2 shrink-0 rounded-full bg-(--color-craft-accent)"
+              : "size-2 shrink-0 rounded-full border border-(--border-subtle)"
           }
         />
         <span className="font-medium text-foreground">{isSelected ? "Selected specimen" : "Resting specimen"}</span>

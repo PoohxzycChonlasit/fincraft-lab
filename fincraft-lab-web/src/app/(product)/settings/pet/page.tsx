@@ -14,12 +14,12 @@ export const metadata: Metadata = {
 
 function SettingsSubNav({ activeTab }: { activeTab: "profile" | "pet" }) {
   return (
-    <nav aria-label="Settings sub-navigation" className="flex items-center gap-4 border-b border-[var(--border-subtle)] pb-2 mb-6">
+    <nav aria-label="Settings sub-navigation" className="flex items-center gap-4 border-b border-(--border-subtle) pb-2 mb-6">
       <Link
         href="/settings/profile"
         className={`inline-flex items-center gap-1.5 min-h-[44px] px-3 py-2 text-xs font-bold transition-colors ${
           activeTab === "profile"
-            ? "text-[var(--accent-orange)] border-b-2 border-[var(--accent-orange)]"
+            ? "text-(--accent-orange) border-b-2 border-(--accent-orange)"
             : "text-muted-foreground hover:text-foreground"
         }`}
       >
@@ -30,7 +30,7 @@ function SettingsSubNav({ activeTab }: { activeTab: "profile" | "pet" }) {
         href="/settings/pet"
         className={`inline-flex items-center gap-1.5 min-h-[44px] px-3 py-2 text-xs font-bold transition-colors ${
           activeTab === "pet"
-            ? "text-[var(--accent-orange)] border-b-2 border-[var(--accent-orange)]"
+            ? "text-(--accent-orange) border-b-2 border-(--accent-orange)"
             : "text-muted-foreground hover:text-foreground"
         }`}
       >

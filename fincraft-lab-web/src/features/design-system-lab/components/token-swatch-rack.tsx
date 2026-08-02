@@ -21,13 +21,13 @@ const borderSwatches = [
 
 function BrandSwatchCard({ name, varName, hex, role }: (typeof brandSwatches)[number]) {
   return (
-    <div className="overflow-hidden rounded-md border border-[var(--border-subtle)]" style={{ boxShadow: "var(--shadow-resting)" }}>
+    <div className="overflow-hidden rounded-md border border-(--border-subtle)" style={{ boxShadow: "var(--shadow-resting)" }}>
       <div
         className="h-20 w-full"
         style={{ backgroundColor: `var(${varName})` }}
         aria-label={`${name}: ${hex}`}
       />
-      <div className="px-3 py-2.5 bg-[var(--surface-resting)] border-t border-[var(--border-subtle)]">
+      <div className="px-3 py-2.5 bg-(--surface-resting) border-t border-(--border-subtle)">
         <p className="text-[11px] font-bold text-foreground">{name}</p>
         <p className="font-mono text-[10px] text-muted-foreground">{hex}</p>
         <p className="mt-0.5 text-[10px] text-muted-foreground">{role}</p>
@@ -52,7 +52,7 @@ function SurfaceSpecimenCard({ name, cssClass, label }: (typeof surfaceSwatches)
 
 function BorderStrokeCard({ name, varName, label }: (typeof borderSwatches)[number]) {
   return (
-    <div className="rounded-md bg-[var(--surface-inset)] p-3 flex items-center gap-3">
+    <div className="rounded-md bg-(--surface-inset) p-3 flex items-center gap-3">
       <div
         className="h-10 w-1.5 rounded-full flex-shrink-0"
         style={{ backgroundColor: `var(${varName})` }}
@@ -68,10 +68,10 @@ function BorderStrokeCard({ name, varName, label }: (typeof borderSwatches)[numb
 
 export function TokenSwatchRack() {
   return (
-    <div className="surface-resting border border-[var(--border-subtle)] p-5">
-      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3 mb-5">
+    <div className="surface-resting border border-(--border-subtle) p-5">
+      <div className="flex items-center justify-between border-b border-(--border-subtle) pb-3 mb-5">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-teal-700)]">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-(--color-teal-700)">
             Token Swatch Rack
           </p>
           <h3 className="text-base font-semibold text-foreground">Canonical CSS Variables</h3>

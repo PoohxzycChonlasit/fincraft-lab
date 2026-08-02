@@ -33,9 +33,9 @@ function WorkspaceErrorAlert({ error }: { error?: string }) {
 
 function WorkspacePageHeader({ workspaceId }: { workspaceId: string }) {
   return (
-    <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
+    <header className="flex flex-wrap items-center justify-between gap-4 border-b border-(--border-subtle) pb-4">
       <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--accent-orange)]">
+        <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-(--accent-orange)">
           <Sparkles size={14} aria-hidden="true" />
           <span>Personal World Archive</span>
         </div>
@@ -47,7 +47,7 @@ function WorkspacePageHeader({ workspaceId }: { workspaceId: string }) {
 
       <Link
         href={`/lab?workspaceId=${workspaceId}`}
-        className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--brand-primary)] px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-[var(--accent-teal-strong)] transition-colors"
+        className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-(--brand-primary) px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-(--accent-teal-strong) transition-colors"
       >
         <span>Open in Lab</span>
         <ArrowRight size={16} aria-hidden="true" />
@@ -66,13 +66,13 @@ function ActiveWorkspaceCard({ selectedWorkspace, snapshot, workspaceId }: {
   const isArchived = selectedWorkspace.status === "ARCHIVED";
 
   return (
-    <section aria-label="Active Workspace Summary" className="surface-paper rounded-2xl border border-[var(--border-subtle)] p-6 space-y-4 shadow-xs">
-      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+    <section aria-label="Active Workspace Summary" className="surface-paper rounded-2xl border border-(--border-subtle) p-6 space-y-4 shadow-xs">
+      <div className="flex items-center justify-between border-b border-(--border-subtle) pb-3">
         <div className="flex items-center gap-2">
-          <Layers size={18} className="text-[var(--accent-teal)]" aria-hidden="true" />
+          <Layers size={18} className="text-(--accent-teal)" aria-hidden="true" />
           <h2 className="font-section-title text-foreground">Current World: {selectedWorkspace.name}</h2>
         </div>
-        <span className={`font-caption rounded-full border px-3 py-1 font-bold ${isArchived ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300" : "border-[var(--border-subtle)] bg-[var(--surface-solid)] text-[var(--accent-orange)]"}`}>
+        <span className={`font-caption rounded-full border px-3 py-1 font-bold ${isArchived ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300" : "border-(--border-subtle) bg-(--surface-solid) text-(--accent-orange)"}`}>
           {isArchived ? "Archived" : "Active"}
         </span>
       </div>
@@ -87,7 +87,7 @@ function ActiveWorkspaceCard({ selectedWorkspace, snapshot, workspaceId }: {
         </span>
         <Link
           href={`/lab?workspaceId=${workspaceId}`}
-          className="font-caption font-bold text-[var(--brand-primary)] hover:underline inline-flex items-center gap-1"
+          className="font-caption font-bold text-(--brand-primary) hover:underline inline-flex items-center gap-1"
         >
           <span>Resume Experiment</span>
           <ArrowRight size={14} aria-hidden="true" />
@@ -123,7 +123,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
       <WorkspacePageHeader workspaceId={workspaceId} />
       <CompanionWidget pet={pet} />
       <ActiveWorkspaceCard selectedWorkspace={selectedWorkspace} snapshot={snapshot} workspaceId={workspaceId} />
-      <section aria-label="Workspace Manager" className="surface-solid space-y-4 rounded-2xl border border-[var(--border-subtle)] p-4 sm:p-6">
+      <section aria-label="Workspace Manager" className="surface-solid space-y-4 rounded-2xl border border-(--border-subtle) p-4 sm:p-6">
         <div className="space-y-1">
           <h2 className="font-section-title text-foreground">Workspace records</h2>
           <p className="font-body-small text-muted-foreground">Create, rename, open, and archive saved financial worlds. Archived records keep their canvas until you restore them.</p>

@@ -1,7 +1,7 @@
 export function TypographySpecimen() {
   return (
     <section aria-labelledby="type-heading" className="surface-inset h-full border p-5 sm:p-6">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-orange-700)]">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-(--color-orange-700)">
         Type and number readout
       </p>
       <h2 id="type-heading" className="mt-2 text-2xl font-semibold tracking-tight text-foreground">

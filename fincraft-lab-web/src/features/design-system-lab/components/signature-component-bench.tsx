@@ -78,9 +78,9 @@ function SupportingLabItems() {
 export function SignatureComponentBench() {
   return (
     <section aria-labelledby="signature-components-heading" className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--border-subtle)] pb-4">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-(--border-subtle) pb-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-craft-accent)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-(--color-craft-accent)">
             Signature Components
           </p>
           <h2 id="signature-components-heading" className="mt-1 text-xl font-bold tracking-tight text-foreground">

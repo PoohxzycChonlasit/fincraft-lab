@@ -30,12 +30,12 @@ function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>)
   const typeColor = getTypeColor(data.categoryName);
 
   const borderStyle = isTarget
-    ? "border-[var(--accent-orange)] ring-4 ring-[var(--accent-orange)]/30 scale-105 shadow-md"
+    ? "border-(--accent-orange) ring-4 ring-(--accent-orange)/30 scale-105 shadow-md"
     : isTapSelected
-      ? "border-[var(--accent-teal)] ring-2 ring-[var(--accent-teal)]"
+      ? "border-(--accent-teal) ring-2 ring-(--accent-teal)"
       : selected
-        ? "border-[var(--border-strong)] ring-2 ring-[var(--focus-ring)]"
-        : "border-[var(--border-subtle)]";
+        ? "border-(--border-strong) ring-2 ring-(--focus-ring)"
+        : "border-(--border-subtle)";
 
   return (
     <article
@@ -49,18 +49,18 @@ function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>)
         position={Position.Left}
         id="lineage-target"
         aria-label="Input port"
-        className="!h-3 !w-3 !-left-1.5 !border-2 !border-[var(--surface-solid)] !bg-[var(--accent-teal)] transition-transform hover:scale-125"
+        className="!h-3 !w-3 !-left-1.5 !border-2 !border-(--surface-solid) !bg-(--accent-teal) transition-transform hover:scale-125"
       />
 
-      <div className="rounded-t-lg px-2.5 py-1 border-b border-[var(--border-subtle)] bg-[var(--surface-paper)] flex items-center justify-between gap-1">
+      <div className="rounded-t-lg px-2.5 py-1 border-b border-(--border-subtle) bg-(--surface-paper) flex items-center justify-between gap-1">
         <span className="text-[9px] font-extrabold uppercase tracking-wider truncate" style={{ color: typeColor }}>
           {data.categoryName || "ELEMENT"}
         </span>
-        {isTarget ? <span className="text-[8px] font-bold uppercase text-[var(--accent-orange)]">Target</span> : null}
+        {isTarget ? <span className="text-[8px] font-bold uppercase text-(--accent-orange)">Target</span> : null}
       </div>
 
       <div className="p-2.5 flex items-start gap-2 min-h-[44px]">
-        <span className="surface-paper flex size-7 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-sm leading-none">
+        <span className="surface-paper flex size-7 shrink-0 items-center justify-center rounded-lg border border-(--border-subtle) text-sm leading-none">
           {data.emoji || "Element"}
         </span>
         <div className="min-w-0 flex-1">
@@ -73,7 +73,7 @@ function ElementCanvasNodeBase({ data, selected }: NodeProps<ElementCanvasNode>)
         position={Position.Right}
         id="lineage-source"
         aria-label="Output port"
-        className="!h-3 !w-3 !-right-1.5 !border-2 !border-[var(--surface-solid)] !bg-[var(--accent-orange)] transition-transform hover:scale-125"
+        className="!h-3 !w-3 !-right-1.5 !border-2 !border-(--surface-solid) !bg-(--accent-orange) transition-transform hover:scale-125"
       />
     </article>
   );

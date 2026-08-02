@@ -18,11 +18,11 @@ function SimulationRecord({ simulation }: { simulation: SimulationSummary }) {
     <article className="surface-paper grid gap-6 rounded-2xl p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
       <div className="space-y-5">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-teal)]">
+          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-(--accent-teal)">
             <Activity className="size-4" aria-hidden="true" />
             Active simulation
           </span>
-          <span className="font-caption border-l border-[var(--border-subtle)] pl-4">
+          <span className="font-caption border-l border-(--border-subtle) pl-4">
             Model: {simulation.name}
           </span>
         </div>
@@ -36,7 +36,7 @@ function SimulationRecord({ simulation }: { simulation: SimulationSummary }) {
           </p>
         </div>
 
-        <dl className="grid gap-3 border-t border-[var(--border-subtle)] pt-4 text-xs sm:grid-cols-2">
+        <dl className="grid gap-3 border-t border-(--border-subtle) pt-4 text-xs sm:grid-cols-2">
           <div>
             <dt className="font-label text-muted-foreground">Purpose</dt>
             <dd className="mt-1 font-medium text-foreground">
@@ -52,7 +52,7 @@ function SimulationRecord({ simulation }: { simulation: SimulationSummary }) {
 
       <Link
         href={`/simulations/${simulation.id}`}
-        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand-primary)] px-5 py-3 text-xs font-bold text-[var(--brand-primary-foreground)] shadow-xs transition-colors hover:bg-[var(--accent-teal-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 lg:min-w-52"
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-(--brand-primary) px-5 py-3 text-xs font-bold text-(--brand-primary-foreground) shadow-xs transition-colors hover:bg-(--accent-teal-strong) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring) focus-visible:ring-offset-2 lg:min-w-52"
         aria-label="Open Emergency Fund Runway simulation"
       >
         <span>Open Simulation</span>
@@ -66,7 +66,7 @@ function EmptyState() {
   return (
     <section className="surface-paper rounded-2xl p-8 sm:p-10" aria-labelledby="simulation-empty-title">
       <div className="max-w-xl space-y-2">
-        <p className="font-label text-[var(--accent-orange)]">No active experiments</p>
+        <p className="font-label text-(--accent-orange)">No active experiments</p>
         <h2 id="simulation-empty-title" className="font-section-title text-foreground">
           There are no published simulations right now.
         </h2>
@@ -94,7 +94,7 @@ function ErrorState() {
           </div>
           <Link
             href="/simulations"
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-solid)] px-4 text-xs font-bold text-foreground transition-colors hover:bg-[var(--surface-inset)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-(--border-subtle) bg-(--surface-solid) px-4 text-xs font-bold text-foreground transition-colors hover:bg-(--surface-inset) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring) focus-visible:ring-offset-2"
           >
             <RefreshCw className="size-3.5" aria-hidden="true" />
             Try again
@@ -108,11 +108,11 @@ function ErrorState() {
 function LoadingState() {
   return (
     <section className="surface-paper space-y-5 rounded-2xl p-5 sm:p-7" role="status" aria-label="Loading simulations">
-      <div className="h-3 w-36 animate-pulse rounded bg-[var(--surface-inset)]" />
+      <div className="h-3 w-36 animate-pulse rounded bg-(--surface-inset)" />
       <div className="space-y-3">
-        <div className="h-7 w-2/3 animate-pulse rounded bg-[var(--surface-inset)]" />
-        <div className="h-4 w-full animate-pulse rounded bg-[var(--surface-inset)]" />
-        <div className="h-4 w-4/5 animate-pulse rounded bg-[var(--surface-inset)]" />
+        <div className="h-7 w-2/3 animate-pulse rounded bg-(--surface-inset)" />
+        <div className="h-4 w-full animate-pulse rounded bg-(--surface-inset)" />
+        <div className="h-4 w-4/5 animate-pulse rounded bg-(--surface-inset)" />
       </div>
       <span className="sr-only">Loading active simulations.</span>
     </section>
@@ -149,8 +149,8 @@ export default async function SimulationsPage() {
 
   return (
     <div className="simulation-page-frame mx-auto w-full max-w-5xl space-y-7">
-      <header className="space-y-3 border-b border-[var(--border-subtle)] pb-5">
-        <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-teal)]">
+      <header className="space-y-3 border-b border-(--border-subtle) pb-5">
+        <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-(--accent-teal)">
           <Activity className="size-4" aria-hidden="true" />
           Financial consequence instrument
         </div>

@@ -25,7 +25,7 @@ function ErrorBanner({ error }: { error: string }) {
 function WaitingForResult() {
   return (
     <aside className="surface-inset rounded-2xl p-5 sm:p-6" aria-labelledby="result-waiting-title">
-      <p className="font-label text-[var(--accent-teal)]">Step 2 · Read the result</p>
+      <p className="font-label text-(--accent-teal)">Step 2 · Read the result</p>
       <h2 id="result-waiting-title" className="mt-2 font-section-title text-foreground">Your estimate will appear here</h2>
       <p className="font-body mt-2 leading-relaxed text-muted-foreground">
         Run the experiment after entering both assumptions. The backend calculation remains the authority for the primary result.
@@ -51,7 +51,7 @@ function AssumptionsSection({ detail, initialValues, onRunStart, onRunSuccess, o
   return (
     <section id="simulation-assumptions" className="space-y-3" aria-labelledby="simulation-assumptions-title">
       <div>
-        <p className="font-label text-[var(--accent-teal)]">Step 1 · Enter assumptions</p>
+        <p className="font-label text-(--accent-teal)">Step 1 · Enter assumptions</p>
         <h2 id="simulation-assumptions-title" className="sr-only">Enter assumptions</h2>
       </div>
       <SimulationForm simulationId={detail.id} initialValues={initialValues} onRunStart={onRunStart} onRunSuccess={onRunSuccess} onReset={onReset} onError={onError} />
@@ -64,10 +64,10 @@ function ResultSection({ result, onRunAgain }: { result: SimulationRunResult; on
     <section className="space-y-3" aria-labelledby="simulation-result-title">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-label text-[var(--accent-teal)]">Step 2 · Primary result</p>
+          <p className="font-label text-(--accent-teal)">Step 2 · Primary result</p>
           <h2 id="simulation-result-title" className="sr-only">Primary simulation result</h2>
         </div>
-        <button type="button" onClick={onRunAgain} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-solid)] px-3.5 text-xs font-bold text-foreground transition-colors hover:bg-[var(--surface-inset)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2">
+        <button type="button" onClick={onRunAgain} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-(--border-subtle) bg-(--surface-solid) px-3.5 text-xs font-bold text-foreground transition-colors hover:bg-(--surface-inset) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring) focus-visible:ring-offset-2">
           <RotateCcw className="size-3.5" aria-hidden="true" />
           Run Again
         </button>

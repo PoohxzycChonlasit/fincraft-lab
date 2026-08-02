@@ -47,7 +47,7 @@ function SegmentedControl<T extends string>({
   return (
     <div
       role="group"
-      className="flex rounded-md border border-[var(--border-subtle)] bg-[var(--surface-inset)] p-[3px] gap-[3px]"
+      className="flex rounded-md border border-(--border-subtle) bg-(--surface-inset) p-[3px] gap-[3px]"
       style={{ boxShadow: "inset 0 1px 3px rgb(28 25 23 / 0.10)" }}
     >
       {options.map(({ value, label }) => (
@@ -57,10 +57,10 @@ function SegmentedControl<T extends string>({
           onClick={() => onChange(value)}
           className={[
             "flex-1 min-h-[38px] rounded px-2 text-[11px] font-medium capitalize transition-all duration-150",
-            "focus-visible:outline-2 focus-visible:outline-[var(--color-teal-600)] focus-visible:outline-offset-1",
+            "focus-visible:outline-2 focus-visible:outline-(--color-teal-600) focus-visible:outline-offset-1",
             current === value
-              ? "bg-[var(--surface-resting)] text-foreground font-semibold border-l-2 border-[var(--color-teal-600)]"
-              : "text-muted-foreground hover:text-foreground hover:bg-[var(--surface-resting)]/60",
+              ? "bg-(--surface-resting) text-foreground font-semibold border-l-2 border-(--color-teal-600)"
+              : "text-muted-foreground hover:text-foreground hover:bg-(--surface-resting)/60",
           ].join(" ")}
           style={
             current === value
@@ -127,7 +127,7 @@ function StateSelector({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as VisualState)}
-        className="w-full min-h-[38px] rounded-md border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-2.5 py-2 text-[12px] font-medium text-foreground outline-none focus:border-[var(--color-teal-600)] focus:ring-2 focus:ring-[var(--color-teal-600)]/20 transition-colors"
+        className="w-full min-h-[38px] rounded-md border border-(--border-subtle) bg-(--surface-inset) px-2.5 py-2 text-[12px] font-medium text-foreground outline-none focus:border-(--color-teal-600) focus:ring-2 focus:ring-(--color-teal-600)/20 transition-colors"
         style={{ boxShadow: "inset 0 1px 3px rgb(28 25 23 / 0.10)" }}
       >
         <option value="ready">Ready</option>
@@ -162,7 +162,7 @@ const DENSITY_OPTS = [
 
 function RangePair(p: Pick<ControlsProps, "depthIdx" | "radiusIdx" | "currentRadius" | "onDepthChange" | "onRadiusChange">) {
   return (
-    <div className="grid grid-cols-2 gap-4 pt-1 border-t border-[var(--border-subtle)]">
+    <div className="grid grid-cols-2 gap-4 pt-1 border-t border-(--border-subtle)">
       <RangeControl label="Depth Shadow" valueText={`Lvl ${p.depthIdx}`} min={0} max={4} value={p.depthIdx} onChange={p.onDepthChange} />
       <RangeControl label="Radius" valueText={`${p.currentRadius}px`} min={0} max={3} value={p.radiusIdx} onChange={p.onRadiusChange} />
     </div>
@@ -173,8 +173,8 @@ export function ConsoleControls(p: ControlsProps) {
   return (
     <div className="flex flex-col justify-between p-5 lg:col-span-5 space-y-5">
       <div>
-        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3 mb-4">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-teal-700)]">Material Controller</p>
+        <div className="flex items-center justify-between border-b border-(--border-subtle) pb-3 mb-4">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-(--color-teal-700)">Material Controller</p>
           <span className="font-mono text-[10px] text-muted-foreground">TACTILE INPUTS</span>
         </div>
         <div className="space-y-4">
@@ -194,7 +194,7 @@ export function ConsoleControls(p: ControlsProps) {
           <RangePair depthIdx={p.depthIdx} radiusIdx={p.radiusIdx} currentRadius={p.currentRadius} onDepthChange={p.onDepthChange} onRadiusChange={p.onRadiusChange} />
         </div>
       </div>
-      <p className="rounded border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3 py-2 text-[11px] text-muted-foreground">
+      <p className="rounded border border-(--border-subtle) bg-(--surface-inset) px-3 py-2 text-[11px] text-muted-foreground">
         All controls update the Live Preview instantly.
       </p>
     </div>

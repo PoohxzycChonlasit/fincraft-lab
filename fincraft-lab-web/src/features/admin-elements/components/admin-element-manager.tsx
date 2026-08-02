@@ -48,12 +48,12 @@ export function AdminElementManager({ initialElements }: ManagerProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--border-subtle)] pb-4">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-(--border-subtle) pb-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--color-craft-accent)]">Content catalogue</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-(--color-craft-accent)">Content catalogue</p>
           <h2 className="mt-1 text-lg font-bold tracking-tight text-foreground">Elements <span className="font-mono text-sm font-normal text-muted-foreground">{elements.length}</span></h2>
         </div>
-        {!isFormOpen ? <button id="create-element-button" type="button" onClick={handleOpenCreate} className="min-h-11 rounded-xl bg-[var(--color-action-primary)] px-5 text-xs font-semibold text-white hover:bg-[var(--color-action-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">Create Element</button> : null}
+        {!isFormOpen ? <button id="create-element-button" type="button" onClick={handleOpenCreate} className="min-h-11 rounded-xl bg-(--color-action-primary) px-5 text-xs font-semibold text-white hover:bg-(--color-action-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring)">Create Element</button> : null}
       </div>
 
       {feedback ? <div role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-700 dark:text-emerald-300">{feedback}</div> : null}

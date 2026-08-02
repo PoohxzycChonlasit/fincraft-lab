@@ -19,8 +19,8 @@ const DEFAULT_VALUES: SimulationFormValues = {
 const MAX_AMOUNT = 100000000;
 
 const inputClass = (error?: string) =>
-  `w-full min-h-11 rounded-xl border bg-[var(--surface-inset)] px-3.5 py-2.5 text-sm font-medium text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-50 ${
-    error ? "border-destructive" : "border-[var(--border-subtle)] focus-visible:border-[var(--accent-teal)]"
+  `w-full min-h-11 rounded-xl border bg-(--surface-inset) px-3.5 py-2.5 text-sm font-medium text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring) disabled:opacity-50 ${
+    error ? "border-destructive" : "border-(--border-subtle) focus-visible:border-(--accent-teal)"
   }`;
 
 function validateAmount(value: string, minimum: number, label: string): string | undefined {
@@ -100,11 +100,11 @@ function SimulationFields({ values, errors, onChange, disabled }: { values: Simu
 function FormActions({ isPending, onReset }: { isPending: boolean; onReset: () => void }) {
   return (
     <div className="flex flex-col-reverse gap-3 pt-1 sm:flex-row sm:items-center sm:justify-end">
-      <button type="button" onClick={onReset} disabled={isPending} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-solid)] px-4 text-xs font-bold text-foreground transition-colors hover:bg-[var(--surface-paper)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 disabled:opacity-50">
+      <button type="button" onClick={onReset} disabled={isPending} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-(--border-subtle) bg-(--surface-solid) px-4 text-xs font-bold text-foreground transition-colors hover:bg-(--surface-paper) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring) focus-visible:ring-offset-2 disabled:opacity-50">
         <RotateCcw className="size-3.5" aria-hidden="true" />
         Reset
       </button>
-      <button type="submit" disabled={isPending} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand-primary)] px-5 text-xs font-bold text-[var(--brand-primary-foreground)] shadow-xs transition-colors hover:bg-[var(--accent-teal-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 disabled:opacity-50">
+      <button type="submit" disabled={isPending} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-(--brand-primary) px-5 text-xs font-bold text-(--brand-primary-foreground) shadow-xs transition-colors hover:bg-(--accent-teal-strong) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus-ring) focus-visible:ring-offset-2 disabled:opacity-50">
         {isPending ? <><RefreshCw className="size-3.5 animate-spin" aria-hidden="true" />Running experiment…</> : <><Play className="size-3.5 fill-current" aria-hidden="true" />Run Simulation</>}
       </button>
     </div>
